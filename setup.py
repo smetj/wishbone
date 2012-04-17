@@ -32,4 +32,5 @@ if __name__ == '__main__':
         author='Jelle Smet',
         author_email='development@smetj.net',
         url='https://github.com/smetj/wishbone',
-        packages=['io','modules'])
+	packages=['wishbone', 'io', 'modules'],
+	package_dir={'io':'wishbone/io', 'modules':'wishbone/modules'})
