@@ -22,6 +22,5 @@
 #       
 #       
 from wishbone import Wishbone
-#from wishbone import PrimitiveActor
 import modules
-import io
+import io_modules
