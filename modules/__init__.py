@@ -21,7 +21,7 @@
 #       MA 02110-1301, USA.
 #       
 #       
-from wishbone import Wishbone
-#from wishbone import PrimitiveActor
-import modules
-import io
+
+from skeleton import Skeleton
+from compressor import Compressor
+from jsonvalidator import JSONValidator
