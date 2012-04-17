@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#       __init__.py
+#       skeleton.py
 #       
 #       Copyright 2012 Jelle Smet development@smetj.net
 #       
@@ -21,7 +21,19 @@
 #       MA 02110-1301, USA.
 #       
 #       
-from wishbone import Wishbone
-#from wishbone import PrimitiveActor
-import modules
-import io
+
+from wishbone.wishbone import PrimitiveActor
+
+
+class Skeleton(PrimitiveActor):
+    '''Skeleton class is a minimal Actor class which does nothing more than shoveling data from its inbox to its outbox.
+    It can be used as an example/base for new blocks.'''
+    
+    def __init__(self, name, block, *args, **kwargs):
+        PrimitiveActor.__init__(self, name, block)
+    
+    def consume(self,doc):
+        self.outbox.put(doc)
+       
+    def shutdown(self):
+        self.logging.info('Shutdown')
