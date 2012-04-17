@@ -23,7 +23,7 @@
 #       
 
 import logging
-import io
+import io_modules
 from importlib import import_module
 from gevent import Greenlet, sleep, spawn
 from gevent.queue import Queue
@@ -43,10 +43,10 @@ class Wishbone():
             print "Problem loading module: %s and class %s. Reason: %s" % ( module_name, class_name, err)
 
     def registerBroker(self, *args, **kwargs):
-        self.broker = io.Broker(block=self.block, *args, **kwargs )
+        self.broker = io_modules.Broker(block=self.block, *args, **kwargs )
     
     def registerUDPServer(self, port='9000', *args, **kwargs):
-        self.udp_server = io.UDPServer(port, *args, **kwargs)
+        self.udp_server = io_modules.UDPServer(port, *args, **kwargs)
     
     def connect(self,inbox,outbox):
         spawn ( self.__connector, inbox, outbox )
