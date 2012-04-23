@@ -22,7 +22,7 @@
 #       
 #       
 
-from wishbone.wishbone import PrimitiveActor
+from wishbone.toolkit import PrimitiveActor
 
 class Compressor(PrimitiveActor):
     
@@ -30,7 +30,7 @@ class Compressor(PrimitiveActor):
         PrimitiveActor.__init__(self, name, block)
       
     def consume(self,doc):
-        self.outbox.put((exchange, key, json.dumps(doc)))
+        self.sendData(doc)
        
     def shutdown(self):
         self.logging.info('Shutdown')

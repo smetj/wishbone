@@ -24,17 +24,19 @@
 
 import logging
 from amqplib import client_0_8 as amqp
+from wishbone.toolkit import QueueFunctions
 from gevent import Greenlet, sleep, spawn
 from gevent.queue import Queue
 from gevent import monkey; monkey.patch_all()
 
-class Broker(Greenlet):
+class Broker(Greenlet, QueueFunctions):
     '''Creates an object doing all broker I/O.  It's meant to be resillient to disconnects and broker unavailability.
     Data going to the broker goes into Broker.outgoing_queue.  Data coming from the broker is submitted to the scheduler_callback method'''
     
-    def __init__(self, host, vhost, username, password, consume_queue='wishbone_in', produce_exchange='wishbone_out', routing_key='wishbone', block=None ):
+    def __init__(self, name, block, host, vhost, username, password, consume_queue='wishbone_in', produce_exchange='wishbone_out', routing_key='wishbone' ):
         Greenlet.__init__(self)
         self.logging = logging.getLogger( 'Broker' )
+        self.name = 'Broker'
         self.logging.info('Initiated')
         self.host=host
         self.vhost=vhost
@@ -95,7 +97,7 @@ class Broker(Greenlet):
                     break
         
     def consume(self,doc):
-        self.inbox.put(doc.body)
+        self.sendData(doc.body)
         self.logging.info('Data received from broker.')
         self.incoming.basic_ack(doc.delivery_tag)
         

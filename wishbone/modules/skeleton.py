@@ -22,7 +22,7 @@
 #       
 #       
 
-from wishbone.wishbone import PrimitiveActor
+from wishbone.toolkit import PrimitiveActor
 
 
 class Skeleton(PrimitiveActor):
@@ -33,7 +33,7 @@ class Skeleton(PrimitiveActor):
         PrimitiveActor.__init__(self, name, block)
     
     def consume(self,doc):
-        self.outbox.put(doc)
+        self.sendData(doc)
        
     def shutdown(self):
         self.logging.info('Shutdown')

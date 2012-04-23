@@ -23,30 +23,36 @@
 #       
 
 import logging
-import io_modules
 from importlib import import_module
-from gevent import Greenlet, sleep, spawn
+from gevent import sleep, spawn
 from gevent.queue import Queue
-
 
 class Wishbone():
     
     def __init__(self):
         self.lock=True
         self.__configureLogging()
+        self.logging = logging.getLogger( 'Wishbone' )
+        self.modules=[]
+        self.servers=[]
+        self.hub = Queue(None)
+        self.outhub = Queue(None)
         
     def registerModule(self, module_name, class_name, name, *args, **kwargs):
         try:
             loaded_module = import_module(module_name)
             setattr(self, name, getattr (loaded_module, class_name)(name, self.block, *args, **kwargs))
+            self.modules.append(getattr (self, name))
         except Exception as err:
             print "Problem loading module: %s and class %s. Reason: %s" % ( module_name, class_name, err)
-
+    
     def registerBroker(self, *args, **kwargs):
         self.broker = io_modules.Broker(block=self.block, *args, **kwargs )
+        self.servers.append(self.broker)
     
     def registerUDPServer(self, port='9000', *args, **kwargs):
         self.udp_server = io_modules.UDPServer(port, *args, **kwargs)
+        self.servers.append(self.udp_server)
     
     def connect(self,inbox,outbox):
         spawn ( self.__connector, inbox, outbox )
@@ -59,7 +65,7 @@ class Wishbone():
                 pass
         while self.block() == True:
             sleep(0.01)
-
+    
     def stop(self):
         self.lock=False
         for instance in self.__dict__:
@@ -74,9 +80,9 @@ class Wishbone():
     def __connector(self,inbox, outbox):
         '''Consumes data from inbox and puts it in outbox.'''
         while self.block() == True:
-                outbox.put(inbox.get())
+            outbox.put(inbox.get())
         
-    def __configureLogging(self,syslog=False,loglevel=logging.INFO):
+    def __configureLogging(self,syslog=False,loglevel=logging.DEBUG):
         format=('%(asctime)s %(levelname)s %(name)s %(message)s')
         if syslog == False:
             logging.basicConfig(level=loglevel, format=format)
@@ -88,18 +94,3 @@ class Wishbone():
             syslog.setFormatter(formatter)
             logger.addHandler(syslog)
 
-class PrimitiveActor(Greenlet):
-
-    def __init__(self, name, block):
-        Greenlet.__init__(self)
-        self.logging = logging.getLogger( name )
-        self.logging.info('Initiated.')
-        self.block = block
-        self.inbox = Queue(None)
-        self.outbox = Queue(None)
-        
-    def _run(self):
-        self.logging.info('Started.')
-        while self.block() == True:
-            message = self.inbox.get()
-            self.consume(message)
