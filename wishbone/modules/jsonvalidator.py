@@ -23,7 +23,8 @@
 
 import json
 from jsonschema import Validator
-from wishbone.wishbone import PrimitiveActor
+from wishbone.toolkit import PrimitiveActor
+
 
 class JSONValidator(PrimitiveActor):
     
@@ -42,7 +43,7 @@ class JSONValidator(PrimitiveActor):
         try:
             data = json.loads(message)
             self.validateBroker(data)
-            self.outbox.put(data)
+            self.sendData(data)
         except Exception as err:
             self.logging.warning('Invalid data received and purged. Reason: %s' % (err))
 

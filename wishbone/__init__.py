@@ -20,7 +20,8 @@
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
 #       
-#       
+#
+
 from wishbone import Wishbone
-import modules
-import io_modules
+#from wishbone import Wishbone
+#from wishbone import QueueFunctions
