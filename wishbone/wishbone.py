@@ -82,7 +82,7 @@ class Wishbone():
         while self.block() == True:
             outbox.put(inbox.get())
         
-    def __configureLogging(self,syslog=False,loglevel=logging.DEBUG):
+    def __configureLogging(self,syslog=False,loglevel=logging.INFO):
         format=('%(asctime)s %(levelname)s %(name)s %(message)s')
         if syslog == False:
             logging.basicConfig(level=loglevel, format=format)
