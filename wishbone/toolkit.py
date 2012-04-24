@@ -29,7 +29,7 @@ from gevent.queue import Queue
 class QueueFunctions():
 
     def sendData(self, data, destination='*', queue='outbox'):
-        getattr (self, queue).put ( ('data', destination, data) )
+        getattr (self, queue).put ( ('data', data, destination) )
             
     def sendCommand(self, data, destination='*'):
         self.outbox.put( ('command', destination, data) )

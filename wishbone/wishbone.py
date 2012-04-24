@@ -38,22 +38,17 @@ class Wishbone():
         self.hub = Queue(None)
         self.outhub = Queue(None)
         
-    def registerModule(self, module_name, class_name, name, *args, **kwargs):
+    def registerModule(self, config, *args, **kwargs):
+        module_name = config[0]
+        class_name = config[1]
+        name = config[2]        
         try:
             loaded_module = import_module(module_name)
             setattr(self, name, getattr (loaded_module, class_name)(name, self.block, *args, **kwargs))
             self.modules.append(getattr (self, name))
         except Exception as err:
             print "Problem loading module: %s and class %s. Reason: %s" % ( module_name, class_name, err)
-    
-    def registerBroker(self, *args, **kwargs):
-        self.broker = io_modules.Broker(block=self.block, *args, **kwargs )
-        self.servers.append(self.broker)
-    
-    def registerUDPServer(self, port='9000', *args, **kwargs):
-        self.udp_server = io_modules.UDPServer(port, *args, **kwargs)
-        self.servers.append(self.udp_server)
-    
+        
     def connect(self,inbox,outbox):
         spawn ( self.__connector, inbox, outbox )
     
