@@ -45,7 +45,6 @@ class JSONValidator(PrimitiveActor):
             self.validateBroker(data)
             self.sendData(data)
         except Exception as err:
-            print message
             self.logging.warning('Invalid data received and purged. Reason: %s' % (err))
 
     def validateBroker(self,data):
