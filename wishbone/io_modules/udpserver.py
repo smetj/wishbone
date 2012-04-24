@@ -36,12 +36,12 @@ class UDPServer(DatagramServer, QueueFunctions):
         self.logging = logging.getLogger( 'UDPServer' )
         self.name = 'UDPServer'
         self.logging.info ( 'started and listening on port %s' % port)
-        self.inbox=Queue(None)        
+        self.inbox=Queue(None)
         spawn(self.run)
  
     def handle(self, data, address):
         self.logging.info ('%s: Data received.' % (address[0]) )
-        self.sendData(data)
+        self.sendData(data, queue='inbox')
  
     def run(self):
         self.serve_forever()

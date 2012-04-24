@@ -23,5 +23,3 @@
 #
 
 from wishbone import Wishbone
-#from wishbone import Wishbone
-#from wishbone import QueueFunctions

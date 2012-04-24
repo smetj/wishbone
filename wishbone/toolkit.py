@@ -28,10 +28,10 @@ from gevent.queue import Queue
 
 class QueueFunctions():
 
-    def sendData(self, destination='*', data=None):
-        self.outbox.put( ('data', destination, data) )
+    def sendData(self, data, destination='*', queue='outbox'):
+        getattr (self, queue).put ( ('data', destination, data) )
             
-    def sendCommand(self, destination='*', data=None):
+    def sendCommand(self, data, destination='*'):
         self.outbox.put( ('command', destination, data) )
 
 class PrimitiveActor(Greenlet, QueueFunctions):
