@@ -30,7 +30,9 @@ class JSONValidator(PrimitiveActor):
     
     def __init__(self, name, block, *args, **kwargs):
         PrimitiveActor.__init__(self, name, block)
+        self.name = name
         self.schema = kwargs.get('schema',None)
+        self.convert = kwargs.get('convert',False)
         self.loadSchema()
 
     def loadSchema(self):
@@ -41,9 +43,11 @@ class JSONValidator(PrimitiveActor):
 
     def consume(self, message):
         try:
-            data = json.loads(message)
+            data = json.loads(message["data"])
             self.validateBroker(data)
-            self.sendData(data)
+            if self.convert == True:
+                message['data']=data
+            self.sendData(message)
         except Exception as err:
             self.logging.warning('Invalid data received and purged. Reason: %s' % (err))
 

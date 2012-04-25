@@ -97,17 +97,20 @@ class Broker(Greenlet, QueueFunctions):
                     break
         
     def consume(self,doc):
-        self.sendData(doc.body)
+        self.sendData({'header':{},'data':doc.body}, queue='inbox')
         self.logging.info('Data received from broker.')
         self.incoming.basic_ack(doc.delivery_tag)
         
-    def produce(self,data):
-        if self.connected == True:
-            msg = amqp.Message(str(data[2]))
-            msg.properties["delivery_mode"] = 2
-            self.outgoing.basic_publish(msg,exchange=data[0],routing_key=data[1])
+    def produce(self,message):
+        if message["header"].has_key('broker_exchange') and message["header"].has_key('broker_key'):            
+            if self.connected == True:
+                msg = amqp.Message(message['data'])
+                msg.properties["delivery_mode"] = 2
+                self.outgoing.basic_publish(msg,exchange=message['header']['broker_exchange'],routing_key=message['header']['broker_key'])
+            else:
+                raise Exception('Not Connected to broker')
         else:
-            raise Exception('Not Connected to broker')  
+            self.logging.warn('Received data for broker without exchange or key information in header. Purged.')
 
     def shutdown(self):
         self.logging.info('Shutdown')

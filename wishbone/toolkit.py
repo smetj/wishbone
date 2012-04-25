@@ -25,14 +25,40 @@
 import logging
 from gevent import Greenlet
 from gevent.queue import Queue
+from copy import deepcopy
 
 class QueueFunctions():
 
-    def sendData(self, data, destination='*', queue='outbox'):
-        getattr (self, queue).put ( ('data', data, destination) )
+    def sendData(self, data, queue='outbox'):
+        '''Submits data to the module outbox, with the goal it will be shuffled by a connector to another module inbox.  By default the queue outbox is chosen'''
+        
+        if self.checkIntegrity(data):
+            getattr (self, queue).put ( data )
+        else:
+            self.logging.warn('Invalid internal data structure detected. Data is purged. Turn on debugging to see datastructure.')
+            self.logging.debug('Invalid data structure: %s' % (data))
+    
+    def sendRaw(self, data, queue='outbox'):
+        '''Allows you to bypass message integrity checking.
+        Its usage should be sparse, although it's usefull when you want to send data back to a module as it would have come from the outside world.'''
+        
+        getattr (self, queue).put ( deepcopy(data) )
             
-    def sendCommand(self, data, destination='*'):
-        self.outbox.put( ('command', destination, data) )
+    def sendCommand(self, data, destination='*', queue='outbox'):
+        self.outbox.put( (destination, data) )
+        
+    def checkIntegrity(self, data):
+        if type(data) is dict:
+            if len(data.keys()) == 2:
+                if data.has_key('header') and data.has_key('data'):
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
+                
 
 class PrimitiveActor(Greenlet, QueueFunctions):
 
@@ -48,13 +74,7 @@ class PrimitiveActor(Greenlet, QueueFunctions):
     def _run(self):
         self.logging.info('Started.')
         while self.block() == True:
-            message = self.inbox.get()
-            if message[0] == 'data':
-                self.consume(message[1])
-            elif message[1] == 'command':
-                self.command(message[1])
-            else:
-                pass
+            self.consume(self.inbox.get())
                     
     def consume(self, *args, **kwargs):
         raise Exception ('You have no consume function in your class.')
@@ -69,10 +89,4 @@ class PrimitiveActor(Greenlet, QueueFunctions):
     def _run(self):
         self.logging.info('Started.')
         while self.block() == True:
-            message = self.inbox.get()
-            if message[0] == 'data':
-                self.consume(message[1])
-            elif message[1] == 'command':
-                self.command(message[1])
-            else:
-                pass
+            self.consume(self.inbox.get())
