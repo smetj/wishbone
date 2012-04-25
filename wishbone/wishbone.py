@@ -72,13 +72,13 @@ class Wishbone():
     def block(self):
         return self.lock
          
-    def __connector(self,inbox, outbox):
-        '''Consumes data from inbox and puts it in outbox.'''
+    def __connector(self,source, destination):
+        '''Consumes data from source and puts it in destination.'''
         while self.block() == True:
-            outbox.put(inbox.get())
+            destination.put(source.get())
         
     def __configureLogging(self,syslog=False,loglevel=logging.INFO):
-        format=('%(asctime)s %(levelname)s %(name)s %(message)s')
+        format=('%(asctime)s %(levelname)s %(name)s: %(message)s')
         if syslog == False:
             logging.basicConfig(level=loglevel, format=format)
         else:

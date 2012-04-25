@@ -40,8 +40,8 @@ class UDPServer(DatagramServer, QueueFunctions):
         spawn(self.run)
  
     def handle(self, data, address):
-        self.logging.info ('%s: Data received.' % (address[0]) )
-        self.sendData(data, queue='inbox')
+        self.logging.info ('Data received from %s' % (address[0]) )
+        self.sendData({'header':{},'data':data}, queue='inbox')
  
     def run(self):
         self.serve_forever()

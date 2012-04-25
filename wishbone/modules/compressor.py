@@ -23,14 +23,25 @@
 #       
 
 from wishbone.toolkit import PrimitiveActor
+import snappy
+import json
 
 class Compressor(PrimitiveActor):
     
     def __init__(self, name, block, *args, **kwargs):
         PrimitiveActor.__init__(self, name, block)
       
-    def consume(self,doc):
-        self.sendData(doc)
+    def consume(self,message):
+        data = json.dumps(message['data'])
+        if snappy.isValidCompressed(data):
+            self.logging.debug('Data decompressed.')
+            self.sendData(snappy.decompress(data))
+        else:
+            self.logging.debug('Data compressed.')
+            message['data'] = snappy.compress(data)
+            message['header']['compression']='snappy'
+            self.sendData(message)
        
     def shutdown(self):
         self.logging.info('Shutdown')
+        
