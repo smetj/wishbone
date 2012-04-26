@@ -58,8 +58,9 @@ class Wishbone():
                 self.__dict__[instance].start()
             except:
                 pass
-        while self.block() == True:
-            sleep(0.01)
+        while True:
+            sleep(1)
+        
     
     def stop(self):
         self.lock=False
