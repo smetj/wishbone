@@ -90,3 +90,6 @@ class PrimitiveActor(Greenlet, QueueFunctions):
         self.logging.info('Started.')
         while self.block() == True:
             self.consume(self.inbox.get())
+
+    def shutdown(self):
+        self.logging.info('Shutdown')
