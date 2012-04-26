@@ -65,8 +65,8 @@ class Broker(Greenlet, QueueFunctions):
                         self.produce(self.outbox.get())
                     except:
                         break
-                sleep(0.01)
-            sleep(0.01)
+                sleep(1)
+            sleep(1)
                                 
     def _run(self):
         self.logging.info('Started')
