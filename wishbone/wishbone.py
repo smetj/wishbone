@@ -60,7 +60,6 @@ class Wishbone():
                 pass
         while True:
             sleep(1)
-        
     
     def stop(self):
         self.lock=False

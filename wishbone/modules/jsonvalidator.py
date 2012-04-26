@@ -27,6 +27,15 @@ from wishbone.toolkit import PrimitiveActor
 
 
 class JSONValidator(PrimitiveActor):
+    '''A WishBone module which verifies JSON data against a validator schema loaded from file.
+    
+    Messages consumed from the inbox queue is verified against a Validator schema.  When the message is not a valid JSON document
+    or when it doesn't match your predifined Validator schema, it is dropped.
+    This module accepts 2 parameters:
+        
+        schema:     The location and filename of the schema to load.  The schema should follow http://json-schema.org/ specifications.
+        convert:    When True it will aditionally convert the incoming JSON string to a Python object.
+    '''    
     
     def __init__(self, name, block, *args, **kwargs):
         PrimitiveActor.__init__(self, name, block)
@@ -34,14 +43,19 @@ class JSONValidator(PrimitiveActor):
         self.schema = kwargs.get('schema',None)
         self.convert = kwargs.get('convert',False)
         self.loadSchema()
+        self.checker = Validator()
 
     def loadSchema(self):
+        '''Loads the json-schema definition from disk.'''
+        
         file = open(self.schema,'r')
         data = file.readlines()
         file.close()
         self.schema=json.loads(''.join(data))
 
     def consume(self, message):
+        '''Executed for each incoming message.'''
+        
         try:
             data = json.loads(message["data"])
             self.validateBroker(data)
@@ -52,8 +66,6 @@ class JSONValidator(PrimitiveActor):
             self.logging.warning('Invalid data received and purged. Reason: %s' % (err))
 
     def validateBroker(self,data):
-        checker = Validator()
-        checker.validate(data,self.schema)
-
-    def shutdown(self):
-        self.logging.info('Shutdown')
+        '''Validates data against the JSON schema.'''
+        
+        self.checker.validate(data,self.schema) 
