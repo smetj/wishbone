@@ -30,6 +30,9 @@ from copy import deepcopy
 class QueueFunctions():
     '''A base class for Wishbone Actor classes.  Shouldn't be called directly but is inherited by PrimitiveActor.'''
 
+    def __init__(self):
+        self.lock=True
+    
     def sendData(self, data, queue='outbox'):
         '''Submits data to one of the module its queues.
         
@@ -76,7 +79,10 @@ class QueueFunctions():
                 return False
         else:
             return False
-                
+
+    def block(self):
+        '''A simple blocking function.'''
+        return self.lock                
 
 class PrimitiveActor(Greenlet, QueueFunctions):
     '''A base class used to create Wishbone modules.
@@ -87,12 +93,13 @@ class PrimitiveActor(Greenlet, QueueFunctions):
         name:      Gives a name to the module
     '''
 
-    def __init__(self, name, block):
+    def __init__(self, name):
+        QueueFunctions.__init__(self)
         Greenlet.__init__(self)
         self.logging = logging.getLogger( name )
         self.logging.info('Initiated.')
         self.name=name
-        self.block = block
+        self.lock = True
         self.inbox = Queue(None)
         self.outbox = Queue(None)
         
@@ -116,10 +123,10 @@ class PrimitiveActor(Greenlet, QueueFunctions):
         self.block = block
         self.inbox = Queue(None)
         self.outbox = Queue(None)
-
+   
     def shutdown(self):
         '''A function which could be overridden by the Wisbone module.
         
         This function is called on shutdown.'''
-        
+        self.lock=False
         self.logging.info('Shutdown')

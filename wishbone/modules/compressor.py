@@ -32,8 +32,8 @@ class Compressor(PrimitiveActor):
     The module detects whether data is compressed or not.
     '''
     
-    def __init__(self, name, block, *args, **kwargs):
-        PrimitiveActor.__init__(self, name, block)
+    def __init__(self, name, *args, **kwargs):
+        PrimitiveActor.__init__(self, name)
       
     def consume(self,message):
         data = json.dumps(message['data'])

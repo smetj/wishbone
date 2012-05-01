@@ -70,7 +70,7 @@ class Wishbone():
         name = config[2]        
         try:
             loaded_module = import_module(module_name)
-            setattr(self, name, getattr (loaded_module, class_name)(name, self.block, *args, **kwargs))
+            setattr(self, name, getattr (loaded_module, class_name)(name, *args, **kwargs))
             self.modules.append(getattr (self, name))
         except Exception as err:
             print "Problem loading module: %s and class %s. Reason: %s" % ( module_name, class_name, err)

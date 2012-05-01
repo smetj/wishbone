@@ -29,8 +29,8 @@ class Skeleton(PrimitiveActor):
     '''Skeleton class is a minimal Actor class which does nothing more than shoveling data from its inbox to its outbox.
     It can be used as an example/base for new blocks.'''
     
-    def __init__(self, name, block, *args, **kwargs):
-        PrimitiveActor.__init__(self, name, block)
+    def __init__(self, name, *args, **kwargs):
+        PrimitiveActor.__init__(self, name)
     
     def consume(self,doc):
         self.sendData(doc)
