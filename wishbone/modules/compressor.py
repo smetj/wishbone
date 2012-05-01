@@ -27,6 +27,10 @@ import snappy
 import json
 
 class Compressor(PrimitiveActor):
+    '''A Wishbone module which compresses uncompressed data and decompresses compressed data using Snappy.
+    
+    The module detects whether data is compressed or not.
+    '''
     
     def __init__(self, name, block, *args, **kwargs):
         PrimitiveActor.__init__(self, name, block)

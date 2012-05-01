@@ -30,10 +30,28 @@ from gevent.queue import Queue
 from gevent import monkey; monkey.patch_all()
 
 class Broker(Greenlet, QueueFunctions):
-    '''Creates an object doing all broker I/O.  It's meant to be resillient to disconnects and broker unavailability.
-    Data going to the broker goes into Broker.outgoing_queue.  Data coming from the broker is submitted to the scheduler_callback method'''
+    '''A Wisbone module which handles AMQP0.8 input and output.  It's meant to be resillient to disconnects and broker unavailability.
     
-    def __init__(self, name, block, host, vhost, username, password, consume_queue='wishbone_in', produce_exchange='wishbone_out', routing_key='wishbone' ):
+    Data consumed from the broker goes into self.inbox
+    Data which should be produced towards to broker goes into self.outbox
+    
+    The message submitted to self.outbox should have 2 values in its headers:
+    
+        {'header':{'broker_exchange':name, 'broker_key':name}}
+        
+        broker_exchange:    The exchange to which data should be submitted.
+        broker_key:         The routing key used when submitting data.
+    
+    Parameters:
+        name:               The name you want this module to be registered under.
+        host:               The name or IP of the broker.
+        vhost:              The virtual host of the broker. By default this is '/'
+        username:           The username to connect to the broker.  By default this is 'guest'.
+        password:           The password to connect to the broker.  By default this is 'guest'.
+        consume_queue:      The queue which should be consumed. By default this is "wishbone_in".
+    '''
+    
+    def __init__(self, name, block, host, vhost='/', username='guest', password='guest', consume_queue='wishbone_in' ):
         Greenlet.__init__(self)
         self.logging = logging.getLogger( 'Broker' )
         self.name = 'Broker'
@@ -43,20 +61,24 @@ class Broker(Greenlet, QueueFunctions):
         self.username=username
         self.password=password
         self.consume_queue = consume_queue
-        self.produce_exchange = produce_exchange
-        self.routing_key = routing_key
         self.block = block
         self.outbox=Queue(None)
         self.inbox=Queue(None)
         self.connected=False
 
     def __setup(self):
+        '''Handles connection and channel creation.
+        '''
+        
         self.conn = amqp.Connection(host="%s:5672"%(self.host), userid=self.username,password=self.password, virtual_host=self.vhost, insist=False)
         self.incoming = self.conn.channel()
         self.outgoing = self.conn.channel()
         self.logging.info('Connected to broker')
         
     def submitBroker(self):
+        '''Submits all data from self.outbox into the broker by calling the produce() funtion.
+        '''
+        
         while self.block() == True:
             while self.connected == True:
                 while self.outbox.qsize() > 0:
@@ -69,6 +91,10 @@ class Broker(Greenlet, QueueFunctions):
             sleep(1)
                                 
     def _run(self):
+        '''
+        Blocking function which start consumption and producing of data.  It is executed when issuing the Greenlet start()
+        '''
+        
         self.logging.info('Started')
         night=0.5
         outgoing = spawn ( self.submitBroker )
@@ -97,11 +123,21 @@ class Broker(Greenlet, QueueFunctions):
                     break
         
     def consume(self,doc):
+        '''Is called upon each message coming from the broker infrastructure.
+        
+        It also makes sure the incoming data is encapsulated in the right Wishbone format.
+        When successful, this function acknowledges the message from the broker.
+        '''
+        
         self.sendData({'header':{},'data':doc.body}, queue='inbox')
         self.logging.info('Data received from broker.')
         self.incoming.basic_ack(doc.delivery_tag)
         
     def produce(self,message):
+        '''Is called upon each message going to to the broker infrastructure.
+        
+        This function is called by the consume() function.  If the correct header info isn't present (but that would be odd at this point), the data is purged.
+        '''
         if message["header"].has_key('broker_exchange') and message["header"].has_key('broker_key'):            
             if self.connected == True:
                 msg = amqp.Message(message['data'])
@@ -113,4 +149,6 @@ class Broker(Greenlet, QueueFunctions):
             self.logging.warn('Received data for broker without exchange or key information in header. Purged.')
 
     def shutdown(self):
+        '''This function is called on shutdown().'''
+        
         self.logging.info('Shutdown')

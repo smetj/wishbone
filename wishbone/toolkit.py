@@ -28,9 +28,17 @@ from gevent.queue import Queue
 from copy import deepcopy
 
 class QueueFunctions():
+    '''A base class for Wishbone Actor classes.  Shouldn't be called directly but is inherited by PrimitiveActor.'''
 
     def sendData(self, data, queue='outbox'):
-        '''Submits data to the module outbox, with the goal it will be shuffled by a connector to another module inbox.  By default the queue outbox is chosen'''
+        '''Submits data to one of the module its queues.
+        
+        The data send by this funtion is automatically checked on integrity, whether it has the right Wishbone data structure.  If that is not the case
+        an exception is returned.
+        
+        Parameters:
+            queue:  Determines to which queue data should be send.  By default this is 'outbox'.
+        '''
         
         if self.checkIntegrity(data):
             getattr (self, queue).put ( data )
@@ -39,15 +47,25 @@ class QueueFunctions():
             self.logging.debug('Invalid data structure: %s' % (data))
     
     def sendRaw(self, data, queue='outbox'):
-        '''Allows you to bypass message integrity checking.
-        Its usage should be sparse, although it's usefull when you want to send data back to a module as it would have come from the outside world.'''
+        '''Submits data to one of the mudule its queues.
+        
+        Allows you to bypass message integrity checking.  Its usage should be sparse, although it's usefull when you want to send data back 
+        to a module as it would have come from the outside world.'''
         
         getattr (self, queue).put ( deepcopy(data) )
             
     def sendCommand(self, data, destination='*', queue='outbox'):
+        '''Placeholder not implemented for the moment.'''
+        
         self.outbox.put( (destination, data) )
         
     def checkIntegrity(self, data):
+        '''Checks the integrity of the messages passed over the different queues.
+        
+        The format of the messages should be:
+        
+        { 'headers': {}, data: {} }'''
+        
         if type(data) is dict:
             if len(data.keys()) == 2:
                 if data.has_key('header') and data.has_key('data'):
@@ -61,6 +79,13 @@ class QueueFunctions():
                 
 
 class PrimitiveActor(Greenlet, QueueFunctions):
+    '''A base class used to create Wishbone modules.
+    
+    This base class offers Wishbone specific functionalities and objects.
+
+    Parameters:
+        name:      Gives a name to the module
+    '''
 
     def __init__(self, name, block):
         Greenlet.__init__(self)
@@ -77,19 +102,24 @@ class PrimitiveActor(Greenlet, QueueFunctions):
             self.consume(self.inbox.get())
                     
     def consume(self, *args, **kwargs):
+        '''A function which should be overridden by the Wishbone module.
+        
+        This function, when called throws an exception.
+        '''
         raise Exception ('You have no consume function in your class.')
         
     def command(self, *args, **kwargs):
+        '''A placeholder not implemented for the moment.'''
+        
         self.logging.info('Initiated.')
         self.name=name
         self.block = block
         self.inbox = Queue(None)
         self.outbox = Queue(None)
-        
-    def _run(self):
-        self.logging.info('Started.')
-        while self.block() == True:
-            self.consume(self.inbox.get())
 
     def shutdown(self):
+        '''A function which could be overridden by the Wisbone module.
+        
+        This function is called on shutdown.'''
+        
         self.logging.info('Shutdown')
