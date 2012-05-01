@@ -37,8 +37,8 @@ class JSONValidator(PrimitiveActor):
         convert:    When True it will aditionally convert the incoming JSON string to a Python object.
     '''    
     
-    def __init__(self, name, block, *args, **kwargs):
-        PrimitiveActor.__init__(self, name, block)
+    def __init__(self, name, *args, **kwargs):
+        PrimitiveActor.__init__(self, name)
         self.name = name
         self.schema = kwargs.get('schema',None)
         self.convert = kwargs.get('convert',False)

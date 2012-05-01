@@ -51,8 +51,9 @@ class Broker(Greenlet, QueueFunctions):
         consume_queue:      The queue which should be consumed. By default this is "wishbone_in".
     '''
     
-    def __init__(self, name, block, host, vhost='/', username='guest', password='guest', consume_queue='wishbone_in' ):
+    def __init__(self, name, host, vhost='/', username='guest', password='guest', consume_queue='wishbone_in' ):
         Greenlet.__init__(self)
+        QueueFunctions.__init__(self)
         self.logging = logging.getLogger( 'Broker' )
         self.name = 'Broker'
         self.logging.info('Initiated')
@@ -61,7 +62,6 @@ class Broker(Greenlet, QueueFunctions):
         self.username=username
         self.password=password
         self.consume_queue = consume_queue
-        self.block = block
         self.outbox=Queue(None)
         self.inbox=Queue(None)
         self.connected=False

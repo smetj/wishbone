@@ -39,8 +39,9 @@ class UDPServer(DatagramServer, QueueFunctions):
         port:       The port on which the server should listen.
     '''
  
-    def __init__(self, name, block, port, *args, **kwargs):
+    def __init__(self, name, port, *args, **kwargs):
         DatagramServer.__init__(self, ':'+port, *args, **kwargs)
+        QueueFunctions.__init__(self)
         self.logging = logging.getLogger( 'UDPServer' )
         self.name = 'UDPServer'
         self.logging.info ( 'started and listening on port %s' % port)
