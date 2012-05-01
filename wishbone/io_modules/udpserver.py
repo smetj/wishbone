@@ -30,6 +30,14 @@ import logging
 
 
 class UDPServer(DatagramServer, QueueFunctions):
+    '''A Wishbone module which handles UDP input.
+    
+    Data received by the module is put into self.inbox
+    
+    Parameters:
+        name:       The name you want this module to be registered under.
+        port:       The port on which the server should listen.
+    '''
  
     def __init__(self, name, block, port, *args, **kwargs):
         DatagramServer.__init__(self, ':'+port, *args, **kwargs)
@@ -40,8 +48,12 @@ class UDPServer(DatagramServer, QueueFunctions):
         spawn(self.run)
  
     def handle(self, data, address):
-        self.logging.info ('Data received from %s' % (address[0]) )
+        '''Is called upon each incoming message, makes sure the data has the right Wishbone format and writes the it into self.inbox'''
+        
+        self.logging.debug ('Data received from %s' % (address[0]) )
         self.sendData({'header':{},'data':data}, queue='inbox')
  
     def run(self):
+        '''Blocking function which starts the UDP server.'''
+        
         self.serve_forever()
