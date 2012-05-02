@@ -56,6 +56,12 @@ Compressor Class
 .. automodule:: wishbone.modules.compressor
    :members:
 
+STDOUT Class
+================
+
+.. automodule:: wishbone.modules.stdout
+   :members:
+
 Broker Class
 ============
 
