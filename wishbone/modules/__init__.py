@@ -25,4 +25,4 @@
 from skeleton import Skeleton
 from compressor import Compressor
 from jsonvalidator import JSONValidator
-from jelle import Jelle
+from stdout import STDOUT
