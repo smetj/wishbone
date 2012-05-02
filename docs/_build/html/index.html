@@ -1,0 +1,408 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Wishbone &mdash; wishbone 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="wishbone 0.1 documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">wishbone 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="wishbone">
+<h1>Wishbone<a class="headerlink" href="#wishbone" title="Permalink to this headline">¶</a></h1>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+<div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Wishbone is a gevent based framework which simplifies writing modular message passing code. It allows you to build a data flow by connecting the in- and outbox queue of multiple modules.
+The goal is that each module has (at least) an inbox and outbox queue. Each module has a consume() function, which is consumes all messages from the inbox queue.
+It’s up to the consume() function to put the data into the outbox queue.  A programmer connects the outbox of one module to the inbox of another in order to create a dataflow.</p>
+</div>
+<div class="section" id="module-wishbone.wishbone">
+<span id="wishbone-class"></span><h1>Wishbone Class<a class="headerlink" href="#module-wishbone.wishbone" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="wishbone.wishbone.Wishbone">
+<em class="property">class </em><tt class="descclassname">wishbone.wishbone.</tt><tt class="descname">Wishbone</tt><a class="headerlink" href="#wishbone.wishbone.Wishbone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wishbone is a module which allows you to write gevent based, modular message passing code.</p>
+<p>Wishbone allows you to build a data flow by connecting the in- and outbox queue of multiple modules.
+The goal is that each module has (at least) an inbox and outbox queue.  Each module has a consume() function,
+which is called upon to all messages from its inbox queue.  It&#8217;s up to the consume() function to put the data
+into its outbox queue.  A programmer can then connect the outbox of one module to the inbox of another in order
+to create a dataflow.  The result is that one is able to create code which is modular and almost &#8220;graphical&#8221; because
+like this it is very easy to define processing blocks and dataflow.</p>
+<dl class="method">
+<dt id="wishbone.wishbone.Wishbone.block">
+<tt class="descname">block</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.wishbone.Wishbone.block" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which provides a global block where required.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.wishbone.Wishbone.connect">
+<tt class="descname">connect</tt><big>(</big><em>source</em>, <em>destination</em><big>)</big><a class="headerlink" href="#wishbone.wishbone.Wishbone.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new background Greenthread which continuously consumes all messages from source into destination.</p>
+<p>This function is used to connect the queue of one module with the queue of another.  A typical useage is to connect outbox from module1
+to inbox of module2.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.wishbone.Wishbone.registerModule">
+<tt class="descname">registerModule</tt><big>(</big><em>config</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#wishbone.wishbone.Wishbone.registerModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers a Wishbone Module into the framework.  All modules used within Wishbone should be regesitered through this function.</p>
+<p>This function receives a tuple containing 3 values.  Any further args or kwargs are used to initialize the actual module you register.</p>
+<p>The config parameter should be a tuple of 3 strings:</p>
+<blockquote>
+<div><p>(module, class, name)</p>
+<p>module:     The name of the module to import.
+class:      The name of the class to initialize
+name:       The name under which the module should be initialized.</p>
+<p><a href="#id1"><span class="problematic" id="id2">*</span></a>args and <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs are passed to the class which is initialized.</p>
+</div></blockquote>
+<p>self.modules contains a list of all registered modules.  Also, each registered module is registered under self.name, where name is last
+value of the tuple.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.wishbone.Wishbone.start">
+<tt class="descname">start</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.wishbone.Wishbone.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which starts all registered Wishbone modules.</p>
+<p>Function which runs over all registered instances/modules and tries to execute the start() function in order to let that module start
+to consume the messages of its inbox and execute the consume function on each message.
+This function blocks from exiting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.wishbone.Wishbone.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.wishbone.Wishbone.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function which stops all registered Wishbone modules.</p>
+<p>Function which runs over all registered instances/modules and tries to execute its stop() function in order to stop that module.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-wishbone.toolkit">
+<span id="toolkit-class"></span><h1>Toolkit Class<a class="headerlink" href="#module-wishbone.toolkit" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="wishbone.toolkit.PrimitiveActor">
+<em class="property">class </em><tt class="descclassname">wishbone.toolkit.</tt><tt class="descname">PrimitiveActor</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.toolkit.PrimitiveActor" title="Permalink to this definition">¶</a></dt>
+<dd><p>A base class used to create Wishbone modules.</p>
+<p>This base class offers Wishbone specific functionalities and objects.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>name:      Gives a name to the module</dd>
+</dl>
+<dl class="method">
+<dt id="wishbone.toolkit.PrimitiveActor.command">
+<tt class="descname">command</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#wishbone.toolkit.PrimitiveActor.command" title="Permalink to this definition">¶</a></dt>
+<dd><p>A placeholder not implemented for the moment.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.toolkit.PrimitiveActor.consume">
+<tt class="descname">consume</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#wishbone.toolkit.PrimitiveActor.consume" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function which should be overridden by the Wishbone module.</p>
+<p>This function, when called throws an exception.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.toolkit.PrimitiveActor.shutdown">
+<tt class="descname">shutdown</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.toolkit.PrimitiveActor.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function which could be overridden by the Wisbone module.</p>
+<p>This function is called on shutdown.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wishbone.toolkit.QueueFunctions">
+<em class="property">class </em><tt class="descclassname">wishbone.toolkit.</tt><tt class="descname">QueueFunctions</tt><a class="headerlink" href="#wishbone.toolkit.QueueFunctions" title="Permalink to this definition">¶</a></dt>
+<dd><p>A base class for Wishbone Actor classes.  Shouldn&#8217;t be called directly but is inherited by PrimitiveActor.</p>
+<dl class="method">
+<dt id="wishbone.toolkit.QueueFunctions.block">
+<tt class="descname">block</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.toolkit.QueueFunctions.block" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple blocking function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.toolkit.QueueFunctions.checkIntegrity">
+<tt class="descname">checkIntegrity</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#wishbone.toolkit.QueueFunctions.checkIntegrity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks the integrity of the messages passed over the different queues.</p>
+<p>The format of the messages should be:</p>
+<p>{ &#8216;headers&#8217;: {}, data: {} }</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.toolkit.QueueFunctions.sendCommand">
+<tt class="descname">sendCommand</tt><big>(</big><em>data</em>, <em>destination='*'</em>, <em>queue='outbox'</em><big>)</big><a class="headerlink" href="#wishbone.toolkit.QueueFunctions.sendCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Placeholder not implemented for the moment.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.toolkit.QueueFunctions.sendData">
+<tt class="descname">sendData</tt><big>(</big><em>data</em>, <em>queue='outbox'</em><big>)</big><a class="headerlink" href="#wishbone.toolkit.QueueFunctions.sendData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Submits data to one of the module its queues.</p>
+<p>The data send by this funtion is automatically checked on integrity, whether it has the right Wishbone data structure.  If that is not the case
+an exception is returned.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>queue:  Determines to which queue data should be send.  By default this is &#8216;outbox&#8217;.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.toolkit.QueueFunctions.sendRaw">
+<tt class="descname">sendRaw</tt><big>(</big><em>data</em>, <em>queue='outbox'</em><big>)</big><a class="headerlink" href="#wishbone.toolkit.QueueFunctions.sendRaw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Submits data to one of the mudule its queues.</p>
+<p>Allows you to bypass message integrity checking.  Its usage should be sparse, although it&#8217;s usefull when you want to send data back 
+to a module as it would have come from the outside world.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-wishbone.modules.skeleton">
+<span id="skeleton-class"></span><h1>Skeleton Class<a class="headerlink" href="#module-wishbone.modules.skeleton" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="wishbone.modules.skeleton.Skeleton">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.skeleton.</tt><tt class="descname">Skeleton</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#wishbone.modules.skeleton.Skeleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skeleton class is a minimal Actor class which does nothing more than shoveling data from its inbox to its outbox.
+It can be used as an example/base for new blocks.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wishbone.modules.jsonvalidator">
+<span id="jsonvalidator-class"></span><h1>Jsonvalidator Class<a class="headerlink" href="#module-wishbone.modules.jsonvalidator" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="wishbone.modules.jsonvalidator.JSONValidator">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.jsonvalidator.</tt><tt class="descname">JSONValidator</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#wishbone.modules.jsonvalidator.JSONValidator" title="Permalink to this definition">¶</a></dt>
+<dd><p>A WishBone module which verifies JSON data against a validator schema loaded from file.</p>
+<p>Messages consumed from the inbox queue is verified against a Validator schema.  When the message is not a valid JSON document
+or when it doesn&#8217;t match your predifined Validator schema, it is dropped.
+This module accepts 2 parameters:</p>
+<blockquote>
+<div>schema:     The location and filename of the schema to load.  The schema should follow <a class="reference external" href="http://json-schema.org/">http://json-schema.org/</a> specifications.
+convert:    When True it will aditionally convert the incoming JSON string to a Python object.</div></blockquote>
+<dl class="method">
+<dt id="wishbone.modules.jsonvalidator.JSONValidator.consume">
+<tt class="descname">consume</tt><big>(</big><em>message</em><big>)</big><a class="headerlink" href="#wishbone.modules.jsonvalidator.JSONValidator.consume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executed for each incoming message.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.modules.jsonvalidator.JSONValidator.loadSchema">
+<tt class="descname">loadSchema</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.modules.jsonvalidator.JSONValidator.loadSchema" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the json-schema definition from disk.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.modules.jsonvalidator.JSONValidator.validateBroker">
+<tt class="descname">validateBroker</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#wishbone.modules.jsonvalidator.JSONValidator.validateBroker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates data against the JSON schema.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-wishbone.modules.compressor">
+<span id="compressor-class"></span><h1>Compressor Class<a class="headerlink" href="#module-wishbone.modules.compressor" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="wishbone.modules.compressor.Compressor">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.compressor.</tt><tt class="descname">Compressor</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#wishbone.modules.compressor.Compressor" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Wishbone module which compresses uncompressed data and decompresses compressed data using Snappy.</p>
+<p>The module detects whether data is compressed or not.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wishbone.io_modules.broker">
+<span id="broker-class"></span><h1>Broker Class<a class="headerlink" href="#module-wishbone.io_modules.broker" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="wishbone.io_modules.broker.Broker">
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.broker.</tt><tt class="descname">Broker</tt><big>(</big><em>name</em>, <em>host</em>, <em>vhost='/'</em>, <em>username='guest'</em>, <em>password='guest'</em>, <em>consume_queue='wishbone_in'</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.broker.Broker" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Wisbone module which handles AMQP0.8 input and output.  It&#8217;s meant to be resillient to disconnects and broker unavailability.</p>
+<p>Data consumed from the broker goes into self.inbox
+Data which should be produced towards to broker goes into self.outbox</p>
+<p>The message submitted to self.outbox should have 2 values in its headers:</p>
+<blockquote>
+<div><p>{&#8216;header&#8217;:{&#8216;broker_exchange&#8217;:name, &#8216;broker_key&#8217;:name}}</p>
+<p>broker_exchange:    The exchange to which data should be submitted.
+broker_key:         The routing key used when submitting data.</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>name:               The name you want this module to be registered under.
+host:               The name or IP of the broker.
+vhost:              The virtual host of the broker. By default this is &#8216;/&#8217;
+username:           The username to connect to the broker.  By default this is &#8216;guest&#8217;.
+password:           The password to connect to the broker.  By default this is &#8216;guest&#8217;.
+consume_queue:      The queue which should be consumed. By default this is &#8220;wishbone_in&#8221;.</dd>
+</dl>
+<dl class="method">
+<dt id="wishbone.io_modules.broker.Broker.consume">
+<tt class="descname">consume</tt><big>(</big><em>doc</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.broker.Broker.consume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is called upon each message coming from the broker infrastructure.</p>
+<p>It also makes sure the incoming data is encapsulated in the right Wishbone format.
+When successful, this function acknowledges the message from the broker.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.io_modules.broker.Broker.produce">
+<tt class="descname">produce</tt><big>(</big><em>message</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.broker.Broker.produce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is called upon each message going to to the broker infrastructure.</p>
+<p>This function is called by the consume() function.  If the correct header info isn&#8217;t present (but that would be odd at this point), the data is purged.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.io_modules.broker.Broker.shutdown">
+<tt class="descname">shutdown</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.io_modules.broker.Broker.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is called on shutdown().</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.io_modules.broker.Broker.submitBroker">
+<tt class="descname">submitBroker</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.io_modules.broker.Broker.submitBroker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Submits all data from self.outbox into the broker by calling the produce() funtion.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-wishbone.io_modules.udpserver">
+<span id="udpserver-class"></span><h1>UDPserver Class<a class="headerlink" href="#module-wishbone.io_modules.udpserver" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="wishbone.io_modules.udpserver.UDPServer">
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.udpserver.</tt><tt class="descname">UDPServer</tt><big>(</big><em>name</em>, <em>port</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.udpserver.UDPServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Wishbone module which handles UDP input.</p>
+<p>Data received by the module is put into self.inbox</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd>name:       The name you want this module to be registered under.
+port:       The port on which the server should listen.</dd>
+</dl>
+<dl class="method">
+<dt id="wishbone.io_modules.udpserver.UDPServer.handle">
+<tt class="descname">handle</tt><big>(</big><em>data</em>, <em>address</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.udpserver.UDPServer.handle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is called upon each incoming message, makes sure the data has the right Wishbone format and writes the it into self.inbox</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.io_modules.udpserver.UDPServer.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.io_modules.udpserver.UDPServer.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Blocking function which starts the UDP server.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Wishbone</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#module-wishbone.wishbone">Wishbone Class</a></li>
+<li><a class="reference internal" href="#module-wishbone.toolkit">Toolkit Class</a></li>
+<li><a class="reference internal" href="#module-wishbone.modules.skeleton">Skeleton Class</a></li>
+<li><a class="reference internal" href="#module-wishbone.modules.jsonvalidator">Jsonvalidator Class</a></li>
+<li><a class="reference internal" href="#module-wishbone.modules.compressor">Compressor Class</a></li>
+<li><a class="reference internal" href="#module-wishbone.io_modules.broker">Broker Class</a></li>
+<li><a class="reference internal" href="#module-wishbone.io_modules.udpserver">UDPserver Class</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">wishbone 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Jelle Smet.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
