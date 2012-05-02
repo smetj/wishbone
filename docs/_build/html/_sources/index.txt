@@ -21,9 +21,37 @@ Indices and tables
 Introduction
 ============
 
-Wishbone is a gevent based framework which simplifies writing modular message passing code. It allows you to build a data flow by connecting the in- and outbox queue of multiple modules. 
-The goal is that each module has (at least) an inbox and outbox queue. Each module has a consume() function, which is consumes all messages from the inbox queue.
-It’s up to the consume() function to put the data into the outbox queue.  A programmer connects the outbox of one module to the inbox of another in order to create a dataflow. 
+Wishbone is a gevent based framework which simplifies writing modular message passing code by allowing by connecting the in- and outbox queues of multiple modules into a workflow.
+The idea is that each "Wishbone module" plugged into the framework has a consume() function.  This function consumes all messages from the inbox, processes them and puts them back into the outbox queue.
+A programmer interconnects the in- and outbox queues of all modules in order to reach a modular data flow.
+
+Example
+=======
+
+The Wishbone framework comes with  some premade modules such as the io_module "Broker" and the module "STDOUT".
+The Broker module consumes and produces data to a message broker infrastructure, while the STDOUT module merely prints messages from its inbox and then puts those messages back into outbox.
+
+Let's create an example where we consume date from a message broker, print it and put it back into the message broker.
+
+.. highlight:: python
+#!/usr/bin/python
+
+import wishbone
+from wishbone.toolkit import PrimitiveActor
+
+class Header(PrimitiveActor):
+    def __init__(self, name, *args, **kwargs):
+        PrimitiveActor.__init__(self, name)
+    def consume(self,message):
+        message['header']['broker_exchange'] = ''
+        message['header']['broker_key'] = 'test'
+        self.outbox.put(message)
+
+wb = wishbone.Wishbone()
+wb.registerModule ( ('wishbone.io_modules', 'Broker', 'broker'), host='sandbox', vhost='/', username='guest', password='guest', consume_queue='indigo' )
+wb.registerModule ( ('wishbone.modules', 'STDOUT', 'jelle') )
+wb.registerModule ( ('__main__', 'Header', 'header') )
+wb.start()
 
 
 Wishbone Class
