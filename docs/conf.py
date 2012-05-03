@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# wishbone documentation build configuration file, created by
-# sphinx-quickstart on Wed May  2 20:10:45 2012.
+# Wishbone documentation build configuration file, created by
+# sphinx-quickstart on Thu May  3 19:32:33 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -25,7 +25,7 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'wishbone'
+project = u'Wishbone'
 copyright = u'2012, Jelle Smet'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -164,7 +164,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'wishbonedoc'
+htmlhelp_basename = 'Wishbonedoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -183,7 +183,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'wishbone.tex', u'wishbone Documentation',
+  ('index', 'Wishbone.tex', u'Wishbone Documentation',
    u'Jelle Smet', 'manual'),
 ]
 
@@ -213,7 +213,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'wishbone', u'wishbone Documentation',
+    ('index', 'wishbone', u'Wishbone Documentation',
      [u'Jelle Smet'], 1)
 ]
 
@@ -227,8 +227,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'wishbone', u'wishbone Documentation',
-   u'Jelle Smet', 'wishbone', 'One line description of project.',
+  ('index', 'Wishbone', u'Wishbone Documentation',
+   u'Jelle Smet', 'Wishbone', 'One line description of project.',
    'Miscellaneous'),
 ]
 
