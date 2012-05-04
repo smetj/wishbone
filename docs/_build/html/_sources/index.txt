@@ -68,7 +68,11 @@ Headers contains a dictionary with values for modules to use.  Data contains the
 Example
 ======= 
 
-Let's make a simple program which consumes data from an AMQP messagebroker, prints it to STDOUT and writes the data back into the broker.
+Let's make a simple program which consumes data from an AMQP messagebroker, prints it to STDOUT and writes the data back into the broker:
+
+
+.. figure::  _static/wishbone_example.png
+
 
 The Wishbone framework comes with modules such as the io_module "Broker" and the module "STDOUT".
 The Broker module consumes and produces data to a message broker infrastructure, while the STDOUT module merely prints messages from its inbox and then puts those messages back into outbox.
@@ -115,47 +119,53 @@ Wishbone Class
 ==============
 
 .. automodule:: wishbone.wishbone
+   :undoc-members:
    :members:
 
 Toolkit Class
 ==============
 
 .. automodule:: wishbone.toolkit
+   :undoc-members:
    :members:
 
 Skeleton Class
 ==============
 
 .. automodule:: wishbone.modules.skeleton
+   :undoc-members:
    :members:
 
 Jsonvalidator Class
 ===================
 
 .. automodule:: wishbone.modules.jsonvalidator
+   :undoc-members:
    :members:
 
 Compressor Class
 ================
 .. automodule:: wishbone.modules.compressor
+   :undoc-members:   
    :members:
 
 STDOUT Class
 ================
 
 .. automodule:: wishbone.modules.stdout
+   :undoc-members:
    :members:
 
 Broker Class
 ============
 
 .. automodule:: wishbone.io_modules.broker
+   :undoc-members:
    :members:
 
 UDPserver Class
 ===============
 
 .. automodule:: wishbone.io_modules.udpserver
+   :undoc-members:
    :members:
-
-
