@@ -97,7 +97,10 @@ At a certain point you need to have a module which receives data from outside su
 </div>
 <div class="section" id="example">
 <h1>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h1>
-<p>Let&#8217;s make a simple program which consumes data from an AMQP messagebroker, prints it to STDOUT and writes the data back into the broker.</p>
+<p>Let&#8217;s make a simple program which consumes data from an AMQP messagebroker, prints it to STDOUT and writes the data back into the broker:</p>
+<div class="figure">
+<img alt="_images/wishbone_example.png" src="_images/wishbone_example.png" />
+</div>
 <p>The Wishbone framework comes with modules such as the io_module &#8220;Broker&#8221; and the module &#8220;STDOUT&#8221;.
 The Broker module consumes and produces data to a message broker infrastructure, while the STDOUT module merely prints messages from its inbox and then puts those messages back into outbox.</p>
 <div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
@@ -306,6 +309,16 @@ to a module as it would have come from the outside world.</p>
 <em class="property">class </em><tt class="descclassname">wishbone.modules.skeleton.</tt><tt class="descname">Skeleton</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/skeleton.html#Skeleton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.skeleton.Skeleton" title="Permalink to this definition">¶</a></dt>
 <dd><p>Skeleton class is a minimal Actor class which does nothing more than shoveling data from its inbox to its outbox.
 It can be used as an example/base for new blocks.</p>
+<dl class="method">
+<dt id="wishbone.modules.skeleton.Skeleton.consume">
+<tt class="descname">consume</tt><big>(</big><em>doc</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/skeleton.html#Skeleton.consume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.skeleton.Skeleton.consume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wishbone.modules.skeleton.Skeleton.shutdown">
+<tt class="descname">shutdown</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/wishbone/modules/skeleton.html#Skeleton.shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.skeleton.Skeleton.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -349,6 +362,16 @@ convert:    When True it will aditionally convert the incoming JSON string to a 
 <em class="property">class </em><tt class="descclassname">wishbone.modules.compressor.</tt><tt class="descname">Compressor</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/compressor.html#Compressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.compressor.Compressor" title="Permalink to this definition">¶</a></dt>
 <dd><p>A Wishbone module which compresses uncompressed data and decompresses compressed data using Snappy.</p>
 <p>The module detects whether data is compressed or not.</p>
+<dl class="method">
+<dt id="wishbone.modules.compressor.Compressor.consume">
+<tt class="descname">consume</tt><big>(</big><em>message</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/compressor.html#Compressor.consume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.compressor.Compressor.consume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wishbone.modules.compressor.Compressor.shutdown">
+<tt class="descname">shutdown</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/wishbone/modules/compressor.html#Compressor.shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.compressor.Compressor.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -358,6 +381,16 @@ convert:    When True it will aditionally convert the incoming JSON string to a 
 <dt id="wishbone.modules.stdout.STDOUT">
 <em class="property">class </em><tt class="descclassname">wishbone.modules.stdout.</tt><tt class="descname">STDOUT</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/stdout.html#STDOUT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.stdout.STDOUT" title="Permalink to this definition">¶</a></dt>
 <dd><p>STDOUT class is a minimal Actor class which does nothing more than printing the messages from inbox and putting them back in outbox.</p>
+<dl class="method">
+<dt id="wishbone.modules.stdout.STDOUT.consume">
+<tt class="descname">consume</tt><big>(</big><em>doc</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/stdout.html#STDOUT.consume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.stdout.STDOUT.consume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="wishbone.modules.stdout.STDOUT.shutdown">
+<tt class="descname">shutdown</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/wishbone/modules/stdout.html#STDOUT.shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.stdout.STDOUT.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
