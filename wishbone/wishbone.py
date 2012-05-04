@@ -44,6 +44,7 @@ class Wishbone():
         self.__configureLogging()
         self.logging = logging.getLogger( 'Wishbone' )
         self.modules=[]
+        self.connectors=[]
         self.hub = Queue(None)
         self.outhub = Queue(None)
         
@@ -82,7 +83,7 @@ class Wishbone():
         to inbox of module2.
         '''
         
-        spawn ( self.__connector, source, destination )
+        self.connectors.append(spawn ( self.__connector, source, destination ))
     
     def start(self):
         '''Function which starts all registered Wishbone modules.
@@ -97,8 +98,8 @@ class Wishbone():
                 self.__dict__[instance].start()
             except:
                 pass
-        while True:
-            sleep(1)
+        #Block
+        self.modules[0].join()
     
     def stop(self):
         '''Function which stops all registered Wishbone modules.
