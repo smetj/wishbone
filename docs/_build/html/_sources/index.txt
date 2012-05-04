@@ -115,14 +115,14 @@ This allows the Broker module to route messages using a specific exchange and or
 And that's it!
 
 
-Wishbone Class
+Wishbone Module
 ==============
 
 .. automodule:: wishbone.wishbone
-   :undoc-members:
+   :undoc-members:    
    :members:
-
-Toolkit Class
+    
+Toolkit module
 ==============
 
 .. automodule:: wishbone.toolkit

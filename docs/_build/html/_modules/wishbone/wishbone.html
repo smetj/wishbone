@@ -1,0 +1,239 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>wishbone.wishbone &mdash; Wishbone 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Wishbone 0.1 documentation" href="../../index.html" />
+    <link rel="up" title="wishbone" href="../wishbone.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Wishbone 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../wishbone.html" accesskey="U">wishbone</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for wishbone.wishbone</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c">#       wishbone.py</span>
+<span class="c">#       </span>
+<span class="c">#       Copyright 2012 Jelle Smet development@smetj.net</span>
+<span class="c">#       </span>
+<span class="c">#       This program is free software; you can redistribute it and/or modify</span>
+<span class="c">#       it under the terms of the GNU General Public License as published by</span>
+<span class="c">#       the Free Software Foundation; either version 3 of the License, or</span>
+<span class="c">#       (at your option) any later version.</span>
+<span class="c">#       </span>
+<span class="c">#       This program is distributed in the hope that it will be useful,</span>
+<span class="c">#       but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#       GNU General Public License for more details.</span>
+<span class="c">#       </span>
+<span class="c">#       You should have received a copy of the GNU General Public License</span>
+<span class="c">#       along with this program; if not, write to the Free Software</span>
+<span class="c">#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,</span>
+<span class="c">#       MA 02110-1301, USA.</span>
+<span class="c">#       </span>
+<span class="c">#       </span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
+<span class="kn">from</span> <span class="nn">gevent</span> <span class="kn">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">spawn</span>
+<span class="kn">from</span> <span class="nn">gevent.queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+
+<div class="viewcode-block" id="Wishbone"><a class="viewcode-back" href="../../index.html#wishbone.wishbone.Wishbone">[docs]</a><span class="k">class</span> <span class="nc">Wishbone</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Wishbone is a module which allows you to write gevent based, modular message passing code.</span>
+<span class="sd">    </span>
+<span class="sd">    Wishbone allows you to build a data flow by connecting the in- and outbox queue of multiple modules.</span>
+<span class="sd">    The goal is that each module has (at least) an inbox and outbox queue.  Each module has a consume() function,</span>
+<span class="sd">    which is called upon to all messages from its inbox queue.  It&#39;s up to the consume() function to put the data</span>
+<span class="sd">    into its outbox queue.  A programmer can then connect the outbox of one module to the inbox of another in order</span>
+<span class="sd">    to create a dataflow.  The result is that one is able to create code which is modular and almost &quot;graphical&quot; because</span>
+<span class="sd">    like this it is very easy to define processing blocks and dataflow.    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+<div class="viewcode-block" id="Wishbone.__init__"><a class="viewcode-back" href="../../index.html#wishbone.wishbone.Wishbone.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">=</span><span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__configureLogging</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span> <span class="s">&#39;Wishbone&#39;</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="o">=</span><span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hub</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outhub</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Wishbone.registerModule"><a class="viewcode-back" href="../../index.html#wishbone.wishbone.Wishbone.registerModule">[docs]</a>    <span class="k">def</span> <span class="nf">registerModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Registers a Wishbone Module into the framework.  All modules used within Wishbone should be regesitered through this function.</span>
+<span class="sd">        </span>
+<span class="sd">        This function receives a tuple containing 3 values.  Any further args or kwargs are used to initialize the actual module you register.</span>
+<span class="sd">        </span>
+<span class="sd">        The config parameter should be a tuple of 3 strings:</span>
+<span class="sd">            </span>
+<span class="sd">            (module, class, name)</span>
+<span class="sd">        </span>
+<span class="sd">            module:     The name of the module to import.</span>
+<span class="sd">            class:      The name of the class to initialize</span>
+<span class="sd">            name:       The name under which the module should be initialized.</span>
+<span class="sd">            </span>
+<span class="sd">            *args and **kwargs are passed to the class which is initialized.</span>
+<span class="sd">        </span>
+<span class="sd">        self.modules contains a list of all registered modules.  Also, each registered module is registered under self.name, where name is last</span>
+<span class="sd">        value of the tuple.&#39;&#39;&#39;</span>
+               
+        <span class="n">module_name</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">class_name</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">loaded_module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">getattr</span> <span class="p">(</span><span class="n">loaded_module</span><span class="p">,</span> <span class="n">class_name</span><span class="p">)(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">getattr</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Problem loading module: </span><span class="si">%s</span><span class="s"> and class </span><span class="si">%s</span><span class="s">. Reason: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Wishbone.connect"><a class="viewcode-back" href="../../index.html#wishbone.wishbone.Wishbone.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Creates a new background Greenthread which continuously consumes all messages from source into destination.</span>
+<span class="sd">        </span>
+<span class="sd">        This function is used to connect the queue of one module with the queue of another.  A typical useage is to connect outbox from module1</span>
+<span class="sd">        to inbox of module2.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="n">spawn</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__connector</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span> <span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="Wishbone.start"><a class="viewcode-back" href="../../index.html#wishbone.wishbone.Wishbone.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Function which starts all registered Wishbone modules.</span>
+<span class="sd">        </span>
+<span class="sd">        Function which runs over all registered instances/modules and tries to execute the start() function in order to let that module start</span>
+<span class="sd">        to consume the messages of its inbox and execute the consume function on each message.</span>
+<span class="sd">        This function blocks from exiting.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="k">for</span> <span class="n">instance</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="Wishbone.stop"><a class="viewcode-back" href="../../index.html#wishbone.wishbone.Wishbone.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Function which stops all registered Wishbone modules.</span>
+<span class="sd">        </span>
+<span class="sd">        Function which runs over all registered instances/modules and tries to execute its stop() function in order to stop that module.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">=</span><span class="bp">False</span>
+        <span class="k">for</span> <span class="n">instance</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">instance</span><span class="p">]</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+    </div>
+<div class="viewcode-block" id="Wishbone.block"><a class="viewcode-back" href="../../index.html#wishbone.wishbone.Wishbone.block">[docs]</a>    <span class="k">def</span> <span class="nf">block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Function which provides a global block where required.&#39;&#39;&#39;</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span>
+         </div>
+    <span class="k">def</span> <span class="nf">__connector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Consumes data from source and puts it in destination.&#39;&#39;&#39;</span>
+        
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">()</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">destination</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+        
+    <span class="k">def</span> <span class="nf">__configureLogging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">syslog</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">loglevel</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Configures logging.</span>
+<span class="sd">        </span>
+<span class="sd">        Configures the format of the logging messages.  This function accepts 1 parameter:</span>
+<span class="sd">        </span>
+<span class="sd">        loglevel: defines the loglevel.&#39;&#39;&#39;</span>
+        
+        <span class="n">format</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%(asctime)s</span><span class="s"> </span><span class="si">%(levelname)s</span><span class="s"> </span><span class="si">%(name)s</span><span class="s">: </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">syslog</span> <span class="o">==</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">loglevel</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="n">format</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">loglevel</span><span class="p">)</span>
+            <span class="n">syslog</span> <span class="o">=</span> <span class="n">SysLogHandler</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="s">&#39;/dev/log&#39;</span><span class="p">)</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">format</span><span class="p">)</span>
+            <span class="n">syslog</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">syslog</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Wishbone 0.1 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../wishbone.html" >wishbone</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Jelle Smet.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
