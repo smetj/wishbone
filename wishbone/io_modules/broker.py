@@ -81,14 +81,11 @@ class Broker(Greenlet, QueueFunctions):
         
         while self.block() == True:
             while self.connected == True:
-                while self.outbox.qsize() > 0:
-                    try:
-                        self.logging.info('Submitting data to broker')
-                        self.produce(self.outbox.get())
-                    except:
-                        break
-                sleep(1)
-            sleep(1)
+                try:
+                    self.produce(self.outbox.get())
+                except:
+                    break
+            sleep(0.01)
                                 
     def _run(self):
         '''
@@ -130,7 +127,7 @@ class Broker(Greenlet, QueueFunctions):
         '''
         
         self.sendData({'header':{},'data':doc.body}, queue='inbox')
-        self.logging.info('Data received from broker.')
+        self.logging.debug('Data received from broker.')
         self.incoming.basic_ack(doc.delivery_tag)
         
     def produce(self,message):

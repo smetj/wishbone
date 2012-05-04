@@ -64,17 +64,42 @@
 </div>
 <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>Wishbone is a gevent based framework which simplifies writing modular message passing code by connecting the in- and outbox queues of multiple modules into a clean workflow.</p>
-<p>The idea is that each &#8220;Wishbone module&#8221; plugged into the framework has a consume() function.  This function consumes all messages from the inbox, processes them and puts them back into the outbox queue.
-By connecting the in- and outbox queues of all modules you create a clear modular data flow.</p>
-<p>Wishbone comes with a set of modules which can be divided into 2 categories IO modules and regular modules.</p>
-<p>IO modules</p>
+<p>Wishbone is a gevent based framework to write <cite>asynchronous</cite>, modular message passing code by connecting local message queues of multiple modules into a clean workflow.</p>
+<p>Multiple components are included:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Wishbone()</p>
+<p>A class with tools to register your components and to organize your workflow.</p>
+</li>
+<li><p class="first">PrimitiveActor()</p>
+<p>A baseclass which provide tools to write your own modules.</p>
+</li>
+<li><p class="first">Broker()</p>
+<p>An IO module which handles AMQP io.</p>
+</li>
+<li><p class="first">UDPServer()</p>
+<p>An IO module which accepts UDP data.</p>
+</li>
+<li><p class="first">Multiple data processing modules:</p>
+<p>To verify and convert json data, compress data, print data, ...</p>
+</li>
+</ul>
+</div></blockquote>
+<p>The idea is that each &#8220;Wishbone module&#8221; plugged into the framework has a consume() function.  This function consumes all messages from the module&#8217;s inbox,
+processes them and puts them back into the outbox queue.  By connecting the in- and outbox queues of all modules you create a clear modular data flow.</p>
+<p>The data which is passed from one modules queue to another should have a certain format.  If not then it will be purged.
+At a certain point you need to have a module which receives data from outside such as the Broker() or UDPServer() modules.</p>
+<p>They are responsible to embed the raw data into the right format which is actually a dictionary with 2 elements, headers and data:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&#39;headers&#39;</span><span class="p">:{},</span><span class="s">&#39;data&#39;</span><span class="p">:</span><span class="s">&#39;your_data&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Headers contains a dictionary with values for modules to use.  Data contains the actual data.</p>
 </div>
 <div class="section" id="example">
 <h1>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h1>
+<p>Let&#8217;s make a simple program which consumes data from an AMQP messagebroker, prints it to STDOUT and writes the data back into the broker.</p>
 <p>The Wishbone framework comes with modules such as the io_module &#8220;Broker&#8221; and the module &#8220;STDOUT&#8221;.
 The Broker module consumes and produces data to a message broker infrastructure, while the STDOUT module merely prints messages from its inbox and then puts those messages back into outbox.</p>
-<p>Let&#8217;s create an example where we consume date from a message broker, print it and put it back into the message broker.</p>
 <div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
@@ -122,6 +147,15 @@ The Broker module consumes and produces data to a message broker infrastructure,
 <span class="n">wb</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
+<ul class="simple">
+<li>lines 15,16,17 we register our modules in the Wishbone class.</li>
+<li>lines 19,20 and 21 we connect the queues defining the actual dataflow.</li>
+</ul>
+<p>The Header class is a Wishbone module created from scratch by inheriting the PrimitiveActor baseclass.
+When this baseclass is inherited, the modules automatically gets an inbox and outbox queue.
+For each message arriving in the inbox queue, the consume() function is called.  In this function we modify the header with extra information.
+This allows the Broker module to route messages using a specific exchange and or routing key.</p>
+<p>And that&#8217;s it!</p>
 </div>
 <div class="section" id="module-wishbone.wishbone">
 <span id="wishbone-class"></span><h1>Wishbone Class<a class="headerlink" href="#module-wishbone.wishbone" title="Permalink to this headline">¶</a></h1>
