@@ -6,7 +6,7 @@
 Wishbone 
 ====================================
 
-Contents:
+Download code from: https://github.com/smetj/wishbone
 
 .. toctree::
    :maxdepth: 2
