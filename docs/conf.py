@@ -261,6 +261,6 @@ class Mock(object):
         else:
             return Mock()
 
-MOCK_MODULES = ['gevent','gevent.queue','amqplib','snappy']
+MOCK_MODULES = ['gevent','gevent.queue','gevent.server','amqplib','snappy']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
