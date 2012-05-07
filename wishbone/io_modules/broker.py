@@ -54,7 +54,7 @@ class Broker(Greenlet, QueueFunctions):
     def __init__(self, name, host, vhost='/', username='guest', password='guest', consume_queue='wishbone_in' ):
         Greenlet.__init__(self)
         QueueFunctions.__init__(self)
-        self.logging = logging.getLogger( 'Broker' )
+        self.logging = logging.getLogger( name )
         self.name = 'Broker'
         self.logging.info('Initiated')
         self.host=host

@@ -23,3 +23,4 @@
 #
 
 from wishbone import Wishbone
+from server import Server
