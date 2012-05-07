@@ -24,11 +24,11 @@
 
 import logging
 from importlib import import_module
-from gevent import sleep, spawn
+from gevent import spawn, sleep
 from gevent.queue import Queue
 from multiprocessing import current_process
 from string import lstrip
-
+#from time import sleep
 
 class Wishbone():
     '''
@@ -75,7 +75,7 @@ class Wishbone():
         name = config[2]        
         try:
             loaded_module = import_module(module_name)
-            setattr(self, name, getattr (loaded_module, class_name)('Process-%s:%s'%(self.__currentProcessName(),name), *args, **kwargs))
+            setattr(self, name, getattr (loaded_module, class_name)('Intance #%s:%s'%(self.__currentProcessName(),name), *args, **kwargs))
             self.modules.append(getattr (self, name))
         except Exception as err:
             print "Problem loading module: %s and class %s. Reason: %s" % ( module_name, class_name, err)
@@ -102,8 +102,13 @@ class Wishbone():
                 self.__dict__[instance].start()
             except:
                 pass
-        #Block
-        self.modules[0].join()
+
+        try:
+            while True:
+                sleep(1) #This stays a bottleneck
+            #self.modules[0].join()
+        except KeyboardInterrupt:
+            self.stop()            
     
     def stop(self):
         '''Function which stops all registered Wishbone modules.
@@ -111,12 +116,19 @@ class Wishbone():
         Function which runs over all registered instances/modules and tries to execute its stop() function in order to stop that module.
         '''
         
+        self.logging.info('Stop received.')
         self.lock=False
-        for instance in self.__dict__:
+        for module in self.modules:
+            module.shutdown()
+            self.logging.debug('Waiting for module %s'%module.name)
             try:
-                self.__dict__[instance].shutdown()
+                module.join()
             except:
                 pass
+        
+        for connector in self.connectors:
+            self.logging.debug('Waiting for connector %s'%module.name)
+            connector.join()
     
     def block(self):
         '''Function which provides a global block where required.'''
@@ -127,9 +139,20 @@ class Wishbone():
         '''Consumes data from source and puts it in destination.'''
         
         while self.block() == True:
-            destination.put(source.get())
+            try:
+                destination.put(source.get(timeout=1))
+            except:
+                pass
         
     def __currentProcessName(self):
         '''return the current process name withought the Process- part'''
-        
-        return str(current_process().name).lstrip('Process-')
+        if current_process().name == 'Process-1':
+            return '0'
+        else:
+            return str(current_process().name)
+
+
+class Server():
+    
+    def __init__(self):
+        pass

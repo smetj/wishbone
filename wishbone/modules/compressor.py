@@ -45,7 +45,3 @@ class Compressor(PrimitiveActor):
             message['data'] = snappy.compress(data)
             message['header']['compression']='snappy'
             self.sendData(message)
-       
-    def shutdown(self):
-        self.logging.info('Shutdown')
-        
