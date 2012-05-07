@@ -26,6 +26,9 @@ import logging
 from importlib import import_module
 from gevent import sleep, spawn
 from gevent.queue import Queue
+from multiprocessing import current_process
+from string import lstrip
+
 
 class Wishbone():
     '''
@@ -41,12 +44,13 @@ class Wishbone():
     
     def __init__(self):
         self.lock=True
-        self.__configureLogging()
+        #self.__configureLogging()
         self.logging = logging.getLogger( 'Wishbone' )
         self.modules=[]
         self.connectors=[]
         self.hub = Queue(None)
         self.outhub = Queue(None)
+        self.run=self.start
         
     def registerModule(self, config, *args, **kwargs):
         '''Registers a Wishbone Module into the framework.  All modules used within Wishbone should be regesitered through this function.
@@ -71,7 +75,7 @@ class Wishbone():
         name = config[2]        
         try:
             loaded_module = import_module(module_name)
-            setattr(self, name, getattr (loaded_module, class_name)(name, *args, **kwargs))
+            setattr(self, name, getattr (loaded_module, class_name)('Process-%s:%s'%(self.__currentProcessName(),name), *args, **kwargs))
             self.modules.append(getattr (self, name))
         except Exception as err:
             print "Problem loading module: %s and class %s. Reason: %s" % ( module_name, class_name, err)
@@ -125,21 +129,7 @@ class Wishbone():
         while self.block() == True:
             destination.put(source.get())
         
-    def __configureLogging(self,syslog=False,loglevel=logging.INFO):
-        '''Configures logging.
+    def __currentProcessName(self):
+        '''return the current process name withought the Process- part'''
         
-        Configures the format of the logging messages.  This function accepts 1 parameter:
-        
-        loglevel: defines the loglevel.'''
-        
-        format=('%(asctime)s %(levelname)s %(name)s: %(message)s')
-        if syslog == False:
-            logging.basicConfig(level=loglevel, format=format)
-        else:
-            logger = logging.getLogger()
-            logger.setLevel(loglevel)
-            syslog = SysLogHandler(address='/dev/log')
-            formatter = logging.Formatter(format)
-            syslog.setFormatter(formatter)
-            logger.addHandler(syslog)
-
+        return str(current_process().name).lstrip('Process-')
