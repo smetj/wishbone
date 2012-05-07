@@ -42,7 +42,7 @@ class UDPServer(DatagramServer, QueueFunctions):
     def __init__(self, name, port, *args, **kwargs):
         DatagramServer.__init__(self, ':'+port, *args, **kwargs)
         QueueFunctions.__init__(self)
-        self.logging = logging.getLogger( 'UDPServer' )
+        self.logging = logging.getLogger( name )
         self.name = 'UDPServer'
         self.logging.info ( 'started and listening on port %s' % port)
         self.inbox=Queue(None)
