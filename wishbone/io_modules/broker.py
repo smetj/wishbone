@@ -97,7 +97,7 @@ class Broker(Greenlet, QueueFunctions):
         outgoing = spawn ( self.submitBroker )
 
         while self.block() == True:
-            while self.connected==False:
+            while self.connected==False and self.block() == True:
                 try:
                     if night < 512:
                         night *=2
@@ -118,6 +118,7 @@ class Broker(Greenlet, QueueFunctions):
                     self.incoming.close()
                     self.conn.close()
                     break
+            sleep(0.5)
         
     def consume(self,doc):
         '''Is called upon each message coming from the broker infrastructure.
@@ -147,5 +148,6 @@ class Broker(Greenlet, QueueFunctions):
 
     def shutdown(self):
         '''This function is called on shutdown().'''
-        
+        self.lock=False
+        #self.conn.close()
         self.logging.info('Shutdown')
