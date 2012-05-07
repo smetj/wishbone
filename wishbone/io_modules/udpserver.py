@@ -58,3 +58,8 @@ class UDPServer(DatagramServer, QueueFunctions):
         '''Blocking function which starts the UDP server.'''
         
         self.serve_forever()
+
+    def shutdown(self):
+        '''This function is called on shutdown().'''
+        self.lock=False
+        self.logging.info('Shutdown')

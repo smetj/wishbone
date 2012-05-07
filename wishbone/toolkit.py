@@ -106,7 +106,10 @@ class PrimitiveActor(Greenlet, QueueFunctions):
     def _run(self):
         self.logging.info('Started.')
         while self.block() == True:
-            self.consume(self.inbox.get())
+            try:
+                self.consume(self.inbox.get(timeout=1))
+            except:
+                pass
                     
     def consume(self, *args, **kwargs):
         '''A function which should be overridden by the Wishbone module.
@@ -127,6 +130,6 @@ class PrimitiveActor(Greenlet, QueueFunctions):
     def shutdown(self):
         '''A function which could be overridden by the Wisbone module.
         
-        This function is called on shutdown.'''
+        This function is called on shutdown.  Make sure you include self.lock=False otherwise that greenthread will hang on shutdown and never exit.'''
         self.lock=False
         self.logging.info('Shutdown')
