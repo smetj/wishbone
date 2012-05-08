@@ -81,7 +81,7 @@
 <span class="kn">from</span> <span class="nn">gevent.queue</span> <span class="kn">import</span> <span class="n">Queue</span>
 <span class="kn">from</span> <span class="nn">gevent</span> <span class="kn">import</span> <span class="n">monkey</span><span class="p">;</span> <span class="n">monkey</span><span class="o">.</span><span class="n">patch_all</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Broker"><a class="viewcode-back" href="../../../index.html#wishbone.io_modules.broker.Broker">[docs]</a><span class="k">class</span> <span class="nc">Broker</span><span class="p">(</span><span class="n">Greenlet</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">):</span>
+<div class="viewcode-block" id="Broker"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.broker.Broker">[docs]</a><span class="k">class</span> <span class="nc">Broker</span><span class="p">(</span><span class="n">Greenlet</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;A Wisbone module which handles AMQP0.8 input and output.  It&#39;s meant to be resillient to disconnects and broker unavailability.</span>
 <span class="sd">    </span>
 <span class="sd">    Data consumed from the broker goes into self.inbox</span>
@@ -127,7 +127,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">outgoing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Connected to broker&#39;</span><span class="p">)</span>
         
-<div class="viewcode-block" id="Broker.submitBroker"><a class="viewcode-back" href="../../../index.html#wishbone.io_modules.broker.Broker.submitBroker">[docs]</a>    <span class="k">def</span> <span class="nf">submitBroker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Broker.submitBroker"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.broker.Broker.submitBroker">[docs]</a>    <span class="k">def</span> <span class="nf">submitBroker</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Submits all data from self.outbox into the broker by calling the produce() funtion.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         
@@ -174,7 +174,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="k">break</span>
         
-<div class="viewcode-block" id="Broker.consume"><a class="viewcode-back" href="../../../index.html#wishbone.io_modules.broker.Broker.consume">[docs]</a>    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">doc</span><span class="p">):</span>
+<div class="viewcode-block" id="Broker.consume"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.broker.Broker.consume">[docs]</a>    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">doc</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Is called upon each message coming from the broker infrastructure.</span>
 <span class="sd">        </span>
 <span class="sd">        It also makes sure the incoming data is encapsulated in the right Wishbone format.</span>
@@ -185,7 +185,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Data received from broker.&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">basic_ack</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">delivery_tag</span><span class="p">)</span>
         </div>
-<div class="viewcode-block" id="Broker.produce"><a class="viewcode-back" href="../../../index.html#wishbone.io_modules.broker.Broker.produce">[docs]</a>    <span class="k">def</span> <span class="nf">produce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">message</span><span class="p">):</span>
+<div class="viewcode-block" id="Broker.produce"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.broker.Broker.produce">[docs]</a>    <span class="k">def</span> <span class="nf">produce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">message</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Is called upon each message going to to the broker infrastructure.</span>
 <span class="sd">        </span>
 <span class="sd">        This function is called by the consume() function.  If the correct header info isn&#39;t present (but that would be odd at this point), the data is purged.</span>
@@ -200,7 +200,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Received data for broker without exchange or key information in header. Purged.&#39;</span><span class="p">)</span>
 </div>
-<div class="viewcode-block" id="Broker.shutdown"><a class="viewcode-back" href="../../../index.html#wishbone.io_modules.broker.Broker.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Broker.shutdown"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.broker.Broker.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;This function is called on shutdown().&#39;&#39;&#39;</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Shutdown&#39;</span><span class="p">)</span></div></div>
