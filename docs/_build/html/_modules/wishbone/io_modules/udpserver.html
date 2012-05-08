@@ -81,7 +81,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 
 
-<div class="viewcode-block" id="UDPServer"><a class="viewcode-back" href="../../../index.html#wishbone.io_modules.udpserver.UDPServer">[docs]</a><span class="k">class</span> <span class="nc">UDPServer</span><span class="p">(</span><span class="n">DatagramServer</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">):</span>
+<div class="viewcode-block" id="UDPServer"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.udpserver.UDPServer">[docs]</a><span class="k">class</span> <span class="nc">UDPServer</span><span class="p">(</span><span class="n">DatagramServer</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;A Wishbone module which handles UDP input.</span>
 <span class="sd">    </span>
 <span class="sd">    Data received by the module is put into self.inbox</span>
@@ -100,13 +100,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">inbox</span><span class="o">=</span><span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
         <span class="n">spawn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">)</span>
  
-<div class="viewcode-block" id="UDPServer.handle"><a class="viewcode-back" href="../../../index.html#wishbone.io_modules.udpserver.UDPServer.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+<div class="viewcode-block" id="UDPServer.handle"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.udpserver.UDPServer.handle">[docs]</a>    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Is called upon each incoming message, makes sure the data has the right Wishbone format and writes the it into self.inbox&#39;&#39;&#39;</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span> <span class="p">(</span><span class="s">&#39;Data received from </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">address</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sendData</span><span class="p">({</span><span class="s">&#39;header&#39;</span><span class="p">:{},</span><span class="s">&#39;data&#39;</span><span class="p">:</span><span class="n">data</span><span class="p">},</span> <span class="n">queue</span><span class="o">=</span><span class="s">&#39;inbox&#39;</span><span class="p">)</span>
  </div>
-<div class="viewcode-block" id="UDPServer.run"><a class="viewcode-back" href="../../../index.html#wishbone.io_modules.udpserver.UDPServer.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="UDPServer.run"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.udpserver.UDPServer.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Blocking function which starts the UDP server.&#39;&#39;&#39;</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span></div></div>

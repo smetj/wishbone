@@ -77,17 +77,17 @@
 <span class="kn">from</span> <span class="nn">wishbone.toolkit</span> <span class="kn">import</span> <span class="n">PrimitiveActor</span>
 
 
-<div class="viewcode-block" id="Skeleton"><a class="viewcode-back" href="../../../index.html#wishbone.modules.skeleton.Skeleton">[docs]</a><span class="k">class</span> <span class="nc">Skeleton</span><span class="p">(</span><span class="n">PrimitiveActor</span><span class="p">):</span>
+<div class="viewcode-block" id="Skeleton"><a class="viewcode-back" href="../../../classes.html#wishbone.modules.skeleton.Skeleton">[docs]</a><span class="k">class</span> <span class="nc">Skeleton</span><span class="p">(</span><span class="n">PrimitiveActor</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Skeleton class is a minimal Actor class which does nothing more than shoveling data from its inbox to its outbox.</span>
 <span class="sd">    It can be used as an example/base for new blocks.&#39;&#39;&#39;</span>
     
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">PrimitiveActor</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
     
-<div class="viewcode-block" id="Skeleton.consume"><a class="viewcode-back" href="../../../index.html#wishbone.modules.skeleton.Skeleton.consume">[docs]</a>    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">doc</span><span class="p">):</span>
+<div class="viewcode-block" id="Skeleton.consume"><a class="viewcode-back" href="../../../classes.html#wishbone.modules.skeleton.Skeleton.consume">[docs]</a>    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">doc</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sendData</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
        </div>
-<div class="viewcode-block" id="Skeleton.shutdown"><a class="viewcode-back" href="../../../index.html#wishbone.modules.skeleton.Skeleton.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Skeleton.shutdown"><a class="viewcode-back" href="../../../classes.html#wishbone.modules.skeleton.Skeleton.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Shutdown&#39;</span><span class="p">)</span></div></div>
 </pre></div>
 
