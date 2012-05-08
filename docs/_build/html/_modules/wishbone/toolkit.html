@@ -79,13 +79,13 @@
 <span class="kn">from</span> <span class="nn">gevent.queue</span> <span class="kn">import</span> <span class="n">Queue</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 
-<div class="viewcode-block" id="QueueFunctions"><a class="viewcode-back" href="../../index.html#wishbone.toolkit.QueueFunctions">[docs]</a><span class="k">class</span> <span class="nc">QueueFunctions</span><span class="p">():</span>
+<div class="viewcode-block" id="QueueFunctions"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.QueueFunctions">[docs]</a><span class="k">class</span> <span class="nc">QueueFunctions</span><span class="p">():</span>
     <span class="sd">&#39;&#39;&#39;A base class for Wishbone Actor classes.  Shouldn&#39;t be called directly but is inherited by PrimitiveActor.&#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">=</span><span class="bp">True</span>
     
-<div class="viewcode-block" id="QueueFunctions.sendData"><a class="viewcode-back" href="../../index.html#wishbone.toolkit.QueueFunctions.sendData">[docs]</a>    <span class="k">def</span> <span class="nf">sendData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="s">&#39;outbox&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="QueueFunctions.sendData"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.QueueFunctions.sendData">[docs]</a>    <span class="k">def</span> <span class="nf">sendData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="s">&#39;outbox&#39;</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Submits data to one of the module its queues.</span>
 <span class="sd">        </span>
 <span class="sd">        The data send by this funtion is automatically checked on integrity, whether it has the right Wishbone data structure.  If that is not the case</span>
@@ -101,7 +101,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Invalid internal data structure detected. Data is purged. Turn on debugging to see datastructure.&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Invalid data structure: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data</span><span class="p">))</span>
     </div>
-<div class="viewcode-block" id="QueueFunctions.sendRaw"><a class="viewcode-back" href="../../index.html#wishbone.toolkit.QueueFunctions.sendRaw">[docs]</a>    <span class="k">def</span> <span class="nf">sendRaw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="s">&#39;outbox&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="QueueFunctions.sendRaw"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.QueueFunctions.sendRaw">[docs]</a>    <span class="k">def</span> <span class="nf">sendRaw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="s">&#39;outbox&#39;</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Submits data to one of the mudule its queues.</span>
 <span class="sd">        </span>
 <span class="sd">        Allows you to bypass message integrity checking.  Its usage should be sparse, although it&#39;s usefull when you want to send data back </span>
@@ -109,12 +109,12 @@
         
         <span class="nb">getattr</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span><span class="o">.</span><span class="n">put</span> <span class="p">(</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="p">)</span>
             </div>
-<div class="viewcode-block" id="QueueFunctions.sendCommand"><a class="viewcode-back" href="../../index.html#wishbone.toolkit.QueueFunctions.sendCommand">[docs]</a>    <span class="k">def</span> <span class="nf">sendCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s">&#39;*&#39;</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="s">&#39;outbox&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="QueueFunctions.sendCommand"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.QueueFunctions.sendCommand">[docs]</a>    <span class="k">def</span> <span class="nf">sendCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s">&#39;*&#39;</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="s">&#39;outbox&#39;</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Placeholder not implemented for the moment.&#39;&#39;&#39;</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">outbox</span><span class="o">.</span><span class="n">put</span><span class="p">(</span> <span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="p">)</span>
         </div>
-<div class="viewcode-block" id="QueueFunctions.checkIntegrity"><a class="viewcode-back" href="../../index.html#wishbone.toolkit.QueueFunctions.checkIntegrity">[docs]</a>    <span class="k">def</span> <span class="nf">checkIntegrity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="QueueFunctions.checkIntegrity"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.QueueFunctions.checkIntegrity">[docs]</a>    <span class="k">def</span> <span class="nf">checkIntegrity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Checks the integrity of the messages passed over the different queues.</span>
 <span class="sd">        </span>
 <span class="sd">        The format of the messages should be:</span>
@@ -132,11 +132,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">False</span>
 </div>
-<div class="viewcode-block" id="QueueFunctions.block"><a class="viewcode-back" href="../../index.html#wishbone.toolkit.QueueFunctions.block">[docs]</a>    <span class="k">def</span> <span class="nf">block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="QueueFunctions.block"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.QueueFunctions.block">[docs]</a>    <span class="k">def</span> <span class="nf">block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;A simple blocking function.&#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span>                
 </div></div>
-<div class="viewcode-block" id="PrimitiveActor"><a class="viewcode-back" href="../../index.html#wishbone.toolkit.PrimitiveActor">[docs]</a><span class="k">class</span> <span class="nc">PrimitiveActor</span><span class="p">(</span><span class="n">Greenlet</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">):</span>
+<div class="viewcode-block" id="PrimitiveActor"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.PrimitiveActor">[docs]</a><span class="k">class</span> <span class="nc">PrimitiveActor</span><span class="p">(</span><span class="n">Greenlet</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;A base class used to create Wishbone modules.</span>
 <span class="sd">    </span>
 <span class="sd">    This base class offers Wishbone specific functionalities and objects.</span>
@@ -160,14 +160,14 @@
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">()</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inbox</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
                     
-<div class="viewcode-block" id="PrimitiveActor.consume"><a class="viewcode-back" href="../../index.html#wishbone.toolkit.PrimitiveActor.consume">[docs]</a>    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="PrimitiveActor.consume"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.PrimitiveActor.consume">[docs]</a>    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;A function which should be overridden by the Wishbone module.</span>
 <span class="sd">        </span>
 <span class="sd">        This function, when called throws an exception.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">raise</span> <span class="ne">Exception</span> <span class="p">(</span><span class="s">&#39;You have no consume function in your class.&#39;</span><span class="p">)</span>
         </div>
-<div class="viewcode-block" id="PrimitiveActor.command"><a class="viewcode-back" href="../../index.html#wishbone.toolkit.PrimitiveActor.command">[docs]</a>    <span class="k">def</span> <span class="nf">command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="PrimitiveActor.command"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.PrimitiveActor.command">[docs]</a>    <span class="k">def</span> <span class="nf">command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;A placeholder not implemented for the moment.&#39;&#39;&#39;</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Initiated.&#39;</span><span class="p">)</span>
@@ -176,7 +176,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">inbox</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outbox</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
    </div>
-<div class="viewcode-block" id="PrimitiveActor.shutdown"><a class="viewcode-back" href="../../index.html#wishbone.toolkit.PrimitiveActor.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PrimitiveActor.shutdown"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.PrimitiveActor.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;A function which could be overridden by the Wisbone module.</span>
 <span class="sd">        </span>
 <span class="sd">        This function is called on shutdown.&#39;&#39;&#39;</span>
