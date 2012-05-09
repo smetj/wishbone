@@ -25,7 +25,7 @@ The Broker module consumes and produces data to a message broker infrastructure,
         def consume(self,message):
             message['header']['broker_exchange'] = ''
             message['header']['broker_key'] = 'test'
-            self.outbox.put(message)
+            self.sendData(message)
 
     wb = wishbone.Wishbone()
     wb.registerModule ( ('wishbone.io_modules', 'Broker', 'broker'), host='sandbox', vhost='/', username='guest', password='guest', consume_queue='indigo' )

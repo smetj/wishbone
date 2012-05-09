@@ -26,6 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Wishbone 0.1 documentation" href="index.html" />
+    <link rel="next" title="Classes" href="classes.html" />
     <link rel="prev" title="Introduction" href="introduction.html" /> 
   </head>
   <body>
@@ -38,6 +39,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="classes.html" title="Classes"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="introduction.html" title="Introduction"
              accesskey="P">previous</a> |</li>
@@ -91,7 +95,7 @@ The Broker module consumes and produces data to a message broker infrastructure,
     <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">message</span><span class="p">):</span>
         <span class="n">message</span><span class="p">[</span><span class="s">&#39;header&#39;</span><span class="p">][</span><span class="s">&#39;broker_exchange&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
         <span class="n">message</span><span class="p">[</span><span class="s">&#39;header&#39;</span><span class="p">][</span><span class="s">&#39;broker_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;test&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">outbox</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendData</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
 <span class="n">wb</span> <span class="o">=</span> <span class="n">wishbone</span><span class="o">.</span><span class="n">Wishbone</span><span class="p">()</span>
 <span class="n">wb</span><span class="o">.</span><span class="n">registerModule</span> <span class="p">(</span> <span class="p">(</span><span class="s">&#39;wishbone.io_modules&#39;</span><span class="p">,</span> <span class="s">&#39;Broker&#39;</span><span class="p">,</span> <span class="s">&#39;broker&#39;</span><span class="p">),</span> <span class="n">host</span><span class="o">=</span><span class="s">&#39;sandbox&#39;</span><span class="p">,</span> <span class="n">vhost</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s">&#39;guest&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&#39;guest&#39;</span><span class="p">,</span> <span class="n">consume_queue</span><span class="o">=</span><span class="s">&#39;indigo&#39;</span> <span class="p">)</span>
@@ -125,6 +129,9 @@ This allows the Broker module to route messages using a specific exchange and or
   <h4>Previous topic</h4>
   <p class="topless"><a href="introduction.html"
                         title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="classes.html"
+                        title="next chapter">Classes</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/example.txt"
@@ -156,6 +163,9 @@ This allows the Broker module to route messages using a specific exchange and or
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="classes.html" title="Classes"
+             >next</a> |</li>
         <li class="right" >
           <a href="introduction.html" title="Introduction"
              >previous</a> |</li>
