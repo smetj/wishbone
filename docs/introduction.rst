@@ -28,50 +28,6 @@ Wishbone is organized around 2 objects which, in combination with "Wishbone Modu
 	* :class:`wishbone.wishbone.Wishbone`
 	* :class:`wishbone.server.Server`
 
-The Wishbone
-------------
-
-:class:`wishbone.wishbone.Wishbone` is the "root" class in which you register your modules and where you design your dataflow by interconnecting the queues of the
-participating modules.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Multiple components are included:
-    
-    -   Wishbone() 
-    
-        A class with tools to register your components and to organize your workflow.
-
-    -   PrimitiveActor()
-    
-        A baseclass which provide tools to write your own modules.
-        
-    -   Broker()
-    
-        An IO module which handles AMQP io.
-        
-    -   UDPServer()
-    
-        An IO module which accepts UDP data.
-        
-    -   Multiple data processing modules:
-    
-        To verify and convert json data, compress data, print data, ...
-    
-    
-
 
 The data which is passed from one modules queue to another should have a certain format.  If not then it will be purged.
 At a certain point you need to have a module which receives data from outside such as the Broker() or UDPServer() modules.
