@@ -107,7 +107,7 @@ class PrimitiveActor(Greenlet, QueueFunctions):
         self.logging.info('Started.')
         while self.block() == True:
             try:
-                self.consume(self.inbox.get(timeout=1))
+                self.consume(self.inbox.get(timeout=0.1))
             except:
                 pass
                     

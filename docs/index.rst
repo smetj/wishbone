@@ -1,8 +1,8 @@
 ===========================================================
  Wishbone -- Framework for gevent based modular programming
-==========================================================
+===========================================================
 
-Wishbone is a gevent based framework to write `asynchronous`, modular message passing code by connecting local message queues of multiple modules into a clean workflow.
+Wishbone is a gevent based framework to write `asynchronous`, modular message passing code by connecting message queues of multiple modules into a clean workflow.
 
 Download code from: https://github.com/smetj/wishbone
 

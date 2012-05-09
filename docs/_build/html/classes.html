@@ -56,68 +56,6 @@
             
   <div class="section" id="classes">
 <h1>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h1>
-<p>Let&#8217;s make a simple program which consumes data from an AMQP messagebroker, prints it to STDOUT and writes the data back into the broker:</p>
-<div class="figure">
-<img alt="_images/wishbone_example.png" src="_images/wishbone_example.png" />
-</div>
-<p>The Wishbone framework comes with modules such as the io_module &#8220;Broker&#8221; and the module &#8220;STDOUT&#8221;.
-The Broker module consumes and produces data to a message broker infrastructure, while the STDOUT module merely prints messages from its inbox and then puts those messages back into outbox.</p>
-<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23</pre></div></td><td class="code"><div class="highlight"><pre><span class="c">#!/usr/bin/python</span>
-
-<span class="kn">import</span> <span class="nn">wishbone</span>
-<span class="kn">from</span> <span class="nn">wishbone.toolkit</span> <span class="kn">import</span> <span class="n">PrimitiveActor</span>
-
-<span class="k">class</span> <span class="nc">Header</span><span class="p">(</span><span class="n">PrimitiveActor</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">PrimitiveActor</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">message</span><span class="p">):</span>
-        <span class="n">message</span><span class="p">[</span><span class="s">&#39;header&#39;</span><span class="p">][</span><span class="s">&#39;broker_exchange&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-        <span class="n">message</span><span class="p">[</span><span class="s">&#39;header&#39;</span><span class="p">][</span><span class="s">&#39;broker_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;test&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">outbox</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-
-<span class="n">wb</span> <span class="o">=</span> <span class="n">wishbone</span><span class="o">.</span><span class="n">Wishbone</span><span class="p">()</span>
-<span class="n">wb</span><span class="o">.</span><span class="n">registerModule</span> <span class="p">(</span> <span class="p">(</span><span class="s">&#39;wishbone.io_modules&#39;</span><span class="p">,</span> <span class="s">&#39;Broker&#39;</span><span class="p">,</span> <span class="s">&#39;broker&#39;</span><span class="p">),</span> <span class="n">host</span><span class="o">=</span><span class="s">&#39;sandbox&#39;</span><span class="p">,</span> <span class="n">vhost</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s">&#39;guest&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&#39;guest&#39;</span><span class="p">,</span> <span class="n">consume_queue</span><span class="o">=</span><span class="s">&#39;indigo&#39;</span> <span class="p">)</span>
-<span class="n">wb</span><span class="o">.</span><span class="n">registerModule</span> <span class="p">(</span> <span class="p">(</span><span class="s">&#39;wishbone.modules&#39;</span><span class="p">,</span> <span class="s">&#39;STDOUT&#39;</span><span class="p">,</span> <span class="s">&#39;stdout&#39;</span><span class="p">)</span> <span class="p">)</span>
-<span class="n">wb</span><span class="o">.</span><span class="n">registerModule</span> <span class="p">(</span> <span class="p">(</span><span class="s">&#39;__main__&#39;</span><span class="p">,</span> <span class="s">&#39;Header&#39;</span><span class="p">,</span> <span class="s">&#39;header&#39;</span><span class="p">)</span> <span class="p">)</span>
-
-<span class="n">wb</span><span class="o">.</span><span class="n">connect</span> <span class="p">(</span><span class="n">wb</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">inbox</span><span class="p">,</span> <span class="n">wb</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">inbox</span><span class="p">)</span>
-<span class="n">wb</span><span class="o">.</span><span class="n">connect</span> <span class="p">(</span><span class="n">wb</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">outbox</span><span class="p">,</span> <span class="n">wb</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">inbox</span><span class="p">)</span>
-<span class="n">wb</span><span class="o">.</span><span class="n">connect</span> <span class="p">(</span><span class="n">wb</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">outbox</span><span class="p">,</span> <span class="n">wb</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">inbox</span><span class="p">)</span>
-
-<span class="n">wb</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-</pre></div>
-</td></tr></table></div>
-<ul class="simple">
-<li>lines 15,16,17 we register our modules in the Wishbone class.</li>
-<li>lines 19,20 and 21 we connect the queues defining the actual dataflow.</li>
-</ul>
-<p>The Header class is a Wishbone module created from scratch by inheriting the PrimitiveActor baseclass.
-When this baseclass is inherited, the modules automatically gets an inbox and outbox queue.
-For each message arriving in the inbox queue, the consume() function is called.  In this function we modify the header with extra information.
-This allows the Broker module to route messages using a specific exchange and or routing key.</p>
-<p>And that&#8217;s it!</p>
 <div class="section" id="wishbone-module">
 <h2>Wishbone Module<a class="headerlink" href="#wishbone-module" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-wishbone.wishbone"></span><dl class="class">
