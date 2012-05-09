@@ -6,6 +6,10 @@ Wishbone is a gevent based framework to write `asynchronous`, modular message pa
 
 Download code from: https://github.com/smetj/wishbone
 
+.. note::
+
+   The documentation is work in progress.
+
 
 Contents:
 

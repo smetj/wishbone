@@ -82,30 +82,6 @@ the module delivers it to its &#8220;outbox&#8221; queue.  The framework takes c
 <li><tt class="xref py py-class docutils literal"><span class="pre">wishbone.server.Server</span></tt></li>
 </ul>
 </div></blockquote>
-<div class="section" id="the-wishbone">
-<h3>The Wishbone<a class="headerlink" href="#the-wishbone" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference internal" href="classes.html#wishbone.wishbone.Wishbone" title="wishbone.wishbone.Wishbone"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.wishbone.Wishbone</span></tt></a> is the &#8220;root&#8221; class in which you register your modules and where you design your dataflow by interconnecting the queues of the
-participating modules.</p>
-<p>Multiple components are included:</p>
-<blockquote>
-<div><ul>
-<li><p class="first">Wishbone()</p>
-<p>A class with tools to register your components and to organize your workflow.</p>
-</li>
-<li><p class="first">PrimitiveActor()</p>
-<p>A baseclass which provide tools to write your own modules.</p>
-</li>
-<li><p class="first">Broker()</p>
-<p>An IO module which handles AMQP io.</p>
-</li>
-<li><p class="first">UDPServer()</p>
-<p>An IO module which accepts UDP data.</p>
-</li>
-<li><p class="first">Multiple data processing modules:</p>
-<p>To verify and convert json data, compress data, print data, ...</p>
-</li>
-</ul>
-</div></blockquote>
 <p>The data which is passed from one modules queue to another should have a certain format.  If not then it will be purged.
 At a certain point you need to have a module which receives data from outside such as the Broker() or UDPServer() modules.</p>
 <p>They are responsible to embed the raw data into the right format which is actually a dictionary with 2 elements, headers and data:</p>
@@ -113,7 +89,6 @@ At a certain point you need to have a module which receives data from outside su
 </pre></div>
 </div>
 <p>Headers contains a dictionary with values for modules to use.  Data contains the actual data.</p>
-</div>
 </div>
 </div>
 
@@ -127,10 +102,7 @@ At a certain point you need to have a module which receives data from outside su
   <ul>
 <li><a class="reference internal" href="#">Introduction</a><ul>
 <li><a class="reference internal" href="#wishbone-modules">Wishbone modules</a></li>
-<li><a class="reference internal" href="#wishbone-objects">Wishbone objects</a><ul>
-<li><a class="reference internal" href="#the-wishbone">The Wishbone</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#wishbone-objects">Wishbone objects</a></li>
 </ul>
 </li>
 </ul>
