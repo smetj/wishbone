@@ -27,9 +27,16 @@ from wishbone.toolkit import PrimitiveActor
 
 class Skeleton(PrimitiveActor):
     '''Skeleton class is a minimal Actor class which does nothing more than shoveling data from its inbox to its outbox.
-    It can be used as an example/base for new blocks.'''
+
+    It can be used as an example/base for new blocks.
+    '''
     
     def __init__(self, name, *args, **kwargs):
+        '''
+
+        :param name: Provides the name under which this module has been registered in Wishbone.  Merely for logging or your convenience
+        :type name: string
+        '''
         PrimitiveActor.__init__(self, name)
     
     def consume(self,doc):

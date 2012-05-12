@@ -112,12 +112,14 @@ class Broker(Greenlet, QueueFunctions):
             while self.block() == True and self.connected == True:
                 try:
                     self.incoming.wait()
-                except Exception as err:
+                except Exception or KeyboardInterrupt as err:
                     self.logging.warning('Connection to broker lost. Reason: %s' % err )
                     self.connected = False
                     self.incoming.close()
                     self.conn.close()
                     break
+            while self.block() == True and :
+                
             sleep(0.5)
         
     def consume(self,doc):
@@ -149,5 +151,8 @@ class Broker(Greenlet, QueueFunctions):
     def shutdown(self):
         '''This function is called on shutdown().'''
         self.lock=False
-        #self.conn.close()
+        try:
+             self.incoming.basic_cancel('request')
+        except:
+            pass
         self.logging.info('Shutdown')
