@@ -40,7 +40,8 @@ class QueueFunctions():
         an exception is returned.
         
         Parameters:
-            queue:  Determines to which queue data should be send.  By default this is 'outbox'.
+
+            * queue:  Determines to which queue data should be send.  By default this is 'outbox'.
         '''
         
         if self.checkIntegrity(data):
