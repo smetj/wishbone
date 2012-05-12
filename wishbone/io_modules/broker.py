@@ -39,19 +39,21 @@ class Broker(Greenlet, QueueFunctions):
     
         {'header':{'broker_exchange':name, 'broker_key':name}}
         
-        broker_exchange:    The exchange to which data should be submitted.
-        broker_key:         The routing key used when submitting data.
-    
-    Parameters:
-        name:               The name you want this module to be registered under.
-        host:               The name or IP of the broker.
-        vhost:              The virtual host of the broker. By default this is '/'
-        username:           The username to connect to the broker.  By default this is 'guest'.
-        password:           The password to connect to the broker.  By default this is 'guest'.
-        consume_queue:      The queue which should be consumed. By default this is "wishbone_in".
+        * broker_exchange:    The exchange to which data should be submitted.
+        * broker_key:         The routing key used when submitting data.
+
+        Parameters:
+
+        * name:               The name you want this module to be registered under.
+        * host:               The name or IP of the broker.
+        * vhost:              The virtual host of the broker. By default this is '/'.
+        * username:           The username to connect to the broker.  By default this is 'guest'.
+        * password:           The password to connect to the broker.  By default this is 'guest'.
+        * consume_queue:      The queue which should be consumed. By default this is "wishbone_in".
     '''
     
     def __init__(self, name, host, vhost='/', username='guest', password='guest', consume_queue='wishbone_in' ):
+    
         Greenlet.__init__(self)
         QueueFunctions.__init__(self)
         self.logging = logging.getLogger( name )
@@ -117,10 +119,7 @@ class Broker(Greenlet, QueueFunctions):
                     self.connected = False
                     self.incoming.close()
                     self.conn.close()
-                    break
-            while self.block() == True and :
-                
-            sleep(0.5)
+                    break   
         
     def consume(self,doc):
         '''Is called upon each message coming from the broker infrastructure.
