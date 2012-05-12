@@ -32,14 +32,7 @@ from string import lstrip
 
 class Wishbone():
     '''
-    Wishbone is a module which allows you to write gevent based, modular message passing code.
-    
-    Wishbone allows you to build a data flow by connecting the in- and outbox queue of multiple modules.
-    The goal is that each module has (at least) an inbox and outbox queue.  Each module has a consume() function,
-    which is called upon to all messages from its inbox queue.  It's up to the consume() function to put the data
-    into its outbox queue.  A programmer can then connect the outbox of one module to the inbox of another in order
-    to create a dataflow.  The result is that one is able to create code which is modular and almost "graphical" because
-    like this it is very easy to define processing blocks and dataflow.    
+    The main class in which the Wishbone modules are registered and managed.
     '''
     
     def __init__(self):
@@ -61,9 +54,9 @@ class Wishbone():
             
             (module, class, name)
         
-            module:     The name of the module to import.
-            class:      The name of the class to initialize
-            name:       The name under which the module should be initialized.
+            * module:     The name of the module to import.
+            * class:      The name of the class to initialize
+            * name:       The name under which the module should be initialized.
             
             *args and **kwargs are passed to the class which is initialized.
         
