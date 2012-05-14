@@ -25,13 +25,14 @@
 import logging
 from multiprocessing import Process, Event
 from time import sleep
+from os import getpid
 
 
 class Server():
     '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.''' 
     
     def __init__(self, instances=1, setup=None, log_level=logging.INFO):
-        self.instance=instances
+        self.instances=instances
         self.setup=setup
         self.log_level=log_level
         self.wishbone=None
@@ -42,11 +43,12 @@ class Server():
     def start(self):
         '''Starts the environment.'''
         
-        for number in range(self.instance):
+        for number in range(self.instances):
             self.processes.append(Process(target=self.setup, name=number))
             self.processes[number].start()
             self.logging.info('Instance #%s started.'%number)
         
+        self.logging.info('Started with pids: %s' % ', '.join(map(str, self.collectPids())))
         try:
             while True:
                 sleep(1)
@@ -61,7 +63,13 @@ class Server():
             self.logging.info('Waiting for %s' %process.name)
             process.join()
         logging.shutdown()
-            
+
+    def collectPids(self):
+        pids = [getpid()]
+        for process in self.processes:
+            pids.append(process.pid)
+        return pids
+        
     def configureLogging(self,syslog=False,loglevel=logging.INFO):
         '''Configures logging.
         
