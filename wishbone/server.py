@@ -61,6 +61,7 @@ class Server():
         for process in self.processes.keys():
             self.logging.info('Waiting for %s' %self.processes[process].name)
             self.processes[process].join()
+        logging.shutdown()
             
     def configureLogging(self,syslog=False,loglevel=logging.INFO):
         '''Configures logging.

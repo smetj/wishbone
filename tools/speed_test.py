@@ -26,6 +26,7 @@
 
 import wishbone
 from wishbone.toolkit import PrimitiveActor
+from wishbone.server import Server
 
 class AddHeader(PrimitiveActor):
     def __init__(self, name, *args, **kwargs):
@@ -41,17 +42,19 @@ class PassThrough(PrimitiveActor):
     def consume(self,message):
         self.outbox.put(message)
 
-wb = wishbone.Wishbone()
-wb.registerModule ( ('wishbone.io_modules', 'Broker', 'broker'), host='sandbox', vhost='/', username='guest', password='guest', consume_queue='wb_speedtest' )
-wb.registerModule ( ('__main__', 'AddHeader', 'addheader') )
-wb.registerModule ( ('__main__', 'PassThrough', 'pass1') )
-wb.registerModule ( ('__main__', 'PassThrough', 'pass2') )
+def setup():
 
+    wb = wishbone.Wishbone()
+    wb.registerModule ( ('wishbone.io_modules', 'Broker', 'broker'), host='sandbox', vhost='/', username='guest', password='guest', consume_queue='wb_speedtest' )
+    wb.registerModule ( ('__main__', 'AddHeader', 'addheader') )
+    wb.registerModule ( ('__main__', 'PassThrough', 'pass1') )
+    wb.registerModule ( ('__main__', 'PassThrough', 'pass2') )
+    wb.connect (wb.broker.inbox, wb.addheader.inbox)
+    wb.connect (wb.addheader.outbox, wb.pass1.inbox)
+    wb.connect (wb.pass1.outbox, wb.pass2.inbox)
+    wb.connect (wb.pass2.outbox, wb.broker.outbox)
+    wb.start()
 
-wb.connect (wb.broker.inbox, wb.addheader.inbox)
-wb.connect (wb.addheader.outbox, wb.pass1.inbox)
-wb.connect (wb.pass1.outbox, wb.pass2.inbox)
-wb.connect (wb.pass2.outbox, wb.broker.outbox)
+server = Server(instances=1, setup=setup)
+server.start()
 
-print "Check the msg/s rate in your Broker."
-wb.start()

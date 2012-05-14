@@ -4,6 +4,11 @@ Introduction
 
 Wishbone is a gevent based framework to write `asynchronous`, modular message passing code by connecting message queues of multiple modules into a clean workflow.
 
+Intended use
+============
+
+Although not limited to it, Wishbone is geared towards writing applications to consume and process data coming from a Message broker infrastructure.
+
 Wishbone modules
 ================
 
