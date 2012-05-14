@@ -35,7 +35,7 @@ class Server():
         self.setup=setup
         self.log_level=log_level
         self.wishbone=None
-        self.processes={}
+        self.processes=[]
         self.configureLogging()
         self.logging = logging.getLogger( 'Server' )
     
@@ -43,8 +43,7 @@ class Server():
         '''Starts the environment.'''
         
         for number in range(self.instance):
-            self.processes[number] = Process(target=self.setup, name=number)
-            #self.processes[number].daemon=True
+            self.processes.append(Process(target=self.setup, name=number))
             self.processes[number].start()
             self.logging.info('Instance #%s started.'%number)
         
@@ -58,9 +57,9 @@ class Server():
         '''Stops the environment.'''
         
         self.logging.info('SIGINT received. Stopping')
-        for process in self.processes.keys():
+        for process in self.processes():
             self.logging.info('Waiting for %s' %self.processes[process].name)
-            self.processes[process].join()
+            process.join()
         logging.shutdown()
             
     def configureLogging(self,syslog=False,loglevel=logging.INFO):
