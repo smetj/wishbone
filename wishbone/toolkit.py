@@ -23,6 +23,7 @@
 #  
 
 import logging
+import stopwatch
 from gevent import Greenlet
 from gevent.queue import Queue
 from copy import deepcopy
@@ -103,14 +104,32 @@ class PrimitiveActor(Greenlet, QueueFunctions):
         self.lock = True
         self.inbox = Queue(None)
         self.outbox = Queue(None)
+        self.stats={'msg': 0, 'min': 0, 'max': 0, 'avg': 0, 'total': 0}
         
     def _run(self):
         self.logging.info('Started.')
         while self.block() == True:
             try:
-                self.consume(self.inbox.get(timeout=0.1))
+                data = self.inbox.get(timeout=0.1)
             except:
                 pass
+            else:
+                t = stopwatch.Timer()
+                self.consume(data)
+                t.stop()
+                self.stats['msg']+=1
+                self.stats['total'] += t.elapsed
+                self.stats['avg'] = self.stats['total'] / self.stats['msg']
+                
+                if self.stats['max'] == 0:
+                    self.stats['max'] = t.elapsed
+                elif t.elapsed > self.stats['max']:
+                    self.stats['max'] = t.elapsed
+                
+                if self.stats['min'] == 0:
+                    self.stats['min'] = t.elapsed
+                if t.elapsed < self.stats['min']:
+                    self.stats['min'] = t.elapsed
                     
     def consume(self, *args, **kwargs):
         '''A function which should be overridden by the Wishbone module.
@@ -127,7 +146,12 @@ class PrimitiveActor(Greenlet, QueueFunctions):
         self.block = block
         self.inbox = Queue(None)
         self.outbox = Queue(None)
-   
+
+    def logMetrics(self):
+        '''Generates a line with metrics of the spefic module.'''
+        
+        self.logging.info('Total messages: %s, Min: %s seconds, Max: %s seconds, Avg: %s seconds' % (self.stats['msg'], self.stats['min'], self.stats['max'], self.stats['avg']))
+    
     def shutdown(self):
         '''A function which could be overridden by the Wisbone module.
         

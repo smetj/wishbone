@@ -101,8 +101,8 @@ class Wishbone():
                 sleep(1) #This stays a bottleneck
             #self.modules[0].join()
         except KeyboardInterrupt:
-            self.stop()            
-    
+            self.stop()
+            
     def stop(self):
         '''Function which stops all registered Wishbone modules.
         
@@ -113,6 +113,10 @@ class Wishbone():
         self.lock=False
         for module in self.modules:
             module.shutdown()
+            try:
+                module.logMetrics()
+            except:
+                pass
             self.logging.debug('Waiting for module %s'%module.name)
             try:
                 module.join()
