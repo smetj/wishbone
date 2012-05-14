@@ -57,8 +57,8 @@ class Server():
         '''Stops the environment.'''
         
         self.logging.info('SIGINT received. Stopping')
-        for process in self.processes():
-            self.logging.info('Waiting for %s' %self.processes[process].name)
+        for process in self.processes:
+            self.logging.info('Waiting for %s' %process.name)
             process.join()
         logging.shutdown()
             
