@@ -61,7 +61,12 @@ class Server():
         self.logging.info('SIGINT received. Stopping')
         for process in self.processes:
             self.logging.info('Waiting for %s' %process.name)
-            process.join()
+            try:
+                process.join()
+            except KeyboardInterrupt:
+                #some people have no patience
+                process.terminate()
+                
         logging.shutdown()
 
     def collectPids(self):
