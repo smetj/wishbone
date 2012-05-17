@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  untitled.py
+#  speed_test.py
 #  
 #  Copyright 2012 Jelle Smet development@smetj.net
 #  

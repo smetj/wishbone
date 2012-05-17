@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Wishbone 0.1 documentation" href="index.html" />
-    <link rel="next" title="&lt;no title&gt;" href="developers.html" />
+    <link rel="next" title="Developers" href="developers.html" />
     <link rel="prev" title="Classes" href="classes.html" /> 
   </head>
   <body>
@@ -40,7 +40,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="developers.html" title="&lt;no title&gt;"
+          <a href="developers.html" title="Developers"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="classes.html" title="Classes"
@@ -66,9 +66,63 @@
 application and extensions are installed (either a virtualenv or the
 global site-packages). You may need administrative privileges to do
 that.</p>
-<p>Make sure you have the latest gevent build installed by downloading and
-installing gevent from <a class="reference external" href="https://bitbucket.org/denis/gevent/wiki/Home">https://bitbucket.org/denis/gevent/wiki/Home</a>:</p>
-<div class="highlight-python"><pre>$ hg clone https://bitbucket.org/denis/gevent</pre>
+<p>Wishbone is build upon the latest features available in gevent (<a class="reference external" href="http://www.gevent.org">http://www.gevent.org</a>).
+So installing Wishbone consists out of 2 steps:</p>
+<ul class="simple">
+<li>Download and install a recent gevent.</li>
+<li>Download and install Wishbone.</li>
+</ul>
+<div class="section" id="gevent">
+<h3>Gevent<a class="headerlink" href="#gevent" title="Permalink to this headline">¶</a></h3>
+<p>Download and install the latest gevent from <a class="reference external" href="https://bitbucket.org/denis/gevent/downloads">https://bitbucket.org/denis/gevent/downloads</a></p>
+<p>The steps to take typically involve something like:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>wget https://bitbucket.org/denis/gevent/get/1.0b2.tar.gz
+<span class="nv">$ </span>tar -xvzf 1.0b2.tar.gz
+<span class="nv">$ </span><span class="nb">cd</span> <span class="o">[</span>into_directory<span class="o">]</span>
+<span class="nv">$ </span>sudo python setup.py install
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If gevent fails to install check whether you have installed following package and its dependencies:</p>
+</div>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>aptitude show libevent-dev
+
+Package: libevent-dev
+State: installed
+Automatically installed: no
+Version: 2.0.16-stable-1
+Priority: optional
+Section: libdevel
+Maintainer: Ubuntu Developers &lt;ubuntu-devel-discuss@lists.ubuntu.com&gt;
+Architecture: amd64
+Uncompressed Size: 1,353 k
+Depends: libevent-2.0-5 <span class="o">(=</span> 2.0.16-stable-1<span class="o">)</span>, libevent-core-2.0-5 <span class="o">(=</span> 2.0.16-stable-1<span class="o">)</span>, libevent-extra-2.0-5 <span class="o">(=</span> 2.0.16-stable-1<span class="o">)</span>, libevent-pthreads-2.0-5 <span class="o">(=</span> 2.0.16-stable-1<span class="o">)</span>,
+         libevent-openssl-2.0-5 <span class="o">(=</span> 2.0.16-stable-1<span class="o">)</span>
+Conflicts: libevent-dev
+Description: Asynchronous event notification library <span class="o">(</span>development files<span class="o">)</span>
+ Libevent is an asynchronous event notification library that provides a mechanism to execute a callback <span class="k">function </span>when a specific event occurs on a file descriptor or after a
+ timeout has been reached.
+
+ This package includes development files <span class="k">for </span>compiling against libevent.
+Homepage: http://www.monkey.org/~provos/libevent/
+
+Make sure you have the latest gevent build installed by downloading and
+installing gevent from https://bitbucket.org/denis/gevent/wiki/Home::
+   <span class="nv">$ </span>hg clone https://bitbucket.org/denis/gevent
+</pre></div>
+</div>
+</div>
+<div class="section" id="wishbone">
+<h3>Wishbone<a class="headerlink" href="#wishbone" title="Permalink to this headline">¶</a></h3>
+<p>Download and install the latest wishbone from <a class="reference external" href="https://github.com/smetj/wishbone/tarball/master">https://github.com/smetj/wishbone/tarball/master</a></p>
+<p>The steps to take typically involve something like:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nv">$ </span>wget https://github.com/smetj/wishbone/tarball/master -O wishbone.tar.gz
+<span class="nv">$ </span>tar -xvzf wishbone.tar.gz
+<span class="nv">$ </span><span class="nb">cd</span> <span class="o">[</span>into_directory<span class="o">]</span>
+<span class="nv">$ </span>sudo python setup.py install
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="source-code">
@@ -92,7 +146,11 @@ installing gevent from <a class="reference external" href="https://bitbucket.org
   <ul>
 <li><a class="reference internal" href="#">Installation</a><ul>
 <li><a class="reference internal" href="#python-versions">Python Versions</a></li>
-<li><a class="reference internal" href="#basic-installation">Basic Installation</a></li>
+<li><a class="reference internal" href="#basic-installation">Basic Installation</a><ul>
+<li><a class="reference internal" href="#gevent">Gevent</a></li>
+<li><a class="reference internal" href="#wishbone">Wishbone</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#source-code">Source Code</a></li>
 <li><a class="reference internal" href="#reporting-bugs">Reporting Bugs</a></li>
 </ul>
@@ -104,7 +162,7 @@ installing gevent from <a class="reference external" href="https://bitbucket.org
                         title="previous chapter">Classes</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="developers.html"
-                        title="next chapter">&lt;no title&gt;</a></p>
+                        title="next chapter">Developers</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/install.txt"
@@ -137,7 +195,7 @@ installing gevent from <a class="reference external" href="https://bitbucket.org
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="developers.html" title="&lt;no title&gt;"
+          <a href="developers.html" title="Developers"
              >next</a> |</li>
         <li class="right" >
           <a href="classes.html" title="Classes"
