@@ -26,13 +26,11 @@ import logging
 import stopwatch
 from gevent import Greenlet
 from gevent.queue import Queue
+from gevent.event import Event
 from copy import deepcopy
 
 class QueueFunctions():
     '''A base class for Wishbone Actor classes.  Shouldn't be called directly but is inherited by PrimitiveActor.'''
-
-    def __init__(self):
-        self.lock=True
     
     def sendData(self, data, queue='outbox'):
         '''Submits data to one of the module its queues.
@@ -82,11 +80,31 @@ class QueueFunctions():
         else:
             return False
 
+class Block():
+    '''A base class providing a global lock.'''
+    
+    def __init__(self):
+        self.lock=Event()
+
     def block(self):
         '''A simple blocking function.'''
-        return self.lock                
+        
+        if self.lock.isSet():
+            return False
+        else:
+            return True
 
-class PrimitiveActor(Greenlet, QueueFunctions):
+    def wait(self):
+        '''Blocks from exiting until self.lock is set.'''
+        
+        self.lock.wait()        
+
+    def release(self):
+        '''Set the lock flag which essentially unlocks.'''
+        
+        self.lock.set()
+
+class PrimitiveActor(Greenlet, QueueFunctions, Block):
     '''A base class used to create Wishbone modules.
     
     This base class offers Wishbone specific functionalities and objects.
@@ -96,12 +114,11 @@ class PrimitiveActor(Greenlet, QueueFunctions):
     '''
 
     def __init__(self, name):
-        QueueFunctions.__init__(self)
+        Block.__init__(self)
         Greenlet.__init__(self)
         self.logging = logging.getLogger( name )
         self.logging.info('Initiated.')
         self.name=name
-        self.lock = True
         self.inbox = Queue(None)
         self.outbox = Queue(None)
         self.stats={'msg': 0, 'min': 0, 'max': 0, 'avg': 0, 'total': 0}
@@ -156,5 +173,5 @@ class PrimitiveActor(Greenlet, QueueFunctions):
         '''A function which could be overridden by the Wisbone module.
         
         This function is called on shutdown.  Make sure you include self.lock=False otherwise that greenthread will hang on shutdown and never exit.'''
-        self.lock=False
         self.logging.info('Shutdown')
+        

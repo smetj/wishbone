@@ -24,12 +24,12 @@
 
 import logging
 from amqplib import client_0_8 as amqp
-from wishbone.toolkit import QueueFunctions
+from wishbone.toolkit import QueueFunctions, Block
 from gevent import Greenlet, sleep, spawn
 from gevent.queue import Queue
 from gevent import monkey; monkey.patch_all()
 
-class Broker(Greenlet, QueueFunctions):
+class Broker(Greenlet, QueueFunctions, Block):
     '''A Wisbone module which handles AMQP0.8 input and output.  It's meant to be resillient to disconnects and broker unavailability.
     
     Data consumed from the broker goes into self.inbox
@@ -55,7 +55,7 @@ class Broker(Greenlet, QueueFunctions):
     def __init__(self, name, host, vhost='/', username='guest', password='guest', consume_queue='wishbone_in' ):
     
         Greenlet.__init__(self)
-        QueueFunctions.__init__(self)
+        Block.__init__(self)
         self.logging = logging.getLogger( name )
         self.name = 'Broker'
         self.logging.info('Initiated')
@@ -119,7 +119,7 @@ class Broker(Greenlet, QueueFunctions):
                     self.connected = False
                     self.incoming.close()
                     self.conn.close()
-                    break   
+                    break
         
     def consume(self,doc):
         '''Is called upon each message coming from the broker infrastructure.
@@ -149,7 +149,6 @@ class Broker(Greenlet, QueueFunctions):
 
     def shutdown(self):
         '''This function is called on shutdown().'''
-        self.lock=False
         try:
              self.incoming.basic_cancel('request')
         except:
