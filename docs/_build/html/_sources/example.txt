@@ -47,3 +47,21 @@ For each message arriving in the inbox queue, the consume() function is called. 
 This allows the Broker module to route messages using a specific exchange and or routing key.
 
 And that's it!
+
+
+=============
+More Examples
+=============
+
+The examples directory contains multiple examples.
+
+-------------
+udp_server.py
+-------------
+An UDP listener which writes incoming data to STDOUT.
+
+-------------
+speed_test.py
+-------------
+Consumes 1 messages from a queue called wb_speedtest and produces that message again to the same queue essentially making a loop.
+This might give you an idea of IO when looking at the msg/s in your broker admin interface.

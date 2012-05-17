@@ -37,9 +37,6 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="classes.html" title="Classes"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -119,6 +116,19 @@ For each message arriving in the inbox queue, the consume() function is called. 
 This allows the Broker module to route messages using a specific exchange and or routing key.</p>
 <p>And that&#8217;s it!</p>
 </div>
+<div class="section" id="more-examples">
+<h1>More Examples<a class="headerlink" href="#more-examples" title="Permalink to this headline">¶</a></h1>
+<p>The examples directory contains multiple examples.</p>
+<div class="section" id="udp-server-py">
+<h2>udp_server.py<a class="headerlink" href="#udp-server-py" title="Permalink to this headline">¶</a></h2>
+<p>An UDP listener which writes incoming data to STDOUT.</p>
+</div>
+<div class="section" id="speed-test-py">
+<h2>speed_test.py<a class="headerlink" href="#speed-test-py" title="Permalink to this headline">¶</a></h2>
+<p>Consumes 1 messages from a queue called wb_speedtest and produces that message again to the same queue essentially making a loop.
+This might give you an idea of IO when looking at the msg/s in your broker admin interface.</p>
+</div>
+</div>
 
 
           </div>
@@ -126,6 +136,16 @@ This allows the Broker module to route messages using a specific exchange and or
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Example</a></li>
+<li><a class="reference internal" href="#more-examples">More Examples</a><ul>
+<li><a class="reference internal" href="#udp-server-py">udp_server.py</a></li>
+<li><a class="reference internal" href="#speed-test-py">speed_test.py</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="introduction.html"
                         title="previous chapter">Introduction</a></p>
@@ -160,9 +180,6 @@ This allows the Broker module to route messages using a specific exchange and or
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
         <li class="right" >
           <a href="classes.html" title="Classes"
              >next</a> |</li>
