@@ -26,8 +26,11 @@ import logging
 import daemon
 from multiprocessing import Process, Event
 from time import sleep
-from os import getpid, kill, remove
+from os import getpid, kill, remove, path
+from signal import SIGINT
 import sys
+
+
 
 class Server():
     '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.''' 
@@ -46,7 +49,7 @@ class Server():
     def start(self):
         '''Starts the server environment in fore- or background.'''
                 
-        if self.checkPids() != False:
+        if self.checkPids() == True:
             if self.daemonize == True:
                 print 'Starting %s in background.' % (self.name)
                 self.configureLogging(name=self.name, syslog=True)
@@ -79,7 +82,7 @@ class Server():
     def stop(self):
         '''Stops the environment.'''
         
-        self.logging.info('SIGINT received. Stopping')
+        self.logging.info('SIGINT received. Stopping processes.  Send SIGINT again to stop everything without waiting.')
         for process in self.processes:
             self.logging.info('Waiting for %s' %process.name)
             try:
@@ -87,8 +90,38 @@ class Server():
             except KeyboardInterrupt:
                 #some people have no patience
                 process.terminate()
-                
+        self.removePids()
         logging.shutdown()
+
+    @staticmethod
+    def sendSIGINT(pidfile):
+        '''Sends sigint signal to the pids.
+        
+        Needs to be a static method to facilitate init scripts.'''
+        for pid in Server.readPids(pidfile):
+            kill(int(pid),SIGINT)
+        print "Tail the logfile to see progress."
+
+    @staticmethod    
+    def readPids(pidfile):
+        '''Tries to open and read the pids from the pidfile
+        
+        Returns a list of pidfiles.'''
+
+        pids=[]
+        
+        if path.exists(pidfile):
+            try:
+                pidfile = open (pidfile,'r')
+            except Exception as err:
+                print ('Pidfile exists, but I could not read it.  Reason: %s' % err)
+                sys.exit(1)
+            else:
+                for pid in pidfile.readlines():
+                    pids.append(pid)
+                pidfile.close()
+
+        return pids
 
     def collectPids(self):
         '''Gets the pids of the current process and all the ones started by multiprocessing.'''
@@ -99,31 +132,31 @@ class Server():
         return pids
     
     def checkPids(self):
-        '''Reads the pids of the pidfile.'''
+        '''Reads the pids of the pidfile and sys.exit() if something goes wrong.
         
-        try:
-            pidfile = open (self.pidfile,'r')
-            for pid in pidfile.readlines():
-                try:
-                    kill(int(pid),0)
-                except:
-                    pass
-                else:
-                    print 'There is already a version of %s running with pid %s' % (self.name, pid)
-                    pidfile.close()
-                    sys.exit(1)
-            pidfile.close()
+        returns True when all is fine.
+         '''
+        
+        pids = self.readPids(self.pidfile)
+        for pid in pids:
+            try:
+                kill(int(pid),0)
+            except:
+                pass
+            else:
+                print 'There is already a version of %s running with pid %s' % (self.name, pid)
+                pidfile.close()
+                sys.exit(1)
+            
             try:
                 remove(self.pidfile)
-                self.logging.warn('Pidfile exists, but processes not running anymore. Removed.')
+                print 'Pidfile exists, but processes not running anymore. Removed.'
+                return True
             except Exception as err:
-                self.logging.warn('Pidfile exists, but I could not remove it.  Reason: %s' % (err))
+                print 'Pidfile exists, but I could not remove it.  Reason: %s' % (err)
                 sys.exit(1)
-        except:
-            pass
-        
-        return False
-        
+        return True
+
     def writePids(self):
         '''Writes all the pids into a pid file.
         
@@ -136,6 +169,14 @@ class Server():
         except Exception as err:
             self.logging.warn('Could not write pid file.  Reason: %s' %(err))
             
+    def removePids(self):
+        '''Deletes the PID file.'''
+        
+        try:
+            remove(self.pidfile)
+            self.logging.info('Pidfile removed.')
+        except Exception as err:
+            self.logging.warn('I could not remove the pidfile. Reason: '%(err))            
     
     def configureLogging(self,name=None, syslog=False, loglevel=logging.INFO):
         '''Configures logging.
