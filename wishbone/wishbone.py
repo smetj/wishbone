@@ -28,17 +28,16 @@ from gevent import spawn, sleep
 from gevent.queue import Queue
 from multiprocessing import current_process
 from string import lstrip
-#from time import sleep
+from toolkit import Block
 
-class Wishbone():
+class Wishbone(Block):
     '''
     The main class in which the Wishbone modules are registered and managed.
     '''
     
     def __init__(self):
-        self.lock=True
-        #self.__configureLogging()
         self.logging = logging.getLogger( 'Wishbone' )
+        Block.__init__(self)
         self.modules=[]
         self.connectors=[]
         self.hub = Queue(None)
@@ -66,12 +65,12 @@ class Wishbone():
         module_name = config[0]
         class_name = config[1]
         name = config[2]        
-        try:
-            loaded_module = import_module(module_name)
-            setattr(self, name, getattr (loaded_module, class_name)('Intance #%s:%s'%(self.__currentProcessName(),name), *args, **kwargs))
-            self.modules.append(getattr (self, name))
-        except Exception as err:
-            print "Problem loading module: %s and class %s. Reason: %s" % ( module_name, class_name, err)
+        #try:
+        loaded_module = import_module(module_name)
+        setattr(self, name, getattr (loaded_module, class_name)('Intance #%s:%s'%(self.__currentProcessName(),name), *args, **kwargs))
+        self.modules.append(getattr (self, name))
+        #except Exception as err:
+            #print "Problem loading module: %s and class %s. Reason: %s" % ( module_name, class_name, err)
         
     def connect(self, source, destination):
         '''Creates a new background Greenthread which continuously consumes all messages from source into destination.
@@ -97,10 +96,9 @@ class Wishbone():
                 pass
 
         try:
-            while True:
-                sleep(1) #This stays a bottleneck
-            #self.modules[0].join()
+            self.wait()
         except KeyboardInterrupt:
+            self.release()
             self.stop()
             
     def stop(self):
@@ -110,8 +108,8 @@ class Wishbone():
         '''
         
         self.logging.info('Stop received.')
-        self.lock=False
         for module in self.modules:
+            module.release()
             module.shutdown()
             try:
                 module.logMetrics()
@@ -126,11 +124,6 @@ class Wishbone():
         for connector in self.connectors:
             self.logging.debug('Waiting for connector %s'%module.name)
             connector.join()
-    
-    def block(self):
-        '''Function which provides a global block where required.'''
-        
-        return self.lock
          
     def __connector(self,source, destination):
         '''Consumes data from source and puts it in destination.'''

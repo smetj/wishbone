@@ -25,11 +25,11 @@
 from gevent import spawn
 from gevent.queue import Queue
 from gevent.server import DatagramServer
-from wishbone.toolkit import QueueFunctions
+from wishbone.toolkit import QueueFunctions, Block
 import logging
 
 
-class UDPServer(DatagramServer, QueueFunctions):
+class UDPServer(DatagramServer, QueueFunctions, Block):
     '''A Wishbone module which handles UDP input.
     
     Data received by the module is put into self.inbox
@@ -42,7 +42,7 @@ class UDPServer(DatagramServer, QueueFunctions):
  
     def __init__(self, name, port, *args, **kwargs):
         DatagramServer.__init__(self, ':'+port, *args, **kwargs)
-        QueueFunctions.__init__(self)
+        Block.__init__(self)
         self.logging = logging.getLogger( name )
         self.name = 'UDPServer'
         self.logging.info ( 'started and listening on port %s' % port)
@@ -58,9 +58,9 @@ class UDPServer(DatagramServer, QueueFunctions):
     def run(self):
         '''Blocking function which starts the UDP server.'''
         
-        self.serve_forever()
+        self.start()
+        self.wait()
 
     def shutdown(self):
         '''This function is called on shutdown().'''
-        self.lock=False
         self.logging.info('Shutdown')
