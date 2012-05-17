@@ -86,6 +86,7 @@ class Server():
         for process in self.processes:
             self.logging.info('Waiting for %s' %process.name)
             try:
+                print process.name
                 process.join()
             except KeyboardInterrupt:
                 #some people have no patience

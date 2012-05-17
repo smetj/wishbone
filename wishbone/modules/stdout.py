@@ -41,11 +41,11 @@ class STDOUT(PrimitiveActor):
         self.purge=purge
         
     def consume(self,doc):
-        if self.complete = False:
+        if self.complete == False:
             print doc['data']
         else:
             print doc
-        if self.purge=False:
+        if self.purge == False:
             self.sendData(doc)
        
     def shutdown(self):
