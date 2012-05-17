@@ -26,14 +26,27 @@ from wishbone.toolkit import PrimitiveActor
 
 
 class STDOUT(PrimitiveActor):
-    '''STDOUT class is a minimal Actor class which does nothing more than printing the messages from inbox and putting them back in outbox.'''
+    '''STDOUT class is a minimal Actor class which does nothing more than printing the messages from inbox and putting them back in outbox.
     
-    def __init__(self, name, *args, **kwargs):
+    Parameters:        
+
+        * complete: If True, it prints out the message in Wishbone format including headers, if False only the content of the data field itself.
+        * purge: When True the message is not put into the outbox but is purged.
+    
+    '''
+    
+    def __init__(self, name, complete=False, purge=False, *args, **kwargs):
         PrimitiveActor.__init__(self, name)
-    
+        self.complete=complete
+        self.purge=purge
+        
     def consume(self,doc):
-        print doc
-        self.sendData(doc)
+        if self.complete = False:
+            print doc['data']
+        else:
+            print doc
+        if self.purge=False:
+            self.sendData(doc)
        
     def shutdown(self):
         self.logging.info('Shutdown')
