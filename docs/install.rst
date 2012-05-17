@@ -5,7 +5,7 @@
 Python Versions
 ===============
 
-cliff is being developed under Python 2.7
+Wishbone is being developed under Python 2.7
 
 .. _install-basic:
 
