@@ -27,7 +27,7 @@ from amqplib import client_0_8 as amqp
 from wishbone.toolkit import QueueFunctions, Block
 from gevent import Greenlet, spawn
 from gevent.queue import Queue
-from gevent import monkey; monkey.patch_all()
+from gevent import monkey;monkey.patch_all()
 
 class Broker(Greenlet, QueueFunctions, Block):
     '''A Wisbone module which handles AMQP0.8 input and output.  It's meant to be resillient to disconnects and broker unavailability.
@@ -71,11 +71,12 @@ class Broker(Greenlet, QueueFunctions, Block):
     def __setup(self):
         '''Handles connection and channel creation.
         '''
-        
+
         self.conn = amqp.Connection(host="%s:5672"%(self.host), userid=self.username,password=self.password, virtual_host=self.vhost, insist=False)
         self.incoming = self.conn.channel()
         self.outgoing = self.conn.channel()
         self.logging.info('Connected to broker')
+        self.connected = True
         
     def submitBroker(self):
         '''Submits all data from self.outbox into the broker by calling the produce() funtion.
@@ -87,6 +88,7 @@ class Broker(Greenlet, QueueFunctions, Block):
                     self.produce(self.outbox.get())
                 except:
                     break
+                    
                                 
     def _run(self):
         '''
@@ -104,7 +106,6 @@ class Broker(Greenlet, QueueFunctions, Block):
                         night *=2
                     self.__setup()
                     self.incoming.basic_consume(queue=self.consume_queue, callback=self.consume, consumer_tag='request')
-                    self.connected=True
                     night=0.5
                 except Exception as err:
                     self.connected=False
@@ -136,6 +137,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         
         This function is called by the consume() function.  If the correct header info isn't present (but that would be odd at this point), the data is purged.
         '''
+        
         if message["header"].has_key('broker_exchange') and message["header"].has_key('broker_key'):            
             if self.connected == True:
                 msg = amqp.Message(message['data'])
@@ -148,6 +150,7 @@ class Broker(Greenlet, QueueFunctions, Block):
 
     def shutdown(self):
         '''This function is called on shutdown().'''
+        
         try:
              self.incoming.basic_cancel('request')
         except:
