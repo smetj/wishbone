@@ -180,8 +180,8 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
 class ESTools():
     '''A baseclass which offers ElasticSearch connectivity and functionality.'''
     
-    def es_index(self, document, index, type):
-        '''Indexes a document into ElasticSearch.
+    def es_index(self, *args, **kwargs):
+        '''Wrapper around ES.index()
         
         When ES is not available it tries to resubmit the document untill the general block is cancelled.'''
     
@@ -190,14 +190,13 @@ class ESTools():
                     self.wait(0.5)                
 
                 try:
-                    id = self.conn.index(document, index, type)
+                    id = self.conn.index(*args, **kwargs)
                     
                 except Exception as err:
                     self.setupConnection()
                 
                 else:
                     break
-        
         return id
     
     def setupConnection(self):
