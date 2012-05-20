@@ -88,7 +88,7 @@ class Broker(Greenlet, QueueFunctions, Block):
                     self.produce(self.outbox.get())
                 except:
                     break
-            self.wait(timeout=1)
+            self.wait(timeout=0.1)
                                 
     def _run(self):
         '''

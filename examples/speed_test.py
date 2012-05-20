@@ -51,8 +51,7 @@ def setup():
     wb.registerModule ( ('__main__', 'PassThrough', 'pass2') )
     wb.connect (wb.broker.inbox, wb.addheader.inbox)
     wb.connect (wb.addheader.outbox, wb.pass1.inbox)
-    wb.connect (wb.pass1.outbox, wb.pass2.inbox)
-    wb.connect (wb.pass2.outbox, wb.broker.outbox)
+    wb.connect (wb.pass1.outbox, wb.broker.outbox)
     wb.start()
 
 server = Server(instances=1, setup=setup)
