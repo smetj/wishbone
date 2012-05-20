@@ -24,10 +24,12 @@
 
 import logging
 import stopwatch
+import pyes
 from gevent import Greenlet
 from gevent.queue import Queue
 from gevent.event import Event
 from copy import deepcopy
+from gevent import monkey; monkey.patch_all()
 
 class QueueFunctions():
     '''A base class for Wishbone Actor classes.  Shouldn't be called directly but is inherited by PrimitiveActor.'''
@@ -175,3 +177,46 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
         This function is called on shutdown.  Make sure you include self.lock=False otherwise that greenthread will hang on shutdown and never exit.'''
         self.logging.info('Shutdown')
         
+class ESTools():
+    '''A baseclass which offers ElasticSearch connectivity and functionality.'''
+    
+    def es_index(self, document, index, type):
+        '''Indexes a document into ElasticSearch.
+        
+        When ES is not available it tries to resubmit the document untill the general block is cancelled.'''
+    
+        while self.block() == True:
+                while self.connected == False:
+                    self.wait(0.5)                
+
+                try:
+                    id = self.conn.index(document, index, type)
+                    
+                except Exception as err:
+                    self.setupConnection()
+                
+                else:
+                    break
+        
+        return id
+    
+    def setupConnection(self):
+        '''Wrapper for calling __setupConnection.  Spawned into a greenlet so it doesn't block us.'''
+        
+        self.connected=False
+        Greenlet.spawn(self.__setupConnection)
+       
+    def __setupConnection(self):
+        '''Is called by setupConnection, tries to connect until succeeds or block is lifted.'''
+        
+        while self.block() == True:
+            try:
+                self.conn =  pyes.ES([self.host])
+                if self.conn.collect_info() == False:
+                    raise Exception ('Unable to connect.')
+            except Exception as err:   
+                self.logging.warn('Could not connect to ElasticSearch. Waiting for a second.  Reason: %s' %(err))
+                self.wait(timeout=1)
+            else:
+                self.connected=True
+                break
