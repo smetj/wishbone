@@ -97,7 +97,7 @@ class Block():
     def wait(self, timeout=None):
         '''Blocks from exiting until self.lock is set.'''
         
-        self.lock.wait(timeout=timeout)
+        self.lock.wait(timeout)
 
     def release(self):
         '''Set the lock flag which essentially unlocks.'''
