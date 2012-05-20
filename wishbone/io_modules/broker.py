@@ -24,10 +24,11 @@
 
 import logging
 from amqplib import client_0_8 as amqp
-from wishbone.toolkit import QueueFunctions, Block
-from gevent import Greenlet, spawn
-from gevent.queue import Queue
 from gevent import monkey;monkey.patch_all()
+from wishbone.toolkit import QueueFunctions, Block
+from gevent import Greenlet, spawn, sleep
+from gevent.queue import Queue
+
 
 class Broker(Greenlet, QueueFunctions, Block):
     '''A Wisbone module which handles AMQP0.8 input and output.  It's meant to be resillient to disconnects and broker unavailability.
@@ -76,7 +77,6 @@ class Broker(Greenlet, QueueFunctions, Block):
         self.incoming = self.conn.channel()
         self.outgoing = self.conn.channel()
         self.logging.info('Connected to broker')
-        self.connected = True
         
     def submitBroker(self):
         '''Submits all data from self.outbox into the broker by calling the produce() funtion.
@@ -88,7 +88,7 @@ class Broker(Greenlet, QueueFunctions, Block):
                     self.produce(self.outbox.get())
                 except:
                     break
-                    
+            self.wait(timeout=1)
                                 
     def _run(self):
         '''
@@ -98,19 +98,19 @@ class Broker(Greenlet, QueueFunctions, Block):
         self.logging.info('Started')
         night=0.5
         outgoing = spawn ( self.submitBroker )
-
         while self.block() == True:
             while self.connected==False and self.block() == True:
                 try:
                     if night < 512:
                         night *=2
                     self.__setup()
+                    self.connected = True
                     self.incoming.basic_consume(queue=self.consume_queue, callback=self.consume, consumer_tag='request')
                     night=0.5
                 except Exception as err:
                     self.connected=False
                     self.logging.warning('Connection to broker lost. Reason: %s. Try again in %s seconds.' % (err,night) )
-                    self.wait(timeout=night)
+                    self.sleep(night)
             while self.block() == True and self.connected == True:
                 try:
                     self.incoming.wait()
