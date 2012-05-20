@@ -25,7 +25,7 @@
 import logging
 from amqplib import client_0_8 as amqp
 from wishbone.toolkit import QueueFunctions, Block
-from gevent import Greenlet, sleep, spawn
+from gevent import Greenlet, spawn
 from gevent.queue import Queue
 from gevent import monkey; monkey.patch_all()
 
@@ -87,7 +87,6 @@ class Broker(Greenlet, QueueFunctions, Block):
                     self.produce(self.outbox.get())
                 except:
                     break
-            sleep(0.01)
                                 
     def _run(self):
         '''
@@ -110,7 +109,7 @@ class Broker(Greenlet, QueueFunctions, Block):
                 except Exception as err:
                     self.connected=False
                     self.logging.warning('Connection to broker lost. Reason: %s. Try again in %s seconds.' % (err,night) )
-                    sleep(night)
+                    self.wait(timeout=night)
             while self.block() == True and self.connected == True:
                 try:
                     self.incoming.wait()
