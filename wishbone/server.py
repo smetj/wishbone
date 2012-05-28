@@ -30,7 +30,16 @@ from os import getpid, kill, remove, path
 from signal import SIGINT
 import sys
 
-
+class LogFilter(logging.Filter):
+    '''Logging() Filter wich only allows Wishbone related logging.'''
+    
+    black_list_names = [ 'pyes', 'requests.packages.urllib3.connectionpool' ]
+    
+    def filter(self, record):
+        if record.name in self.black_list_names:
+            return False
+        
+        return True
 
 class Server():
     '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.''' 
@@ -190,7 +199,13 @@ class Server():
         else:
             format= name+' %(name)s: %(message)s'
         if syslog == False:
-            logging.basicConfig(level=loglevel, format=format)
+            logger = logging.getLogger()
+            logger.setLevel(loglevel)
+            stream = logging.StreamHandler(sys.stdout)
+            formatter = logging.Formatter(format)
+            stream.setFormatter(formatter)
+            stream.addFilter(LogFilter())
+            logger.addHandler(stream)
         else:
             from logging.handlers import SysLogHandler
             logger = logging.getLogger()
@@ -200,4 +215,3 @@ class Server():
             formatter = logging.Formatter(format)
             syslog.setFormatter(formatter)
             logger.addHandler(syslog)
-
