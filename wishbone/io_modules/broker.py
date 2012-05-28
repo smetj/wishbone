@@ -110,7 +110,7 @@ class Broker(Greenlet, QueueFunctions, Block):
                 except Exception as err:
                     self.connected=False
                     self.logging.warning('Connection to broker lost. Reason: %s. Try again in %s seconds.' % (err,night) )
-                    self.sleep(night)
+                    self.wait(night)
             while self.block() == True and self.connected == True:
                 try:
                     self.incoming.wait()
