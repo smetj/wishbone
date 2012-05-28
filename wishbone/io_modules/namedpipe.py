@@ -54,20 +54,22 @@ class NamedPipe(Greenlet, QueueFunctions, Block):
     def _run(self):
         self.logging.info('Started.')
         try:
-            self.fifo = open(self.file,'r')
-        except KeyboardInterrupt:
-            self.shutdown()
+            fd = os.open(self.file, os.O_RDONLY|os.O_NONBLOCK)
         except Exception as err:
             self.logging.error('Error opening Named pipe %s. Reason: %s' % (self.file, err))
         else:        
             try:
                 while self.block() == True:
-                    line = self.fifo.readline()[:-1]
-                    if len(line) != 0:
-                        self.sendData({'header':{},'data':line}, queue='inbox')
+                    try:
+                        lines = os.read(fd, 4096).splitlines()
+                    except:
+                        pass
+                    if lines:
+                        for line in lines:
+                            self.sendData({'header':{},'data':line}, queue='inbox')
                     else:
                         self.wait(0.1)
-                        
+                                                
             except KeyboardInterrupt:
                 self.fifo.close()
                 self.shutdown()
@@ -77,4 +79,4 @@ class NamedPipe(Greenlet, QueueFunctions, Block):
     def shutdown(self):
         os.unlink(self.file)
         self.logging.info('Shutdown')
-        sys.exit(1)
+        
