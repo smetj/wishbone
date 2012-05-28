@@ -49,3 +49,9 @@ UDPserver Class
 .. automodule:: wishbone.io_modules.udpserver
    :members:
 
+NamedPipe Class
+===============
+
+.. automodule:: wishbone.io_modules.namedpipe
+   :members:
+
