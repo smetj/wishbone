@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  udp_server.py
+#  namedpipe_server.py
 #  
 #  Copyright 2012 Jelle Smet development@smetj.net
 #  
