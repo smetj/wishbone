@@ -55,3 +55,9 @@ NamedPipe Class
 .. automodule:: wishbone.io_modules.namedpipe
    :members:
 
+NamedPipe Class
+===============
+
+.. automodule:: wishbone.io_modules.socketfile
+   :members:
+
