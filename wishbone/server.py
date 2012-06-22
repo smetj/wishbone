@@ -29,6 +29,7 @@ from time import sleep
 from os import getpid, kill, remove, path
 from signal import SIGINT
 import sys
+from gevent import monkey;monkey.patch_all()
 
 class LogFilter(logging.Filter):
     '''Logging() Filter wich only allows Wishbone related logging.'''
@@ -61,12 +62,12 @@ class Server():
         if self.checkPids() == True:
             if self.daemonize == True:
                 print 'Starting %s in background.' % (self.name)
-                self.configureLogging(name=self.name, syslog=True)
+                self.configureLogging(name=self.name, syslog=True, loglevel=self.log_level)
                 self.logging = logging.getLogger( 'Server' )
                 with daemon.DaemonContext():
                     self.__start()
             else:
-                self.configureLogging()
+                self.configureLogging(loglevel=self.log_level)
                 self.logging = logging.getLogger( 'Server' )
                 self.__start()
     
@@ -154,7 +155,6 @@ class Server():
                 pass
             else:
                 print 'There is already a version of %s running with pid %s' % (self.name, pid)
-                pidfile.close()
                 sys.exit(1)
             
             try:
