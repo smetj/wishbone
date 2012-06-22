@@ -46,7 +46,11 @@ class QueueFunctions():
         '''
         
         if self.checkIntegrity(data):
-            getattr (self, queue).put ( data )
+            try:
+                getattr (self, queue).put ( data )
+            except:
+                setattr (self, queue, Queue)
+                getattr (self, queue).put ( data )
         else:
             self.logging.warn('Invalid internal data structure detected. Data is purged. Turn on debugging to see datastructure.')
             self.logging.debug('Invalid data structure: %s' % (data))
@@ -214,7 +218,7 @@ class ESTools():
                 if self.conn.collect_info() == False:
                     raise Exception ('Unable to connect.')
             except Exception as err:   
-                self.logging.warn('Could not connect to ElasticSearch. Waiting for a second.  Reason: %s' %(err))
+                self.logging.error('Could not connect to ElasticSearch. Waiting for a second.  Reason: %s' %(err))
                 self.wait(timeout=1)
             else:
                 self.connected=True
