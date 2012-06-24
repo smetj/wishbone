@@ -29,6 +29,7 @@ from gevent import Greenlet
 from gevent.queue import Queue
 from gevent.event import Event
 from copy import deepcopy
+from pymongo import Connection
 from gevent import monkey; monkey.patch_all()
 
 class QueueFunctions():
@@ -221,5 +222,31 @@ class ESTools():
                 self.logging.error('Could not connect to ElasticSearch. Waiting for a second.  Reason: %s' %(err))
                 self.wait(timeout=1)
             else:
+                self.logging.info('Connected')
                 self.connected=True
                 break
+
+class MongoTools():
+    '''A baseclass which offers MongoDB connectivity and functionality.'''
+    
+    def setupConnection(self):
+        '''Wrapper for calling __setupConnection.  Spawned into a greenlet so it doesn't block us.'''
+        self.connected=False
+        Greenlet.spawn(self.__setupConnection)
+    
+    def __setupConnection(self):
+        '''Is called by setupConnection, tries to connect until succeeds or block is lifted.'''
+        
+        while self.block() == True:
+            try:
+                self.conn = Connection( self.host, self.port, use_greenlets=True )
+            except:
+                self.logging.error('I could not connect to the MongoDB database.  Will try again in 1 second')
+                self.wait(timeout=1)    
+            else:
+                self.logging.info('Connected')
+                self.connected=True
+                break
+                
+            
+        
