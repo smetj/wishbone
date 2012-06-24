@@ -109,13 +109,14 @@ class Broker(Greenlet, QueueFunctions, Block):
                     night=0.5
                 except Exception as err:
                     self.connected=False
-                    self.logging.warning('Connection to broker lost. Reason: %s. Try again in %s seconds.' % (err,night) )
+                    self.logging.error('Connection to broker lost. Reason: %s. Try again in %s seconds.' % (err,night) )
                     self.wait(night)
+            self.logging.info('Connected')
             while self.block() == True and self.connected == True:
                 try:
                     self.incoming.wait()
                 except Exception or KeyboardInterrupt as err:
-                    self.logging.warning('Connection to broker lost. Reason: %s' % err )
+                    self.logging.error('Connection to broker lost. Reason: %s' % err )
                     self.connected = False
                     self.incoming.close()
                     self.conn.close()
