@@ -23,12 +23,11 @@
 #  
 
 import logging
-from amqplib import client_0_8 as amqp
-from gevent import monkey;monkey.patch_all()
 from wishbone.toolkit import QueueFunctions, Block
 from gevent import Greenlet, spawn, sleep
 from gevent.queue import Queue
-
+from amqplib import client_0_8 as amqp
+from gevent import monkey;monkey.patch_all()
 
 class Broker(Greenlet, QueueFunctions, Block):
     '''A Wisbone module which handles AMQP0.8 input and output.  It's meant to be resillient to disconnects and broker unavailability.
@@ -72,7 +71,7 @@ class Broker(Greenlet, QueueFunctions, Block):
     def __setup(self):
         '''Handles connection and channel creation.
         '''
-
+        
         self.conn = amqp.Connection(host="%s:5672"%(self.host), userid=self.username,password=self.password, virtual_host=self.vhost, insist=False)
         self.incoming = self.conn.channel()
         self.outgoing = self.conn.channel()
@@ -86,7 +85,8 @@ class Broker(Greenlet, QueueFunctions, Block):
             while self.connected == True:
                 try:
                     self.produce(self.outbox.get())
-                except:
+                except Exception as err:
+                    self.logging.warn('Could not write data to broker.  Reason: %s'%(err))
                     break
             self.wait(timeout=0.1)
                                 
@@ -97,7 +97,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         
         self.logging.info('Started')
         night=0.5
-        outgoing = spawn ( self.submitBroker )
+        outgoing = spawn ( self.submitBroker )        
         while self.block() == True:
             while self.connected==False and self.block() == True:
                 try:
@@ -112,7 +112,7 @@ class Broker(Greenlet, QueueFunctions, Block):
                     self.logging.error('Connection to broker lost. Reason: %s. Try again in %s seconds.' % (err,night) )
                     self.wait(night)
             self.logging.info('Connected')
-            while self.block() == True and self.connected == True:
+            while self.block() == True and self.connected == True:                
                 try:
                     self.incoming.wait()
                 except Exception or KeyboardInterrupt as err:
@@ -128,7 +128,6 @@ class Broker(Greenlet, QueueFunctions, Block):
         It also makes sure the incoming data is encapsulated in the right Wishbone format.
         When successful, this function acknowledges the message from the broker.
         '''
-        
         self.sendData({'header':{},'data':doc.body}, queue='inbox')
         self.logging.debug('Data received from broker.')
         self.incoming.basic_ack(doc.delivery_tag)
@@ -141,7 +140,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         
         if message["header"].has_key('broker_exchange') and message["header"].has_key('broker_key'):            
             if self.connected == True:
-                msg = amqp.Message(message['data'])
+                msg = amqp.Message(str(message['data']))
                 msg.properties["delivery_mode"] = 2
                 self.outgoing.basic_publish(msg,exchange=message['header']['broker_exchange'],routing_key=message['header']['broker_key'])
             else:
