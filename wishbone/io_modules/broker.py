@@ -50,6 +50,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         * username:           The username to connect to the broker.  By default this is 'guest'.
         * password:           The password to connect to the broker.  By default this is 'guest'.
         * consume_queue:      The queue which should be consumed. By default this is "wishbone_in".
+        * prefetch_count:     The amount of messages consumed from the queue at once.
     '''
     
     def __init__(self, name, host, vhost='/', username='guest', password='guest', prefetch_count=1, consume_queue='wishbone_in' ):
