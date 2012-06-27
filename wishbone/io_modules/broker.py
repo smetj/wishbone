@@ -52,7 +52,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         * consume_queue:      The queue which should be consumed. By default this is "wishbone_in".
     '''
     
-    def __init__(self, name, host, vhost='/', username='guest', password='guest', consume_queue='wishbone_in' ):
+    def __init__(self, name, host, vhost='/', username='guest', password='guest', prefetch_count=1, consume_queue='wishbone_in' ):
     
         Greenlet.__init__(self)
         Block.__init__(self)
@@ -63,9 +63,11 @@ class Broker(Greenlet, QueueFunctions, Block):
         self.vhost=vhost
         self.username=username
         self.password=password
+        self.prefetch_count=prefetch_count
         self.consume_queue = consume_queue
         self.outbox=Queue(None)
         self.inbox=Queue(None)
+        self.acknowledge=Queue(None)
         self.connected=False
 
     def __setup(self):
@@ -74,6 +76,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         
         self.conn = amqp.Connection(host="%s:5672"%(self.host), userid=self.username,password=self.password, virtual_host=self.vhost, insist=False)
         self.incoming = self.conn.channel()
+        self.incoming.basic_qos(prefetch_size=0, prefetch_count=self.prefetch_count, a_global=False)
         self.outgoing = self.conn.channel()
         self.logging.info('Connected to broker')
         
@@ -89,6 +92,21 @@ class Broker(Greenlet, QueueFunctions, Block):
                     self.logging.warn('Could not write data to broker.  Reason: %s'%(err))
                     break
             self.wait(timeout=0.1)
+    
+    def acknowledgeMessage(self):
+        '''Acknowledges messages
+        '''       
+
+        while self.block() == True:
+            while self.connected == True:
+                try:
+                    ack = self.acknowledge.get()
+                    self.incoming.basic_ack(ack)
+                except Exception as err:
+                    self.acknowledge.put(ack)
+                    self.logging.warn('Could not acknowledge message in broker.  Reason: %s'%(err))
+                    break
+            self.wait(timeout=0.1)
                                 
     def _run(self):
         '''
@@ -98,6 +116,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         self.logging.info('Started')
         night=0.5
         outgoing = spawn ( self.submitBroker )        
+        acknowledging = spawn ( self.acknowledgeMessage )        
         while self.block() == True:
             while self.connected==False and self.block() == True:
                 try:
@@ -128,10 +147,9 @@ class Broker(Greenlet, QueueFunctions, Block):
         It also makes sure the incoming data is encapsulated in the right Wishbone format.
         When successful, this function acknowledges the message from the broker.
         '''
-        self.sendData({'header':{},'data':doc.body}, queue='inbox')
+        self.sendData({'header':{'broker_tag':doc.delivery_tag},'data':doc.body}, queue='inbox')
         self.logging.debug('Data received from broker.')
-        self.incoming.basic_ack(doc.delivery_tag)
-        
+         
     def produce(self,message):
         '''Is called upon each message going to to the broker infrastructure.
         
@@ -143,6 +161,9 @@ class Broker(Greenlet, QueueFunctions, Block):
                 msg = amqp.Message(str(message['data']))
                 msg.properties["delivery_mode"] = 2
                 self.outgoing.basic_publish(msg,exchange=message['header']['broker_exchange'],routing_key=message['header']['broker_key'])
+                
+                if message['header'].has_key('broker_tag'):
+                    self.incoming.basic_ack(message['header']['broker_tag'])                
             else:
                 raise Exception('Not Connected to broker')
         else:
