@@ -28,8 +28,6 @@ from gevent import Greenlet
 from gevent.queue import Queue
 from gevent.event import Event
 from copy import deepcopy
-from pymongo import Connection
-from gevent import monkey; monkey.patch_all()
 
 class QueueFunctions():
     '''A base class for Wishbone Actor classes.  Shouldn't be called directly but is inherited by PrimitiveActor.'''
