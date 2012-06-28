@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  server.py
+#  parallelserver.py
 #  
 #  Copyright 2012 Jelle Smet development@smetj.net
 #  
@@ -42,7 +42,7 @@ class LogFilter(logging.Filter):
         
         return True
 
-class Server():
+class ParallelServer():
     '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.''' 
     
     def __init__(self, instances=1, setup=None, daemonize=False, log_level=logging.INFO, name='Server'):
