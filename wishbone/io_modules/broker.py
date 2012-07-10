@@ -35,12 +35,24 @@ class Broker(Greenlet, QueueFunctions, Block):
     Data consumed from the broker goes into self.inbox
     Data which should be produced towards to broker goes into self.outbox
     
-    The message submitted to self.outbox should have 2 values in its headers:
+    Acknowledging:
     
-        {'header':{'broker_exchange':name, 'broker_key':name}}
+    Messages which arrive in the outbox and which have an acknowledge tag in the header will be acknowledged.
+    When a broker_tag is submitted to the acknowledge queue the tag is acknowledged with the broker.
+    
+    The message submitted to self.outbox should have 3 values in its headers:
+    
+        {'header':{'broker_exchange':name, 'broker_key':name, 'broker_tag':tag}}
         
         * broker_exchange:    The exchange to which data should be submitted.
         * broker_key:         The routing key used when submitting data.
+        * broker_tag:         The tag used to acknowledge the message from the broker.
+        
+        Queues:
+        
+        * inbox:              The queue containing messages coming from the broker.
+        * outbox:             The queue containing messages to the broker.
+        * acknowledge:        The queue containing messages to acknowledge
 
         Parameters:
 
