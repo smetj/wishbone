@@ -142,9 +142,3 @@ class Wishbone(Block):
             return '0'
         else:
             return str(current_process().name)
-
-
-class Server():
-    
-    def __init__(self):
-        pass
