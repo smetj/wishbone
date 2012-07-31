@@ -29,7 +29,7 @@ from time import sleep
 from os import getpid, kill, remove, path
 from signal import SIGINT
 import sys
-from gevent import monkey;monkey.patch_all()
+from gevent import monkey
 
 class LogFilter(logging.Filter):
     '''Logging() Filter wich only allows Wishbone related logging.'''
@@ -67,6 +67,7 @@ class ParallelServer():
                 with daemon.DaemonContext():
                     self.__start()
             else:
+                monkey.patch_all()
                 self.configureLogging(loglevel=self.log_level)
                 self.logging = logging.getLogger( 'Server' )
                 self.__start()
