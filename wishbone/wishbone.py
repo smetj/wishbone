@@ -30,6 +30,7 @@ from multiprocessing import current_process
 from string import lstrip
 from toolkit import Block
 from sys import exit
+from wishbone.server import tools
 
 class Wishbone(Block):
     '''
@@ -43,6 +44,7 @@ class Wishbone(Block):
         self.connectors=[]
         self.hub = Queue(None)
         self.outhub = Queue(None)
+        self.tools.configureLogging()
         self.run=self.start
         
     def registerModule(self, config, *args, **kwargs):
@@ -102,6 +104,8 @@ class Wishbone(Block):
         except KeyboardInterrupt:
             self.release()
             self.stop()
+        except Exception as err:
+            self.logging.error("Error ocurred. Reason: %s"%(err))
             
     def stop(self):
         '''Function which stops all registered Wishbone modules.

@@ -29,6 +29,7 @@ from time import sleep
 from os import getpid, kill, remove, path
 from signal import SIGINT
 import sys
+import tools
 from gevent import monkey
 
 class LogFilter(logging.Filter):
@@ -45,13 +46,13 @@ class LogFilter(logging.Filter):
 class ParallelServer():
     '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.''' 
     
-    def __init__(self, instances=1, setup=None, daemonize=False, log_level=logging.INFO, name='Server'):
+    def __init__(self, instances=1, setup=None, daemonize=False, log_level=logging.INFO, name='Server', pidlocation='/tmp'):
         self.instances=instances
         self.setup=setup
         self.daemonize=daemonize
         self.log_level=log_level
         self.name=name
-        self.pidfile='/tmp/%s.pid'%name
+        self.pidfile="%s/%s.pid"%(pidlocation,name)
         self.wishbone=None
         self.processes=[]
         self.pids = []
@@ -62,13 +63,13 @@ class ParallelServer():
         if self.checkPids() == True:
             if self.daemonize == True:
                 print 'Starting %s in background.' % (self.name)
-                self.configureLogging(name=self.name, syslog=True, loglevel=self.log_level)
+                tools.configureLogging(name=self.name, syslog=True, loglevel=self.log_level)
                 self.logging = logging.getLogger( 'Server' )
                 with daemon.DaemonContext():
                     self.__start()
             else:
                 monkey.patch_all()
-                self.configureLogging(loglevel=self.log_level)
+                tools.configureLogging(loglevel=self.log_level)
                 self.logging = logging.getLogger( 'Server' )
                 self.__start()
     
@@ -176,6 +177,7 @@ class ParallelServer():
             pidfile = open(self.pidfile,'w')
             pidfile.write("\n".join(map(str, self.pids)))
             pidfile.close()
+            self.logging.debug('Pid file written to %s'%(self.pidfile))
         except Exception as err:
             self.logging.warn('Could not write pid file.  Reason: %s' %(err))
             
@@ -188,7 +190,8 @@ class ParallelServer():
         except Exception as err:
             self.logging.warn('I could not remove the pidfile. Reason: '%(err))            
     
-    def configureLogging(self,name=None, syslog=False, loglevel=logging.INFO):
+    @staticmethod
+    def configureLogging(name=None, syslog=False, loglevel=logging.INFO):
         '''Configures logging.
         
         Configures the format of the logging messages.  This function accepts 1 parameter:
