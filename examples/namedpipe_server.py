@@ -23,16 +23,16 @@
 #  
 
 from wishbone.wishbone import Wishbone
-from wishbone.server import Server
+from wishbone.server import ParallelServer
 
 
 if __name__ == '__main__':    
     def setup():    
         wb = Wishbone()
-        wb.registerModule ( ('wishbone.io_modules', 'NamedPipe', 'named_pipe'), file='/tmp/named_pipe_server' )
-        wb.registerModule ( ('wishbone.modules', 'STDOUT', 'stdout'), complete=True, purge=True )
+        wb.registerModule ( ('wishbone.io_modules.namedpipe', 'NamedPipe', 'named_pipe'), file='/tmp/named_pipe_server' )
+        wb.registerModule ( ('wishbone.modules.stdout', 'STDOUT', 'stdout'), complete=True, purge=True )
         wb.connect (wb.named_pipe.inbox, wb.stdout.inbox)        
         wb.start()
         
-    server = Server(instances=1, setup=setup, daemonize=False, name='named_pipe_server')
+    server = ParallelServer(instances=1, setup=setup, daemonize=False, name='named_pipe_server')
     server.start()
