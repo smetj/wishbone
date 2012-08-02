@@ -30,6 +30,7 @@ from multiprocessing import current_process
 from string import lstrip
 from toolkit import Block
 from sys import exit
+from wishbone.tools import configureLogging
 
 class Wishbone(Block):
     '''
