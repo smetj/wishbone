@@ -39,6 +39,7 @@ class Wishbone(Block):
     
     def __init__(self):
         self.logging = logging.getLogger( 'Wishbone' )
+        configureLogging()
         Block.__init__(self)
         self.modules=[]
         self.connectors=[]

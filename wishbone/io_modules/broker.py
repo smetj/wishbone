@@ -63,9 +63,10 @@ class Broker(Greenlet, QueueFunctions, Block):
         * password:           The password to connect to the broker.  By default this is 'guest'.
         * consume_queue:      The queue which should be consumed. By default this is "wishbone_in".
         * prefetch_count:     The amount of messages consumed from the queue at once.
+        * no_ack:             Should no acknowledgements be required? By default this is False.
     '''
     
-    def __init__(self, name, host, vhost='/', username='guest', password='guest', prefetch_count=1, consume_queue='wishbone_in' ):
+    def __init__(self, name, host, vhost='/', username='guest', password='guest', prefetch_count=1, no_ack=False, consume_queue='wishbone_in' ):
     
         Greenlet.__init__(self)
         Block.__init__(self)
@@ -77,6 +78,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         self.username=username
         self.password=password
         self.prefetch_count=prefetch_count
+        self.no_ack=no_ack
         self.consume_queue = consume_queue
         self.outbox=Queue(None)
         self.inbox=Queue(None)
@@ -137,7 +139,7 @@ class Broker(Greenlet, QueueFunctions, Block):
                         night *=2
                     self.__setup()
                     self.connected = True
-                    self.incoming.basic_consume(queue=self.consume_queue, callback=self.consume, consumer_tag='request')
+                    self.incoming.basic_consume(queue=self.consume_queue, callback=self.consume, consumer_tag='request', no_ack=self.no_ack)
                     night=0.5
                 except Exception as err:
                     self.connected=False

@@ -28,8 +28,8 @@ The Broker module consumes and produces data to a message broker infrastructure,
             self.sendData(message)
 
     wb = wishbone.Wishbone()
-    wb.registerModule ( ('wishbone.io_modules', 'Broker', 'broker'), host='sandbox', vhost='/', username='guest', password='guest', consume_queue='indigo' )
-    wb.registerModule ( ('wishbone.modules', 'STDOUT', 'stdout') )
+    wb.registerModule ( ('wishbone.io_modules.broker', 'Broker', 'broker'), host='sandbox', vhost='/', username='guest', password='guest', consume_queue='indigo' )
+    wb.registerModule ( ('wishbone.modules.stdout', 'STDOUT', 'stdout') )
     wb.registerModule ( ('__main__', 'Header', 'header') )
 
     wb.connect (wb.broker.inbox, wb.stdout.inbox)

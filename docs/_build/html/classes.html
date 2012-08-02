@@ -56,57 +56,8 @@
             
   <div class="section" id="classes">
 <h1>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-wishbone.wishbone">
-<span id="wishbone-module"></span><h2>Wishbone Module<a class="headerlink" href="#module-wishbone.wishbone" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="wishbone.wishbone.Wishbone">
-<em class="property">class </em><tt class="descclassname">wishbone.wishbone.</tt><tt class="descname">Wishbone</tt><a class="reference internal" href="_modules/wishbone/wishbone.html#Wishbone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.wishbone.Wishbone" title="Permalink to this definition">¶</a></dt>
-<dd><p>The main class in which the Wishbone modules are registered and managed.</p>
-<dl class="method">
-<dt id="wishbone.wishbone.Wishbone.connect">
-<tt class="descname">connect</tt><big>(</big><em>source</em>, <em>destination</em><big>)</big><a class="reference internal" href="_modules/wishbone/wishbone.html#Wishbone.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.wishbone.Wishbone.connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a new background Greenthread which continuously consumes all messages from source into destination.</p>
-<p>This function is used to connect the queue of one module with the queue of another.  A typical useage is to connect outbox from module1
-to inbox of module2.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="wishbone.wishbone.Wishbone.registerModule">
-<tt class="descname">registerModule</tt><big>(</big><em>config</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/wishbone.html#Wishbone.registerModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.wishbone.Wishbone.registerModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Registers a Wishbone Module into the framework.  All modules used within Wishbone should be regesitered through this function.</p>
-<p>This function receives a tuple containing 3 values.  Any further args or kwargs are used to initialize the actual module you register.</p>
-<p>The config parameter should be a tuple of 3 strings:</p>
-<blockquote>
-<div><p>(module, class, name)</p>
-<ul class="simple">
-<li>module:     The name of the module to import.</li>
-<li>class:      The name of the class to initialize</li>
-<li>name:       The name under which the module should be initialized.</li>
-</ul>
-<p><a href="#id1"><span class="problematic" id="id2">*</span></a>args and <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs are passed to the class which is initialized.</p>
-</div></blockquote>
-<p>self.modules contains a list of all registered modules.  Also, each registered module is registered under self.name, where name is last
-value of the tuple.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="wishbone.wishbone.Wishbone.start">
-<tt class="descname">start</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/wishbone/wishbone.html#Wishbone.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.wishbone.Wishbone.start" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function which starts all registered Wishbone modules.</p>
-<p>Function which runs over all registered instances/modules and tries to execute the start() function in order to let that module start
-to consume the messages of its inbox and execute the consume function on each message.
-This function blocks from exiting.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="wishbone.wishbone.Wishbone.stop">
-<tt class="descname">stop</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/wishbone/wishbone.html#Wishbone.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.wishbone.Wishbone.stop" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function which stops all registered Wishbone modules.</p>
-<p>Function which runs over all registered instances/modules and tries to execute its stop() function in order to stop that module.</p>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="wishbone-module">
+<h2>Wishbone Module<a class="headerlink" href="#wishbone-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-wishbone.toolkit">
 <span id="toolkit-module"></span><h2>Toolkit module<a class="headerlink" href="#module-wishbone.toolkit" title="Permalink to this headline">¶</a></h2>
@@ -130,25 +81,6 @@ This function blocks from exiting.</p>
 <dt id="wishbone.toolkit.Block.wait">
 <tt class="descname">wait</tt><big>(</big><em>timeout=None</em><big>)</big><a class="headerlink" href="#wishbone.toolkit.Block.wait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Blocks from exiting until self.lock is set.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="wishbone.toolkit.ESTools">
-<em class="property">class </em><tt class="descclassname">wishbone.toolkit.</tt><tt class="descname">ESTools</tt><a class="headerlink" href="#wishbone.toolkit.ESTools" title="Permalink to this definition">¶</a></dt>
-<dd><p>A baseclass which offers ElasticSearch connectivity and functionality.</p>
-<dl class="method">
-<dt id="wishbone.toolkit.ESTools.es_index">
-<tt class="descname">es_index</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#wishbone.toolkit.ESTools.es_index" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper around ES.index()</p>
-<p>When ES is not available it tries to resubmit the document untill the general block is cancelled.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="wishbone.toolkit.ESTools.setupConnection">
-<tt class="descname">setupConnection</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.toolkit.ESTools.setupConnection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper for calling __setupConnection.  Spawned into a greenlet so it doesn&#8217;t block us.</p>
 </dd></dl>
 
 </dd></dl>
@@ -309,16 +241,26 @@ or when it doesn&#8217;t match your predifined Validator schema, it is dropped.<
 <span id="broker-class"></span><h2>Broker Class<a class="headerlink" href="#module-wishbone.io_modules.broker" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="wishbone.io_modules.broker.Broker">
-<em class="property">class </em><tt class="descclassname">wishbone.io_modules.broker.</tt><tt class="descname">Broker</tt><big>(</big><em>name</em>, <em>host</em>, <em>vhost='/'</em>, <em>username='guest'</em>, <em>password='guest'</em>, <em>consume_queue='wishbone_in'</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/broker.html#Broker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.broker.Broker" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.broker.</tt><tt class="descname">Broker</tt><big>(</big><em>name</em>, <em>host</em>, <em>vhost='/'</em>, <em>username='guest'</em>, <em>password='guest'</em>, <em>prefetch_count=1</em>, <em>consume_queue='wishbone_in'</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/broker.html#Broker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.broker.Broker" title="Permalink to this definition">¶</a></dt>
 <dd><p>A Wisbone module which handles AMQP0.8 input and output.  It&#8217;s meant to be resillient to disconnects and broker unavailability.</p>
 <p>Data consumed from the broker goes into self.inbox
 Data which should be produced towards to broker goes into self.outbox</p>
-<p>The message submitted to self.outbox should have 2 values in its headers:</p>
+<p>Acknowledging:</p>
+<p>Messages which arrive in the outbox and which have an acknowledge tag in the header will be acknowledged.
+When a broker_tag is submitted to the acknowledge queue the tag is acknowledged with the broker.</p>
+<p>The message submitted to self.outbox should have 3 values in its headers:</p>
 <blockquote>
-<div><p>{&#8216;header&#8217;:{&#8216;broker_exchange&#8217;:name, &#8216;broker_key&#8217;:name}}</p>
+<div><p>{&#8216;header&#8217;:{&#8216;broker_exchange&#8217;:name, &#8216;broker_key&#8217;:name, &#8216;broker_tag&#8217;:tag}}</p>
 <ul class="simple">
 <li>broker_exchange:    The exchange to which data should be submitted.</li>
 <li>broker_key:         The routing key used when submitting data.</li>
+<li>broker_tag:         The tag used to acknowledge the message from the broker.</li>
+</ul>
+<p>Queues:</p>
+<ul class="simple">
+<li>inbox:              The queue containing messages coming from the broker.</li>
+<li>outbox:             The queue containing messages to the broker.</li>
+<li>acknowledge:        The queue containing messages to acknowledge</li>
 </ul>
 <p>Parameters:</p>
 <ul class="simple">
@@ -328,8 +270,15 @@ Data which should be produced towards to broker goes into self.outbox</p>
 <li>username:           The username to connect to the broker.  By default this is &#8216;guest&#8217;.</li>
 <li>password:           The password to connect to the broker.  By default this is &#8216;guest&#8217;.</li>
 <li>consume_queue:      The queue which should be consumed. By default this is &#8220;wishbone_in&#8221;.</li>
+<li>prefetch_count:     The amount of messages consumed from the queue at once.</li>
 </ul>
 </div></blockquote>
+<dl class="method">
+<dt id="wishbone.io_modules.broker.Broker.acknowledgeMessage">
+<tt class="descname">acknowledgeMessage</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.io_modules.broker.Broker.acknowledgeMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acknowledges messages</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="wishbone.io_modules.broker.Broker.consume">
 <tt class="descname">consume</tt><big>(</big><em>doc</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/broker.html#Broker.consume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.broker.Broker.consume" title="Permalink to this definition">¶</a></dt>
@@ -400,7 +349,7 @@ When successful, this function acknowledges the message from the broker.</p>
 <dl class="class">
 <dt id="wishbone.io_modules.namedpipe.NamedPipe">
 <em class="property">class </em><tt class="descclassname">wishbone.io_modules.namedpipe.</tt><tt class="descname">NamedPipe</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/namedpipe.html#NamedPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.namedpipe.NamedPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>A Wishbone module which handles named pipe input.</p>
+<dd><p>A Wishbone IO module which handles named pipe input.</p>
 <p>Parameters:</p>
 <blockquote>
 <div><ul class="simple">
@@ -408,6 +357,28 @@ When successful, this function acknowledges the message from the broker.</p>
 <li>file:       The absolute filename of the named pipe.</li>
 </ul>
 </div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h2>NamedPipe Class<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-wishbone.io_modules.socketfile"></span><dl class="class">
+<dt id="wishbone.io_modules.socketfile.SocketFile">
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.socketfile.</tt><tt class="descname">SocketFile</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/socketfile.html#SocketFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.socketfile.SocketFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Wishbone IO module which handles unix domain socket input.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>name:       The name you want this module to be registered under.</li>
+<li>file:       The absolute filename of the named pipe.</li>
+</ul>
+</div></blockquote>
+<dl class="method">
+<dt id="wishbone.io_modules.socketfile.SocketFile.handle">
+<tt class="descname">handle</tt><big>(</big><em>socket</em>, <em>address</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/socketfile.html#SocketFile.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.socketfile.SocketFile.handle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is called upon each incoming message, makes sure the data has the right Wishbone format and writes the it into self.inbox</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -422,7 +393,7 @@ When successful, this function acknowledges the message from the broker.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Classes</a><ul>
-<li><a class="reference internal" href="#module-wishbone.wishbone">Wishbone Module</a></li>
+<li><a class="reference internal" href="#wishbone-module">Wishbone Module</a></li>
 <li><a class="reference internal" href="#module-wishbone.toolkit">Toolkit module</a></li>
 <li><a class="reference internal" href="#module-wishbone.modules.skeleton">Skeleton Class</a></li>
 <li><a class="reference internal" href="#module-wishbone.modules.jsonvalidator">Jsonvalidator Class</a></li>
@@ -431,6 +402,7 @@ When successful, this function acknowledges the message from the broker.</p>
 <li><a class="reference internal" href="#module-wishbone.io_modules.broker">Broker Class</a></li>
 <li><a class="reference internal" href="#module-wishbone.io_modules.udpserver">UDPserver Class</a></li>
 <li><a class="reference internal" href="#module-wishbone.io_modules.namedpipe">NamedPipe Class</a></li>
+<li><a class="reference internal" href="#id1">NamedPipe Class</a></li>
 </ul>
 </li>
 </ul>
