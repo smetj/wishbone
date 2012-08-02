@@ -5,7 +5,7 @@ Classes
 Wishbone Module
 ===============
 
-.. automodule:: wishbone.wishbone
+.. automodule:: Wishbone
    :members:
     
 Toolkit module

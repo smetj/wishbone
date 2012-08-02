@@ -5,7 +5,7 @@ Classes
 Wishbone Module
 ===============
 
-.. automodule:: wishbone.wishbone
+.. automodule:: Wishbone
    :members:
     
 Toolkit module
@@ -53,5 +53,11 @@ NamedPipe Class
 ===============
 
 .. automodule:: wishbone.io_modules.namedpipe
+   :members:
+
+NamedPipe Class
+===============
+
+.. automodule:: wishbone.io_modules.socketfile
    :members:
 
