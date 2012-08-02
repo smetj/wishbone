@@ -1,63 +1,75 @@
-=======
-Classes
-======= 
+===================
+Modules and Classes
+===================
 
-Wishbone Module
-===============
+Wishbone
+========
 
-.. automodule:: Wishbone
+.. automodule:: wishbone.main
    :members:
     
-Toolkit module
-==============
+Toolkit 
+=======
 
 .. automodule:: wishbone.toolkit
    :members:
 
-Skeleton Class
-==============
+==========
+IO modules
+==========
 
-.. automodule:: wishbone.modules.skeleton
-   :members:
+IO modules are modules which receive/submit messages from/to an outside source.
 
-Jsonvalidator Class
-===================
-
-.. automodule:: wishbone.modules.jsonvalidator
-   :members:
-
-Compressor Class
-================
-.. automodule:: wishbone.modules.compressor
-   :members:
-
-STDOUT Class
-============
-
-.. automodule:: wishbone.modules.stdout
-   :members:
-
-Broker Class
-============
+Broker
+======
 
 .. automodule:: wishbone.io_modules.broker
    :members:
 
-UDPserver Class
-===============
+UDPserver
+=========
 
 .. automodule:: wishbone.io_modules.udpserver
    :members:
 
-NamedPipe Class
-===============
+NamedPipe
+=========
 
 .. automodule:: wishbone.io_modules.namedpipe
    :members:
 
-NamedPipe Class
-===============
+SocketFile
+==========
 
 .. automodule:: wishbone.io_modules.socketfile
    :members:
 
+=======
+Modules
+=======
+
+Modules only receive/submit message from/to other modules.
+
+Skeleton
+========
+
+.. automodule:: wishbone.modules.skeleton
+   :members:
+
+Jsonvalidator
+=============
+
+.. automodule:: wishbone.modules.jsonvalidator
+   :members:
+
+Compressor
+==========
+
+.. automodule:: wishbone.modules.compressor
+   :members:
+
+STDOUT
+======
+
+.. automodule:: wishbone.modules.stdout
+   :members:
