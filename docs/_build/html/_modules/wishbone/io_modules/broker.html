@@ -26,7 +26,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="top" title="Wishbone 0.1 documentation" href="../../../index.html" />
-    <link rel="up" title="wishbone" href="../../wishbone.html" /> 
+    <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,8 +39,7 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../../../index.html">Wishbone 0.1 documentation</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../wishbone.html" accesskey="U">wishbone</a> &raquo;</li> 
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -53,7 +52,7 @@
 <span class="c">#!/usr/bin/env python</span>
 <span class="c"># -*- coding: utf-8 -*-</span>
 <span class="c">#</span>
-<span class="c">#  io.py</span>
+<span class="c">#  broker.py</span>
 <span class="c">#  </span>
 <span class="c">#  Copyright 2012 Jelle Smet development@smetj.net</span>
 <span class="c">#  </span>
@@ -75,47 +74,66 @@
 <span class="c">#  </span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">amqplib</span> <span class="kn">import</span> <span class="n">client_0_8</span> <span class="k">as</span> <span class="n">amqp</span>
-<span class="kn">from</span> <span class="nn">wishbone.toolkit</span> <span class="kn">import</span> <span class="n">QueueFunctions</span>
-<span class="kn">from</span> <span class="nn">gevent</span> <span class="kn">import</span> <span class="n">Greenlet</span><span class="p">,</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">spawn</span>
+<span class="kn">from</span> <span class="nn">wishbone.toolkit</span> <span class="kn">import</span> <span class="n">QueueFunctions</span><span class="p">,</span> <span class="n">Block</span>
+<span class="kn">from</span> <span class="nn">gevent</span> <span class="kn">import</span> <span class="n">Greenlet</span><span class="p">,</span> <span class="n">spawn</span><span class="p">,</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">gevent.queue</span> <span class="kn">import</span> <span class="n">Queue</span>
-<span class="kn">from</span> <span class="nn">gevent</span> <span class="kn">import</span> <span class="n">monkey</span><span class="p">;</span> <span class="n">monkey</span><span class="o">.</span><span class="n">patch_all</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">amqplib</span> <span class="kn">import</span> <span class="n">client_0_8</span> <span class="k">as</span> <span class="n">amqp</span>
+<span class="kn">from</span> <span class="nn">gevent</span> <span class="kn">import</span> <span class="n">monkey</span><span class="p">;</span><span class="n">monkey</span><span class="o">.</span><span class="n">patch_all</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Broker"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.broker.Broker">[docs]</a><span class="k">class</span> <span class="nc">Broker</span><span class="p">(</span><span class="n">Greenlet</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">):</span>
+<div class="viewcode-block" id="Broker"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.broker.Broker">[docs]</a><span class="k">class</span> <span class="nc">Broker</span><span class="p">(</span><span class="n">Greenlet</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">,</span> <span class="n">Block</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;A Wisbone module which handles AMQP0.8 input and output.  It&#39;s meant to be resillient to disconnects and broker unavailability.</span>
 <span class="sd">    </span>
 <span class="sd">    Data consumed from the broker goes into self.inbox</span>
 <span class="sd">    Data which should be produced towards to broker goes into self.outbox</span>
 <span class="sd">    </span>
-<span class="sd">    The message submitted to self.outbox should have 2 values in its headers:</span>
+<span class="sd">    Acknowledging:</span>
 <span class="sd">    </span>
-<span class="sd">        {&#39;header&#39;:{&#39;broker_exchange&#39;:name, &#39;broker_key&#39;:name}}</span>
+<span class="sd">    Messages which arrive in the outbox and which have an acknowledge tag in the header will be acknowledged.</span>
+<span class="sd">    When a broker_tag is submitted to the acknowledge queue the tag is acknowledged with the broker.</span>
+<span class="sd">    </span>
+<span class="sd">    The message submitted to self.outbox should have 3 values in its headers:</span>
+<span class="sd">    </span>
+<span class="sd">        {&#39;header&#39;:{&#39;broker_exchange&#39;:name, &#39;broker_key&#39;:name, &#39;broker_tag&#39;:tag}}</span>
 <span class="sd">        </span>
-<span class="sd">        broker_exchange:    The exchange to which data should be submitted.</span>
-<span class="sd">        broker_key:         The routing key used when submitting data.</span>
-<span class="sd">    </span>
-<span class="sd">    Parameters:</span>
-<span class="sd">        name:               The name you want this module to be registered under.</span>
-<span class="sd">        host:               The name or IP of the broker.</span>
-<span class="sd">        vhost:              The virtual host of the broker. By default this is &#39;/&#39;</span>
-<span class="sd">        username:           The username to connect to the broker.  By default this is &#39;guest&#39;.</span>
-<span class="sd">        password:           The password to connect to the broker.  By default this is &#39;guest&#39;.</span>
-<span class="sd">        consume_queue:      The queue which should be consumed. By default this is &quot;wishbone_in&quot;.</span>
+<span class="sd">        * broker_exchange:    The exchange to which data should be submitted.</span>
+<span class="sd">        * broker_key:         The routing key used when submitting data.</span>
+<span class="sd">        * broker_tag:         The tag used to acknowledge the message from the broker.</span>
+<span class="sd">        </span>
+<span class="sd">        Queues:</span>
+<span class="sd">        </span>
+<span class="sd">        * inbox:              The queue containing messages coming from the broker.</span>
+<span class="sd">        * outbox:             The queue containing messages to the broker.</span>
+<span class="sd">        * acknowledge:        The queue containing messages to acknowledge</span>
+
+<span class="sd">        Parameters:</span>
+
+<span class="sd">        * name:               The name you want this module to be registered under.</span>
+<span class="sd">        * host:               The name or IP of the broker.</span>
+<span class="sd">        * vhost:              The virtual host of the broker. By default this is &#39;/&#39;.</span>
+<span class="sd">        * username:           The username to connect to the broker.  By default this is &#39;guest&#39;.</span>
+<span class="sd">        * password:           The password to connect to the broker.  By default this is &#39;guest&#39;.</span>
+<span class="sd">        * consume_queue:      The queue which should be consumed. By default this is &quot;wishbone_in&quot;.</span>
+<span class="sd">        * prefetch_count:     The amount of messages consumed from the queue at once.</span>
+<span class="sd">        * no_ack:             Should no acknowledgements be required? By default this is False.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">vhost</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s">&#39;guest&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&#39;guest&#39;</span><span class="p">,</span> <span class="n">consume_queue</span><span class="o">=</span><span class="s">&#39;wishbone_in&#39;</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">vhost</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s">&#39;guest&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s">&#39;guest&#39;</span><span class="p">,</span> <span class="n">prefetch_count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">no_ack</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">consume_queue</span><span class="o">=</span><span class="s">&#39;wishbone_in&#39;</span> <span class="p">):</span>
+    
         <span class="n">Greenlet</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">QueueFunctions</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span> <span class="s">&#39;Broker&#39;</span> <span class="p">)</span>
+        <span class="n">Block</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span> <span class="n">name</span> <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Broker&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Initiated&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">=</span><span class="n">host</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vhost</span><span class="o">=</span><span class="n">vhost</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="o">=</span><span class="n">username</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="o">=</span><span class="n">password</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prefetch_count</span><span class="o">=</span><span class="n">prefetch_count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">no_ack</span><span class="o">=</span><span class="n">no_ack</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">consume_queue</span> <span class="o">=</span> <span class="n">consume_queue</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outbox</span><span class="o">=</span><span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inbox</span><span class="o">=</span><span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acknowledge</span><span class="o">=</span><span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">connected</span><span class="o">=</span><span class="bp">False</span>
 
     <span class="k">def</span> <span class="nf">__setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -124,6 +142,7 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">conn</span> <span class="o">=</span> <span class="n">amqp</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">&quot;</span><span class="si">%s</span><span class="s">:5672&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">),</span> <span class="n">userid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span><span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span> <span class="n">virtual_host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">vhost</span><span class="p">,</span> <span class="n">insist</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">incoming</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">basic_qos</span><span class="p">(</span><span class="n">prefetch_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">prefetch_count</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prefetch_count</span><span class="p">,</span> <span class="n">a_global</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outgoing</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Connected to broker&#39;</span><span class="p">)</span>
         
@@ -133,14 +152,27 @@
         
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">()</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
-                <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">outbox</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Submitting data to broker&#39;</span><span class="p">)</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">produce</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outbox</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
-                    <span class="k">except</span><span class="p">:</span>
-                        <span class="k">break</span>
-                <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">produce</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outbox</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Could not write data to broker.  Reason: </span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+                    <span class="k">break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="Broker.acknowledgeMessage"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.broker.Broker.acknowledgeMessage">[docs]</a>    <span class="k">def</span> <span class="nf">acknowledgeMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Acknowledges messages</span>
+<span class="sd">        &#39;&#39;&#39;</span>       
+
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">()</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ack</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acknowledge</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">basic_ack</span><span class="p">(</span><span class="n">ack</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">acknowledge</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">ack</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Could not acknowledge message in broker.  Reason: </span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+                    <span class="k">break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
                                 </div>
     <span class="k">def</span> <span class="nf">_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -149,26 +181,27 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Started&#39;</span><span class="p">)</span>
         <span class="n">night</span><span class="o">=</span><span class="mf">0.5</span>
-        <span class="n">outgoing</span> <span class="o">=</span> <span class="n">spawn</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">submitBroker</span> <span class="p">)</span>
-
+        <span class="n">outgoing</span> <span class="o">=</span> <span class="n">spawn</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">submitBroker</span> <span class="p">)</span>        
+        <span class="n">acknowledging</span> <span class="o">=</span> <span class="n">spawn</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">acknowledgeMessage</span> <span class="p">)</span>        
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">()</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
-            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected</span><span class="o">==</span><span class="bp">False</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected</span><span class="o">==</span><span class="bp">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">()</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">night</span> <span class="o">&lt;</span> <span class="mi">512</span><span class="p">:</span>
                         <span class="n">night</span> <span class="o">*=</span><span class="mi">2</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__setup</span><span class="p">()</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">basic_consume</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">consume_queue</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">consume</span><span class="p">,</span> <span class="n">consumer_tag</span><span class="o">=</span><span class="s">&#39;request&#39;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">connected</span><span class="o">=</span><span class="bp">True</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">basic_consume</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">consume_queue</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">consume</span><span class="p">,</span> <span class="n">consumer_tag</span><span class="o">=</span><span class="s">&#39;request&#39;</span><span class="p">,</span> <span class="n">no_ack</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">no_ack</span><span class="p">)</span>
                     <span class="n">night</span><span class="o">=</span><span class="mf">0.5</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">connected</span><span class="o">=</span><span class="bp">False</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Connection to broker lost. Reason: </span><span class="si">%s</span><span class="s">. Try again in </span><span class="si">%s</span><span class="s"> seconds.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">err</span><span class="p">,</span><span class="n">night</span><span class="p">)</span> <span class="p">)</span>
-                    <span class="n">sleep</span><span class="p">(</span><span class="n">night</span><span class="p">)</span>
-            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">()</span> <span class="o">==</span> <span class="bp">True</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;Connection to broker lost. Reason: </span><span class="si">%s</span><span class="s">. Try again in </span><span class="si">%s</span><span class="s"> seconds.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">err</span><span class="p">,</span><span class="n">night</span><span class="p">)</span> <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">night</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Connected&#39;</span><span class="p">)</span>
+            <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">()</span> <span class="o">==</span> <span class="bp">True</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>                
                 <span class="k">try</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;Connection to broker lost. Reason: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">err</span> <span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="ow">or</span> <span class="ne">KeyboardInterrupt</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;Connection to broker lost. Reason: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">err</span> <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="bp">False</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -180,21 +213,23 @@
 <span class="sd">        It also makes sure the incoming data is encapsulated in the right Wishbone format.</span>
 <span class="sd">        When successful, this function acknowledges the message from the broker.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">sendData</span><span class="p">({</span><span class="s">&#39;header&#39;</span><span class="p">:{},</span><span class="s">&#39;data&#39;</span><span class="p">:</span><span class="n">doc</span><span class="o">.</span><span class="n">body</span><span class="p">},</span> <span class="n">queue</span><span class="o">=</span><span class="s">&#39;inbox&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Data received from broker.&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">basic_ack</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">delivery_tag</span><span class="p">)</span>
-        </div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendData</span><span class="p">({</span><span class="s">&#39;header&#39;</span><span class="p">:{</span><span class="s">&#39;broker_tag&#39;</span><span class="p">:</span><span class="n">doc</span><span class="o">.</span><span class="n">delivery_tag</span><span class="p">},</span><span class="s">&#39;data&#39;</span><span class="p">:</span><span class="n">doc</span><span class="o">.</span><span class="n">body</span><span class="p">},</span> <span class="n">queue</span><span class="o">=</span><span class="s">&#39;inbox&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Data received from broker.&#39;</span><span class="p">)</span>
+         </div>
 <div class="viewcode-block" id="Broker.produce"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.broker.Broker.produce">[docs]</a>    <span class="k">def</span> <span class="nf">produce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">message</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Is called upon each message going to to the broker infrastructure.</span>
 <span class="sd">        </span>
 <span class="sd">        This function is called by the consume() function.  If the correct header info isn&#39;t present (but that would be odd at this point), the data is purged.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
+        
         <span class="k">if</span> <span class="n">message</span><span class="p">[</span><span class="s">&quot;header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;broker_exchange&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">message</span><span class="p">[</span><span class="s">&quot;header&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;broker_key&#39;</span><span class="p">):</span>            
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
-                <span class="n">msg</span> <span class="o">=</span> <span class="n">amqp</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">])</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="n">amqp</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]))</span>
                 <span class="n">msg</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s">&quot;delivery_mode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">outgoing</span><span class="o">.</span><span class="n">basic_publish</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span><span class="n">exchange</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="s">&#39;header&#39;</span><span class="p">][</span><span class="s">&#39;broker_exchange&#39;</span><span class="p">],</span><span class="n">routing_key</span><span class="o">=</span><span class="n">message</span><span class="p">[</span><span class="s">&#39;header&#39;</span><span class="p">][</span><span class="s">&#39;broker_key&#39;</span><span class="p">])</span>
+                
+                <span class="k">if</span> <span class="n">message</span><span class="p">[</span><span class="s">&#39;header&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s">&#39;broker_tag&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">basic_ack</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="s">&#39;header&#39;</span><span class="p">][</span><span class="s">&#39;broker_tag&#39;</span><span class="p">])</span>                
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Not Connected to broker&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -203,6 +238,10 @@
 <div class="viewcode-block" id="Broker.shutdown"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.broker.Broker.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;This function is called on shutdown().&#39;&#39;&#39;</span>
         
+        <span class="k">try</span><span class="p">:</span>
+             <span class="bp">self</span><span class="o">.</span><span class="n">incoming</span><span class="o">.</span><span class="n">basic_cancel</span><span class="p">(</span><span class="s">&#39;request&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Shutdown&#39;</span><span class="p">)</span></div></div>
 </pre></div>
 
@@ -238,8 +277,7 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../../../index.html">Wishbone 0.1 documentation</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../wishbone.html" >wishbone</a> &raquo;</li> 
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
