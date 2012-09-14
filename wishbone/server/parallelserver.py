@@ -32,17 +32,6 @@ import sys
 import tools
 from gevent import monkey
 
-class LogFilter(logging.Filter):
-    '''Logging() Filter wich only allows Wishbone related logging.'''
-    
-    black_list_names = [ 'pyes', 'requests.packages.urllib3.connectionpool' ]
-    
-    def filter(self, record):
-        if record.name in self.black_list_names:
-            return False
-        
-        return True
-
 class ParallelServer():
     '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.''' 
     
@@ -188,34 +177,4 @@ class ParallelServer():
             remove(self.pidfile)
             self.logging.info('Pidfile removed.')
         except Exception as err:
-            self.logging.warn('I could not remove the pidfile. Reason: '%(err))            
-    
-    @staticmethod
-    def configureLogging(name=None, syslog=False, loglevel=logging.INFO):
-        '''Configures logging.
-        
-        Configures the format of the logging messages.  This function accepts 1 parameter:
-        
-        loglevel: defines the loglevel.'''
-        
-        if name == None:
-            format= '%(asctime)s %(levelname)s %(name)s: %(message)s'
-        else:
-            format= name+' %(name)s: %(message)s'
-        if syslog == False:
-            logger = logging.getLogger()
-            logger.setLevel(loglevel)
-            stream = logging.StreamHandler(sys.stdout)
-            formatter = logging.Formatter(format)
-            stream.setFormatter(formatter)
-            stream.addFilter(LogFilter())
-            logger.addHandler(stream)
-        else:
-            from logging.handlers import SysLogHandler
-            logger = logging.getLogger()
-            logger.setLevel(loglevel)
-            syslog = SysLogHandler(address='/dev/log')
-            syslog.set_name(self.name)
-            formatter = logging.Formatter(format)
-            syslog.setFormatter(formatter)
-            logger.addHandler(syslog)
+            self.logging.warn('I could not remove the pidfile. Reason: '%(err))
