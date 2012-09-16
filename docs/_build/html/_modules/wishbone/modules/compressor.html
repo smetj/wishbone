@@ -26,7 +26,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="top" title="Wishbone 0.1 documentation" href="../../../index.html" />
-    <link rel="up" title="wishbone" href="../../wishbone.html" /> 
+    <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,8 +39,7 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../../../index.html">Wishbone 0.1 documentation</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../wishbone.html" accesskey="U">wishbone</a> &raquo;</li> 
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -87,7 +86,7 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">PrimitiveActor</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
       
-<div class="viewcode-block" id="Compressor.consume"><a class="viewcode-back" href="../../../classes.html#wishbone.modules.compressor.Compressor.consume">[docs]</a>    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">message</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">message</span><span class="p">):</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">message</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">snappy</span><span class="o">.</span><span class="n">isValidCompressed</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Data decompressed.&#39;</span><span class="p">)</span>
@@ -96,11 +95,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Data compressed.&#39;</span><span class="p">)</span>
             <span class="n">message</span><span class="p">[</span><span class="s">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">snappy</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="n">message</span><span class="p">[</span><span class="s">&#39;header&#39;</span><span class="p">][</span><span class="s">&#39;compression&#39;</span><span class="p">]</span><span class="o">=</span><span class="s">&#39;snappy&#39;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sendData</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-       </div>
-<div class="viewcode-block" id="Compressor.shutdown"><a class="viewcode-back" href="../../../index.html#wishbone.modules.compressor.Compressor.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Shutdown&#39;</span><span class="p">)</span>
-        </div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sendData</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -135,8 +130,7 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../../../index.html">Wishbone 0.1 documentation</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../wishbone.html" >wishbone</a> &raquo;</li> 
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

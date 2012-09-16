@@ -4,11 +4,6 @@ Introduction
 
 Wishbone is a gevent based framework to write `asynchronous`, modular message passing code by connecting message queues of multiple modules into a clean workflow.
 
-Intended use
-============
-
-Although not limited to it, Wishbone is geared towards writing applications to consume and process data coming from a Message broker infrastructure.
-
 Wishbone modules
 ================
 
@@ -18,25 +13,19 @@ the module delivers it to its "outbox" queue.  The framework takes care of forwa
 
 By connecting the different queues with each other, one can make a clean "asynchronous" workflow in a simple way, without using any callbacks.
 
-Wishbone comes with a some premade modules such as:
+There are 2 types of modules:
+    IO_modules receive/submit messages from/to outside the Wishbone framework.
+    Modules receive/submit message to other modules.
 
-	* :class:`wishbone.io_modules.broker.Broker`
-	* :class:`wishbone.io_modules.udpserver.UDPServer`
-	* :class:`wishbone.modules.skeleton.Skeleton`
-	* ...
+Wishbone
+========
 
-Wishbone objects
-================
+Wishbone is organized around 1 object which, holds and organises the chain of Wishbone modules resulting into your processing workflow.
 
-Wishbone is organized around 2 objects which, in combination with "Wishbone Modules", can be combined into a data processing framework:
-
-	* :class:`wishbone.wishbone.Wishbone`
-	* :class:`wishbone.server.Server`
-
+	* :class:`wishbone.main.Wishbone`
 
 The data which is passed from one modules queue to another should have a certain format.  If not then it will be purged.
 At a certain point you need to have a module which receives data from outside such as the Broker() or UDPServer() modules.
-
 
 They are responsible to embed the raw data into the right format which is actually a dictionary with 2 elements, headers and data:
 
@@ -46,3 +35,12 @@ They are responsible to embed the raw data into the right format which is actual
 
 
 Headers contains a dictionary with values for modules to use.  Data contains the actual data.
+
+
+ParallelServer
+==============
+
+ParallelServe is a class which allows you to start multiple Wishbone chains in parallel each as a different process.
+This basically results into a libevent loop per process.
+
+	* :class:`wishbone.server.ParallelServer`

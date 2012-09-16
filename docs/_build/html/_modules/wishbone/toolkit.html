@@ -26,7 +26,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <link rel="top" title="Wishbone 0.1 documentation" href="../../index.html" />
-    <link rel="up" title="wishbone" href="../wishbone.html" /> 
+    <link rel="up" title="Module code" href="../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,8 +39,7 @@
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../../index.html">Wishbone 0.1 documentation</a> &raquo;</li>
-          <li><a href="../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../wishbone.html" accesskey="U">wishbone</a> &raquo;</li> 
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -75,15 +74,14 @@
 <span class="c">#  </span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">stopwatch</span>
 <span class="kn">from</span> <span class="nn">gevent</span> <span class="kn">import</span> <span class="n">Greenlet</span>
 <span class="kn">from</span> <span class="nn">gevent.queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">gevent.event</span> <span class="kn">import</span> <span class="n">Event</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 
 <div class="viewcode-block" id="QueueFunctions"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.QueueFunctions">[docs]</a><span class="k">class</span> <span class="nc">QueueFunctions</span><span class="p">():</span>
     <span class="sd">&#39;&#39;&#39;A base class for Wishbone Actor classes.  Shouldn&#39;t be called directly but is inherited by PrimitiveActor.&#39;&#39;&#39;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">=</span><span class="bp">True</span>
     
 <div class="viewcode-block" id="QueueFunctions.sendData"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.QueueFunctions.sendData">[docs]</a>    <span class="k">def</span> <span class="nf">sendData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="s">&#39;outbox&#39;</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Submits data to one of the module its queues.</span>
@@ -92,11 +90,16 @@
 <span class="sd">        an exception is returned.</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters:</span>
-<span class="sd">            queue:  Determines to which queue data should be send.  By default this is &#39;outbox&#39;.</span>
+
+<span class="sd">            * queue:  Determines to which queue data should be send.  By default this is &#39;outbox&#39;.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkIntegrity</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-            <span class="nb">getattr</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span><span class="o">.</span><span class="n">put</span> <span class="p">(</span> <span class="n">data</span> <span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">getattr</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span><span class="o">.</span><span class="n">put</span> <span class="p">(</span> <span class="n">data</span> <span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="nb">setattr</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">Queue</span><span class="p">)</span>
+                <span class="nb">getattr</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span><span class="o">.</span><span class="n">put</span> <span class="p">(</span> <span class="n">data</span> <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Invalid internal data structure detected. Data is purged. Turn on debugging to see datastructure.&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Invalid data structure: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data</span><span class="p">))</span>
@@ -131,12 +134,32 @@
                 <span class="k">return</span> <span class="bp">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">False</span>
-</div>
-<div class="viewcode-block" id="QueueFunctions.block"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.QueueFunctions.block">[docs]</a>    <span class="k">def</span> <span class="nf">block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;A simple blocking function.&#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span>                
 </div></div>
-<div class="viewcode-block" id="PrimitiveActor"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.PrimitiveActor">[docs]</a><span class="k">class</span> <span class="nc">PrimitiveActor</span><span class="p">(</span><span class="n">Greenlet</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">):</span>
+<div class="viewcode-block" id="Block"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.Block">[docs]</a><span class="k">class</span> <span class="nc">Block</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;A base class providing a global lock.&#39;&#39;&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">=</span><span class="n">Event</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Block.block"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.Block.block">[docs]</a>    <span class="k">def</span> <span class="nf">block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;A simple blocking function.&#39;&#39;&#39;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">isSet</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="Block.wait"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.Block.wait">[docs]</a>    <span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Blocks from exiting until self.lock is set.&#39;&#39;&#39;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Block.release"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.Block.release">[docs]</a>    <span class="k">def</span> <span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Set the lock flag which essentially unlocks.&#39;&#39;&#39;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+</div></div>
+<div class="viewcode-block" id="PrimitiveActor"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.PrimitiveActor">[docs]</a><span class="k">class</span> <span class="nc">PrimitiveActor</span><span class="p">(</span><span class="n">Greenlet</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">,</span> <span class="n">Block</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;A base class used to create Wishbone modules.</span>
 <span class="sd">    </span>
 <span class="sd">    This base class offers Wishbone specific functionalities and objects.</span>
@@ -146,19 +169,39 @@
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="n">QueueFunctions</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">Block</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">Greenlet</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span> <span class="n">name</span> <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Initiated.&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="n">name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="bp">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inbox</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outbox</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;msg&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;min&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;max&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;avg&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;total&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
         
     <span class="k">def</span> <span class="nf">_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Started.&#39;</span><span class="p">)</span>
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">()</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inbox</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inbox</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">stopwatch</span><span class="o">.</span><span class="n">Timer</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">consume</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;msg&#39;</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;total&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">t</span><span class="o">.</span><span class="n">elapsed</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;avg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;total&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;msg&#39;</span><span class="p">]</span>
+                
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;max&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">elapsed</span>
+                <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">elapsed</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;max&#39;</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">elapsed</span>
+                
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;min&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">elapsed</span>
+                <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">elapsed</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;min&#39;</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">elapsed</span>
                     
 <div class="viewcode-block" id="PrimitiveActor.consume"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.PrimitiveActor.consume">[docs]</a>    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;A function which should be overridden by the Wishbone module.</span>
@@ -175,12 +218,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">block</span> <span class="o">=</span> <span class="n">block</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inbox</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outbox</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
-   </div>
+</div>
+<div class="viewcode-block" id="PrimitiveActor.logMetrics"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.PrimitiveActor.logMetrics">[docs]</a>    <span class="k">def</span> <span class="nf">logMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Generates a line with metrics of the spefic module.&#39;&#39;&#39;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Total messages: </span><span class="si">%s</span><span class="s">, Min: </span><span class="si">%s</span><span class="s"> seconds, Max: </span><span class="si">%s</span><span class="s"> seconds, Avg: </span><span class="si">%s</span><span class="s"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;msg&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;min&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;max&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">stats</span><span class="p">[</span><span class="s">&#39;avg&#39;</span><span class="p">]))</span>
+    </div>
 <div class="viewcode-block" id="PrimitiveActor.shutdown"><a class="viewcode-back" href="../../classes.html#wishbone.toolkit.PrimitiveActor.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;A function which could be overridden by the Wisbone module.</span>
 <span class="sd">        </span>
-<span class="sd">        This function is called on shutdown.&#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">=</span><span class="bp">False</span>
+<span class="sd">        This function is called on shutdown.  Make sure you include self.lock=False otherwise that greenthread will hang on shutdown and never exit.&#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Shutdown&#39;</span><span class="p">)</span></div></div>
 </pre></div>
 
@@ -216,8 +263,7 @@
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../../index.html">Wishbone 0.1 documentation</a> &raquo;</li>
-          <li><a href="../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../wishbone.html" >wishbone</a> &raquo;</li> 
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

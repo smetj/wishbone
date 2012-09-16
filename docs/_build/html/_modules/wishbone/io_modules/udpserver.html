@@ -26,7 +26,7 @@
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <link rel="top" title="Wishbone 0.1 documentation" href="../../../index.html" />
-    <link rel="up" title="wishbone" href="../../wishbone.html" /> 
+    <link rel="up" title="Module code" href="../../index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,8 +39,7 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../../../index.html">Wishbone 0.1 documentation</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../wishbone.html" accesskey="U">wishbone</a> &raquo;</li> 
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -77,24 +76,25 @@
 <span class="kn">from</span> <span class="nn">gevent</span> <span class="kn">import</span> <span class="n">spawn</span>
 <span class="kn">from</span> <span class="nn">gevent.queue</span> <span class="kn">import</span> <span class="n">Queue</span>
 <span class="kn">from</span> <span class="nn">gevent.server</span> <span class="kn">import</span> <span class="n">DatagramServer</span>
-<span class="kn">from</span> <span class="nn">wishbone.toolkit</span> <span class="kn">import</span> <span class="n">QueueFunctions</span>
+<span class="kn">from</span> <span class="nn">wishbone.toolkit</span> <span class="kn">import</span> <span class="n">QueueFunctions</span><span class="p">,</span> <span class="n">Block</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
 
-<div class="viewcode-block" id="UDPServer"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.udpserver.UDPServer">[docs]</a><span class="k">class</span> <span class="nc">UDPServer</span><span class="p">(</span><span class="n">DatagramServer</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">):</span>
+<div class="viewcode-block" id="UDPServer"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.udpserver.UDPServer">[docs]</a><span class="k">class</span> <span class="nc">UDPServer</span><span class="p">(</span><span class="n">DatagramServer</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">,</span> <span class="n">Block</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;A Wishbone module which handles UDP input.</span>
 <span class="sd">    </span>
 <span class="sd">    Data received by the module is put into self.inbox</span>
 <span class="sd">    </span>
 <span class="sd">    Parameters:</span>
-<span class="sd">        name:       The name you want this module to be registered under.</span>
-<span class="sd">        port:       The port on which the server should listen.</span>
+
+<span class="sd">        * name:       The name you want this module to be registered under.</span>
+<span class="sd">        * port:       The port on which the server should listen.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
  
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">DatagramServer</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;:&#39;</span><span class="o">+</span><span class="n">port</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">QueueFunctions</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span> <span class="s">&#39;UDPServer&#39;</span> <span class="p">)</span>
+        <span class="n">Block</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span> <span class="n">name</span> <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&#39;UDPServer&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span> <span class="p">(</span> <span class="s">&#39;started and listening on port </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">port</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inbox</span><span class="o">=</span><span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
@@ -109,7 +109,12 @@
 <div class="viewcode-block" id="UDPServer.run"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.udpserver.UDPServer.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Blocking function which starts the UDP server.&#39;&#39;&#39;</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="UDPServer.shutdown"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.udpserver.UDPServer.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;This function is called on shutdown().&#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Shutdown&#39;</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>
@@ -144,8 +149,7 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li><a href="../../../index.html">Wishbone 0.1 documentation</a> &raquo;</li>
-          <li><a href="../../index.html" >Module code</a> &raquo;</li>
-          <li><a href="../../wishbone.html" >wishbone</a> &raquo;</li> 
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

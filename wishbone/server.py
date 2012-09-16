@@ -31,17 +31,7 @@ from signal import SIGINT
 import sys
 import tools
 from gevent import monkey
-
-class LogFilter(logging.Filter):
-    '''Logging() Filter wich only allows Wishbone related logging.'''
-    
-    black_list_names = [ 'pyes', 'requests.packages.urllib3.connectionpool' ]
-    
-    def filter(self, record):
-        if record.name in self.black_list_names:
-            return False
-        
-        return True
+from wishbone.tools import configureLogging 
 
 def configureLogging(name=None, syslog=False, loglevel=logging.INFO):
     '''Configures logging.
@@ -216,4 +206,8 @@ class ParallelServer():
             remove(self.pidfile)
             self.logging.info('Pidfile removed.')
         except Exception as err:
+<<<<<<< HEAD:wishbone/server.py
             self.logging.warn('I could not remove the pidfile. Reason: '%(err))
+=======
+            self.logging.warn('I could not remove the pidfile. Reason: '%(err))            
+>>>>>>> 576529ca780cc4f2e6e14e2441907c84fe45c8df:wishbone/server/parallelserver.py
