@@ -22,17 +22,17 @@
 #  
 #  
 
-from wishbone.wishbone import Wishbone
-from wishbone.server import Server
+from wishbone import Wishbone
+from wishbone.server import ParallelServer
 
 
 if __name__ == '__main__':    
     def setup():    
         wb = Wishbone()
-        wb.registerModule ( ('wishbone.io_modules', 'UDPServer', 'udp_server'), port='9001' )
-        wb.registerModule ( ('wishbone.modules', 'STDOUT', 'stdout'), complete=False, purge=True )
+        wb.registerModule ( ('wishbone.io_modules.udpserver', 'UDPServer', 'udp_server'), port='9001' )
+        wb.registerModule ( ('wishbone.modules.stdout', 'STDOUT', 'stdout'), complete=False, purge=True )
         wb.connect (wb.udp_server.inbox, wb.stdout.inbox)        
         wb.start()
         
-    server = Server(instances=1, setup=setup, daemonize=False, name='udp_server')
+    server = ParallelServer(instances=1, setup=setup, daemonize=False, name='udp_server')
     server.start()
