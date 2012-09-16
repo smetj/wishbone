@@ -30,7 +30,7 @@ from multiprocessing import current_process
 from string import lstrip
 from toolkit import Block
 from sys import exit
-from wishbone.server import tools
+from wishbone.server import configureLogging 
 
 class Wishbone(Block):
     '''
@@ -44,7 +44,7 @@ class Wishbone(Block):
         self.connectors=[]
         self.hub = Queue(None)
         self.outhub = Queue(None)
-        self.tools.configureLogging()
+        #configureLogging()
         self.run=self.start
         
     def registerModule(self, config, *args, **kwargs):
