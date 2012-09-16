@@ -22,9 +22,4 @@
 #       
 #
 
-<<<<<<< HEAD
-=======
-#from wishbone import Wishbone
-#from server import Server
->>>>>>> 576529ca780cc4f2e6e14e2441907c84fe45c8df
 from main import Wishbone

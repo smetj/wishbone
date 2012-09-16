@@ -206,8 +206,4 @@ class ParallelServer():
             remove(self.pidfile)
             self.logging.info('Pidfile removed.')
         except Exception as err:
-<<<<<<< HEAD:wishbone/server.py
             self.logging.warn('I could not remove the pidfile. Reason: '%(err))
-=======
-            self.logging.warn('I could not remove the pidfile. Reason: '%(err))            
->>>>>>> 576529ca780cc4f2e6e14e2441907c84fe45c8df:wishbone/server/parallelserver.py
