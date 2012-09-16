@@ -31,36 +31,8 @@ from signal import SIGINT
 import sys
 import tools
 from gevent import monkey
-from wishbone.tools import configureLogging 
+from wishbone.tools import configureLogging
 
-def configureLogging(name=None, syslog=False, loglevel=logging.INFO):
-    '''Configures logging.
-    
-    Configures the format of the logging messages.  This function accepts 1 parameter:
-    
-    loglevel: defines the loglevel.'''
-
-    if name == None:
-        format= '%(asctime)s %(levelname)s %(name)s: %(message)s'
-    else:
-        format= name+' %(name)s: %(message)s'
-    if syslog == False:
-        logger = logging.getLogger()
-        logger.setLevel(loglevel)
-        stream = logging.StreamHandler(sys.stdout)
-        formatter = logging.Formatter(format)
-        stream.setFormatter(formatter)
-        stream.addFilter(LogFilter())
-        logger.addHandler(stream)
-    else:
-        from logging.handlers import SysLogHandler
-        logger = logging.getLogger()
-        logger.setLevel(loglevel)
-        syslog = SysLogHandler(address='/dev/log')
-        syslog.set_name(self.name)
-        formatter = logging.Formatter(format)
-        syslog.setFormatter(formatter)
-        logger.addHandler(syslog)
 
 class ParallelServer():
     '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.''' 
@@ -81,14 +53,14 @@ class ParallelServer():
                 
         if self.checkPids() == True:
             if self.daemonize == True:
+                configureLogging(syslog=True)
                 print 'Starting %s in background.' % (self.name)
-                configureLogging(name=self.name, syslog=True, loglevel=self.log_level)
                 self.logging = logging.getLogger( 'Server' )
                 with daemon.DaemonContext():
                     self.__start()
             else:
+                configureLogging()
                 monkey.patch_all()
-                configureLogging(loglevel=self.log_level)
                 self.logging = logging.getLogger( 'Server' )
                 self.__start()
     

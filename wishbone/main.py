@@ -30,7 +30,6 @@ from multiprocessing import current_process
 from string import lstrip
 from toolkit import Block
 from sys import exit
-from wishbone.server import configureLogging 
 
 class Wishbone(Block):
     '''
@@ -39,7 +38,6 @@ class Wishbone(Block):
     
     def __init__(self):
         self.logging = logging.getLogger( 'Wishbone' )
-        configureLogging()
         Block.__init__(self)
         self.modules=[]
         self.connectors=[]
