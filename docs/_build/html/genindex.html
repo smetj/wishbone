@@ -52,9 +52,9 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#B"><strong>B</strong></a>
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
- | <a href="#E"><strong>E</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#J"><strong>J</strong></a>
  | <a href="#L"><strong>L</strong></a>
@@ -68,6 +68,16 @@
  | <a href="#W"><strong>W</strong></a>
  
 </div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="classes.html#wishbone.io_modules.broker.Broker.acknowledgeMessage">acknowledgeMessage() (wishbone.io_modules.broker.Broker method)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
@@ -106,7 +116,7 @@
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="classes.html#wishbone.wishbone.Wishbone.connect">connect() (wishbone.wishbone.Wishbone method)</a>
+  <dt><a href="classes.html#wishbone.main.Wishbone.connect">connect() (wishbone.main.Wishbone method)</a>
   </dt>
 
       
@@ -126,29 +136,19 @@
   </dl></td>
 </tr></table>
 
-<h2 id="E">E</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="classes.html#wishbone.toolkit.ESTools.es_index">es_index() (wishbone.toolkit.ESTools method)</a>
-  </dt>
-
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="classes.html#wishbone.toolkit.ESTools">ESTools (class in wishbone.toolkit)</a>
-  </dt>
-
-  </dl></td>
-</tr></table>
-
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="classes.html#wishbone.io_modules.udpserver.UDPServer.handle">handle() (wishbone.io_modules.udpserver.UDPServer method)</a>
+  <dt><a href="classes.html#wishbone.io_modules.socketfile.SocketFile.handle">handle() (wishbone.io_modules.socketfile.SocketFile method)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="classes.html#wishbone.io_modules.udpserver.UDPServer.handle">(wishbone.io_modules.udpserver.UDPServer method)</a>
+  </dt>
+
+      </dl></dd>
   </dl></td>
 </tr></table>
 
@@ -218,7 +218,7 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="classes.html#wishbone.wishbone.Wishbone.registerModule">registerModule() (wishbone.wishbone.Wishbone method)</a>
+  <dt><a href="classes.html#wishbone.main.Wishbone.registerModule">registerModule() (wishbone.main.Wishbone method)</a>
   </dt>
 
       
@@ -250,10 +250,6 @@
   </dt>
 
       
-  <dt><a href="classes.html#wishbone.toolkit.ESTools.setupConnection">setupConnection() (wishbone.toolkit.ESTools method)</a>
-  </dt>
-
-      
   <dt><a href="classes.html#wishbone.io_modules.broker.Broker.shutdown">shutdown() (wishbone.io_modules.broker.Broker method)</a>
   </dt>
 
@@ -267,14 +263,18 @@
   </dt>
 
       </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="classes.html#wishbone.modules.skeleton.Skeleton">Skeleton (class in wishbone.modules.skeleton)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="classes.html#wishbone.wishbone.Wishbone.start">start() (wishbone.wishbone.Wishbone method)</a>
+  <dt><a href="classes.html#wishbone.io_modules.socketfile.SocketFile">SocketFile (class in wishbone.io_modules.socketfile)</a>
+  </dt>
+
+      
+  <dt><a href="classes.html#wishbone.main.Wishbone.start">start() (wishbone.main.Wishbone method)</a>
   </dt>
 
       
@@ -282,7 +282,7 @@
   </dt>
 
       
-  <dt><a href="classes.html#wishbone.wishbone.Wishbone.stop">stop() (wishbone.wishbone.Wishbone method)</a>
+  <dt><a href="classes.html#wishbone.main.Wishbone.stop">stop() (wishbone.main.Wishbone method)</a>
   </dt>
 
       
@@ -320,7 +320,7 @@
   </dt>
 
       
-  <dt><a href="classes.html#wishbone.wishbone.Wishbone">Wishbone (class in wishbone.wishbone)</a>
+  <dt><a href="classes.html#wishbone.main.Wishbone">Wishbone (class in wishbone.main)</a>
   </dt>
 
       
@@ -332,15 +332,23 @@
   </dt>
 
       
+  <dt><a href="classes.html#module-wishbone.io_modules.socketfile">wishbone.io_modules.socketfile (module)</a>
+  </dt>
+
+      
   <dt><a href="classes.html#module-wishbone.io_modules.udpserver">wishbone.io_modules.udpserver (module)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="classes.html#module-wishbone.main">wishbone.main (module)</a>
   </dt>
 
       
   <dt><a href="classes.html#module-wishbone.modules.compressor">wishbone.modules.compressor (module)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="classes.html#module-wishbone.modules.jsonvalidator">wishbone.modules.jsonvalidator (module)</a>
   </dt>
@@ -355,10 +363,6 @@
 
       
   <dt><a href="classes.html#module-wishbone.toolkit">wishbone.toolkit (module)</a>
-  </dt>
-
-      
-  <dt><a href="classes.html#module-wishbone.wishbone">wishbone.wishbone (module)</a>
   </dt>
 
   </dl></td>

@@ -22,9 +22,14 @@
 #  
 #  
 
+<<<<<<< HEAD
 from wishbone.wishbone import Wishbone
 from wishbone.server.parallelserver import ParallelServer
 from logging import DEBUG
+=======
+from wishbone import Wishbone
+from wishbone.server import ParallelServer
+>>>>>>> 576529ca780cc4f2e6e14e2441907c84fe45c8df
 
 
 if __name__ == '__main__':    
@@ -35,5 +40,9 @@ if __name__ == '__main__':
         wb.connect (wb.named_pipe.inbox, wb.stdout.inbox)        
         wb.start()
         
+<<<<<<< HEAD
     server = ParallelServer(instances=1, setup=setup, daemonize=False, name='named_pipe_server', log_level=DEBUG)
+=======
+    server = ParallelServer(instances=1, setup=setup, daemonize=False, name='named_pipe_server')
+>>>>>>> 576529ca780cc4f2e6e14e2441907c84fe45c8df
     server.start()
