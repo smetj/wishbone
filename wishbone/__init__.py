@@ -22,5 +22,4 @@
 #       
 #
 
-#from wishbone import Wishbone
-#from server import Server
+from main import Wishbone

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  parallelserver.py
+#  server.py
 #  
 #  Copyright 2012 Jelle Smet development@smetj.net
 #  
@@ -32,6 +32,46 @@ import sys
 import tools
 from gevent import monkey
 
+class LogFilter(logging.Filter):
+    '''Logging() Filter wich only allows Wishbone related logging.'''
+    
+    black_list_names = [ 'pyes', 'requests.packages.urllib3.connectionpool' ]
+    
+    def filter(self, record):
+        if record.name in self.black_list_names:
+            return False
+        
+        return True
+
+def configureLogging(name=None, syslog=False, loglevel=logging.INFO):
+    '''Configures logging.
+    
+    Configures the format of the logging messages.  This function accepts 1 parameter:
+    
+    loglevel: defines the loglevel.'''
+
+    if name == None:
+        format= '%(asctime)s %(levelname)s %(name)s: %(message)s'
+    else:
+        format= name+' %(name)s: %(message)s'
+    if syslog == False:
+        logger = logging.getLogger()
+        logger.setLevel(loglevel)
+        stream = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter(format)
+        stream.setFormatter(formatter)
+        stream.addFilter(LogFilter())
+        logger.addHandler(stream)
+    else:
+        from logging.handlers import SysLogHandler
+        logger = logging.getLogger()
+        logger.setLevel(loglevel)
+        syslog = SysLogHandler(address='/dev/log')
+        syslog.set_name(self.name)
+        formatter = logging.Formatter(format)
+        syslog.setFormatter(formatter)
+        logger.addHandler(syslog)
+
 class ParallelServer():
     '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.''' 
     
@@ -52,13 +92,13 @@ class ParallelServer():
         if self.checkPids() == True:
             if self.daemonize == True:
                 print 'Starting %s in background.' % (self.name)
-                tools.configureLogging(name=self.name, syslog=True, loglevel=self.log_level)
+                configureLogging(name=self.name, syslog=True, loglevel=self.log_level)
                 self.logging = logging.getLogger( 'Server' )
                 with daemon.DaemonContext():
                     self.__start()
             else:
                 monkey.patch_all()
-                tools.configureLogging(loglevel=self.log_level)
+                configureLogging(loglevel=self.log_level)
                 self.logging = logging.getLogger( 'Server' )
                 self.__start()
     
@@ -73,7 +113,6 @@ class ParallelServer():
         self.pids = self.collectPids()
         self.writePids()
         self.logging.info('Started with pids: %s' % ', '.join(map(str, self.pids)))
-        
         try:
             while True:
                 sleep(1)
