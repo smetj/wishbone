@@ -23,4 +23,4 @@
 #
 
 import logging
-from configure_logging import configureLogging
+from configurelogging import configureLogging

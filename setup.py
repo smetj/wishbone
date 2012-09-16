@@ -32,4 +32,4 @@ if __name__ == '__main__':
         author='Jelle Smet',
         author_email='development@smetj.net',
         url='https://github.com/smetj/wishbone',
-	py_modules = [ "wishbone.main", "wishbone.server", "wishbone.toolkit", "wishbone.tools.estools", "wishbone.tools.mongotools", "wishbone.io_modules.broker", "wishbone.io_modules.udpserver", "wishbone.io_modules.namedpipe", "wishbone.io_modules.socketfile", "wishbone.modules.skeleton", "wishbone.modules.jsonvalidator", "wishbone.modules.compressor", "wishbone.modules.stdout", "wishbone.modules.nagiosspoolwriter" ] )
+	py_modules = [ "wishbone.main", "wishbone.server", "wishbone.toolkit", "wishbone.tools.configurelogging", "wishbone.tools.estools", "wishbone.tools.mongotools", "wishbone.io_modules.broker", "wishbone.io_modules.udpserver", "wishbone.io_modules.namedpipe", "wishbone.io_modules.socketfile", "wishbone.modules.skeleton", "wishbone.modules.jsonvalidator", "wishbone.modules.compressor", "wishbone.modules.stdout", "wishbone.modules.nagiosspoolwriter" ] )
