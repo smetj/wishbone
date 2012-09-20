@@ -177,7 +177,7 @@ class Broker(Greenlet, QueueFunctions, Block):
                 msg.properties["delivery_mode"] = 2
                 self.outgoing.basic_publish(msg,exchange=message['header']['broker_exchange'],routing_key=message['header']['broker_key'])
                 
-                if message['header'].has_key('broker_tag'):
+                if message['header'].has_key('broker_tag') and self.no_ack == False:
                     self.incoming.basic_ack(message['header']['broker_tag'])                
             else:
                 raise Exception('Not Connected to broker')

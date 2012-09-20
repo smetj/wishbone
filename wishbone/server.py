@@ -53,13 +53,13 @@ class ParallelServer():
                 
         if self.checkPids() == True:
             if self.daemonize == True:
-                configureLogging(syslog=True)
+                configureLogging(syslog=True,loglevel=self.log_level)
                 print 'Starting %s in background.' % (self.name)
                 self.logging = logging.getLogger( 'Server' )
                 with daemon.DaemonContext():
                     self.__start()
             else:
-                configureLogging()
+                configureLogging(loglevel=self.log_level)
                 monkey.patch_all()
                 self.logging = logging.getLogger( 'Server' )
                 self.__start()
