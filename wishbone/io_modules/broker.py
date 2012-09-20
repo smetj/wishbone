@@ -183,7 +183,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         else:
             self.logging.warn('Received data for broker without exchange or key information in header. Purged.')
             if message['header'].has_key('broker_tag') and self.no_ack == False:
-                    self.incoming.basic_ack(message['header']['broker_tag'])
+                self.incoming.basic_ack(message['header']['broker_tag'])
 
     def shutdown(self):
         '''This function is called on shutdown().'''
