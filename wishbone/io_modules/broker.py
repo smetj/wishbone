@@ -170,19 +170,20 @@ class Broker(Greenlet, QueueFunctions, Block):
         
         This function is called by the consume() function.  If the correct header info isn't present (but that would be odd at this point), the data is purged.
         '''
-        
+
         if message["header"].has_key('broker_exchange') and message["header"].has_key('broker_key'):            
             if self.connected == True:
                 msg = amqp.Message(str(message['data']))
                 msg.properties["delivery_mode"] = 2
                 self.outgoing.basic_publish(msg,exchange=message['header']['broker_exchange'],routing_key=message['header']['broker_key'])
-                
                 if message['header'].has_key('broker_tag') and self.no_ack == False:
-                    self.incoming.basic_ack(message['header']['broker_tag'])                
+                    self.incoming.basic_ack(message['header']['broker_tag'])
             else:
                 raise Exception('Not Connected to broker')
         else:
             self.logging.warn('Received data for broker without exchange or key information in header. Purged.')
+            if message['header'].has_key('broker_tag') and self.no_ack == False:
+                    self.incoming.basic_ack(message['header']['broker_tag'])
 
     def shutdown(self):
         '''This function is called on shutdown().'''
