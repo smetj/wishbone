@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  setup.py
+#  untitled.py
 #  
-#  Copyright 2012 Jelle Smet development@smetj.net
+#  Copyright 2012 Jelle Smet <development@smetj.net>
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,14 +22,54 @@
 #  
 #  
 
-from distutils.core import setup
+PROJECT = 'wishbone'
+
+# Change docs/sphinx/conf.py too!
+VERSION = '0.1'
 
 
-if __name__ == '__main__':
-    setup(name='wishbone',
-        version='0.1',
-        description='A python module which facilitates writing modular message passing code based on gevent.',
-        author='Jelle Smet',
-        author_email='development@smetj.net',
-        url='https://github.com/smetj/wishbone',
-	py_modules = [ "wishbone.main", "wishbone.server", "wishbone.toolkit", "wishbone.tools.configurelogging", "wishbone.tools.estools", "wishbone.tools.mongotools", "wishbone.io_modules.broker", "wishbone.io_modules.udpserver", "wishbone.io_modules.namedpipe", "wishbone.io_modules.socketfile", "wishbone.modules.skeleton", "wishbone.modules.jsonvalidator", "wishbone.modules.compressor", "wishbone.modules.stdout", "wishbone.modules.nagiosspoolwriter" ] )
+from setuptools import setup, find_packages
+
+from distutils.util import convert_path
+from fnmatch import fnmatchcase
+import os
+import sys
+
+try:
+    long_description = open('README.rst', 'rt').read()
+except IOError:
+    long_description = ''
+
+setup(
+    name=PROJECT,
+    version=VERSION,
+
+    description='A library to write multiple gevent based parallel processes which each connect multiple modules through an internal message passing interface into a clean workflow.',
+    long_description=long_description,
+
+    author='Jelle Smet',
+    author_email='development@smetj.net',
+
+    url='https://github.com/smetj/wishbone',
+    download_url='https://github.com/smetj/wishbone/tarball/master',
+
+    classifiers=['Development Status :: 4 - Beta',
+                 'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+                 'Programming Language :: Python',
+                 'Programming Language :: Python :: 2',
+                 'Programming Language :: Python :: 2.7',
+                 'Intended Audience :: Developers',
+                 ],
+
+    platforms=['Any'],
+
+    scripts=[],
+
+    provides=[],
+    install_requires=['gevent','amqplib','python-snappy','daemon','stopwatch','jsonschema','pymongo','pyes'],
+    namespace_packages=[],
+    packages=find_packages(),
+    include_package_data=True,
+
+    zip_safe=False,
+    )
