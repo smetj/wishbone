@@ -27,6 +27,7 @@ import stopwatch
 from gevent import Greenlet
 from gevent.queue import Queue
 from gevent.event import Event
+from gevent import sleep
 from copy import deepcopy
 
 class QueueFunctions():
@@ -54,7 +55,7 @@ class QueueFunctions():
             self.logging.debug('Invalid data structure: %s' % (data))
     
     def sendRaw(self, data, queue='outbox'):
-        '''Submits data to one of the mudule its queues.
+        '''Submits data to one of the module's queues.
         
         Allows you to bypass message integrity checking.  Its usage should be sparse, although it's usefull when you want to send data back 
         to a module as it would have come from the outside world.'''
@@ -130,27 +131,25 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
     def _run(self):
         self.logging.info('Started.')
         while self.block() == True:
-            try:
-                data = self.inbox.get(timeout=0.1)
-            except:
-                pass
-            else:
-                t = stopwatch.Timer()
-                self.consume(data)
-                t.stop()
-                self.stats['msg']+=1
-                self.stats['total'] += t.elapsed
-                self.stats['avg'] = self.stats['total'] / self.stats['msg']
-                
-                if self.stats['max'] == 0:
-                    self.stats['max'] = t.elapsed
-                elif t.elapsed > self.stats['max']:
-                    self.stats['max'] = t.elapsed
-                
-                if self.stats['min'] == 0:
-                    self.stats['min'] = t.elapsed
-                if t.elapsed < self.stats['min']:
-                    self.stats['min'] = t.elapsed
+            #sleep(0)
+            data = self.inbox.get()
+            
+            t = stopwatch.Timer()
+            self.consume(data)
+            t.stop()
+            self.stats['msg']+=1
+            self.stats['total'] += t.elapsed
+            self.stats['avg'] = self.stats['total'] / self.stats['msg']
+            
+            if self.stats['max'] == 0:
+                self.stats['max'] = t.elapsed
+            elif t.elapsed > self.stats['max']:
+                self.stats['max'] = t.elapsed
+            
+            if self.stats['min'] == 0:
+                self.stats['min'] = t.elapsed
+            if t.elapsed < self.stats['min']:
+                self.stats['min'] = t.elapsed                
                     
     def consume(self, *args, **kwargs):
         '''A function which should be overridden by the Wishbone module.

@@ -106,7 +106,8 @@ class Broker(Greenlet, QueueFunctions, Block):
                 except Exception as err:
                     self.logging.warn('Could not write data to broker.  Reason: %s'%(err))
                     break
-            self.wait(timeout=0.1)
+            #self.wait(timeout=0.1)
+            sleep(0)
     
     def acknowledgeMessage(self):
         '''Acknowledges messages
@@ -121,7 +122,8 @@ class Broker(Greenlet, QueueFunctions, Block):
                     self.acknowledge.put(ack)
                     self.logging.warn('Could not acknowledge message in broker.  Reason: %s'%(err))
                     break
-            self.wait(timeout=0.1)
+            #self.wait(timeout=0.1)
+            sleep(0)
                                 
     def _run(self):
         '''

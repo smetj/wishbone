@@ -120,24 +120,26 @@ class Wishbone(Block):
                 module.logMetrics()
             except:
                 pass
-            self.logging.debug('Waiting for module %s'%module.name)
+            self.logging.debug('Waiting 1 second for module %s'%module.name)
             try:
-                module.join()
+                module.join(timeout=1)
             except:
-                pass
+                self.logging.debug('Killing module %s'%module.name)
+                module.kill()
         
         for connector in self.connectors:
-            self.logging.debug('Waiting for connector %s'%module.name)
-            connector.join()
+            self.logging.debug('Waiting 1 second for connector %s'%module.name)
+            try:
+                connector.join(timeout=1)
+            except:
+                self.logging.debug('Killing connector %s'%module.name)
+                connector.kill()
          
     def __connector(self,source, destination):
         '''Consumes data from source and puts it in destination.'''
         
         while self.block() == True:
-            try:
-                destination.put(source.get(timeout=1))
-            except:
-                pass
+            destination.put(source.get())
         
     def __currentProcessName(self):
         '''return the current process name withought the Process- part'''
