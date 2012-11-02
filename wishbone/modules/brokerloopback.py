@@ -40,11 +40,17 @@ class BrokerLoopback(PrimitiveActor):
         * exchange  :   The exchange to write data to.
                         Default: ''
                         Type: string
+        
+        * dump      :   Dumps x amount of messages into the Broker.
+                        Default: 0
+                        Type: int
                             
         '''
         PrimitiveActor.__init__(self, name)
         self.key = kwargs.get('key',name)
         self.exchange = kwargs.get('exchange','')
+        self.dump = kwargs.get('dump',0)
+        self.__dump(self.dump)
     
     def consume(self,doc):
         doc['header']['broker_key']=self.key
@@ -53,3 +59,10 @@ class BrokerLoopback(PrimitiveActor):
        
     def shutdown(self):
         self.logging.info('Shutdown')
+
+    def __dump(self, number):
+        if number == 0:
+            return
+        else:
+            for _ in range(number):
+                self.sendRaw({"header":{"broker_key":self.key,"broker_exchange":self.exchange},"data":"x"})
