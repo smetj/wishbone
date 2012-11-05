@@ -128,28 +128,30 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
         self.outbox = Queue(None)
         self.stats={'msg': 0, 'min': 0, 'max': 0, 'avg': 0, 'total': 0}
         
+    def timer(self, function):
+        t = stopwatch.Timer()
+        function
+        t.stop()
+        self.stats['msg']+=1
+        self.stats['total'] += t.elapsed
+        self.stats['avg'] = self.stats['total'] / self.stats['msg']
+        
+        if self.stats['max'] == 0:
+            self.stats['max'] = t.elapsed
+        elif t.elapsed > self.stats['max']:
+            self.stats['max'] = t.elapsed
+        
+        if self.stats['min'] == 0:
+            self.stats['min'] = t.elapsed
+        if t.elapsed < self.stats['min']:
+            self.stats['min'] = t.elapsed
+        
+        
     def _run(self):
         self.logging.info('Started.')
         while self.block() == True:
-            #sleep(0)
             data = self.inbox.get()
-            
-            t = stopwatch.Timer()
-            self.consume(data)
-            t.stop()
-            self.stats['msg']+=1
-            self.stats['total'] += t.elapsed
-            self.stats['avg'] = self.stats['total'] / self.stats['msg']
-            
-            if self.stats['max'] == 0:
-                self.stats['max'] = t.elapsed
-            elif t.elapsed > self.stats['max']:
-                self.stats['max'] = t.elapsed
-            
-            if self.stats['min'] == 0:
-                self.stats['min'] = t.elapsed
-            if t.elapsed < self.stats['min']:
-                self.stats['min'] = t.elapsed                
+            self.timer(self.consume(data))                            
                     
     def consume(self, *args, **kwargs):
         '''A function which should be overridden by the Wishbone module.

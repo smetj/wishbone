@@ -24,6 +24,7 @@
 
 import logging
 import daemon
+import json
 from multiprocessing import Process, Event
 from time import sleep
 from os import getpid, kill, remove, path
@@ -37,38 +38,54 @@ from wishbone.tools import configureLogging
 class ParallelServer():
     '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.''' 
     
-    def __init__(self, instances=1, setup=None, daemonize=False, log_level=logging.INFO, name='Server', pidlocation='/tmp'):
+    def __init__(self, instances=1, setup=None, config={}, command=None, log_level=logging.INFO, name='Server', pidlocation='/tmp'):
         self.instances=instances
         self.setup=setup
-        self.daemonize=daemonize
+        self.config=config
+        self.command=command
         self.log_level=log_level
         self.name=name
         self.pidfile="%s/%s.pid"%(pidlocation,name)
         self.wishbone=None
         self.processes=[]
         self.pids = []
+        self.do()
+    
+    def do(self):
+        '''Executes the command.'''
+        
+        if self.command == "debug":
+            self.debug()
+        elif self.command == "start":
+            self.start()
+        elif self.command == "stop":
+            self.stop()
+            
+    def debug(self):
+        '''Starts the server environment in the foreground.'''
+        
+        if self.checkPids() == True:
+            configureLogging(loglevel=self.log_level)
+            self.logging = logging.getLogger( 'Server' )
+            self.readConfig()
+            self.__start()           
     
     def start(self):
-        '''Starts the server environment in fore- or background.'''
+        '''Starts the server environment in the background.'''
                 
         if self.checkPids() == True:
-            if self.daemonize == True:
-                configureLogging(syslog=True,loglevel=self.log_level)
-                print 'Starting %s in background.' % (self.name)
-                self.logging = logging.getLogger( 'Server' )
-                with daemon.DaemonContext():
-                    self.__start()
-            else:
-                configureLogging(loglevel=self.log_level)
-                monkey.patch_all()
-                self.logging = logging.getLogger( 'Server' )
-                self.__start()
+            configureLogging(syslog=True,loglevel=self.log_level)
+            print 'Starting %s in background.' % (self.name)
+            self.logging = logging.getLogger( 'Server' )
+            self.readConfig()
+            with daemon.DaemonContext():
+                self.__start()                
     
     def __start(self):
         '''Actually starts the environment.  Should only be called by self.start().'''
         
         for number in range(self.instances):
-            self.processes.append(Process(target=self.setup, name=number))
+            self.processes.append(Process(target=self.setup, name=number, kwargs=self.config))
             self.processes[number].start()
             self.logging.info('Instance #%s started.'%number)
         
@@ -84,6 +101,8 @@ class ParallelServer():
     def stop(self):
         '''Stops the environment.'''
         
+        configureLogging(syslog=True,loglevel=self.log_level)
+        self.logging = logging.getLogger( 'Server' )
         self.logging.info('SIGINT received. Stopping processes.  Send SIGINT again to stop everything without waiting.')
         for process in self.processes:
             self.logging.info('Waiting for %s' %process.name)
@@ -178,4 +197,13 @@ class ParallelServer():
             remove(self.pidfile)
             self.logging.info('Pidfile removed.')
         except Exception as err:
-            self.logging.warn('I could not remove the pidfile. Reason: '%(err))
+            self.logging.warn('I could not remove the pidfile. Reason: %s'%(err))
+    def readConfig(self):
+        '''Reads the config file.'''
+        
+        try:
+            f = open (self.config,'r')
+            self.config = json.load(f)
+            f.close()
+        except Exception as err:
+            self.logging.critical('I could not read the config file. Reason: %s'%(err))
