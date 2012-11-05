@@ -61,7 +61,6 @@ def configureLogging(name=None, syslog=False, loglevel=logging.INFO):
         logger = logging.getLogger()
         logger.setLevel(loglevel)
         syslog = SysLogHandler(address='/dev/log')
-        syslog.set_name(self.name)
         formatter = logging.Formatter(format)
         syslog.setFormatter(formatter)
         logger.addHandler(syslog)
