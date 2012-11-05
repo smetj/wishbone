@@ -66,7 +66,7 @@ setup(
     scripts=[],
 
     provides=[],
-    install_requires=['gevent','amqplib','python-snappy','daemon','stopwatch','jsonschema','pymongo','pyes','ordereddict'],
+    install_requires=['gevent','amqplib','python-snappy','python-daemon','stopwatch','jsonschema','pymongo','pyes','ordereddict'],
     namespace_packages=[],
     packages=find_packages(),
     include_package_data=True,
