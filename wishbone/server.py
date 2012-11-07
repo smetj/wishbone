@@ -41,6 +41,7 @@ class ParallelServer():
     def __init__(self, instances=1, setup=None, daemonize=False, config=None, command=None, log_level=logging.INFO, name='Server', pidlocation='/tmp'):
         self.instances=instances
         self.setup=setup
+        self.daemonize=daemonize
         self.config=config
         self.command=command
         self.log_level=log_level
