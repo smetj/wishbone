@@ -37,7 +37,7 @@ class LogFilter(logging.Filter):
         return True
 
     
-def configureLogging(name=None, syslog=False, loglevel=logging.INFO):
+def configureLogging(name=None, syslog=False, loglevel=logging.INFO, get_handle=False):
     '''Configures logging.
     
     Configures the format of the logging messages.  This function accepts 1 parameter:
@@ -64,3 +64,5 @@ def configureLogging(name=None, syslog=False, loglevel=logging.INFO):
         formatter = logging.Formatter(format)
         syslog.setFormatter(formatter)
         logger.addHandler(syslog)
+        if get_handle == True:
+            return syslog.socket.fileno()
