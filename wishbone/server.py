@@ -38,7 +38,7 @@ from wishbone.tools import configureLogging
 class ParallelServer():
     '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.''' 
     
-    def __init__(self, instances=1, setup=None, config={}, command=None, log_level=logging.INFO, name='Server', pidlocation='/tmp'):
+    def __init__(self, instances=1, setup=None, daemonize=False, config=None, command=None, log_level=logging.INFO, name='Server', pidlocation='/tmp'):
         self.instances=instances
         self.setup=setup
         self.config=config
@@ -53,8 +53,9 @@ class ParallelServer():
     
     def do(self):
         '''Executes the command.'''
-        
-        if self.command == "debug":
+        if self.config != None:
+            self.readConfig()
+        if self.command == "debug" or self.daemonize == False:
             self.debug()
         elif self.command == "start":
             self.start()
@@ -67,7 +68,6 @@ class ParallelServer():
         if self.checkPids() == True:
             configureLogging(loglevel=self.log_level)
             self.logging = logging.getLogger( 'Server' )
-            self.readConfig()
             self.__start()           
     
     def start(self):
@@ -76,8 +76,7 @@ class ParallelServer():
         if self.checkPids() == True:
             configureLogging(syslog=True,loglevel=self.log_level)
             print 'Starting %s in background.' % (self.name)
-            self.logging = logging.getLogger( 'Server' )
-            self.readConfig()
+            self.logging = logging.getLogger( 'Server' )            
             with daemon.DaemonContext():
                 self.__start()                
     
