@@ -207,3 +207,4 @@ class ParallelServer():
             f.close()
         except Exception as err:
             self.logging.critical('I could not read the config file. Reason: %s'%(err))
+            self.config={}
