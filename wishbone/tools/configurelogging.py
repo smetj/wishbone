@@ -45,7 +45,10 @@ def configureLogging(name=None, syslog=False, loglevel=logging.INFO, get_handle=
     loglevel: defines the loglevel.'''
     
     if name == None:
-        format= '%(asctime)s %(levelname)s %(name)s: %(message)s'
+        if syslog == False:
+            format= '%(asctime)s %(levelname)s %(name)s: %(message)s'
+        else:
+            format= '%(levelname)s %(name)s: %(message)s'
     else:
         format= name+' %(name)s: %(message)s'
     if syslog == False:
