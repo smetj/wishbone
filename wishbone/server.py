@@ -93,7 +93,7 @@ class ParallelServer():
         '''Actually starts the environment.  Should only be called by self.start() or self.debug().'''
         
         self.logging.info('Starting %s in foreground.' % (self.name))
-        for number in range(self.instances):
+        for number in range(int(self.instances)):
             if self.config == None:
                 self.processes.append(Process(target=self.setup, name=number))
             else:

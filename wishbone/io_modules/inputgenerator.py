@@ -24,58 +24,131 @@
 
 import logging
 from string import ascii_uppercase, ascii_lowercase, digits
-from random import choice, uniform
+from random import choice, uniform, randint
 from wishbone.toolkit import QueueFunctions, Block
-from gevent import Greenlet, spawn, sleep
+from gevent import Greenlet, spawn, sleep, spawn_later
+from gevent.event import Event
 from gevent.queue import Queue
+from time import time, strftime, localtime
+from gevent import monkey;monkey.patch_all() 
 
 class InputGenerator(Greenlet, QueueFunctions, Block):
-    ''' 
-    
+    '''
+
     A WishBone class which generates random data at different configurable specifications.
-    It's primary use is for testing purposes.        
-       
+    It's primary use is for testing.
+
     Parameters:
     
-        * length:   The maximum length of each random generated message.
-                    Default: 100
-                    Type: Integer
+        * sources:      The number of sources producing data.
+
+        * min_payload:  The minimum length of each random generated message.
+                        Default: 0
+                        Type: Integer
+
+        * max_payload:  The maximum length of each random generated message.
+                        Default: 1
+                        Type: Integer
+
+        * min_interval: The minimum time in seconds between each generated messages.
+                        Default: 0
+                        Type: Integer
+
+        * max_interval: The maximum time in seconds between each generated messages.
+                        Default: 0
+                        Type: Integer
+
+        * min_outage_start: The minimum time in seconds the next outage can start.
+                            Default: 60
+                            type: Int
+
+        * max_outage_start: The maximum time in seconds the next outage can start.
+                            Default: 600
+                            type: Int
         
-        * interval: The time in seconds between each generated messages.
-                    Default: 0.1
-                    Type: Integer
+        * min_outage_length:    The minimum time in seconds an outage can last.
+                                Default: 0
+                                Type: Integer
+                        
+        * max_outage_length:    The maximum time in seconds an outage can last.
+                                Default: 0
+                                Type: Integer
         
-        * randomize:    Make the interval randomize between 0 and the value of interval.
-                        Default: false
-                        type: Bool
+        length:     Simulates the variable length of message data.
+        
+        interval:   Simulates the variable interval rate data is produced.
+        
+        outage:     Simulates the connectivity problems for incoming data.  Under normal conditions
+                    there's a constant stream.  It might happen however incoming connection is
+                    interrupted, data is being build up somewhere and after connectivity restores a
+                    big chunk of data comes in.
     '''
 
     def __init__(self, name, *args, **kwargs):
-       
+
         Greenlet.__init__(self)
         Block.__init__(self)
         self.logging = logging.getLogger( name )
         self.name = name
-        self.logging.info ( 'Initiated' )        
+        self.logging.info ( 'Initiated' )
+        self.outage=Event()
+
+        self.min_payload=kwargs.get('min_payload',0)
+        self.max_payload=kwargs.get('max_payload',1)
+        self.min_interval=kwargs.get('min_interval',0)
+        self.max_interval=kwargs.get('max_interval',0)
+        self.min_outage_start=kwargs.get('min_outage_start',60)
+        self.max_outage_start=kwargs.get('max_outage_start',600)
+        self.min_outage_length=kwargs.get('min_outage_length',0)
+        self.max_outage_length=kwargs.get('max_outage_length',0)
         
-        self.length=kwargs.get('length',100)
-        self.interval=kwargs.get('interval',0.1)
-        self.randomize=kwargs.get('randomize',False)
-        self.inbox=Queue(None)        
-        
+        self.inbox=Queue(None)
+        self.temp=Queue(None)
+        spawn(self.reaper)
+
     def decode (self, gearman_worker, gearman_job):
         self.logging.debug ('Data received.')
-        
 
     def _run(self):
         self.logging.info('Started')
         while self.block():
-            self.sendData({'header':{},'data': ''.join(choice(ascii_uppercase + ascii_lowercase + digits) for x in range(99))}, queue='inbox')            
-            self.logging.debug('Data generated.')
-            if self.randomize == True:
-                sleep(uniform(0,self.interval))
-            else:
-                sleep(self.interval)
+            
+            random_string = ''.join(choice(ascii_uppercase + ascii_lowercase + digits) for x in range(self.min_payload)+range(randint(0, self.max_payload)))
+            self.logging.debug('Data batch generated with size of %s bytes.'%len(random_string))
+            self.temp.put(random_string)
+            
+            sleeping_time = uniform(self.min_interval,self.max_interval)
+            self.logging.debug('Waiting for %s seconds until the next data batch is generated.'%sleeping_time)
+            sleep(sleeping_time)            
+
+    def reaper(self):
+        
+        '''The reaper runs actually submits the randomly generated data from the local queue into the outgoing queue.
+        The goal of this is to make to reaper stop working for min_outage to max_outage to simulate an outage.
+        '''
+        
+        self.planOutage()
+        while self.block():
+            self.outage.wait()
+            self.sendData({"header":{},"data":self.temp.get()},queue='inbox')
+            
+    def planOutage(self):
+        '''Plans when the next outage will occur.'''
+        
+        start_outage=uniform(self.min_outage_start, self.max_outage_start)
+        spawn_later(start_outage,self.executeOutage)
+        self.logging.info('Next outage is planned at %s'%(strftime("%a, %d %b %Y %H:%M:%S +0000", localtime(time()+start_outage))))
+    
+    def executeOutage(self):
+        '''Executes the outage by locking the reaper.'''
+        
+        self.outage.clear()
+        outage_length=uniform(self.min_outage_length, self.max_outage_length)
+        self.logging.info("Outage of %s seconds started."%(outage_length))
+        sleep(outage_length)
+        self.logging.info("Outage finished.")
+        self.planOutage()
+        self.outage.set()
         
     def shutdown(self):
         self.logging.info('Shutdown')
