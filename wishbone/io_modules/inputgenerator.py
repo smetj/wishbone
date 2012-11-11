@@ -40,8 +40,6 @@ class InputGenerator(Greenlet, QueueFunctions, Block):
 
     Parameters:
     
-        * sources:      The number of sources producing data.
-
         * min_payload:  The minimum length of each random generated message.
                         Default: 0
                         Type: Integer
