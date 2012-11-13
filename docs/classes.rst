@@ -26,10 +26,16 @@ Broker
 .. automodule:: wishbone.io_modules.broker
    :members:
 
-UDPserver
-=========
+DomainSocket
+==========
 
-.. automodule:: wishbone.io_modules.udpserver
+.. automodule:: wishbone.io_modules.domainsocket
+   :members:
+
+InputGenerator
+==============
+
+.. automodule:: wishbone.io_modules.inputgenerator
    :members:
 
 NamedPipe
@@ -38,28 +44,23 @@ NamedPipe
 .. automodule:: wishbone.io_modules.namedpipe
    :members:
 
-SocketFile
-==========
+UDPserver
+=========
 
-.. automodule:: wishbone.io_modules.socketfile
+.. automodule:: wishbone.io_modules.udpserver
    :members:
+
 
 =======
 Modules
 =======
 
-Modules only receive/submit message from/to other modules.
+Modules receive from, process and submit messages to other modules.
 
-Skeleton
-========
+BrokerLoopback
+==============
 
-.. automodule:: wishbone.modules.skeleton
-   :members:
-
-Jsonvalidator
-=============
-
-.. automodule:: wishbone.modules.jsonvalidator
+.. automodule:: wishbone.modules.brokerloopback
    :members:
 
 Compressor
@@ -68,8 +69,26 @@ Compressor
 .. automodule:: wishbone.modules.compressor
    :members:
 
+Jsonvalidator
+=============
+
+.. automodule:: wishbone.modules.jsonvalidator
+   :members:
+
+Skeleton
+========
+
+.. automodule:: wishbone.modules.skeleton
+   :members:
+
 STDOUT
 ======
 
 .. automodule:: wishbone.modules.stdout
+   :members:
+   
+TippingBucket
+=============
+
+.. automodule:: wishbone.modules.tippingbucket
    :members:

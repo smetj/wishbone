@@ -28,11 +28,9 @@ from wishbone.toolkit import PrimitiveActor
 class BrokerLoopback(PrimitiveActor):
     '''The BrokerLoopback class does nothing more than adding broker data to the headers of each message and writes that back to its
     outgoing queue.
-    '''
     
-    def __init__(self, name, *args, **kwargs):
-        '''
-
+    Parameters:
+    
         * key       :   The routing key to which to send incoming data.
                         Default: name
                         Type: string
@@ -44,8 +42,10 @@ class BrokerLoopback(PrimitiveActor):
         * dump      :   Dumps x amount of messages into the Broker.
                         Default: 0
                         Type: int
-                            
-        '''
+    '''
+    
+    def __init__(self, name, *args, **kwargs):
+
         PrimitiveActor.__init__(self, name)
         self.key = kwargs.get('key',name)
         self.exchange = kwargs.get('exchange','')
@@ -53,14 +53,17 @@ class BrokerLoopback(PrimitiveActor):
         self.__dump(self.dump)
     
     def consume(self,doc):
+        
         doc['header']['broker_key']=self.key
         doc['header']['broker_exchange']=self.exchange
         self.sendData(doc)
        
     def shutdown(self):
+        
         self.logging.info('Shutdown')
 
     def __dump(self, number):
+        
         if number == 0:
             return
         else:

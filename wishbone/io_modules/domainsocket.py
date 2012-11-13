@@ -28,7 +28,7 @@ from gevent.server import StreamServer
 from wishbone.toolkit import QueueFunctions, Block
 
 
-class SocketFile(Greenlet, QueueFunctions, Block):
+class DomainSocket(Greenlet, QueueFunctions, Block):
     '''A Wishbone IO module which handles unix domain socket.    
     
     Parameters:
