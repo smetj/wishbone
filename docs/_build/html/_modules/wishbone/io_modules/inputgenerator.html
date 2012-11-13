@@ -1,0 +1,246 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>wishbone.io_modules.inputgenerator &mdash; Wishbone 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Wishbone 0.1 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Wishbone 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for wishbone.io_modules.inputgenerator</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c">#       inputgenerator.py</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2012 Jelle Smet development@smetj.net</span>
+<span class="c">#</span>
+<span class="c">#       This program is free software; you can redistribute it and/or modify</span>
+<span class="c">#       it under the terms of the GNU General Public License as published by</span>
+<span class="c">#       the Free Software Foundation; either version 3 of the License, or</span>
+<span class="c">#       (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#       This program is distributed in the hope that it will be useful,</span>
+<span class="c">#       but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#       GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#       You should have received a copy of the GNU General Public License</span>
+<span class="c">#       along with this program; if not, write to the Free Software</span>
+<span class="c">#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,</span>
+<span class="c">#       MA 02110-1301, USA.</span>
+<span class="c">#</span>
+<span class="c">#</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">string</span> <span class="kn">import</span> <span class="n">ascii_uppercase</span><span class="p">,</span> <span class="n">ascii_lowercase</span><span class="p">,</span> <span class="n">digits</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">choice</span><span class="p">,</span> <span class="n">uniform</span><span class="p">,</span> <span class="n">randint</span>
+<span class="kn">from</span> <span class="nn">wishbone.toolkit</span> <span class="kn">import</span> <span class="n">QueueFunctions</span><span class="p">,</span> <span class="n">Block</span>
+<span class="kn">from</span> <span class="nn">gevent</span> <span class="kn">import</span> <span class="n">Greenlet</span><span class="p">,</span> <span class="n">spawn</span><span class="p">,</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">spawn_later</span>
+<span class="kn">from</span> <span class="nn">gevent.event</span> <span class="kn">import</span> <span class="n">Event</span>
+<span class="kn">from</span> <span class="nn">gevent.queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">strftime</span><span class="p">,</span> <span class="n">localtime</span>
+<span class="kn">from</span> <span class="nn">gevent</span> <span class="kn">import</span> <span class="n">monkey</span><span class="p">;</span><span class="n">monkey</span><span class="o">.</span><span class="n">patch_all</span><span class="p">()</span> 
+
+<div class="viewcode-block" id="InputGenerator"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.inputgenerator.InputGenerator">[docs]</a><span class="k">class</span> <span class="nc">InputGenerator</span><span class="p">(</span><span class="n">Greenlet</span><span class="p">,</span> <span class="n">QueueFunctions</span><span class="p">,</span> <span class="n">Block</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">    A WishBone class which generates random data at different configurable specifications.</span>
+<span class="sd">    It&#39;s primary use is for testing.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    </span>
+<span class="sd">        * min_payload:  The minimum length of each random generated message.</span>
+<span class="sd">                        Default: 0</span>
+<span class="sd">                        Type: Integer</span>
+
+<span class="sd">        * max_payload:  The maximum length of each random generated message.</span>
+<span class="sd">                        Default: 1</span>
+<span class="sd">                        Type: Integer</span>
+
+<span class="sd">        * min_interval: The minimum time in seconds between each generated messages.</span>
+<span class="sd">                        Default: 0</span>
+<span class="sd">                        Type: Integer</span>
+
+<span class="sd">        * max_interval: The maximum time in seconds between each generated messages.</span>
+<span class="sd">                        Default: 0</span>
+<span class="sd">                        Type: Integer</span>
+
+<span class="sd">        * min_outage_start: The minimum time in seconds the next outage can start.</span>
+<span class="sd">                            Default: 60</span>
+<span class="sd">                            type: Int</span>
+
+<span class="sd">        * max_outage_start: The maximum time in seconds the next outage can start.</span>
+<span class="sd">                            Default: 600</span>
+<span class="sd">                            type: Int</span>
+<span class="sd">        </span>
+<span class="sd">        * min_outage_length:    The minimum time in seconds an outage can last.</span>
+<span class="sd">                                Default: 0</span>
+<span class="sd">                                Type: Integer</span>
+<span class="sd">                        </span>
+<span class="sd">        * max_outage_length:    The maximum time in seconds an outage can last.</span>
+<span class="sd">                                Default: 0</span>
+<span class="sd">                                Type: Integer</span>
+<span class="sd">        </span>
+<span class="sd">        length:     Simulates the variable length of message data.</span>
+<span class="sd">        </span>
+<span class="sd">        interval:   Simulates the variable interval rate data is produced.</span>
+<span class="sd">        </span>
+<span class="sd">        outage:     Simulates the connectivity problems for incoming data.  Under normal conditions</span>
+<span class="sd">                    there&#39;s a constant stream.  It might happen however incoming connection is</span>
+<span class="sd">                    interrupted, data is being build up somewhere and after connectivity restores a</span>
+<span class="sd">                    big chunk of data comes in.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">Greenlet</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">Block</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span> <span class="n">name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span> <span class="p">(</span> <span class="s">&#39;Initiated&#39;</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outage</span><span class="o">=</span><span class="n">Event</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_payload</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;min_payload&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_payload</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;max_payload&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_interval</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;min_interval&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_interval</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;max_interval&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_outage_start</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;min_outage_start&#39;</span><span class="p">,</span><span class="mi">60</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_outage_start</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;max_outage_start&#39;</span><span class="p">,</span><span class="mi">600</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_outage_length</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;min_outage_length&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_outage_length</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;max_outage_length&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">inbox</span><span class="o">=</span><span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">temp</span><span class="o">=</span><span class="n">Queue</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="n">spawn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reaper</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">decode</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gearman_worker</span><span class="p">,</span> <span class="n">gearman_job</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span> <span class="p">(</span><span class="s">&#39;Data received.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Started&#39;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">():</span>
+            
+            <span class="n">random_string</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">choice</span><span class="p">(</span><span class="n">ascii_uppercase</span> <span class="o">+</span> <span class="n">ascii_lowercase</span> <span class="o">+</span> <span class="n">digits</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_payload</span><span class="p">)</span><span class="o">+</span><span class="nb">range</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_payload</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Data batch generated with size of </span><span class="si">%s</span><span class="s"> bytes.&#39;</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">random_string</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">temp</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">random_string</span><span class="p">)</span>
+            
+            <span class="n">sleeping_time</span> <span class="o">=</span> <span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_interval</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">max_interval</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;Waiting for </span><span class="si">%s</span><span class="s"> seconds until the next data batch is generated.&#39;</span><span class="o">%</span><span class="n">sleeping_time</span><span class="p">)</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="n">sleeping_time</span><span class="p">)</span>            
+
+<div class="viewcode-block" id="InputGenerator.reaper"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.inputgenerator.InputGenerator.reaper">[docs]</a>    <span class="k">def</span> <span class="nf">reaper</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="sd">&#39;&#39;&#39;The reaper runs actually submits the randomly generated data from the local queue into the outgoing queue.</span>
+<span class="sd">        The goal of this is to make to reaper stop working for min_outage to max_outage to simulate an outage.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">planOutage</span><span class="p">()</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">block</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outage</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sendData</span><span class="p">({</span><span class="s">&quot;header&quot;</span><span class="p">:{},</span><span class="s">&quot;data&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">temp</span><span class="o">.</span><span class="n">get</span><span class="p">()},</span><span class="n">queue</span><span class="o">=</span><span class="s">&#39;inbox&#39;</span><span class="p">)</span>
+            </div>
+<div class="viewcode-block" id="InputGenerator.planOutage"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.inputgenerator.InputGenerator.planOutage">[docs]</a>    <span class="k">def</span> <span class="nf">planOutage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Plans when the next outage will occur.&#39;&#39;&#39;</span>
+        
+        <span class="n">start_outage</span><span class="o">=</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_outage_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_outage_start</span><span class="p">)</span>
+        <span class="n">spawn_later</span><span class="p">(</span><span class="n">start_outage</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executeOutage</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Next outage is planned at </span><span class="si">%s</span><span class="s">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%a, </span><span class="si">%d</span><span class="s"> %b %Y %H:%M:%S +0000&quot;</span><span class="p">,</span> <span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="p">()</span><span class="o">+</span><span class="n">start_outage</span><span class="p">))))</span>
+    </div>
+<div class="viewcode-block" id="InputGenerator.executeOutage"><a class="viewcode-back" href="../../../classes.html#wishbone.io_modules.inputgenerator.InputGenerator.executeOutage">[docs]</a>    <span class="k">def</span> <span class="nf">executeOutage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Executes the outage by locking the reaper.&#39;&#39;&#39;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">outage</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">outage_length</span><span class="o">=</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_outage_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_outage_length</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Outage of </span><span class="si">%s</span><span class="s"> seconds started.&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">outage_length</span><span class="p">))</span>
+        <span class="n">sleep</span><span class="p">(</span><span class="n">outage_length</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Outage finished.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">planOutage</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outage</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+        </div>
+    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;Shutdown&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../index.html">Wishbone 0.1 documentation</a> &raquo;</li>
+          <li><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Jelle Smet.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
