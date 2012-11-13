@@ -2,14 +2,17 @@
 Introduction
 ============
 
-Wishbone is a gevent based framework to write `asynchronous`, modular message passing code by connecting message queues of multiple modules into a clean workflow.
+Wishbone is a Python programming library to write `asynchronous` event pipelines mainly focussed on event processing.
+It does this by connecting modules to each other by shoveling data from one module's queue into the other in order to create an event processing flow.
+A module follows the Unix philosophy of writing programs that do one thing and do it well.  Modules work independently and asynchronously from each other without the need for callbacks.
+WishBone is build upon the great Gevent library which uses the libevent library as an eventloop.
 
 Wishbone modules
 ================
 
 Wishbone has a concept of modules. Each "Wishbone module" is a functionally isolated block of code which preferably does only 1 thing.
 Each module has at least 2 queues called inbox and outbox.  The modules process data arriving in the "inbox" queue.  After consuming and processing the data, 
-the module delivers it to its "outbox" queue.  The framework takes care of forwarding the content of this "outbox" to the queue of a module you connected it to.
+the module delivers it to its "outbox" queue.  The framework takes care of forwarding the content of this "outbox" to the inbox queue of a module you connected it to.
 
 By connecting the different queues with each other, one can make a clean "asynchronous" workflow in a simple way, without using any callbacks.
 
@@ -40,7 +43,7 @@ Headers contains a dictionary with values for modules to use.  Data contains the
 ParallelServer
 ==============
 
-ParallelServe is a class which allows you to start multiple Wishbone chains in parallel each as a different process.
+ParallelServe is a class which allows you to start multiple Wishbone event pipelines in parallel each as a different process.
 This basically results into a libevent loop per process.
 
 	* :class:`wishbone.server.ParallelServer`
