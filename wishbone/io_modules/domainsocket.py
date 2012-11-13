@@ -25,6 +25,7 @@
 import logging
 import _socket
 from gevent.server import StreamServer
+from gevent import Greenlet
 from wishbone.toolkit import QueueFunctions, Block
 
 
