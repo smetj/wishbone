@@ -206,7 +206,7 @@ an exception is returned.</p>
 <dl class="method">
 <dt id="wishbone.toolkit.QueueFunctions.sendRaw">
 <tt class="descname">sendRaw</tt><big>(</big><em>data</em>, <em>queue='outbox'</em><big>)</big><a class="reference internal" href="_modules/wishbone/toolkit.html#QueueFunctions.sendRaw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.toolkit.QueueFunctions.sendRaw" title="Permalink to this definition">¶</a></dt>
-<dd><p>Submits data to one of the mudule its queues.</p>
+<dd><p>Submits data to one of the module&#8217;s queues.</p>
 <p>Allows you to bypass message integrity checking.  Its usage should be sparse, although it&#8217;s usefull when you want to send data back 
 to a module as it would have come from the outside world.</p>
 </dd></dl>
@@ -291,6 +291,136 @@ When successful, this function acknowledges the message from the broker.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-wishbone.io_modules.domainsocket">
+<span id="domainsocket"></span><h2>DomainSocket<a class="headerlink" href="#module-wishbone.io_modules.domainsocket" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wishbone.io_modules.domainsocket.DomainSocket">
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.domainsocket.</tt><tt class="descname">DomainSocket</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/domainsocket.html#DomainSocket"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.domainsocket.DomainSocket" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Wishbone IO module which handles unix domain socket.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>name:       The name you want this module to be registered under.</li>
+<li>file:       The absolute filename of the named pipe.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wishbone.io_modules.inputgenerator">
+<span id="inputgenerator"></span><h2>InputGenerator<a class="headerlink" href="#module-wishbone.io_modules.inputgenerator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wishbone.io_modules.inputgenerator.InputGenerator">
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.inputgenerator.</tt><tt class="descname">InputGenerator</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/inputgenerator.html#InputGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.inputgenerator.InputGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>A WishBone class which generates random data at different configurable specifications.
+It&#8217;s primary use is for testing.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>min_payload:  The minimum length of each random generated message.</dt>
+<dd><p class="first last">Default: 0
+Type: Integer</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>max_payload:  The maximum length of each random generated message.</dt>
+<dd><p class="first last">Default: 1
+Type: Integer</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>min_interval: The minimum time in seconds between each generated messages.</dt>
+<dd><p class="first last">Default: 0
+Type: Integer</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>max_interval: The maximum time in seconds between each generated messages.</dt>
+<dd><p class="first last">Default: 0
+Type: Integer</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>min_outage_start: The minimum time in seconds the next outage can start.</dt>
+<dd><p class="first last">Default: 60
+type: Int</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>max_outage_start: The maximum time in seconds the next outage can start.</dt>
+<dd><p class="first last">Default: 600
+type: Int</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>min_outage_length:    The minimum time in seconds an outage can last.</dt>
+<dd><p class="first last">Default: 0
+Type: Integer</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>max_outage_length:    The maximum time in seconds an outage can last.</dt>
+<dd><p class="first last">Default: 0
+Type: Integer</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>length:     Simulates the variable length of message data.</p>
+<p>interval:   Simulates the variable interval rate data is produced.</p>
+<dl class="docutils">
+<dt>outage:     Simulates the connectivity problems for incoming data.  Under normal conditions</dt>
+<dd>there&#8217;s a constant stream.  It might happen however incoming connection is
+interrupted, data is being build up somewhere and after connectivity restores a
+big chunk of data comes in.</dd>
+</dl>
+</div></blockquote>
+<dl class="method">
+<dt id="wishbone.io_modules.inputgenerator.InputGenerator.executeOutage">
+<tt class="descname">executeOutage</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/inputgenerator.html#InputGenerator.executeOutage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.inputgenerator.InputGenerator.executeOutage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes the outage by locking the reaper.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.io_modules.inputgenerator.InputGenerator.planOutage">
+<tt class="descname">planOutage</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/inputgenerator.html#InputGenerator.planOutage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.inputgenerator.InputGenerator.planOutage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plans when the next outage will occur.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.io_modules.inputgenerator.InputGenerator.reaper">
+<tt class="descname">reaper</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/inputgenerator.html#InputGenerator.reaper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.inputgenerator.InputGenerator.reaper" title="Permalink to this definition">¶</a></dt>
+<dd><p>The reaper runs actually submits the randomly generated data from the local queue into the outgoing queue.
+The goal of this is to make to reaper stop working for min_outage to max_outage to simulate an outage.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-wishbone.io_modules.namedpipe">
+<span id="namedpipe"></span><h2>NamedPipe<a class="headerlink" href="#module-wishbone.io_modules.namedpipe" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wishbone.io_modules.namedpipe.NamedPipe">
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.namedpipe.</tt><tt class="descname">NamedPipe</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/namedpipe.html#NamedPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.namedpipe.NamedPipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Wishbone IO module which handles named pipe input.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>name:       The name you want this module to be registered under.</li>
+<li>file:       The absolute filename of the named pipe.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</div>
 <div class="section" id="module-wishbone.io_modules.udpserver">
 <span id="udpserver"></span><h2>UDPserver<a class="headerlink" href="#module-wishbone.io_modules.udpserver" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -326,55 +456,53 @@ When successful, this function acknowledges the message from the broker.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-wishbone.io_modules.namedpipe">
-<span id="namedpipe"></span><h2>NamedPipe<a class="headerlink" href="#module-wishbone.io_modules.namedpipe" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="wishbone.io_modules.namedpipe.NamedPipe">
-<em class="property">class </em><tt class="descclassname">wishbone.io_modules.namedpipe.</tt><tt class="descname">NamedPipe</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/namedpipe.html#NamedPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.namedpipe.NamedPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>A Wishbone IO module which handles named pipe input.</p>
-<p>Parameters:</p>
-<blockquote>
-<div><ul class="simple">
-<li>name:       The name you want this module to be registered under.</li>
-<li>file:       The absolute filename of the named pipe.</li>
-</ul>
-</div></blockquote>
-</dd></dl>
-
-</div>
-<div class="section" id="module-wishbone.io_modules.socketfile">
-<span id="socketfile"></span><h2>SocketFile<a class="headerlink" href="#module-wishbone.io_modules.socketfile" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="wishbone.io_modules.socketfile.SocketFile">
-<em class="property">class </em><tt class="descclassname">wishbone.io_modules.socketfile.</tt><tt class="descname">SocketFile</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/socketfile.html#SocketFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.socketfile.SocketFile" title="Permalink to this definition">¶</a></dt>
-<dd><p>A Wishbone IO module which handles unix domain socket input.</p>
-<p>Parameters:</p>
-<blockquote>
-<div><ul class="simple">
-<li>name:       The name you want this module to be registered under.</li>
-<li>file:       The absolute filename of the named pipe.</li>
-</ul>
-</div></blockquote>
-<dl class="method">
-<dt id="wishbone.io_modules.socketfile.SocketFile.handle">
-<tt class="descname">handle</tt><big>(</big><em>socket</em>, <em>address</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/socketfile.html#SocketFile.handle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.socketfile.SocketFile.handle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Is called upon each incoming message, makes sure the data has the right Wishbone format and writes the it into self.inbox</p>
-</dd></dl>
-
-</dd></dl>
-
-</div>
 </div>
 <div class="section" id="modules">
 <h1>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h1>
-<p>Modules only receive/submit message from/to other modules.</p>
-<div class="section" id="module-wishbone.modules.skeleton">
-<span id="skeleton"></span><h2>Skeleton<a class="headerlink" href="#module-wishbone.modules.skeleton" title="Permalink to this headline">¶</a></h2>
+<p>Modules receive from, process and submit messages to other modules.</p>
+<div class="section" id="module-wishbone.modules.brokerloopback">
+<span id="brokerloopback"></span><h2>BrokerLoopback<a class="headerlink" href="#module-wishbone.modules.brokerloopback" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="wishbone.modules.skeleton.Skeleton">
-<em class="property">class </em><tt class="descclassname">wishbone.modules.skeleton.</tt><tt class="descname">Skeleton</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/skeleton.html#Skeleton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.skeleton.Skeleton" title="Permalink to this definition">¶</a></dt>
-<dd><p>Skeleton class is a minimal Actor class which does nothing more than shoveling data from its inbox to its outbox.</p>
-<p>It can be used as an example/base for new blocks.</p>
+<dt id="wishbone.modules.brokerloopback.BrokerLoopback">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.brokerloopback.</tt><tt class="descname">BrokerLoopback</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/brokerloopback.html#BrokerLoopback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.brokerloopback.BrokerLoopback" title="Permalink to this definition">¶</a></dt>
+<dd><p>The BrokerLoopback class does nothing more than adding broker data to the headers of each message and writes that back to its
+outgoing queue.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>key <span class="classifier-delimiter">:</span> <span class="classifier">The routing key to which to send incoming data.</span></dt>
+<dd><p class="first last">Default: name
+Type: string</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>exchange <span class="classifier-delimiter">:</span> <span class="classifier">The exchange to write data to.</span></dt>
+<dd><p class="first last">Default: &#8216;&#8217;
+Type: string</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>dump <span class="classifier-delimiter">:</span> <span class="classifier">Dumps x amount of messages into the Broker.</span></dt>
+<dd><p class="first last">Default: 0
+Type: int</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wishbone.modules.compressor">
+<span id="compressor"></span><h2>Compressor<a class="headerlink" href="#module-wishbone.modules.compressor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wishbone.modules.compressor.Compressor">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.compressor.</tt><tt class="descname">Compressor</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/compressor.html#Compressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.compressor.Compressor" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Wishbone module which compresses uncompressed data and decompresses compressed data using Snappy.</p>
+<p>The module detects whether data is compressed or not.</p>
 </dd></dl>
 
 </div>
@@ -414,13 +542,19 @@ or when it doesn&#8217;t match your predifined Validator schema, it is dropped.<
 </dd></dl>
 
 </div>
-<div class="section" id="module-wishbone.modules.compressor">
-<span id="compressor"></span><h2>Compressor<a class="headerlink" href="#module-wishbone.modules.compressor" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-wishbone.modules.skeleton">
+<span id="skeleton"></span><h2>Skeleton<a class="headerlink" href="#module-wishbone.modules.skeleton" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="wishbone.modules.compressor.Compressor">
-<em class="property">class </em><tt class="descclassname">wishbone.modules.compressor.</tt><tt class="descname">Compressor</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/compressor.html#Compressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.compressor.Compressor" title="Permalink to this definition">¶</a></dt>
-<dd><p>A Wishbone module which compresses uncompressed data and decompresses compressed data using Snappy.</p>
-<p>The module detects whether data is compressed or not.</p>
+<dt id="wishbone.modules.skeleton.Skeleton">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.skeleton.</tt><tt class="descname">Skeleton</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/skeleton.html#Skeleton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.skeleton.Skeleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skeleton class is a minimal Actor class which does nothing more than shoveling data from its inbox to its outbox.</p>
+<p>It can be used as an example/base for new blocks.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>name :    The name to assign to the module instance in Wishbone.</li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 </div>
@@ -437,6 +571,82 @@ or when it doesn&#8217;t match your predifined Validator schema, it is dropped.<
 <li>purge: When True the message is not put into the outbox but is purged.</li>
 </ul>
 </div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wishbone.modules.tippingbucket">
+<span id="tippingbucket"></span><h2>TippingBucket<a class="headerlink" href="#module-wishbone.modules.tippingbucket" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="wishbone.modules.tippingbucket.TippingBucket">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.tippingbucket.</tt><tt class="descname">TippingBucket</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/tippingbucket.html#TippingBucket"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.tippingbucket.TippingBucket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Buffers unicode data and dumps to the output on 2 conditions:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Last data enteered in buffer is older than x seconds.</li>
+<li>Total data in buffer is x size.</li>
+</ul>
+</div></blockquote>
+<p>When the buffer is empty, the header of the first incoming message will be used as the header
+for the message going out containing the content of the buffer.  If you want to override that
+header with a predefined one then use the &lt;predefined_header&gt; option.</p>
+<p>Realize this is a buffer PER WishBone instance.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>age:  The time in seconds since the first update when the buffer is flushed.</dt>
+<dd><p class="first last">Default: 10
+Type: Int</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>size: The total size in bytes of the buffer when it is flushed.</dt>
+<dd><p class="first last">Default: 10000
+Type: Int</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>predefined_header:    Once the buffer is flushed the message containing the content of the</dt>
+<dd><p class="first last">buffer will have this header instead of the header coming from the
+first package entering the buffer.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>Disclaimer: The size of the buffer is expressed in bytes.  This is <em>only</em> valid when you use</dt>
+<dd>&#8220;single-byte encoding&#8221; characters.  Even then it&#8217;s going to be an approximation.
+When unicode is used then this counter is not going to be realistic anymore.</dd>
+<dt>Disclaimer2:    Binary data is not going to work.  If you require that, encode into base64 or</dt>
+<dd><p class="first">something similar.  In that case take the growth of that into account:</p>
+<blockquote>
+<div>~ output_size = ((input_size - 1) / 3) * 4 + 4</div></blockquote>
+<p class="last">So 256 bytes binary data results into 344 bytes of Base64 data.</p>
+</dd>
+<dt>ToDo(smetj):    Check for each incoming string which type of encoding we&#8217;re talking about</dt>
+<dd>and take into account when &#8220;calculating&#8221; the total size of the buffer.</dd>
+</dl>
+<dl class="method">
+<dt id="wishbone.modules.tippingbucket.TippingBucket.flushBuffer">
+<tt class="descname">flushBuffer</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/wishbone/modules/tippingbucket.html#TippingBucket.flushBuffer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.tippingbucket.TippingBucket.flushBuffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flushes the buffer.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.modules.tippingbucket.TippingBucket.reaper">
+<tt class="descname">reaper</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/wishbone/modules/tippingbucket.html#TippingBucket.reaper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.tippingbucket.TippingBucket.reaper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether our cache is expired and flush the buffer if its the case.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.modules.tippingbucket.TippingBucket.resetBuffer">
+<tt class="descname">resetBuffer</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/wishbone/modules/tippingbucket.html#TippingBucket.resetBuffer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.tippingbucket.TippingBucket.resetBuffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets the counters.</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -457,16 +667,19 @@ or when it doesn&#8217;t match your predifined Validator schema, it is dropped.<
 </li>
 <li><a class="reference internal" href="#io-modules">IO modules</a><ul>
 <li><a class="reference internal" href="#module-wishbone.io_modules.broker">Broker</a></li>
-<li><a class="reference internal" href="#module-wishbone.io_modules.udpserver">UDPserver</a></li>
+<li><a class="reference internal" href="#module-wishbone.io_modules.domainsocket">DomainSocket</a></li>
+<li><a class="reference internal" href="#module-wishbone.io_modules.inputgenerator">InputGenerator</a></li>
 <li><a class="reference internal" href="#module-wishbone.io_modules.namedpipe">NamedPipe</a></li>
-<li><a class="reference internal" href="#module-wishbone.io_modules.socketfile">SocketFile</a></li>
+<li><a class="reference internal" href="#module-wishbone.io_modules.udpserver">UDPserver</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#modules">Modules</a><ul>
-<li><a class="reference internal" href="#module-wishbone.modules.skeleton">Skeleton</a></li>
-<li><a class="reference internal" href="#module-wishbone.modules.jsonvalidator">Jsonvalidator</a></li>
+<li><a class="reference internal" href="#module-wishbone.modules.brokerloopback">BrokerLoopback</a></li>
 <li><a class="reference internal" href="#module-wishbone.modules.compressor">Compressor</a></li>
+<li><a class="reference internal" href="#module-wishbone.modules.jsonvalidator">Jsonvalidator</a></li>
+<li><a class="reference internal" href="#module-wishbone.modules.skeleton">Skeleton</a></li>
 <li><a class="reference internal" href="#module-wishbone.modules.stdout">STDOUT</a></li>
+<li><a class="reference internal" href="#module-wishbone.modules.tippingbucket">TippingBucket</a></li>
 </ul>
 </li>
 </ul>

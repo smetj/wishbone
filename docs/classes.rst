@@ -27,7 +27,7 @@ Broker
    :members:
 
 DomainSocket
-==========
+============
 
 .. automodule:: wishbone.io_modules.domainsocket
    :members:

@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Wishbone – Framework for gevent based modular programming &mdash; Wishbone 0.1 documentation</title>
+    <title>WishBone – Write asynchronous event pipelines without callbacks. &mdash; Wishbone 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -50,9 +50,12 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="wishbone-framework-for-gevent-based-modular-programming">
-<h1>Wishbone &#8211; Framework for gevent based modular programming<a class="headerlink" href="#wishbone-framework-for-gevent-based-modular-programming" title="Permalink to this headline">¶</a></h1>
-<p>Wishbone is a gevent based framework to write <cite>asynchronous</cite>, modular message passing code by connecting message queues of multiple modules into a clean workflow.</p>
+  <div class="section" id="wishbone-write-asynchronous-event-pipelines-without-callbacks">
+<h1>WishBone &#8211; Write asynchronous event pipelines without callbacks.<a class="headerlink" href="#wishbone-write-asynchronous-event-pipelines-without-callbacks" title="Permalink to this headline">¶</a></h1>
+<p>Wishbone is a Python programming library to write <cite>asynchronous</cite> event pipelines mainly focussed on event processing.
+It does this by connecting modules to each other by shoveling data from one module&#8217;s queue into the other in order to create an event processing flow.
+A module follows the Unix philosophy of writing programs that do one thing and do it well.  Modules work independently and asynchronously from each other without the need for callbacks.
+WishBone is build upon the great Gevent library which uses the libevent library as an eventloop.</p>
 <p>Download code from: <a class="reference external" href="https://github.com/smetj/wishbone">https://github.com/smetj/wishbone</a></p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -80,16 +83,19 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="classes.html#io-modules">IO modules</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.io_modules.broker">Broker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.io_modules.udpserver">UDPserver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.io_modules.domainsocket">DomainSocket</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.io_modules.inputgenerator">InputGenerator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.io_modules.namedpipe">NamedPipe</a></li>
-<li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.io_modules.socketfile">SocketFile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.io_modules.udpserver">UDPserver</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="classes.html#modules">Modules</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.modules.skeleton">Skeleton</a></li>
-<li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.modules.jsonvalidator">Jsonvalidator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.modules.brokerloopback">BrokerLoopback</a></li>
 <li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.modules.compressor">Compressor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.modules.jsonvalidator">Jsonvalidator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.modules.skeleton">Skeleton</a></li>
 <li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.modules.stdout">STDOUT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classes.html#module-wishbone.modules.tippingbucket">TippingBucket</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
@@ -121,7 +127,7 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Wishbone &#8211; Framework for gevent based modular programming</a><ul>
+<li><a class="reference internal" href="#">WishBone &#8211; Write asynchronous event pipelines without callbacks.</a><ul>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </li>
