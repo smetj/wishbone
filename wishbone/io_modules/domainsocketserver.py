@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  socket_file.py
+#  domainsocketserver.py
 #  
 #  Copyright 2012 Jelle Smet development@smetj.net
 #  
@@ -23,19 +23,21 @@
 #  
 
 import logging
-import _socket
+#import _socket
+from os import remove
 from gevent.server import StreamServer
-from gevent import Greenlet
+from gevent import Greenlet, socket, sleep
+from gevent.queue import Queue
 from wishbone.toolkit import QueueFunctions, Block
 
 
-class DomainSocket(Greenlet, QueueFunctions, Block):
-    '''A Wishbone IO module which handles unix domain socket.    
+class DomainSocketServer(Greenlet, QueueFunctions, Block):
+    '''A Wishbone IO module which handles unix domain socket input.    
     
     Parameters:
 
         * name:       The name you want this module to be registered under.
-        * file:       The absolute filename of the named pipe.
+        * file:       The absolute filename of the socket.
     ''' 
    
     def __init__(self, name, *args, **kwargs):
@@ -43,20 +45,41 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
         Block.__init__(self)
         self.name=name
         self.logging = logging.getLogger( name )
-        self.file = kwargs.get('file', 'wishboneInput.socket')
-        self.inbox=Queue(None)
+        self.file = kwargs.get('file', '%s.socket'%self.name)
+        self.sock = None
+        self.__setup()
+        self.inbox=Queue()
         self.logging.info('Initialiazed.')
 
     def __setup(self):
-        self.sock = _socket.socket(_socket.AF_UNIX, _socket.SOCK_STREAM)
+        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.sock.setblocking(0)
-        self.sock.bind(self.name)
+        self.sock.bind(self.file)
+        self.sock.listen(50)
+        
+    
+    def handle(self, socket, address):
+        '''Is called upon each incoming message, makes sure the data has the right Wishbone format and writes the it into self.inbox'''
+        
+        fileobj = socket.makefile()
+        while self.block():
+            line = fileobj.readline()
+            if not line:
+                self.logging.debug('Client disconnected.')
+                break
+            else:
+                self.logging.debug ('Data received from %s' % (address) )     
+                self.sendData({'header':{},'data':line.rstrip("\n")}, queue='inbox')
+            sleep(0)
+        fileobj.close()
+        
         
     def _run(self):
         try:
-            StreamServer(bind_unix_listener('mysocket.sock'), handle).serve_forever()
+            StreamServer(self.sock, self.handle).serve_forever()
         except KeyboardInterrupt:
             self.shutdown()
     
-            
-
+    def shutdown(self):
+        remove(self.file)
+        self.logging.info('Shutdown')
