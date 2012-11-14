@@ -22,7 +22,7 @@
 #  
 #  
 
-from gevent import spawn, Greenlet, get_hub
+from gevent import spawn, Greenlet, sleep
 from gevent.queue import Queue
 from wishbone.toolkit import QueueFunctions, Block
 import os
@@ -49,7 +49,7 @@ class NamedPipe(Greenlet, QueueFunctions, Block):
         self.inbox=Queue(None)
         self.logging.info('Initialiazed.')
         os.mkfifo ( self.file )
-        self.logging.info('Named pipe created at: %s'%(self.file))
+        self.logging.info('Named pipe %s created.'%(self.file))
     
     def _run(self):
         self.logging.info('Started.')
@@ -60,11 +60,13 @@ class NamedPipe(Greenlet, QueueFunctions, Block):
         else:        
             try:
                 while self.block() == True:
+                    sleep(0)
                     try:
                         lines = os.read(fd, 4096).splitlines()
                     except:
                         pass
                     if lines:
+                        self.logging.debug('Received a chunk of 4096 bytes.')
                         for line in lines:
                             self.sendData({'header':{},'data':line}, queue='inbox')
                     else:
