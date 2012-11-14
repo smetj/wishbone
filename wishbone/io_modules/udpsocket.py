@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  udpserver.py
+#  udpsocket.py
 #  
 #  Copyright 2012 Jelle Smet development@smetj.net
 #  
@@ -29,7 +29,7 @@ from wishbone.toolkit import QueueFunctions, Block
 import logging
 
 
-class UDPServer(DatagramServer, QueueFunctions, Block):
+class UDPSocket(DatagramServer, QueueFunctions, Block):
     '''A Wishbone module which handles UDP input.
     
     Data received by the module is put into self.inbox
@@ -41,10 +41,10 @@ class UDPServer(DatagramServer, QueueFunctions, Block):
     '''
  
     def __init__(self, name, port, *args, **kwargs):
-        DatagramServer.__init__(self, ':'+port, *args, **kwargs)
+        DatagramServer.__init__(self, ':'+str(port), *args, **kwargs)
         Block.__init__(self)
         self.logging = logging.getLogger( name )
-        self.name = 'UDPServer'
+        self.name = name
         self.logging.info ( 'started and listening on port %s' % port)
         self.inbox=Queue(None)
         spawn(self.run)
