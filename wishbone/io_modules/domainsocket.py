@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  domainsocketserver.py
+#  domainsocket.py
 #  
 #  Copyright 2012 Jelle Smet development@smetj.net
 #  
@@ -31,7 +31,7 @@ from gevent.queue import Queue
 from wishbone.toolkit import QueueFunctions, Block
 
 
-class DomainSocketServer(Greenlet, QueueFunctions, Block):
+class DomainSocket(Greenlet, QueueFunctions, Block):
     '''A Wishbone IO module which handles unix domain socket input.    
     
     Parameters:
