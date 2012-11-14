@@ -7,5 +7,5 @@ It does this by connecting modules to each other by shoveling data from one modu
 A module follows the Unix philosophy of writing programs that do one thing and do it well.  Modules work independently and asynchronously from each other without the need for callbacks.
 WishBone is build upon the great Gevent library which uses the libevent library as an eventloop.
 
-
-http://readthedocs.org/docs/wishbone/en/latest/
+You can find documentation here:
+	http://smetj.github.com/wishbone/index.html
