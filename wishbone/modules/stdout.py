@@ -35,7 +35,7 @@ class STDOUT(PrimitiveActor):
     
     '''
     
-    def __init__(self, name, complete=False, purge=False, *args, **kwargs):
+    def __init__(self, name, complete=False, purge=False):
         PrimitiveActor.__init__(self, name)
         self.complete=complete
         self.purge=purge

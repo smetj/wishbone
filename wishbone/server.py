@@ -27,28 +27,108 @@ import logging
 import json
 import sys
 import resource
+import argparse
 from multiprocessing import Process
 from time import sleep
 from os import getpid, kill, remove, path
 from signal import SIGINT
-from logging import INFO
+from logging import INFO, DEBUG
 from wishbone.tools import configureLogging
+from wishbone import Wishbone
 from gevent import monkey;monkey.patch_all(thread=False)
 
-class ParallelServer():
-    '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.'''
+class BootStrap():
+    '''Bootstraps a Wishbone setup using the received configuration.'''
+    
+    def __init__(self,name="WishBone"):
+        
+        self.name=name
+        cli=self.parseArguments()
+        conf=self.readConfig(cli["config"])
+        log_level = self.translateLogLevel(cli["loglevel"])
+        ParallelServer( instances=int(cli['instances']),
+                    setup=WishbBoneSkeleton,
+                    setup_args=[conf],
+                    command=cli['command'][0],
+                    name=name,
+                    log_level=log_level
+        )
+    
+    def parseArguments(self):
+        
+        parser = argparse.ArgumentParser()
+        parser.add_argument('command', nargs=1, help='Which command to issue.  start, stop, status or debug.')
+        parser.add_argument('--config', dest='config', help='The location of the configuration file.')
+        parser.add_argument('--instances', dest='instances', default=1, help='The number of parallel instances to start.')
+        parser.add_argument('--loglevel', dest='loglevel', default="info", help='The loglevel you want to use. [info,warn,crit,debug]')
+        parser.add_argument('--pid', dest='pid', default=1, help='The absolute path of the pidfile.')
+        return vars(parser.parse_args())
+    
+    def readConfig(self,filename):
+        try:
+            f = open(filename, "r")
+            config = f.readlines()
+            f.close()
+            return json.loads(''.join(config))
+        except Exception as err:
+            print ('An error occurred when processing the config files. Reason: %s'%err)
+            sys.exit(1)
+    
+    def translateLogLevel(self,loglevel):
+        if loglevel == "debug":
+            return DEBUG
+        elif loglevel == "info":
+            return INFO
+        
+class WishbBoneSkeleton():
+    '''A skeleton class which initializes and connects the WishBone modules according to the bootstrap configuration.'''
+    
+    def __init__(self, conf):
+        self.conf=conf
+        self.wb = self.setup()
+        self.wb.start()
 
-    def __init__(self, instances=1, setup=None, daemonize=False, config=None, command=None, log_level=INFO, name='Server', pidfile=None):
+    def setup(self):
+        wb = Wishbone()
+        for module in self.conf["bootstrap"]:
+            wb.registerModule ( (self.conf["bootstrap"][module]["module"],self.conf["bootstrap"][module]["class"],module),
+                                **self.conf["bootstrap"][module]["variables"]
+            )    
+        for source in self.conf["routingtable"]:
+            for destination in self.conf["routingtable"][source]:
+                (src_class,src_queue)=source.split('.')
+                (dst_class,dst_queue)=destination.split('.')
+                src_instance=getattr(wb,src_class)
+                dst_instance=getattr(wb,dst_class)
+                wb.connect(getattr(src_instance,src_queue),getattr(dst_instance,dst_queue))
+        return wb
+
+class ParallelServer():
+    '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.
+    
+    Parameters:
+    
+        * instances:        The number of parallel instances to start.
+        * setup:            The class containing the WishBone setup.
+        * setup_args:       *args to initiate the setup class.        
+        * setup_kwargs:     **kwargs to initiate the setup class.
+        * daemonize:        Detach into background or not.
+        * command:          Which command to invoke. (start, debug, stop, status)
+        * log_level:        The loglevel to use
+        * server:           The name of this insance.
+        * pidfile:          The absolute pathname of the pidfile.    
+    '''
+
+    def __init__(self, instances=1, setup=None, setup_args=None, setup_kwargs={}, command=None, log_level=INFO, name='Server', pidfile=None):
         self.instances=instances
         self.setup=setup
-        self.daemonize=daemonize
-        self.config=config
+        self.setup_kwargs=setup_kwargs
+        self.setup_args=setup_args
         self.command=command
         self.log_level=log_level
         self.name=name
         self.wishbone=None
         self.processes=[]
-        self.module_params={}
         self.logging = logging.getLogger( 'Server' )
         self.pidfile = self.constructPidFileName(pidfile,name)
         self.pids = None
@@ -56,9 +136,7 @@ class ParallelServer():
 
     def do(self):
         '''Executes the command.'''
-        if self.config != None:
-            self.readConfig()
-        if self.command == "debug" or (self.command == None and self.daemonize == False):
+        if self.command == "debug":
             configureLogging(loglevel=self.log_level)
             self.debug()
         elif self.command == "start":
@@ -94,10 +172,11 @@ class ParallelServer():
         
         self.logging.info('Starting %s in foreground.' % (self.name))
         for number in range(int(self.instances)):
-            if self.config == None:
-                self.processes.append(Process(target=self.setup, name=number))
-            else:
-                self.processes.append(Process(target=self.setup, name=number, kwargs=self.module_params))
+            self.processes.append(Process(target=self.setup, name=number, args=self.setup_args, kwargs=self.setup_kwargs))
+            #if self.setup_config == None:
+                #self.processes.append(Process(target=self.setup, name=number))
+            #else:
+                #self.processes.append(Process(target=self.setup, name=number, args=self.setup_args, kwargs=self.setup_kwargs))
             self.processes[number].start()
             self.logging.info('Instance #%s started.'%number)
 
@@ -229,17 +308,6 @@ class ParallelServer():
             self.logging.info('Pidfile removed.')
         except Exception as err:
             self.logging.warn('I could not remove the pidfile. Reason: %s'%(err))
-
-    def readConfig(self):
-        '''Reads the config file.'''
-
-        try:
-            f = open (self.config,'r')
-            self.module_params = json.load(f)
-            f.close()
-        except Exception as err:
-            self.logging.critical('I could not read the config file. Reason: %s'%(err))
-            self.module_params={}
 
     MAXFD = 2048
     def getMaximumFileDescriptors(self):
