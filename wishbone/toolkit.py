@@ -145,8 +145,7 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
             self.stats['min'] = t.elapsed
         if t.elapsed < self.stats['min']:
             self.stats['min'] = t.elapsed
-        
-        
+         
     def _run(self):
         self.logging.info('Started.')
         while self.block() == True:

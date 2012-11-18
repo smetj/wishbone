@@ -36,27 +36,27 @@ class NamedPipe(Greenlet, QueueFunctions, Block):
     
     Parameters:
 
-        * name:       The name you want this module to be registered under.
-        * file:       The absolute filename of the named pipe.
+        * name:     The name you want this module to be registered under.
+        * path:     The absolute path of the named pipe.
     ''' 
    
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name, path):
         Greenlet.__init__(self)
         Block.__init__(self)
         self.name=name
         self.logging = logging.getLogger( name )
-        self.file = kwargs.get('file', 'wishboneInput')
+        self.path = path
         self.inbox=Queue(None)
         self.logging.info('Initialiazed.')
-        os.mkfifo ( self.file )
-        self.logging.info('Named pipe %s created.'%(self.file))
+        os.mkfifo ( self.path )
+        self.logging.info('Named pipe %s created.'%(self.path))
     
     def _run(self):
         self.logging.info('Started.')
         try:
-            fd = os.open(self.file, os.O_RDONLY|os.O_NONBLOCK)
+            fd = os.open(self.path, os.O_RDONLY|os.O_NONBLOCK)
         except Exception as err:
-            self.logging.error('Error opening Named pipe %s. Reason: %s' % (self.file, err))
+            self.logging.error('Error opening Named pipe %s. Reason: %s' % (self.path, err))
         else:        
             try:
                 while self.block() == True:
@@ -79,6 +79,6 @@ class NamedPipe(Greenlet, QueueFunctions, Block):
                 self.logging.warn(err)
     
     def shutdown(self):
-        os.unlink(self.file)
+        os.unlink(self.path)
         self.logging.info('Shutdown')
         

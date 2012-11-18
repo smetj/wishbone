@@ -37,15 +37,15 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
     Parameters:
 
         * name:       The name you want this module to be registered under.
-        * file:       The absolute filename of the socket.
+        * path:       The absolute pathname of the socket.
     ''' 
    
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name, path):
         Greenlet.__init__(self)
         Block.__init__(self)
         self.name=name
         self.logging = logging.getLogger( name )
-        self.file = kwargs.get('file', '%s.socket'%self.name)
+        self.path = path
         self.sock = None
         self.__setup()
         self.inbox=Queue()
@@ -54,7 +54,7 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
     def __setup(self):
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.sock.setblocking(0)
-        self.sock.bind(self.file)
+        self.sock.bind(self.path)
         self.sock.listen(50)
         
     
@@ -81,5 +81,5 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
             self.shutdown()
     
     def shutdown(self):
-        remove(self.file)
+        remove(self.path)
         self.logging.info('Shutdown')
