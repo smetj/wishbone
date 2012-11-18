@@ -82,7 +82,7 @@ class InputGenerator(Greenlet, QueueFunctions, Block):
                     big chunk of data comes in.
     '''
 
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name, min_payload=0,max_payload=1,min_interval=0,max_interval=0,min_outage_start=60,max_outage_start=600,min_outage_length=0,max_outage_length=0):
 
         Greenlet.__init__(self)
         Block.__init__(self)
@@ -91,14 +91,14 @@ class InputGenerator(Greenlet, QueueFunctions, Block):
         self.logging.info ( 'Initiated' )
         self.outage=Event()
 
-        self.min_payload=kwargs.get('min_payload',0)
-        self.max_payload=kwargs.get('max_payload',1)
-        self.min_interval=kwargs.get('min_interval',0)
-        self.max_interval=kwargs.get('max_interval',0)
-        self.min_outage_start=kwargs.get('min_outage_start',60)
-        self.max_outage_start=kwargs.get('max_outage_start',600)
-        self.min_outage_length=kwargs.get('min_outage_length',0)
-        self.max_outage_length=kwargs.get('max_outage_length',0)
+        self.min_payload=min_payload
+        self.max_payload=max_payload
+        self.min_interval=min_interval
+        self.max_interval=max_interval
+        self.min_outage_start=min_outage_start
+        self.max_outage_start=max_outage_start
+        self.min_outage_length=min_outage_length
+        self.max_outage_length=max_outage_length
         
         self.inbox=Queue(None)
         self.temp=Queue(None)
