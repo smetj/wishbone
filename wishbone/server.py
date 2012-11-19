@@ -119,7 +119,7 @@ class ParallelServer():
         * pidfile:          The absolute pathname of the pidfile.    
     '''
 
-    def __init__(self, instances=1, setup=None, setup_args=None, setup_kwargs={}, command=None, log_level=INFO, name='Server', pidfile=None):
+    def __init__(self, instances=1, setup=None, setup_args=[], setup_kwargs={}, command=None, log_level=INFO, name='Server', pidfile=None):
         self.instances=instances
         self.setup=setup
         self.setup_kwargs=setup_kwargs
