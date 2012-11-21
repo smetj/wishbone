@@ -78,11 +78,13 @@ class Wishbone(Block):
     def connect(self, source, destination):
         '''Creates a new background Greenthread which continuously consumes all messages from source into destination.
         
-        This function is used to connect the queue of one module with the queue of another.  A typical useage is to connect outbox from module1
-        to inbox of module2.
+        Both source and destination should be strings.        
         '''
-        
-        self.connectors.append(spawn ( self.__connector, source, destination ))
+        (src_class,src_queue)=source.split('.')
+        (dst_class,dst_queue)=destination.split('.')
+        src_instance=getattr(self,src_class)
+        dst_instance=getattr(self,dst_class)        
+        self.connectors.append(spawn ( self.__connector, getattr(src_instance,src_queue), getattr(dst_instance,dst_queue) ))
     
     def start(self):
         '''Function which starts all registered Wishbone modules.
