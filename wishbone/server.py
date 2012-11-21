@@ -96,11 +96,7 @@ class WishbBoneSkeleton():
             )    
         for source in self.conf["routingtable"]:
             for destination in self.conf["routingtable"][source]:
-                (src_class,src_queue)=source.split('.')
-                (dst_class,dst_queue)=destination.split('.')
-                src_instance=getattr(wb,src_class)
-                dst_instance=getattr(wb,dst_class)
-                wb.connect(getattr(src_instance,src_queue),getattr(dst_instance,dst_queue))
+                wb.connect(source,destination)
         return wb
 
 class ParallelServer():
