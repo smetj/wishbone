@@ -41,7 +41,7 @@ class Wishbone(Block):
                     A value < 1 disables this function.  Default value: 0
     '''
     
-    def __init__(self, metrics=0):
+    def __init__(self, metrics=10):
         self.logging = logging.getLogger( 'Wishbone' )
         Block.__init__(self)
         self.modules=[]
@@ -113,7 +113,7 @@ class Wishbone(Block):
 
         if self.metrics >= 1:
             self.logging.debug('Metrics enabled')
-            spawn(self.logMetrics)
+            spawn(self.logMetrics,self.metrics)
         else:
             self.logging.debug('Metrics disabled.')
         
@@ -158,7 +158,7 @@ class Wishbone(Block):
     def logMetrics(self, interval=5):
         while self.block():
             for module in self.modules:
-                self.logging.info('Metrics: %s'%(str(module.metrics)))
+                self.logging.info('Metrics %s: %s'%(module.name,str(module.metrics)))
             sleep(interval)
     
     def __connector(self,source, destination, source_stats, destination_stats):
