@@ -43,6 +43,7 @@ class UDPSocket(DatagramServer, QueueFunctions, Block):
     def __init__(self, name, port, *args, **kwargs):
         DatagramServer.__init__(self, ':'+str(port), *args, **kwargs)
         Block.__init__(self)
+        QueueFunctions.__init__(self)
         self.logging = logging.getLogger( name )
         self.name = name
         self.logging.info ( 'started and listening on port %s' % port)
@@ -53,7 +54,7 @@ class UDPSocket(DatagramServer, QueueFunctions, Block):
         '''Is called upon each incoming message, makes sure the data has the right Wishbone format and writes the it into self.inbox'''
         
         self.logging.debug ('Data received from %s' % (address[0]) )
-        self.sendData({'header':{},'data':data}, queue='inbox')
+        self.putData({'header':{},'data':data}, queue='inbox')
  
     def run(self):
         '''Blocking function which starts the UDP server.'''

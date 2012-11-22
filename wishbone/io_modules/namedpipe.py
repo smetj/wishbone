@@ -42,11 +42,11 @@ class NamedPipe(Greenlet, QueueFunctions, Block):
    
     def __init__(self, name, path):
         Greenlet.__init__(self)
+        QueueFunctions.__init__(self)
         Block.__init__(self)
         self.name=name
         self.logging = logging.getLogger( name )
         self.path = path
-        self.inbox=Queue(None)
         self.logging.info('Initialiazed.')
         os.mkfifo ( self.path )
         self.logging.info('Named pipe %s created.'%(self.path))
@@ -68,7 +68,7 @@ class NamedPipe(Greenlet, QueueFunctions, Block):
                     if lines:
                         self.logging.debug('Received a chunk of 4096 bytes.')
                         for line in lines:
-                            self.sendData({'header':{},'data':line}, queue='inbox')
+                            self.putData({'header':{},'data':line}, queue='inbox')
                     else:
                         self.wait(0.1)
                                                 
