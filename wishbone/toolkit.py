@@ -33,6 +33,11 @@ from copy import deepcopy
 class QueueFunctions():
     '''A base class for Wishbone Actor classes.  Shouldn't be called directly but is inherited by PrimitiveActor.'''
     
+    def __init__(self):
+        self.inbox = Queue(None)
+        self.outbox = Queue(None)
+        self.metrics={"inbox":{"in":0,"out":0},"outbox":{"in":0,"out":0}}
+    
     def sendData(self, data, queue='outbox'):
         '''Submits data to one of the module its queues.
         
@@ -47,12 +52,14 @@ class QueueFunctions():
         if self.checkIntegrity(data):
             try:
                 getattr (self, queue).put ( data )
+                self.incrementMetric(queue, "in")
             except:
                 setattr (self, queue, Queue)
                 getattr (self, queue).put ( data )
         else:
             self.logging.warn('Invalid internal data structure detected. Data is purged. Turn on debugging to see datastructure.')
             self.logging.debug('Invalid data structure: %s' % (data))
+    putData=sendData
     
     def sendRaw(self, data, queue='outbox'):
         '''Submits data to one of the module's queues.
@@ -61,7 +68,15 @@ class QueueFunctions():
         to a module as it would have come from the outside world.'''
         
         getattr (self, queue).put ( deepcopy(data) )
-            
+        self.incrementMetric(queue, "in")
+    putRaw=sendRaw
+    
+    def getData(self, queue="inbox"):
+        '''Gets data from the queue.'''
+        data = getattr (self, queue).get()
+        self.incrementMetric(queue, "out")
+        return data
+                
     def sendCommand(self, data, destination='*', queue='outbox'):
         '''Placeholder not implemented for the moment.'''
         
@@ -84,6 +99,28 @@ class QueueFunctions():
                 return False
         else:
             return False
+
+    def incrementMetric(self, queue, direction):
+        '''Increments the counter of the queue with one in order to keep track of how many messages went through it.'''
+        
+        try:
+            self.metrics[queue][direction]+=1
+        except:
+            if not hasattr(self, "metrics"):
+                self.metrics={"inbox":{"in":0,"out":0},"outbox":{"in":0,"out":0}}
+            self.metrics[queue]={"in":0,"out":0}
+            self.metrics[queue][direction]+=1
+    
+    def createQueue(self, name):
+        
+        try:
+            setattr(self,name,Queue(None))
+            self.metrics[name]={"in":0,"out":0}
+        except Exception as err:
+            self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
+
+    def logMetrics(self):
+        self.logging.info("Queue metrics %s "%str(self.metrics))
 
 class Block():
     '''A base class providing a global lock.'''
@@ -119,14 +156,13 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
     '''
 
     def __init__(self, name):
-        Block.__init__(self)
         Greenlet.__init__(self)
+        QueueFunctions.__init__(self)
+        Block.__init__(self)
+        self.name=name
+        self.stats={'msg': 0, 'min': 0, 'max': 0, 'avg': 0, 'total': 0}
         self.logging = logging.getLogger( name )
         self.logging.info('Initiated.')
-        self.name=name
-        self.inbox = Queue(None)
-        self.outbox = Queue(None)
-        self.stats={'msg': 0, 'min': 0, 'max': 0, 'avg': 0, 'total': 0}
         
     def timer(self, function):
         t = stopwatch.Timer()
@@ -149,7 +185,7 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
     def _run(self):
         self.logging.info('Started.')
         while self.block() == True:
-            data = self.inbox.get()
+            data = self.getData("inbox")
             self.timer(self.consume(data))                            
                     
     def consume(self, *args, **kwargs):
@@ -172,6 +208,7 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
         '''Generates a line with metrics of the spefic module.'''
         
         self.logging.info('Total messages: %s, Min: %s seconds, Max: %s seconds, Avg: %s seconds' % (self.stats['msg'], self.stats['min'], self.stats['max'], self.stats['avg']))
+        self.logging.info(str(self.metrics))
     
     def shutdown(self):
         '''A function which could be overridden by the Wisbone module.
