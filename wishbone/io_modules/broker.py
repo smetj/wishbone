@@ -70,6 +70,7 @@ class Broker(Greenlet, QueueFunctions, Block):
     
         Greenlet.__init__(self)
         Block.__init__(self)
+        QueueFunctions.__init__(self)
         self.name = 'Broker'
         self.logging = logging.getLogger( self.name )
         self.logging.info('Initiated')
@@ -80,9 +81,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         self.prefetch_count=prefetch_count
         self.no_ack=no_ack
         self.consume_queue = consume_queue
-        self.outbox=Queue(None)
-        self.inbox=Queue(None)
-        self.acknowledge=Queue(None)
+        self.createQueue("acknowledge")
         self.connected=False
 
     def __setup(self):
@@ -102,12 +101,11 @@ class Broker(Greenlet, QueueFunctions, Block):
         while self.block() == True:
             while self.connected == True:
                 try:
-                    self.produce(self.outbox.get())
+                    self.produce(self.getData("outbox"))
                 except Exception as err:
                     self.logging.warn('Could not write data to broker.  Reason: %s'%(err))
                     break
             self.wait(timeout=0.1)
-            #sleep(0)
     
     def acknowledgeMessage(self):
         '''Acknowledges messages
@@ -116,14 +114,13 @@ class Broker(Greenlet, QueueFunctions, Block):
         while self.block() == True:
             while self.connected == True:
                 try:
-                    ack = self.acknowledge.get()
+                    ack = self.getData("acknowledge")
                     self.incoming.basic_ack(ack)
                 except Exception as err:
-                    self.acknowledge.put(ack)
+                    self.putData(ack,"acknowledge")
                     self.logging.warn('Could not acknowledge message in broker.  Reason: %s'%(err))
                     break
             self.wait(timeout=0.1)
-            #sleep(0)
                                 
     def _run(self):
         '''
@@ -164,7 +161,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         It also makes sure the incoming data is encapsulated in the right Wishbone format.
         When successful, this function acknowledges the message from the broker.
         '''
-        self.sendData({'header':{'broker_tag':doc.delivery_tag},'data':doc.body}, queue='inbox')
+        self.putData({'header':{'broker_tag':doc.delivery_tag},'data':doc.body}, queue='inbox')
         self.logging.debug('Data received from broker.')
          
     def produce(self,message):
