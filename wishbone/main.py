@@ -34,13 +34,19 @@ from sys import exit
 class Wishbone(Block):
     '''
     The main class in which the Wishbone modules are registered and managed.
+    
+    Parameters:
+    
+        * metrics:  The value in seconds metrics of the running modules need to be logged.
+                    A value < 1 disables this function.  Default value: 0
     '''
     
-    def __init__(self):
+    def __init__(self, metrics=0):
         self.logging = logging.getLogger( 'Wishbone' )
         Block.__init__(self)
         self.modules=[]
         self.connectors=[]
+        self.metrics=metrics
         self.run=self.start
         
     def registerModule(self, config, *args, **kwargs):
@@ -89,7 +95,7 @@ class Wishbone(Block):
         (dst_class,dst_queue)=destination.split('.')
         src_instance=getattr(self,src_class)
         dst_instance=getattr(self,dst_class)
-        self.connectors.append(spawn ( self.__connector, getattr(src_instance,src_queue), getattr(dst_instance,dst_queue), getattr(src_instance,"metrics")[src_queue], getattr(dst_instance,"metrics")[dst_queue] ))
+        self.connectors.append(spawn ( self.__connector, getattr(src_instance,src_queue), getattr(dst_instance,dst_queue), getattr(src_instance,"metrics")["queues"][src_queue], getattr(dst_instance,"metrics")["queues"][dst_queue] ))
     
     def start(self):
         '''Function which starts all registered Wishbone modules.
@@ -104,6 +110,13 @@ class Wishbone(Block):
                 self.__dict__[instance].start()
             except:
                 pass
+
+        if self.metrics >= 1:
+            self.logging.debug('Metrics enabled')
+            spawn(self.logMetrics)
+        else:
+            self.logging.debug('Metrics disabled.')
+        
 
         try:
             self.wait()
@@ -142,6 +155,12 @@ class Wishbone(Block):
                 self.logging.debug('Killing connector %s'%module.name)
                 connector.kill()
          
+    def logMetrics(self, interval=5):
+        while self.block():
+            for module in self.modules:
+                self.logging.info('Metrics: %s'%(str(module.metrics)))
+            sleep(interval)
+    
     def __connector(self,source, destination, source_stats, destination_stats):
         '''Consumes data from source and puts it in destination.'''
         
