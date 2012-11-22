@@ -103,6 +103,7 @@ class InputGenerator(Greenlet, QueueFunctions, Block):
         
         self.createQueue("temp")
         self.outage=Event()
+        self.outage.set()
         spawn(self.reaper)
 
     def _run(self):
