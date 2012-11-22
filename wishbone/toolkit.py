@@ -36,7 +36,7 @@ class QueueFunctions():
     def __init__(self):
         self.inbox = Queue(None)
         self.outbox = Queue(None)
-        self.metrics={"inbox":{"in":0,"out":0},"outbox":{"in":0,"out":0}}
+        self.metrics={"functions":{},"queues":{"inbox":{"in":0,"out":0},"outbox":{"in":0,"out":0}}}
     
     def sendData(self, data, queue='outbox'):
         '''Submits data to one of the module its queues.
@@ -104,18 +104,18 @@ class QueueFunctions():
         '''Increments the counter of the queue with one in order to keep track of how many messages went through it.'''
         
         try:
-            self.metrics[queue][direction]+=1
+            self.metrics["queues"][queue][direction]+=1
         except:
             if not hasattr(self, "metrics"):
-                self.metrics={"inbox":{"in":0,"out":0},"outbox":{"in":0,"out":0}}
-            self.metrics[queue]={"in":0,"out":0}
-            self.metrics[queue][direction]+=1
+                self.metrics={"functions":{},"queues":{"inbox":{"in":0,"out":0},"outbox":{"in":0,"out":0}}}
+            self.metrics["queues"][queue]={"in":0,"out":0}
+            self.metrics["queues"][queue][direction]+=1
     
     def createQueue(self, name):
         
         try:
             setattr(self,name,Queue(None))
-            self.metrics[name]={"in":0,"out":0}
+            self.metrics["queues"][name]={"in":0,"out":0}
         except Exception as err:
             self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
 
@@ -160,33 +160,35 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
         QueueFunctions.__init__(self)
         Block.__init__(self)
         self.name=name
-        self.stats={'msg': 0, 'min': 0, 'max': 0, 'avg': 0, 'total': 0}
         self.logging = logging.getLogger( name )
         self.logging.info('Initiated.')
         
-    def timer(self, function):
+    def timer(self, function, data):
         t = stopwatch.Timer()
-        function
+        function(data)
         t.stop()
-        self.stats['msg']+=1
-        self.stats['total'] += t.elapsed
-        self.stats['avg'] = self.stats['total'] / self.stats['msg']
+        try:
+            self.metrics["functions"][function.__name__]
+        except:
+            self.metrics["functions"][function.__name__]={"total_time":0,"max_time":0,"min_time":0}
+            
+        self.metrics["functions"][function.__name__]['total_time'] += t.elapsed
+
+        if self.metrics["functions"][function.__name__]['max_time'] == 0:
+            self.metrics["functions"][function.__name__]['max_time'] = t.elapsed
+        elif t.elapsed > self.metrics["functions"][function.__name__]['max_time']:
+            self.metrics["functions"][function.__name__]['max_time'] = t.elapsed
         
-        if self.stats['max'] == 0:
-            self.stats['max'] = t.elapsed
-        elif t.elapsed > self.stats['max']:
-            self.stats['max'] = t.elapsed
-        
-        if self.stats['min'] == 0:
-            self.stats['min'] = t.elapsed
-        if t.elapsed < self.stats['min']:
-            self.stats['min'] = t.elapsed
+        if self.metrics["functions"][function.__name__]['min_time'] == 0:
+            self.metrics["functions"][function.__name__]['min_time'] = t.elapsed
+        if t.elapsed < self.metrics["functions"][function.__name__]['min_time']:
+            self.metrics["functions"][function.__name__]['min_time'] = t.elapsed
          
     def _run(self):
         self.logging.info('Started.')
         while self.block() == True:
             data = self.getData("inbox")
-            self.timer(self.consume(data))                            
+            self.timer(self.consume, data)                            
                     
     def consume(self, *args, **kwargs):
         '''A function which should be overridden by the Wishbone module.
@@ -207,7 +209,6 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
     def logMetrics(self):
         '''Generates a line with metrics of the spefic module.'''
         
-        self.logging.info('Total messages: %s, Min: %s seconds, Max: %s seconds, Avg: %s seconds' % (self.stats['msg'], self.stats['min'], self.stats['max'], self.stats['avg']))
         self.logging.info(str(self.metrics))
     
     def shutdown(self):
