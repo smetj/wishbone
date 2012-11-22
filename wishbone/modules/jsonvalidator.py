@@ -39,11 +39,11 @@ class JSONValidator(PrimitiveActor):
         * convert:    When True it will aditionally convert the incoming JSON string to a Python object.
     '''    
     
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name, schema=None, convert=False):
         PrimitiveActor.__init__(self, name)
         self.name = name
-        self.schema = kwargs.get('schema',None)
-        self.convert = kwargs.get('convert',False)
+        self.schema = schema
+        self.convert = convert
         self.loadSchema()
         self.checker = Validator()
 
@@ -63,7 +63,7 @@ class JSONValidator(PrimitiveActor):
             self.validateBroker(data)
             if self.convert == True:
                 message['data']=data
-            self.sendData(message)
+            self.putData(message)
         except Exception as err:
             self.logging.warning('Invalid data received and purged. Reason: %s' % (err))
 
