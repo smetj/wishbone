@@ -105,9 +105,6 @@ class InputGenerator(Greenlet, QueueFunctions, Block):
         self.outage=Event()
         spawn(self.reaper)
 
-    def decode (self, gearman_worker, gearman_job):
-        self.logging.debug ('Data received.')
-
     def _run(self):
         self.logging.info('Started')
         while self.block():
