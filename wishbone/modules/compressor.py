@@ -32,16 +32,16 @@ class Compressor(PrimitiveActor):
     The module detects whether data is compressed or not.
     '''
     
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name):
         PrimitiveActor.__init__(self, name)
       
     def consume(self,message):
         data = json.dumps(message['data'])
         if snappy.isValidCompressed(data):
             self.logging.debug('Data decompressed.')
-            self.sendData(snappy.decompress(data))
+            self.putData(snappy.decompress(data))
         else:
             self.logging.debug('Data compressed.')
             message['data'] = snappy.compress(data)
             message['header']['compression']='snappy'
-            self.sendData(message)
+            self.putData(message)
