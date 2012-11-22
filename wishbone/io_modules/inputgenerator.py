@@ -85,12 +85,13 @@ class InputGenerator(Greenlet, QueueFunctions, Block):
     def __init__(self, name, min_payload=0,max_payload=1,min_interval=0,max_interval=0,min_outage_start=60,max_outage_start=600,min_outage_length=0,max_outage_length=0):
 
         Greenlet.__init__(self)
+        QueueFunctions.__init__(self)
         Block.__init__(self)
+        
         self.logging = logging.getLogger( name )
-        self.name = name
         self.logging.info ( 'Initiated' )
-        self.outage=Event()
-
+                
+        self.name = name
         self.min_payload=min_payload
         self.max_payload=max_payload
         self.min_interval=min_interval
@@ -100,8 +101,8 @@ class InputGenerator(Greenlet, QueueFunctions, Block):
         self.min_outage_length=min_outage_length
         self.max_outage_length=max_outage_length
         
-        self.inbox=Queue(None)
-        self.temp=Queue(None)
+        self.createQueue("temp")
+        self.outage=Event()
         spawn(self.reaper)
 
     def decode (self, gearman_worker, gearman_job):
@@ -113,7 +114,7 @@ class InputGenerator(Greenlet, QueueFunctions, Block):
             
             random_string = ''.join(choice(ascii_uppercase + ascii_lowercase + digits) for x in range(self.min_payload)+range(randint(0, self.max_payload)))
             self.logging.debug('Data batch generated with size of %s bytes.'%len(random_string))
-            self.temp.put(random_string)
+            self.putData({"header":{},"data":random_string},"temp")
             
             sleeping_time = uniform(self.min_interval,self.max_interval)
             self.logging.debug('Waiting for %s seconds until the next data batch is generated.'%sleeping_time)
@@ -128,7 +129,7 @@ class InputGenerator(Greenlet, QueueFunctions, Block):
         self.planOutage()
         while self.block():
             self.outage.wait()
-            self.sendData({"header":{},"data":self.temp.get()},queue='inbox')
+            self.sendData(self.getData("temp"),queue='inbox')
             
     def planOutage(self):
         '''Plans when the next outage will occur.'''

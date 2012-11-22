@@ -71,12 +71,12 @@ class TippingBucket(PrimitiveActor):
                 
     '''
 
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name, age=5, size=10000, predefined_header=None):
 
         PrimitiveActor.__init__(self, name)
-        self.age = kwargs.get('age',5)
-        self.size = kwargs.get('size',10000)
-        self.predefined_header=kwargs.get('predefined_header',None)
+        self.age = age
+        self.size = size
+        self.predefined_header=predefined_header
         self.buff=[]
         self.buff_age=0
         self.buff_size=0

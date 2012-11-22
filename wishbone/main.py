@@ -41,9 +41,6 @@ class Wishbone(Block):
         Block.__init__(self)
         self.modules=[]
         self.connectors=[]
-        self.hub = Queue(None)
-        self.outhub = Queue(None)
-        #configureLogging()
         self.run=self.start
         
     def registerModule(self, config, *args, **kwargs):
@@ -71,6 +68,14 @@ class Wishbone(Block):
             loaded_module = import_module(module_name)
             setattr(self, name, getattr (loaded_module, class_name)('Intance #%s:%s'%(self.__currentProcessName(),name), *args, **kwargs))
             self.modules.append(getattr (self, name))
+            try:
+                #Do a couple of checks to see whether the loaded module is compliant.
+                self.modules[-1].metrics
+                self.modules[-1].inbox
+                self.modules[-1].outbox
+            except:
+                raise Exception("You might have to load QueueFunctions base class into this class.")
+                
         except Exception as err:
             self.logging.error("Problem loading module: %s and class %s. Reason: %s" % ( module_name, class_name, err))
             exit(1)
@@ -83,8 +88,8 @@ class Wishbone(Block):
         (src_class,src_queue)=source.split('.')
         (dst_class,dst_queue)=destination.split('.')
         src_instance=getattr(self,src_class)
-        dst_instance=getattr(self,dst_class)        
-        self.connectors.append(spawn ( self.__connector, getattr(src_instance,src_queue), getattr(dst_instance,dst_queue) ))
+        dst_instance=getattr(self,dst_class)
+        self.connectors.append(spawn ( self.__connector, getattr(src_instance,src_queue), getattr(dst_instance,dst_queue), getattr(src_instance,"metrics")[src_queue], getattr(dst_instance,"metrics")[dst_queue] ))
     
     def start(self):
         '''Function which starts all registered Wishbone modules.
@@ -137,11 +142,13 @@ class Wishbone(Block):
                 self.logging.debug('Killing connector %s'%module.name)
                 connector.kill()
          
-    def __connector(self,source, destination):
+    def __connector(self,source, destination, source_stats, destination_stats):
         '''Consumes data from source and puts it in destination.'''
         
         while self.block() == True:
             destination.put(source.get())
+            source_stats["out"]+=1
+            destination_stats["in"]+=1
         
     def __currentProcessName(self):
         '''return the current process name withought the Process- part'''
