@@ -110,9 +110,9 @@ class TippingBucket(PrimitiveActor):
         '''Flushes the buffer.'''
 
         if self.predefined_header == None:
-            self.sendData({"header":self.buff_header, "data":self.buff})
+            self.putData({"header":self.buff_header, "data":self.buff})
         else:
-            self.sendData({"header":self.predefined_header, "data":self.buff})
+            self.putData({"header":self.predefined_header, "data":self.buff})
         self.resetBuffer()
         sleep(0)
 
