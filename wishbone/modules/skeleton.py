@@ -35,12 +35,12 @@ class Skeleton(PrimitiveActor):
         * name :    The name to assign to the module instance in Wishbone.
     '''
     
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name):
         
         PrimitiveActor.__init__(self, name)
     
     def consume(self,doc):
-        self.sendData(doc)
+        self.putData(doc)
        
     def shutdown(self):
         self.logging.info('Shutdown')
