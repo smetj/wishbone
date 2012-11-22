@@ -31,7 +31,7 @@ class GotMessage(PrimitiveActor):
     It's just made for testing purposes.
     '''
     
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name):
         PrimitiveActor.__init__(self, name)
     
     def consume(self,doc):

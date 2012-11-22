@@ -68,4 +68,4 @@ class BrokerLoopback(PrimitiveActor):
             return
         else:
             for _ in range(number):
-                self.sendRaw({"header":{"broker_key":self.key,"broker_exchange":self.exchange},"data":"x"})
+                self.putRaw({"header":{"broker_key":self.key,"broker_exchange":self.exchange},"data":"x"})
