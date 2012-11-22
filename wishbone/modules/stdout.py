@@ -46,7 +46,7 @@ class STDOUT(PrimitiveActor):
         else:
             print doc
         if self.purge == False:
-            self.sendData(doc)
+            self.putData(doc)
        
     def shutdown(self):
         self.logging.info('Shutdown')
