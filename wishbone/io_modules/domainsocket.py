@@ -42,13 +42,13 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
    
     def __init__(self, name, path):
         Greenlet.__init__(self)
+        QueueFunctions.__init__(self)
         Block.__init__(self)
         self.name=name
         self.logging = logging.getLogger( name )
         self.path = path
         self.sock = None
         self.__setup()
-        self.inbox=Queue()
         self.logging.info('Initialiazed.')
 
     def __setup(self):
@@ -69,7 +69,7 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
                 break
             else:
                 self.logging.debug ('Data received from %s' % (address) )     
-                self.sendData({'header':{},'data':line.rstrip("\n")}, queue='inbox')
+                self.putData({'header':{},'data':line.rstrip("\n")}, queue='inbox')
             sleep(0)
         fileobj.close()
         
