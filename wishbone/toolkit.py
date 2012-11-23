@@ -170,9 +170,11 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
         try:
             self.metrics["functions"][function.__name__]
         except:
-            self.metrics["functions"][function.__name__]={"total_time":0,"max_time":0,"min_time":0}
+            self.metrics["functions"][function.__name__]={"called":0,"total_time":0,"max_time":0,"min_time":0,"cur_time":0,"avg_time":0}
             
         self.metrics["functions"][function.__name__]['total_time'] += t.elapsed
+        self.metrics["functions"][function.__name__]['called'] += 1
+        self.metrics["functions"][function.__name__]['avg_time'] += self.metrics["functions"][function.__name__]['total_time'] / self.metrics["functions"][function.__name__]['called']
 
         if self.metrics["functions"][function.__name__]['max_time'] == 0:
             self.metrics["functions"][function.__name__]['max_time'] = t.elapsed
