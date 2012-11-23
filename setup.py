@@ -24,8 +24,7 @@
 
 PROJECT = 'wishbone'
 
-# Change docs/sphinx/conf.py too!
-VERSION = '0.1'
+VERSION = '0.2'
 
 
 from setuptools import setup, find_packages
@@ -44,7 +43,7 @@ setup(
     name=PROJECT,
     version=VERSION,
 
-    description='A library to write multiple gevent based parallel processes which each connect multiple modules through an internal message passing interface into a clean workflow.',
+    description='Write asynchronous event pipelines without callbacks.',
     long_description=long_description,
 
     author='Jelle Smet',
