@@ -1,7 +1,5 @@
 *.pyc
-build
 dist
 MANIFEST
 create_rpm/
 wishbone.egg-info/
-
