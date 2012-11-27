@@ -23,6 +23,7 @@
 #
 
 import logging
+import signal
 from importlib import import_module
 from gevent import spawn, sleep
 from gevent.queue import Queue
@@ -65,7 +66,7 @@ class Wishbone(Block, Metrics):
                                         Possible values: logging
     '''
 
-    def __init__(self, metrics=True, metrics_interval=10, metrics_dst="logging"):
+    def __init__(self, syslog=False, metrics=True, metrics_interval=10, metrics_dst="logging"):
         self.metrics=metrics
         self.metrics_interval=metrics_interval
         self.metrics_dst=metrics_dst
@@ -74,7 +75,8 @@ class Wishbone(Block, Metrics):
         Block.__init__(self)
         Metrics.__init__(self)
 
-
+        signal.signal(signal.SIGTERM, self.stop)
+        
         self.modules=[]
         self.connectors=[]
         self.run=self.start
@@ -146,16 +148,11 @@ class Wishbone(Block, Metrics):
             spawn(self.doMetrics)
         else:
             self.logging.debug('Metrics disabled.')
+        
+        while self.block():   
+            self.wait(0.1)
 
-        try:
-            self.wait()
-        except KeyboardInterrupt:
-            self.release()
-            self.stop()
-        except Exception as err:
-            self.logging.error("Error ocurred. Reason: %s"%(err))
-
-    def stop(self):
+    def stop(self,a,b):
         '''Function which stops all registered Wishbone modules.
 
         Function which runs over all registered instances/modules and tries to execute its stop() function in order to stop that module.
@@ -170,19 +167,21 @@ class Wishbone(Block, Metrics):
             except:
                 pass
             self.logging.debug('Waiting 1 second for module %s'%module.name)
+            
             try:
                 module.join(timeout=1)
             except:
-                self.logging.debug('Killing module %s'%module.name)
-                module.kill()
+                pass
+                
 
         for connector in self.connectors:
-            self.logging.debug('Waiting 1 second for connector %s'%module.name)
             try:
                 connector.join(timeout=1)
             except:
-                self.logging.debug('Killing connector %s'%module.name)
-                connector.kill()
+                pass
+        
+        #Now release ourselves
+        self.release()
 
     def __connector(self,source, destination, source_stats, destination_stats):
         '''Consumes data from source and puts it in destination.'''

@@ -63,10 +63,11 @@ class Broker(Greenlet, QueueFunctions, Block):
         * password:           The password to connect to the broker.  By default this is 'guest'.
         * consume_queue:      The queue which should be consumed. By default this is "wishbone_in".
         * prefetch_count:     The amount of messages consumed from the queue at once.
-        * no_ack:             Should no acknowledgements be required? By default this is False.
+        * no_ack:             No acknowledgements required? By default this is False (means acknowledgements are required.)
+        * delivery_mode       The message delivery mode.  1 is Non-persistent, 2 is Persistent. Default=2
     '''
     
-    def __init__(self, name, host, vhost='/', username='guest', password='guest', prefetch_count=1, no_ack=False, consume_queue='wishbone_in' ):
+    def __init__(self, name, host, vhost='/', username='guest', password='guest', prefetch_count=1, no_ack=False, consume_queue='wishbone_in', delivery_mode=2 ):
     
         Greenlet.__init__(self)
         Block.__init__(self)
@@ -81,6 +82,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         self.prefetch_count=prefetch_count
         self.no_ack=no_ack
         self.consume_queue = consume_queue
+        self.delivery_mode=delivery_mode
         self.createQueue("acknowledge")
         self.connected=False
 
@@ -105,12 +107,12 @@ class Broker(Greenlet, QueueFunctions, Block):
                 except Exception as err:
                     self.logging.warn('Could not write data to broker.  Reason: %s'%(err))
                     break
-            self.wait(timeout=0.1)
+            self.wait(timeout=0.1)    
     
     def acknowledgeMessage(self):
         '''Acknowledges messages
         '''       
-
+        
         while self.block() == True:
             while self.connected == True:
                 try:
@@ -148,12 +150,18 @@ class Broker(Greenlet, QueueFunctions, Block):
             while self.block() == True and self.connected == True:                
                 try:
                     self.incoming.wait()
-                except Exception or KeyboardInterrupt as err:
+                except Exception as err:
                     self.logging.error('Connection to broker lost. Reason: %s' % err )
                     self.connected = False
-                    self.incoming.close()
-                    self.conn.close()
-                    break
+                    try:
+                        self.incoming.close()
+                    except:
+                        pass
+                    try:
+                        self.conn.close()
+                    except:
+                        pass
+                    break                   
         
     def consume(self,doc):
         '''Is called upon each message coming from the broker infrastructure.
@@ -173,7 +181,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         if message["header"].has_key('broker_exchange') and message["header"].has_key('broker_key'):            
             if self.connected == True:
                 msg = amqp.Message(str(message['data']))
-                msg.properties["delivery_mode"] = 2
+                msg.properties["delivery_mode"] = self.delivery_mode
                 self.outgoing.basic_publish(msg,exchange=message['header']['broker_exchange'],routing_key=message['header']['broker_key'])
                 if message['header'].has_key('broker_tag') and self.no_ack == False:
                     self.incoming.basic_ack(message['header']['broker_tag'])
