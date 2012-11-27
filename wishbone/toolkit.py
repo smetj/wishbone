@@ -22,6 +22,7 @@
 #  
 #  
 
+import signal, sys
 import logging
 import stopwatch
 from gevent import Greenlet
@@ -127,7 +128,7 @@ class Block():
     
     def __init__(self):
         self.lock=Event()
-
+        signal.signal(signal.SIGINT,self._ignoreSIGINT)
     def block(self):
         '''A simple blocking function.'''
         
@@ -145,6 +146,9 @@ class Block():
         '''Set the lock flag which essentially unlocks.'''
         
         self.lock.set()
+    
+    def _ignoreSIGINT(self,a,b):
+        pass
 
 class PrimitiveActor(Greenlet, QueueFunctions, Block):
     '''A base class used to create Wishbone modules.
@@ -187,10 +191,11 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
             self.metrics["functions"][function.__name__]['min_time'] = t.elapsed
          
     def _run(self):
-        self.logging.info('Started.')
+        self.logging.info('Started.')        
         while self.block() == True:
             data = self.getData("inbox")
             self.timer(self.consume, data)                            
+        self.release()
                     
     def consume(self, *args, **kwargs):
         '''A function which should be overridden by the Wishbone module.
