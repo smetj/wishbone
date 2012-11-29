@@ -23,7 +23,6 @@
 #
 
 import daemon
-import logging
 import json
 import sys
 import resource
@@ -34,9 +33,8 @@ from time import sleep
 from os import getpid, kill, remove, path
 from signal import SIGTERM
 from logging import INFO, DEBUG
-from wishbone.tools import configureLogging
+from wishbone.tools import ConfigureLogging
 from wishbone import Wishbone
-from gevent import monkey;monkey.patch_all(thread=False)
 
 
 class Help():
@@ -138,7 +136,7 @@ class WishbBoneSkeleton():
         self.wb.start()
 
     def setup(self):
-        wb = Wishbone(syslog=False)
+        wb = Wishbone()
         for module in self.conf["bootstrap"]:
             wb.registerModule ( (self.conf["bootstrap"][module]["module"],self.conf["bootstrap"][module]["class"],module),
                                 **self.conf["bootstrap"][module]["variables"]
@@ -146,9 +144,10 @@ class WishbBoneSkeleton():
         for source in self.conf["routingtable"]:
             for destination in self.conf["routingtable"][source]:
                 wb.connect(source,destination)
-        return wb    
+        return wb
+        
 
-class ParallelServer():
+class ParallelServer(ConfigureLogging):
     '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.
 
     Parameters:
@@ -174,7 +173,6 @@ class ParallelServer():
         self.name=name
         self.wishbone=None
         self.processes=[]
-        self.logging = logging.getLogger( 'Server' )
         self.pidfile = self.constructPidFileName(pidfile,name)
         self.pids = None
         self.block=True
@@ -184,16 +182,16 @@ class ParallelServer():
     def do(self):
         '''Executes the command.'''
         if self.command == "debug":
-            configureLogging(loglevel=self.log_level)
+            self.initRootLogger(name="ParallelServer",syslog=False,loglevel=self.log_level)
             self.debug()
         elif self.command == "start":
-            configureLogging(syslog=True,loglevel=self.log_level)
+            self.initRootLogger(name="ParallelServer",syslog=True,loglevel=self.log_level)
             self.start()
         elif self.command == "stop":
-            configureLogging(syslog=False,loglevel=self.log_level)
+            self.initRootLogger(name="ParallelServer",syslog=False,loglevel=self.log_level)
             self.stop()
         elif self.command == 'kill':
-            configureLogging(syslog=True,loglevel=self.log_level)
+            self.initRootLogger(name="ParallelServer",syslog=False,loglevel=self.log_level)
             self.kill()
 
     def debug(self):
@@ -212,8 +210,10 @@ class ParallelServer():
 
         if self.startPid(self.pidfile):
             print('Starting %s in background.' % (self.name))
-            #with daemon.DaemonContext(files_preserve=range(self.getMaximumFileDescriptors())):
-            with daemon.DaemonContext():
+            with daemon.DaemonContext(files_preserve=range(self.getMaximumFileDescriptors())):    
+            #print vars(self.stream
+            #with daemon.DaemonContext():
+            #with daemon.DaemonContext():
                 self.__start()
 
     def __start(self):
@@ -240,14 +240,15 @@ class ParallelServer():
     
     def stop(self):
         '''Stops the environment.'''
-        self.logging.info('SIGINT received. Stopping processes.  Send SIGINT again to stop everything without waiting.')
+        self.logging.info('SIGINT received. Stopping processes gracefully.')
         
         for pid in self.stopPid(self.pidfile):
             self.sendSIGTERM(pid)
-        for pid in self.pids:
-            while self.checkPidAlive(pid):
-                sleep(1)
-        self.removePids()
+        #Change code to wait for all pids except this PID
+        #for pid in self.pids:
+            #while self.checkPidAlive(pid):
+                #sleep(1)
+        #self.removePids()
 
     def kill(self):
         '''Kills the environment.'''
