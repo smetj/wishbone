@@ -136,7 +136,10 @@ class WishbBoneSkeleton():
         self.wb.start()
 
     def setup(self):
-        wb = Wishbone()
+        wb = Wishbone(  metrics=self.conf.get("system",False),
+                        metrics_dst=self.conf.get("metrics_dst","logging"),
+                        metrics_interval=self.conf.get("metrics_interval",10)
+            )
         for module in self.conf["bootstrap"]:
             wb.registerModule ( (self.conf["bootstrap"][module]["module"],self.conf["bootstrap"][module]["class"],module),
                                 **self.conf["bootstrap"][module]["variables"]

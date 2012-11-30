@@ -72,7 +72,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         Greenlet.__init__(self)
         Block.__init__(self)
         QueueFunctions.__init__(self)
-        self.name = 'Broker'
+        self.name=name
         self.logging = logging.getLogger( self.name )
         self.logging.info('Initiated')
         self.host=host

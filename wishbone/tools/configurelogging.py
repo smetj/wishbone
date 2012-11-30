@@ -39,9 +39,10 @@ class LogFilter(logging.Filter):
         return True
 
 class BOMLessFormatter(logging.Formatter):
+    #http://serverfault.com/questions/407643/rsyslog-update-on-amazon-linux-suddenly-treats-info-level-messages-as-emerg
     def format(self, record):
         return logging.Formatter.format(self, record).encode('utf-8')
-
+        
 class ConfigureLogging():
 
     def initRootLogger(self, name='', syslog=False, loglevel=logging.INFO):
@@ -66,8 +67,4 @@ class ConfigureLogging():
             stream.setFormatter(formatter)
             stream.addFilter(LogFilter())
             self.logging.addHandler(stream)
-            
-class BOMLessFormatter(logging.Formatter):
-    #http://serverfault.com/questions/407643/rsyslog-update-on-amazon-linux-suddenly-treats-info-level-messages-as-emerg
-    def format(self, record):
-        return logging.Formatter.format(self, record).encode('utf-8')
+

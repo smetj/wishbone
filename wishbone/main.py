@@ -143,7 +143,7 @@ class Wishbone(Block, Metrics):
             except:
                 pass
 
-        if self.metrics:
+        if self.metrics == True:
             self.logging.debug('Metrics enabled')
             spawn(self.doMetrics)
         else:
