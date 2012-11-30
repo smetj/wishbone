@@ -21,6 +21,4 @@
 #       MA 02110-1301, USA.
 #       
 #
-
-import logging
-from configurelogging import configureLogging
+from configurelogging import ConfigureLogging
