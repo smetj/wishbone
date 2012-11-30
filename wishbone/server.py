@@ -31,7 +31,7 @@ import signal
 from multiprocessing import Process
 from time import sleep
 from os import getpid, kill, remove, path, getpid
-from signal import SIGTERM
+from signal import SIGTERM, SIGKILL
 from logging import INFO, DEBUG
 from wishbone.tools import ConfigureLogging
 from wishbone import Wishbone
@@ -236,6 +236,7 @@ class ParallelServer(ConfigureLogging):
     
     def stop(self):
         '''Stops the environment.'''
+        
         self.logging.info('SIGINT received. Stopping processes gracefully.')
         myself = getpid()
         for pid in self.stopPid(self.pidfile):
@@ -248,13 +249,29 @@ class ParallelServer(ConfigureLogging):
         self.removePids()
 
     def kill(self):
-        '''Kills the environment.'''
-        pass
+        '''Kills the environment without waiting.'''
+        self.logging.info('SIGKILL received. Killing all processes.')
+        myself = getpid()
+        for pid in self.stopPid(self.pidfile):
+            if pid != myself:
+                self.sendSIGTERM(pid)
+                while self.checkPidAlive(pid):
+                    self.sendSIGKILL(pid)
+        self.removePids()
 
     def sendSIGTERM(self, pid):
         '''Sends sigint signal to the pid.'''
-
-        kill(int(pid),SIGTERM)
+        try:
+            kill(int(pid),SIGTERM)
+        except:
+            pass
+    
+    def sendSIGKILL(self, pid):
+        '''Sends sigkill signal to the pid.'''
+        try:
+            kill(int(pid),SIGKILL)
+        except:
+            pass
 
     def constructPidFileName(self,location,name):
         if location == None:
