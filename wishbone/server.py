@@ -30,7 +30,7 @@ import argparse
 import signal
 from multiprocessing import Process
 from time import sleep
-from os import getpid, kill, remove, path
+from os import getpid, kill, remove, path, getpid
 from signal import SIGTERM
 from logging import INFO, DEBUG
 from wishbone.tools import ConfigureLogging
@@ -130,7 +130,7 @@ class BootStrap(Help):
 class WishbBoneSkeleton():
     '''A skeleton class which initializes and connects the WishBone modules according to the bootstrap configuration.'''
 
-    def __init__(self, conf, syslog=False):
+    def __init__(self, conf):
         self.conf=conf
         self.wb = self.setup()
         self.wb.start()
@@ -145,7 +145,6 @@ class WishbBoneSkeleton():
             for destination in self.conf["routingtable"][source]:
                 wb.connect(source,destination)
         return wb
-        
 
 class ParallelServer(ConfigureLogging):
     '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.
@@ -210,10 +209,7 @@ class ParallelServer(ConfigureLogging):
 
         if self.startPid(self.pidfile):
             print('Starting %s in background.' % (self.name))
-            with daemon.DaemonContext(files_preserve=range(self.getMaximumFileDescriptors())):    
-            #print vars(self.stream
-            #with daemon.DaemonContext():
-            #with daemon.DaemonContext():
+            with daemon.DaemonContext(files_preserve=range(self.getMaximumFileDescriptors())):
                 self.__start()
 
     def __start(self):
@@ -241,14 +237,15 @@ class ParallelServer(ConfigureLogging):
     def stop(self):
         '''Stops the environment.'''
         self.logging.info('SIGINT received. Stopping processes gracefully.')
-        
+        myself = getpid()
         for pid in self.stopPid(self.pidfile):
-            self.sendSIGTERM(pid)
-        #Change code to wait for all pids except this PID
-        #for pid in self.pids:
-            #while self.checkPidAlive(pid):
-                #sleep(1)
-        #self.removePids()
+            if pid != myself:
+                self.sendSIGTERM(pid)
+                while self.checkPidAlive(pid):
+                    self.sendSIGTERM(pid)
+                    self.logging.info('Waiting to exit.')
+                    sleep(0.5)
+        self.removePids()
 
     def kill(self):
         '''Kills the environment.'''
