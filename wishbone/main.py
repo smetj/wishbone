@@ -51,19 +51,15 @@ class Metrics():
 
 class Wishbone(Block, Metrics):
     '''
-    The main class in which the Wishbone modules are registered and managed.
+    **The main class in which the Wishbone modules are registered and managed.**
+    
+    
 
     Parameters:
 
         * metrics (bool):               Enable/disable metrics.
-                                        Default: True
-
         * metrics_interval (int):       The interval metrics need to be emitted.
-                                        Default: 10
-
-        * metrics_dst (str):            The destination to write metrics to.
-                                        Default: logging
-                                        Possible values: logging
+        * metrics_dst (str):            The destination to write metrics to: [logging]
     '''
 
     def __init__(self, syslog=False, metrics=True, metrics_interval=10, metrics_dst="logging"):

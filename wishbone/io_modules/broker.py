@@ -30,7 +30,8 @@ from amqplib import client_0_8 as amqp
 from gevent import monkey;monkey.patch_all()
 
 class Broker(Greenlet, QueueFunctions, Block):
-    '''A Wisbone module which handles AMQP0.8 input and output.  It's meant to be resillient to disconnects and broker unavailability.
+    '''**A Wisbone IOmodule which handles AMQP0.8 input and output.  It's meant to be
+    resillient to disconnects and broker unavailability.**
     
     Data consumed from the broker goes into self.inbox
     Data which should be produced towards to broker goes into self.outbox
