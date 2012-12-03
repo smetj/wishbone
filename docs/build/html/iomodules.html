@@ -1,0 +1,143 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>&lt;no title&gt; &mdash; WishBone 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="WishBone 0.2 documentation" href="index.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="modules.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="&lt;no title&gt;"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">WishBone 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <span class="target" id="module-wishbone.io_modules.broker"></span><dl class="class">
+<dt id="wishbone.io_modules.broker.Broker">
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.broker.</tt><tt class="descname">Broker</tt><big>(</big><em>name</em>, <em>host</em>, <em>vhost='/'</em>, <em>username='guest'</em>, <em>password='guest'</em>, <em>prefetch_count=1</em>, <em>no_ack=False</em>, <em>consume_queue='wishbone_in'</em>, <em>delivery_mode=2</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.broker.Broker" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Wisbone module which handles AMQP0.8 input and output.  It&#8217;s meant to be resillient to disconnects and broker unavailability.</p>
+<p>Data consumed from the broker goes into self.inbox
+Data which should be produced towards to broker goes into self.outbox</p>
+<p>Acknowledging:</p>
+<p>Messages which arrive in the outbox and which have an acknowledge tag in the header will be acknowledged.
+When a broker_tag is submitted to the acknowledge queue the tag is acknowledged with the broker.</p>
+<p>The message submitted to self.outbox should have 3 values in its headers:</p>
+<blockquote>
+<div><p>{&#8216;header&#8217;:{&#8216;broker_exchange&#8217;:name, &#8216;broker_key&#8217;:name, &#8216;broker_tag&#8217;:tag}}</p>
+<ul class="simple">
+<li>broker_exchange:    The exchange to which data should be submitted.</li>
+<li>broker_key:         The routing key used when submitting data.</li>
+<li>broker_tag:         The tag used to acknowledge the message from the broker.</li>
+</ul>
+<p>Queues:</p>
+<ul class="simple">
+<li>inbox:              The queue containing messages coming from the broker.</li>
+<li>outbox:             The queue containing messages to the broker.</li>
+<li>acknowledge:        The queue containing messages to acknowledge</li>
+</ul>
+<p>Parameters:</p>
+<ul class="simple">
+<li>name:               The name you want this module to be registered under.</li>
+<li>host:               The name or IP of the broker.</li>
+<li>vhost:              The virtual host of the broker. By default this is &#8216;/&#8217;.</li>
+<li>username:           The username to connect to the broker.  By default this is &#8216;guest&#8217;.</li>
+<li>password:           The password to connect to the broker.  By default this is &#8216;guest&#8217;.</li>
+<li>consume_queue:      The queue which should be consumed. By default this is &#8220;wishbone_in&#8221;.</li>
+<li>prefetch_count:     The amount of messages consumed from the queue at once.</li>
+<li>no_ack:             No acknowledgements required? By default this is False (means acknowledgements are required.)</li>
+<li>delivery_mode       The message delivery mode.  1 is Non-persistent, 2 is Persistent. Default=2</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="modules.html"
+                        title="previous chapter">&lt;no title&gt;</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/iomodules.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="&lt;no title&gt;"
+             >previous</a> |</li>
+        <li><a href="index.html">WishBone 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Jelle Smet.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

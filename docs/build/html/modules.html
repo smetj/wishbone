@@ -1,0 +1,262 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Wishbone modules &mdash; WishBone 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="WishBone 0.2 documentation" href="index.html" />
+    <link rel="next" title="Wishbone IOmodules" href="io_modules.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="module.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="io_modules.html" title="Wishbone IOmodules"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module.html" title="&lt;no title&gt;"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">WishBone 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-wishbone.modules.brokerloopback">
+<span id="wishbone-modules"></span><h1>Wishbone modules<a class="headerlink" href="#module-wishbone.modules.brokerloopback" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="wishbone.modules.brokerloopback.BrokerLoopback">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.brokerloopback.</tt><tt class="descname">BrokerLoopback</tt><big>(</big><em>name</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#wishbone.modules.brokerloopback.BrokerLoopback" title="Permalink to this definition">¶</a></dt>
+<dd><p>The BrokerLoopback class does nothing more than adding broker data to the headers of each message and writes that back to its
+outgoing queue.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>key <span class="classifier-delimiter">:</span> <span class="classifier">The routing key to which to send incoming data.</span></dt>
+<dd><p class="first last">Default: name
+Type: string</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>exchange <span class="classifier-delimiter">:</span> <span class="classifier">The exchange to write data to.</span></dt>
+<dd><p class="first last">Default: &#8216;&#8217;
+Type: string</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>dump <span class="classifier-delimiter">:</span> <span class="classifier">Dumps x amount of messages into the Broker.</span></dt>
+<dd><p class="first last">Default: 0
+Type: int</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="module-wishbone.modules.compressor"></span><dl class="class">
+<dt id="wishbone.modules.compressor.Compressor">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.compressor.</tt><tt class="descname">Compressor</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.modules.compressor.Compressor" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Wishbone module which compresses uncompressed data and decompresses compressed data using Snappy.</p>
+<p>The module detects whether data is compressed or not.</p>
+</dd></dl>
+
+<span class="target" id="module-wishbone.modules.gotmessage"></span><dl class="class">
+<dt id="wishbone.modules.gotmessage.GotMessage">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.gotmessage.</tt><tt class="descname">GotMessage</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.modules.gotmessage.GotMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>A WishBone module which just logs whenever it gets a message and then discards.
+Also the length of the message is included in the log message.  It&#8217;s not really useful.
+It&#8217;s just made for testing purposes.</p>
+</dd></dl>
+
+<span class="target" id="module-wishbone.modules.jsonvalidator"></span><dl class="class">
+<dt id="wishbone.modules.jsonvalidator.JSONValidator">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.jsonvalidator.</tt><tt class="descname">JSONValidator</tt><big>(</big><em>name</em>, <em>schema=None</em>, <em>convert=False</em><big>)</big><a class="headerlink" href="#wishbone.modules.jsonvalidator.JSONValidator" title="Permalink to this definition">¶</a></dt>
+<dd><p>A WishBone module which verifies JSON data against a validator schema loaded from file.</p>
+<p>Messages consumed from the inbox queue is verified against a Validator schema.  When the message is not a valid JSON document
+or when it doesn&#8217;t match your predifined Validator schema, it is dropped.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>schema:     The location and filename of the schema to load.  The schema should follow <a class="reference external" href="http://json-schema.org/">http://json-schema.org/</a> specifications.</li>
+<li>convert:    When True it will aditionally convert the incoming JSON string to a Python object.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="module-wishbone.modules.skeleton"></span><dl class="class">
+<dt id="wishbone.modules.skeleton.Skeleton">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.skeleton.</tt><tt class="descname">Skeleton</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.modules.skeleton.Skeleton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skeleton class is a minimal Actor class which does nothing more than shoveling data from its inbox to its outbox.</p>
+<p>It can be used as an example/base for new blocks.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>name :    The name to assign to the module instance in Wishbone.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="module-wishbone.modules.stdout"></span><dl class="class">
+<dt id="wishbone.modules.stdout.STDOUT">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.stdout.</tt><tt class="descname">STDOUT</tt><big>(</big><em>name</em>, <em>complete=False</em>, <em>purge=False</em><big>)</big><a class="headerlink" href="#wishbone.modules.stdout.STDOUT" title="Permalink to this definition">¶</a></dt>
+<dd><p>STDOUT class is a minimal Actor class which does nothing more than printing the messages from inbox and putting them back in outbox.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>complete: If True, it prints out the message in Wishbone format including headers, if False only the content of the data field itself.</li>
+<li>purge: When True the message is not put into the outbox but is purged.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="module-wishbone.modules.tippingbucket"></span><dl class="class">
+<dt id="wishbone.modules.tippingbucket.TippingBucket">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.tippingbucket.</tt><tt class="descname">TippingBucket</tt><big>(</big><em>name</em>, <em>age=5</em>, <em>size=10000</em>, <em>predefined_header=None</em><big>)</big><a class="headerlink" href="#wishbone.modules.tippingbucket.TippingBucket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Buffers unicode data and dumps to the output on 2 conditions:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Last data enteered in buffer is older than x seconds.</li>
+<li>Total data in buffer is x size.</li>
+</ul>
+</div></blockquote>
+<p>When the buffer is empty, the header of the first incoming message will be used as the header
+for the message going out containing the content of the buffer.  If you want to override that
+header with a predefined one then use the &lt;predefined_header&gt; option.</p>
+<p>Realize this is a buffer PER WishBone instance.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>age:  The time in seconds since the first update when the buffer is flushed.</dt>
+<dd><p class="first last">Default: 10
+Type: Int</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>size: The total size in bytes of the buffer when it is flushed.</dt>
+<dd><p class="first last">Default: 10000
+Type: Int</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>predefined_header:    Once the buffer is flushed the message containing the content of the</dt>
+<dd><p class="first last">buffer will have this header instead of the header coming from the
+first package entering the buffer.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<dl class="docutils">
+<dt>Disclaimer: The size of the buffer is expressed in bytes.  This is <em>only</em> valid when you use</dt>
+<dd>&#8220;single-byte encoding&#8221; characters.  Even then it&#8217;s going to be an approximation.
+When unicode is used then this counter is not going to be realistic anymore.</dd>
+<dt>Disclaimer2:    Binary data is not going to work.  If you require that, encode into base64 or</dt>
+<dd><p class="first">something similar.  In that case take the growth of that into account:</p>
+<blockquote>
+<div>~ output_size = ((input_size - 1) / 3) * 4 + 4</div></blockquote>
+<p class="last">So 256 bytes binary data results into 344 bytes of Base64 data.</p>
+</dd>
+<dt>ToDo(smetj):    Check for each incoming string which type of encoding we&#8217;re talking about</dt>
+<dd>and take into account when &#8220;calculating&#8221; the total size of the buffer.</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="module.html"
+                        title="previous chapter">&lt;no title&gt;</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="io_modules.html"
+                        title="next chapter">Wishbone IOmodules</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/modules.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="io_modules.html" title="Wishbone IOmodules"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module.html" title="&lt;no title&gt;"
+             >previous</a> |</li>
+        <li><a href="index.html">WishBone 0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Jelle Smet.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
