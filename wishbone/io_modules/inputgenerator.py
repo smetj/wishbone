@@ -33,53 +33,19 @@ from time import time, strftime, localtime
 from gevent import monkey;monkey.patch_all() 
 
 class InputGenerator(Greenlet, QueueFunctions, Block):
-    '''
-
-    A WishBone class which generates random data at different configurable specifications.
-    It's primary use is for testing.
+    '''**A WishBone IO module which generates random data for testing purposes.**
 
     Parameters:
-    
-        * min_payload:  The minimum length of each random generated message.
-                        Default: 0
-                        Type: Integer
-
-        * max_payload:  The maximum length of each random generated message.
-                        Default: 1
-                        Type: Integer
-
-        * min_interval: The minimum time in seconds between each generated messages.
-                        Default: 0
-                        Type: Integer
-
-        * max_interval: The maximum time in seconds between each generated messages.
-                        Default: 0
-                        Type: Integer
-
-        * min_outage_start: The minimum time in seconds the next outage can start.
-                            Default: 60
-                            type: Int
-
-        * max_outage_start: The maximum time in seconds the next outage can start.
-                            Default: 600
-                            type: Int
         
-        * min_outage_length:    The minimum time in seconds an outage can last.
-                                Default: 0
-                                Type: Integer
-                        
-        * max_outage_length:    The maximum time in seconds an outage can last.
-                                Default: 0
-                                Type: Integer
-        
-        length:     Simulates the variable length of message data.
-        
-        interval:   Simulates the variable interval rate data is produced.
-        
-        outage:     Simulates the connectivity problems for incoming data.  Under normal conditions
-                    there's a constant stream.  It might happen however incoming connection is
-                    interrupted, data is being build up somewhere and after connectivity restores a
-                    big chunk of data comes in.
+        * name :                    The name to register this instance.
+        * min_payload (int):        The minimum length of each random generated message.
+        * max_payload (int):        The maximum length of each random generated message.
+        * min_interval (int):       The minimum time in seconds between each generated messages.
+        * max_interval (int):       The maximum time in seconds between each generated messages.
+        * min_outage_start (int):   The minimum time in seconds the next outage can start.
+        * max_outage_start (int):   The maximum time in seconds the next outage can start.
+        * min_outage_length (int):  The minimum time in seconds an outage can last.
+        * max_outage_length (int):  The maximum time in seconds an outage can last.
     '''
 
     def __init__(self, name, min_payload=0,max_payload=1,min_interval=0,max_interval=0,min_outage_start=60,max_outage_start=600,min_outage_length=0,max_outage_length=0):
