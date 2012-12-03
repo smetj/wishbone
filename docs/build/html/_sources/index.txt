@@ -24,7 +24,8 @@ Contents:
 
    introduction
    module
-   install
+   modules
+   io_modules
 
 Indices and tables
 ==================

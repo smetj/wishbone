@@ -32,12 +32,14 @@ from wishbone.toolkit import QueueFunctions, Block
 
 
 class DomainSocket(Greenlet, QueueFunctions, Block):
-    '''A Wishbone IO module which handles unix domain socket input.    
+    '''**A Wishbone IOmodule which accepts external input from a unix domain socket.**
     
+    Creates a Unix domain socket to which data can be submitted.
+        
     Parameters:
 
-        * name:       The name you want this module to be registered under.
-        * path:       The absolute pathname of the socket.
+        * name (str):  The name to register this instance.
+        * path (str):  The absolute path of the socket.
     ''' 
    
     def __init__(self, name, path):
@@ -56,7 +58,6 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
         self.sock.setblocking(0)
         self.sock.bind(self.path)
         self.sock.listen(50)
-        
     
     def handle(self, socket, address):
         '''Is called upon each incoming message, makes sure the data has the right Wishbone format and writes the it into self.inbox'''
@@ -72,8 +73,7 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
                 self.putData({'header':{},'data':line.rstrip("\n")}, queue='inbox')
             sleep(0)
         fileobj.close()
-        
-        
+         
     def _run(self):
         try:
             StreamServer(self.sock, self.handle).serve_forever()
