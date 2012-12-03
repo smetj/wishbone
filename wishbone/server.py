@@ -36,7 +36,6 @@ from logging import INFO, DEBUG
 from wishbone.tools import ConfigureLogging
 from wishbone import Wishbone
 
-
 class Help():
     def error(self, message):
         self.message()
@@ -69,7 +68,7 @@ class Help():
 
             --pid           Defines the location of the pidfile.'''
         print "                            The default value is /tmp/%s.pid"%self.name
-        if self.support:
+        if self.support != '':
             print '''
 
 Support:
@@ -78,9 +77,22 @@ Support:
         print ""
 
 class BootStrap(Help):
-    '''Bootstraps a Wishbone setup using the received configuration.'''
+    '''**Bootstraps a Wishbone setup using the received configuration.**
+            
+    Takes care of parsing arguments from command line, reading the bootstrap file
+    and initializing the ParallelServer class with the WishboneSkeleton class.
+    The accepted parameters are used in the --help output on the CLI.
+    
+    Parameters:
+    
+        - name (str):           The name of the WishBone setup.
+        - version (str):        The version of the WishBone setup.
+        - description (str):    A brief description explaining the setup.
+        - author (str):         The name of the author.
+        - support (str):        Contains support information.  When emty, no support information is shown.
+    '''
 
-    def __init__(self,name="WishBone", version="n/a", description="A WishBone event pipeline setup.", author="Unknown", support=False):
+    def __init__(self,name="WishBone", version="n/a", description="A WishBone event pipeline setup.", author="Unknown", support=""):
 
         self.name=name
         self.version=version
@@ -128,7 +140,17 @@ class BootStrap(Help):
             return INFO
 
 class WishbBoneSkeleton():
-    '''A skeleton class which initializes and connects the WishBone modules according to the bootstrap configuration.'''
+    '''**Loads, initializes and connects the WishBone modules according to the 
+    bootstrap configuration.**
+    
+    This class is responsible for loading and initializing the WishBone classes
+    using the parameter values defined in the bootstrap file.  This class is also
+    responsible for creating the module connections.
+    
+    Parameters:
+    
+            - conf (dict):      A dictionary containing the bootstrap config file.    
+    '''
 
     def __init__(self, conf):
         self.conf=conf
@@ -150,19 +172,22 @@ class WishbBoneSkeleton():
         return wb
 
 class ParallelServer(ConfigureLogging):
-    '''Handles starting, stopping and daemonizing of one or multiple Wishbone instances.
+    '''**Handles starting, stopping and daemonizing of one or multiple Wishbone
+    instances**.
+    
+    ParallelServer handles the work related to starting, stopping, backgrounding
+    the WishBone setup.
 
     Parameters:
 
-        * instances:        The number of parallel instances to start.
-        * setup:            The class containing the WishBone setup.
-        * setup_args:       *args to initiate the setup class.
-        * setup_kwargs:     **kwargs to initiate the setup class.
-        * daemonize:        Detach into background or not.
-        * command:          Which command to invoke. (start, debug, stop, status)
-        * log_level:        The loglevel to use
-        * server:           The name of this insance.
-        * pidfile:          The absolute pathname of the pidfile.
+        - instances (int):          The number of parallel instances to start.
+        - setup (class):            The class containing the WishBone setup. (WishBoneSkeleton)
+        - setup_args (list):        *args to initiate the setup class.
+        - setup_kwargs (dict):      **kwargs to initiate the setup class.
+        - command (string):         Which command to invoke. (start, debug, stop, status)
+        - log_level (object):       The loglevel to use
+        - name (string):            The name of this insance.
+        - pidfile (string):         The absolute pathname of the pidfile.
     '''
 
     def __init__(self, instances=1, setup=None, setup_args=[], setup_kwargs={}, command=None, log_level=INFO, name='Server', pidfile=None):
