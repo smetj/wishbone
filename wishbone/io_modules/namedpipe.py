@@ -32,12 +32,18 @@ import gevent.core
 
 
 class NamedPipe(Greenlet, QueueFunctions, Block):
-    '''A Wishbone IO module which handles named pipe input.    
+    '''**A Wishbone IO module which accepts external input from a named pipe.**
+    
+    Creates a named pipe to which data can be submitted.
     
     Parameters:
 
-        * name:     The name you want this module to be registered under.
-        * path:     The absolute path of the named pipe.
+        - name (str):       The instance name when initiated.
+        - path (str):       The absolute path of the named pipe.
+        
+    Queues:
+    
+        - inbox:    Data coming from the outside world.
     ''' 
    
     def __init__(self, name, path):

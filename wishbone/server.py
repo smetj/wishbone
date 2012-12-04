@@ -172,8 +172,7 @@ class WishbBoneSkeleton():
         return wb
 
 class ParallelServer(ConfigureLogging):
-    '''**Handles starting, stopping and daemonizing of one or multiple Wishbone
-    instances**.
+    '''**Handles starting, stopping and daemonizing of one or multiple Wishbone instances.**
     
     ParallelServer handles the work related to starting, stopping, backgrounding
     the WishBone setup.

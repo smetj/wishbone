@@ -3,13 +3,13 @@ WishBone
 
 What?
 -----
-Wishbone is a Python programming library to write `asynchronous` event pipelines mainly focussed on event processing.
+A Python library to easily write coroutine based event pipeline solutions.
 
 How?
 ----
 
-It does this by connecting modules to each other by shoveling data from one module's queue into the other in order to create an event processing flow.
-A module follows the Unix philosophy of writing programs that do one thing and do it well.  Modules work independently and asynchronously from each other without the need for callbacks.  WishBone is build upon the great Gevent library which uses the libevent library as an eventloop.
+In this context, "event pipelines" would be best described as a collection of isolated functions connected into a workflow through which events travel and change.
+This is done by shoveling events from one module's queue into the other in order to create a "flow-chart like" event pipeline. A Wishbone module follows the Unix philosophy of writing programs that do one thing and do it well. Within a Wishbone instance, the modules are running pseudo-concurrently using greenlets on top of a libevent event loop thanks to the the great Gevent library.  Wishbone also offers the possibility to start multiple concurrent processes each with a Wishbone (libevent) instance.
 
 Documentation
 -------------

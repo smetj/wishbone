@@ -14,7 +14,7 @@ Download examples from: https://github.com/smetj/experiments/tree/master/python/
 
 .. note::
 
-   The documentation is work in progress.
+   WishBone requires gevent > 1.0 
 
 
 Contents:
@@ -23,9 +23,10 @@ Contents:
    :maxdepth: 2
 
    introduction
+   bootstrapfiles
    module
-   modules
    io_modules
+   modules
 
 Indices and tables
 ==================
