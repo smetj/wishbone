@@ -25,7 +25,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="WishBone 0.2 documentation" href="index.html" /> 
+    <link rel="top" title="WishBone 0.2 documentation" href="index.html" />
+    <link rel="next" title="&lt;no title&gt;" href="module.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,6 +39,12 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="module.html" title="&lt;no title&gt;"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
         <li><a href="index.html">WishBone 0.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -48,6 +56,11 @@
             
   <div class="section" id="bootstrapfiles">
 <span id="id1"></span><h1>Bootstrapfiles<a class="headerlink" href="#bootstrapfiles" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Wishbone setups can be bootstrapped and started from command line using a bootstrapfile.
+A bootstrap file allows you to configure the complete Wishbone setup without the need to dive into your Python code.
+It&#8217;s a practical way to deliver a fully configurable Wishbone based solution to your end users.</p>
 <p>Example bootstrap file:</p>
 <div class="highlight-text"><div class="highlight"><pre>{
    &quot;system&quot;:{
@@ -90,12 +103,40 @@
 }
 </pre></div>
 </div>
+<p id="bootstrapfiles-system"><strong>A bootstrap file consists out of 3 sections:</strong></p>
+</div>
+<div class="section" id="system">
+<h2>system<a class="headerlink" href="#system" title="Permalink to this headline">¶</a></h2>
+<p>This is an optional section.  It allows to you to configure the characteristics of the Wishbone setup.
+Currently the available options here are:</p>
+<p>Parameters:</p>
 <ul class="simple">
-<li>system
-- metrics
-- metrics_interval
-- metrics_dst</li>
+<li>metrics (bool):               When true metrics are emitted every $metrics_interval seconds to $metrics_dst.</li>
+<li>metrics_interval (int):       The interval in seconds between dumping metrics. Default 10 seconds.</li>
+<li>metrics_dst (string):         Where to dump to metrics to. Default &#8220;logging&#8221;.</li>
 </ul>
+</div>
+<div class="section" id="bootstrap">
+<h2>bootstrap<a class="headerlink" href="#bootstrap" title="Permalink to this headline">¶</a></h2>
+<p>The bootstrap section is where we define the Wishbone modules and their parameters to load and initialise.
+The modules should be loadable from the Python search path, otherwise Wishbone will not be able to load them.</p>
+<p>One section out consists out of following structure:</p>
+<div class="highlight-text"><div class="highlight"><pre>&quot;The instance name when initiated.&quot;:{
+            &quot;module&quot;:&quot;the name of the Python module to load&quot;,
+            &quot;class&quot;:&quot;The name of the Python class to load&quot;,
+            &quot;variables&quot;:{
+                &quot;parameter1&quot;:x,
+                &quot;parameter2&quot;:y,
+                &quot;parameter3&quot;:z
+            }
+}
+</pre></div>
+</div>
+</div>
+<div class="section" id="routingtable">
+<h2>routingtable<a class="headerlink" href="#routingtable" title="Permalink to this headline">¶</a></h2>
+<p>The routing table determines which queues are connected to each other.</p>
+</div>
 </div>
 
 
@@ -104,6 +145,23 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Bootstrapfiles</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#system">system</a></li>
+<li><a class="reference internal" href="#bootstrap">bootstrap</a></li>
+<li><a class="reference internal" href="#routingtable">routingtable</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="introduction.html"
+                        title="previous chapter">Introduction</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="module.html"
+                        title="next chapter">&lt;no title&gt;</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/bootstrapfiles.txt"
@@ -135,6 +193,12 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="module.html" title="&lt;no title&gt;"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="introduction.html" title="Introduction"
+             >previous</a> |</li>
         <li><a href="index.html">WishBone 0.2 documentation</a> &raquo;</li> 
       </ul>
     </div>

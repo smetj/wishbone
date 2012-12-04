@@ -26,7 +26,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="WishBone 0.2 documentation" href="index.html" />
-    <link rel="prev" title="Wishbone modules" href="modules.html" /> 
+    <link rel="next" title="Wishbone modules" href="modules.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="module.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,6 +41,9 @@
              >modules</a> |</li>
         <li class="right" >
           <a href="modules.html" title="Wishbone modules"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module.html" title="&lt;no title&gt;"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">WishBone 0.2 documentation</a> &raquo;</li> 
       </ul>
@@ -55,14 +59,19 @@
 <dl class="class">
 <dt id="wishbone.io_modules.broker.Broker">
 <em class="property">class </em><tt class="descclassname">wishbone.io_modules.broker.</tt><tt class="descname">Broker</tt><big>(</big><em>name</em>, <em>host</em>, <em>vhost='/'</em>, <em>username='guest'</em>, <em>password='guest'</em>, <em>prefetch_count=1</em>, <em>no_ack=False</em>, <em>consume_queue='wishbone_in'</em>, <em>delivery_mode=2</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.broker.Broker" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A Wisbone IOmodule which handles AMQP0.8 input and output.  It&#8217;s meant to be
-resillient to disconnects and broker unavailability.</strong></p>
-<p>Data consumed from the broker goes into self.inbox
-Data which should be produced towards to broker goes into self.outbox</p>
-<p>Acknowledging:</p>
-<p>Messages which arrive in the outbox and which have an acknowledge tag in the header will be acknowledged.
-When a broker_tag is submitted to the acknowledge queue the tag is acknowledged with the broker.</p>
-<p>The message submitted to self.outbox should have 3 values in its headers:</p>
+<dd><p><strong>A Wishbone IO module which handles AMQP0.8 input and output.</strong></p>
+<p>This module handles the IO from and to a message broker.  This module has
+specifically been tested against RabbitMQ.  The module is meant to be resilient
+against disconnects and broker unavailability.</p>
+<p>The module will currently not create any missing queues or exchanges.</p>
+<p>Acknowledging can can done in 2 ways:</p>
+<ul class="simple">
+<li>Messages which arrive to outbox and which have an acknowledge tag in the header 
+will be acknowledged with the broker.</li>
+<li>When a broker_tag is submitted to the &#8220;acknowledge&#8221; queue, then the message
+will be acknowledged with the broker.</li>
+</ul>
+<p>All incoming messages should have at least following header:</p>
 <blockquote>
 <div><p>{&#8216;header&#8217;:{&#8216;broker_exchange&#8217;:name, &#8216;broker_key&#8217;:name, &#8216;broker_tag&#8217;:tag}}</p>
 <ul class="simple">
@@ -70,23 +79,27 @@ When a broker_tag is submitted to the acknowledge queue the tag is acknowledged 
 <li>broker_key:         The routing key used when submitting data.</li>
 <li>broker_tag:         The tag used to acknowledge the message from the broker.</li>
 </ul>
-<p>Queues:</p>
-<ul class="simple">
-<li>inbox:              The queue containing messages coming from the broker.</li>
-<li>outbox:             The queue containing messages to the broker.</li>
-<li>acknowledge:        The queue containing messages to acknowledge</li>
-</ul>
+</div></blockquote>
 <p>Parameters:</p>
-<ul class="simple">
-<li>name:               The name you want this module to be registered under.</li>
-<li>host:               The name or IP of the broker.</li>
-<li>vhost:              The virtual host of the broker. By default this is &#8216;/&#8217;.</li>
-<li>username:           The username to connect to the broker.  By default this is &#8216;guest&#8217;.</li>
-<li>password:           The password to connect to the broker.  By default this is &#8216;guest&#8217;.</li>
-<li>consume_queue:      The queue which should be consumed. By default this is &#8220;wishbone_in&#8221;.</li>
-<li>prefetch_count:     The amount of messages consumed from the queue at once.</li>
-<li>no_ack:             No acknowledgements required? By default this is False (means acknowledgements are required.)</li>
-<li>delivery_mode       The message delivery mode.  1 is Non-persistent, 2 is Persistent. Default=2</li>
+<blockquote>
+<div><ul class="simple">
+<li>name (str):           The instance name when initiated.</li>
+<li>host (str):           The name or IP of the broker.</li>
+<li>vhost (str):          The virtual host of the broker. By default this is &#8216;/&#8217;.</li>
+<li>username (str):       The username to connect to the broker.  By default this is &#8216;guest&#8217;.</li>
+<li>password (str):       The password to connect to the broker.  By default this is &#8216;guest&#8217;.</li>
+<li>consume_queue (str):  The queue which should be consumed. By default this is &#8220;wishbone_in&#8221;.</li>
+<li>prefetch_count (str): The amount of messages consumed from the queue at once.</li>
+<li>no_ack (str):         No acknowledgements required? By default this is False (means acknowledgements are required.)</li>
+<li>delivery_mode (int):  The message delivery mode.  1 is Non-persistent, 2 is Persistent. Default=2</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:              Messages coming from the broker.</li>
+<li>outbox:             Messages destined for the broker.</li>
+<li>acknowledge:        Message tags to acknowledge with the broker.</li>
 </ul>
 </div></blockquote>
 </dd></dl>
@@ -94,13 +107,19 @@ When a broker_tag is submitted to the acknowledge queue the tag is acknowledged 
 <span class="target" id="module-wishbone.io_modules.domainsocket"></span><dl class="class">
 <dt id="wishbone.io_modules.domainsocket.DomainSocket">
 <em class="property">class </em><tt class="descclassname">wishbone.io_modules.domainsocket.</tt><tt class="descname">DomainSocket</tt><big>(</big><em>name</em>, <em>path</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.domainsocket.DomainSocket" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A Wishbone IOmodule which accepts external input from a unix domain socket.</strong></p>
+<dd><p><strong>A Wishbone IO module which accepts external input from a unix domain socket.</strong></p>
 <p>Creates a Unix domain socket to which data can be submitted.</p>
 <p>Parameters:</p>
 <blockquote>
 <div><ul class="simple">
-<li>name (str):  The name to register this instance.</li>
+<li>name (str):  The instance name when initiated.</li>
 <li>path (str):  The absolute path of the socket.</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:       Data coming from the outside world.</li>
 </ul>
 </div></blockquote>
 </dd></dl>
@@ -109,10 +128,12 @@ When a broker_tag is submitted to the acknowledge queue the tag is acknowledged 
 <dt id="wishbone.io_modules.inputgenerator.InputGenerator">
 <em class="property">class </em><tt class="descclassname">wishbone.io_modules.inputgenerator.</tt><tt class="descname">InputGenerator</tt><big>(</big><em>name</em>, <em>min_payload=0</em>, <em>max_payload=1</em>, <em>min_interval=0</em>, <em>max_interval=0</em>, <em>min_outage_start=60</em>, <em>max_outage_start=600</em>, <em>min_outage_length=0</em>, <em>max_outage_length=0</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.inputgenerator.InputGenerator" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A WishBone IO module which generates random data for testing purposes.</strong></p>
+<p>This module allows you to simulate an incoming data stream without acutally 
+having to produce any data yourself.</p>
 <p>Parameters:</p>
 <blockquote>
 <div><ul class="simple">
-<li>name :                    The name to register this instance.</li>
+<li>name (str):               The instance name when initiated.</li>
 <li>min_payload (int):        The minimum length of each random generated message.</li>
 <li>max_payload (int):        The maximum length of each random generated message.</li>
 <li>min_interval (int):       The minimum time in seconds between each generated messages.</li>
@@ -123,17 +144,30 @@ When a broker_tag is submitted to the acknowledge queue the tag is acknowledged 
 <li>max_outage_length (int):  The maximum time in seconds an outage can last.</li>
 </ul>
 </div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:    &#8220;Incoming&#8221; data produced by InputGenerator itself.</li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <span class="target" id="module-wishbone.io_modules.namedpipe"></span><dl class="class">
 <dt id="wishbone.io_modules.namedpipe.NamedPipe">
 <em class="property">class </em><tt class="descclassname">wishbone.io_modules.namedpipe.</tt><tt class="descname">NamedPipe</tt><big>(</big><em>name</em>, <em>path</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.namedpipe.NamedPipe" title="Permalink to this definition">¶</a></dt>
-<dd><p>A Wishbone IO module which handles named pipe input.</p>
+<dd><p><strong>A Wishbone IO module which accepts external input from a named pipe.</strong></p>
+<p>Creates a named pipe to which data can be submitted.</p>
 <p>Parameters:</p>
 <blockquote>
 <div><ul class="simple">
-<li>name:     The name you want this module to be registered under.</li>
-<li>path:     The absolute path of the named pipe.</li>
+<li>name (str):       The instance name when initiated.</li>
+<li>path (str):       The absolute path of the named pipe.</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:    Data coming from the outside world.</li>
 </ul>
 </div></blockquote>
 </dd></dl>
@@ -147,8 +181,11 @@ When a broker_tag is submitted to the acknowledge queue the tag is acknowledged 
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
+  <p class="topless"><a href="module.html"
+                        title="previous chapter">&lt;no title&gt;</a></p>
+  <h4>Next topic</h4>
   <p class="topless"><a href="modules.html"
-                        title="previous chapter">Wishbone modules</a></p>
+                        title="next chapter">Wishbone modules</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/io_modules.txt"
@@ -182,6 +219,9 @@ When a broker_tag is submitted to the acknowledge queue the tag is acknowledged 
              >modules</a> |</li>
         <li class="right" >
           <a href="modules.html" title="Wishbone modules"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module.html" title="&lt;no title&gt;"
              >previous</a> |</li>
         <li><a href="index.html">WishBone 0.2 documentation</a> &raquo;</li> 
       </ul>
