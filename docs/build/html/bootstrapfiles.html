@@ -136,6 +136,24 @@ The modules should be loadable from the Python search path, otherwise Wishbone w
 <div class="section" id="routingtable">
 <h2>routingtable<a class="headerlink" href="#routingtable" title="Permalink to this headline">¶</a></h2>
 <p>The routing table determines which queues are connected to each other.</p>
+<p>Currently we have 2 kinds of connections:</p>
+<blockquote>
+<div><ul class="simple">
+<li>1-1   : The most standard connection. Events from 1 queue go into another queue.</li>
+<li>1-n   : 1 to many connection.  This duplicates the events from 1 queue to each queue it is connected to.</li>
+</ul>
+</div></blockquote>
+<p>The routing table has following format:</p>
+<div class="highlight-text"><div class="highlight"><pre>&quot;routingtable&quot;:{
+    &quot;bootstrapInstanceName.queueName&quot;:[
+        &quot;bootstrapInstanceName.queueName&quot;
+    ],
+    &quot;bootstrapInstanceName.queueName&quot;:[
+        &quot;bootstrapInstanceName.queueName&quot;
+    ]
+}
+</pre></div>
+</div>
 </div>
 </div>
 
