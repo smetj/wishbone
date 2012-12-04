@@ -26,8 +26,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="WishBone 0.2 documentation" href="index.html" />
-    <link rel="next" title="&lt;no title&gt;" href="module.html" />
-    <link rel="prev" title="WishBone – Write asynchronous event pipelines without callbacks." href="index.html" /> 
+    <link rel="next" title="Bootstrapfiles" href="bootstrapfiles.html" />
+    <link rel="prev" title="WishBone" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,10 +40,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="module.html" title="&lt;no title&gt;"
+          <a href="bootstrapfiles.html" title="Bootstrapfiles"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="WishBone – Write asynchronous event pipelines without callbacks."
+          <a href="index.html" title="WishBone"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">WishBone 0.2 documentation</a> &raquo;</li> 
       </ul>
@@ -96,7 +96,7 @@ The framework takes care of forwarding the content the outbox queue to the next 
 <li>n-1   : Many to one connection.  This writes the events of many queues into 1 queue. (not implemented yet)</li>
 </ul>
 <p>The path an event travels is determined by the &#8220;routingtable&#8221; in the bootstrap file.
-By connecting the queues of functionally different modules to each other, one can make a clean &#8220;asynchronous&#8221; workflow in a simple way, without using any callbacks.</p>
+By connecting the queues of different modules to each other, youe can make a clean workflow.</p>
 </div>
 <div class="section" id="events">
 <h3>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h3>
@@ -112,16 +112,16 @@ By connecting the queues of functionally different modules to each other, one ca
 </div>
 <div class="section" id="parallelserver">
 <h2>ParallelServer<a class="headerlink" href="#parallelserver" title="Permalink to this headline">¶</a></h2>
-<p><tt class="xref py py-class docutils literal"><span class="pre">wishbone.server.ParallelServer</span></tt> is a convenience class which has 3 functions:</p>
+<p><a class="reference internal" href="module.html#wishbone.server.ParallelServer" title="wishbone.server.ParallelServer"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.server.ParallelServer</span></tt></a> is a convenience class which has 3 functions:</p>
 <div class="section" id="process-handling-and-parallelisation">
 <h3>Process handling and parallelisation.<a class="headerlink" href="#process-handling-and-parallelisation" title="Permalink to this headline">¶</a></h3>
-<p><tt class="xref py py-class docutils literal"><span class="pre">wishbone.server.ParallelServer</span></tt> takes care of the starting, stopping and daemonizing of a Wishbone setup.
+<p><a class="reference internal" href="module.html#wishbone.server.ParallelServer" title="wishbone.server.ParallelServer"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.server.ParallelServer</span></tt></a> takes care of the starting, stopping and daemonizing of a Wishbone setup.
 Besides that it also takes care of starting multiple parallel instances when required.
 Having more than one instance means there is a libevent loop per process.</p>
 </div>
 <div class="section" id="argument-parsing">
 <h3>Argument parsing.<a class="headerlink" href="#argument-parsing" title="Permalink to this headline">¶</a></h3>
-<p><tt class="xref py py-class docutils literal"><span class="pre">wishbone.server.ParallelServer</span></tt> takes care of parsing the command line arguments required to bootstrap a Wishbone setup.</p>
+<p><a class="reference internal" href="module.html#wishbone.server.ParallelServer" title="wishbone.server.ParallelServer"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.server.ParallelServer</span></tt></a> takes care of parsing the command line arguments required to bootstrap a Wishbone setup.</p>
 <div class="highlight-text"><div class="highlight"><pre>[vagrant@sandbox broker]$ ./brokertest
 BrokerTest version 0.1                                          Jelle Smet
 
@@ -166,7 +166,7 @@ too few arguments
 </div>
 <div class="section" id="bootstrapping">
 <h3>Bootstrapping<a class="headerlink" href="#bootstrapping" title="Permalink to this headline">¶</a></h3>
-<p><tt class="xref py py-class docutils literal"><span class="pre">wishbone.server.ParallelServer</span></tt> reads the configuration file (using the &#8211;config parameter) and starts a setup according to the configuration.
+<p><a class="reference internal" href="module.html#wishbone.server.ParallelServer" title="wishbone.server.ParallelServer"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.server.ParallelServer</span></tt></a> reads the configuration file (using the &#8211;config parameter) and starts a setup according to the configuration.
 The configuration file (bootstrap file) is in JSON format and consists out of 3 big parts:</p>
 <ul>
 <li><p class="first">system</p>
@@ -211,10 +211,10 @@ The configuration file (bootstrap file) is in JSON format and consists out of 3 
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
-                        title="previous chapter">WishBone &#8211; Write asynchronous event pipelines without callbacks.</a></p>
+                        title="previous chapter">WishBone</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="module.html"
-                        title="next chapter">&lt;no title&gt;</a></p>
+  <p class="topless"><a href="bootstrapfiles.html"
+                        title="next chapter">Bootstrapfiles</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/introduction.txt"
@@ -247,10 +247,10 @@ The configuration file (bootstrap file) is in JSON format and consists out of 3 
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="module.html" title="&lt;no title&gt;"
+          <a href="bootstrapfiles.html" title="Bootstrapfiles"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="WishBone – Write asynchronous event pipelines without callbacks."
+          <a href="index.html" title="WishBone"
              >previous</a> |</li>
         <li><a href="index.html">WishBone 0.2 documentation</a> &raquo;</li> 
       </ul>

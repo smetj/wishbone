@@ -42,7 +42,7 @@ Possible connections are:
 - n-1	: Many to one connection.  This writes the events of many queues into 1 queue. (not implemented yet)
 
 The path an event travels is determined by the "routingtable" in the bootstrap file.
-By connecting the queues of functionally different modules to each other, one can make a clean "asynchronous" workflow in a simple way, without using any callbacks.
+By connecting the queues of different modules to each other, youe can make a clean workflow.
 
 Events
 ------

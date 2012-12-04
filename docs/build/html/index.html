@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>WishBone – Write asynchronous event pipelines without callbacks. &mdash; WishBone 0.2 documentation</title>
+    <title>WishBone &mdash; WishBone 0.2 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -50,11 +50,11 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="wishbone-write-asynchronous-event-pipelines-without-callbacks">
-<h1>WishBone &#8211; Write asynchronous event pipelines without callbacks.<a class="headerlink" href="#wishbone-write-asynchronous-event-pipelines-without-callbacks" title="Permalink to this headline">¶</a></h1>
-<p>Wishbone is a Python library to write <cite>asynchronous</cite> event pipelines without the need for callbacks.</p>
-<p>In this context, &#8220;event pipelines&#8221; would be best described as a collection of isolated functions connected into a workflow through which events enter and exit to change along the way depending on which function they pass.  This is done by connecting modules to each other by shoveling data from one module&#8217;s queue into the other in order to create an event pipeline. A module follows the Unix philosophy of writing programs that do one thing and do it well.  Modules work independently and asynchronously from each other without the need for callbacks.</p>
-<p>WishBone is build upon the great Gevent library which uses the libevent library as an eventloop.</p>
+  <div class="section" id="wishbone">
+<h1>WishBone<a class="headerlink" href="#wishbone" title="Permalink to this headline">¶</a></h1>
+<p><strong>A Python library to easily write coroutine based event pipeline solutions.</strong></p>
+<p>In this context, &#8220;event pipelines&#8221; would be best described as a collection of isolated functions connected into a workflow through which events travel and change.
+This is done by shoveling events from one module&#8217;s queue into the other in order to create a &#8220;flow-chart like&#8221; event pipeline. A Wishbone module follows the Unix philosophy of writing programs that do one thing and do it well. Within a Wishbone instance, the modules are running pseudo-concurrently using greenlets on top of a libevent event loop thanks to the the great Gevent library.  Wishbone also offers the possibility to start multiple concurrent processes each with a Wishbone (libevent) instance.</p>
 <p>Download code from: <a class="reference external" href="https://github.com/smetj/wishbone">https://github.com/smetj/wishbone</a></p>
 <p>Download examples from: <a class="reference external" href="https://github.com/smetj/experiments/tree/master/python/wishbone">https://github.com/smetj/experiments/tree/master/python/wishbone</a></p>
 <div class="admonition note">
@@ -98,7 +98,7 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">WishBone &#8211; Write asynchronous event pipelines without callbacks.</a><ul>
+<li><a class="reference internal" href="#">WishBone</a><ul>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </li>

@@ -98,3 +98,20 @@ routingtable
 
 The routing table determines which queues are connected to each other.
 
+Currently we have 2 kinds of connections:
+
+        - 1-1   : The most standard connection. Events from 1 queue go into another queue.
+        - 1-n   : 1 to many connection.  This duplicates the events from 1 queue to each queue it is connected to.
+
+The routing table has following format:
+
+.. code-block:: text
+
+    "routingtable":{
+        "bootstrapInstanceName.queueName":[
+            "bootstrapInstanceName.queueName"
+        ],
+        "bootstrapInstanceName.queueName":[
+            "bootstrapInstanceName.queueName"
+        ]
+    }
