@@ -4,6 +4,13 @@
 Bootstrapfiles
 ==============
 
+Introduction
+------------
+
+Wishbone setups can be bootstrapped and started from command line using a bootstrapfile.
+A bootstrap file allows you to configure the complete Wishbone setup without the need to dive into your Python code.
+It's a practical way to deliver a fully configurable Wishbone based solution to your end users.
+
 Example bootstrap file:
 
 .. code-block:: text
@@ -49,9 +56,45 @@ Example bootstrap file:
         }
 
 .. _bootstrapfiles_system:
-- system
-  - metrics
-  - metrics_interval
-  - metrics_dst
 
+**A bootstrap file consists out of 3 sections:**
+
+system
+------
+
+This is an optional section.  It allows to you to configure the characteristics of the Wishbone setup.
+Currently the available options here are:
+
+Parameters:
+
+- metrics (bool):               When true metrics are emitted every $metrics_interval seconds to $metrics_dst.
+- metrics_interval (int):       The interval in seconds between dumping metrics. Default 10 seconds.
+- metrics_dst (string):         Where to dump to metrics to. Default "logging". 
+
+bootstrap
+---------
+
+The bootstrap section is where we define the Wishbone modules and their parameters to load and initialise.
+The modules should be loadable from the Python search path, otherwise Wishbone will not be able to load them.
+
+One section out consists out of following structure:
+
+.. code-block:: text
+
+    "The instance name when initiated.":{
+                "module":"the name of the Python module to load",
+                "class":"The name of the Python class to load",
+                "variables":{
+                    "parameter1":x,
+                    "parameter2":y,
+                    "parameter3":z
+                }
+    }
+
+
+
+routingtable
+------------
+
+The routing table determines which queues are connected to each other.
 

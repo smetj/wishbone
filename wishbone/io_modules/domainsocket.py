@@ -32,14 +32,18 @@ from wishbone.toolkit import QueueFunctions, Block
 
 
 class DomainSocket(Greenlet, QueueFunctions, Block):
-    '''**A Wishbone IOmodule which accepts external input from a unix domain socket.**
+    '''**A Wishbone IO module which accepts external input from a unix domain socket.**
     
     Creates a Unix domain socket to which data can be submitted.
         
     Parameters:
 
-        * name (str):  The name to register this instance.
-        * path (str):  The absolute path of the socket.
+        - name (str):  The instance name when initiated.
+        - path (str):  The absolute path of the socket.
+    
+    Queues:
+    
+        - inbox:       Data coming from the outside world.
     ''' 
    
     def __init__(self, name, path):

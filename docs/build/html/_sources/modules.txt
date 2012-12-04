@@ -2,10 +2,10 @@
 Wishbone modules
 ================
 
-.. module:: wishbone.modules.brokerloopback
-.. autoclass:: BrokerLoopback
-.. module:: wishbone.modules.compressor
-.. autoclass:: Compressor
+.. module:: wishbone.modules.brokerheader
+.. autoclass:: BrokerHeader
+.. module:: wishbone.modules.snappy
+.. autoclass:: Snappy
 .. module:: wishbone.modules.gotmessage
 .. autoclass:: GotMessage
 .. module:: wishbone.modules.jsonvalidator

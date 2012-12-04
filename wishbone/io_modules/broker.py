@@ -30,42 +30,47 @@ from amqplib import client_0_8 as amqp
 from gevent import monkey;monkey.patch_all()
 
 class Broker(Greenlet, QueueFunctions, Block):
-    '''**A Wisbone IOmodule which handles AMQP0.8 input and output.  It's meant to be
-    resillient to disconnects and broker unavailability.**
+    '''**A Wishbone IO module which handles AMQP0.8 input and output.**
     
-    Data consumed from the broker goes into self.inbox
-    Data which should be produced towards to broker goes into self.outbox
+    This module handles the IO from and to a message broker.  This module has
+    specifically been tested against RabbitMQ.  The module is meant to be resilient
+    against disconnects and broker unavailability.
     
-    Acknowledging:
+    The module will currently not create any missing queues or exchanges.
     
-    Messages which arrive in the outbox and which have an acknowledge tag in the header will be acknowledged.
-    When a broker_tag is submitted to the acknowledge queue the tag is acknowledged with the broker.
+    Acknowledging can can done in 2 ways:
     
-    The message submitted to self.outbox should have 3 values in its headers:
+    - Messages which arrive to outbox and which have an acknowledge tag in the header 
+      will be acknowledged with the broker.
     
-        {'header':{'broker_exchange':name, 'broker_key':name, 'broker_tag':tag}}
+    - When a broker_tag is submitted to the "acknowledge" queue, then the message
+      will be acknowledged with the broker.
+    
+    All incoming messages should have at least following header:
         
-        * broker_exchange:    The exchange to which data should be submitted.
-        * broker_key:         The routing key used when submitting data.
-        * broker_tag:         The tag used to acknowledge the message from the broker.
+        {'header':{'broker_exchange':name, 'broker_key':name, 'broker_tag':tag}}    
         
-        Queues:
+        - broker_exchange:    The exchange to which data should be submitted.
+        - broker_key:         The routing key used when submitting data.
+        - broker_tag:         The tag used to acknowledge the message from the broker.
         
-        * inbox:              The queue containing messages coming from the broker.
-        * outbox:             The queue containing messages to the broker.
-        * acknowledge:        The queue containing messages to acknowledge
+    Parameters:        
 
-        Parameters:
+        - name (str):           The instance name when initiated.
+        - host (str):           The name or IP of the broker.
+        - vhost (str):          The virtual host of the broker. By default this is '/'.
+        - username (str):       The username to connect to the broker.  By default this is 'guest'.
+        - password (str):       The password to connect to the broker.  By default this is 'guest'.
+        - consume_queue (str):  The queue which should be consumed. By default this is "wishbone_in".
+        - prefetch_count (str): The amount of messages consumed from the queue at once.
+        - no_ack (str):         No acknowledgements required? By default this is False (means acknowledgements are required.)
+        - delivery_mode (int):  The message delivery mode.  1 is Non-persistent, 2 is Persistent. Default=2
 
-        * name:               The name you want this module to be registered under.
-        * host:               The name or IP of the broker.
-        * vhost:              The virtual host of the broker. By default this is '/'.
-        * username:           The username to connect to the broker.  By default this is 'guest'.
-        * password:           The password to connect to the broker.  By default this is 'guest'.
-        * consume_queue:      The queue which should be consumed. By default this is "wishbone_in".
-        * prefetch_count:     The amount of messages consumed from the queue at once.
-        * no_ack:             No acknowledgements required? By default this is False (means acknowledgements are required.)
-        * delivery_mode       The message delivery mode.  1 is Non-persistent, 2 is Persistent. Default=2
+    Queues:
+        
+        - inbox:              Messages coming from the broker.
+        - outbox:             Messages destined for the broker.
+        - acknowledge:        Message tags to acknowledge with the broker.
     '''
     
     def __init__(self, name, host, vhost='/', username='guest', password='guest', prefetch_count=1, no_ack=False, consume_queue='wishbone_in', delivery_mode=2 ):
