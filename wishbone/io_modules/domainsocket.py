@@ -22,8 +22,6 @@
 #  
 #  
 
-import logging
-#import _socket
 from os import remove
 from gevent.server import StreamServer
 from gevent import Greenlet, socket, sleep
