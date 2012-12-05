@@ -58,7 +58,7 @@
 <span id="wishbone-iomodules"></span><h1>Wishbone IOmodules<a class="headerlink" href="#module-wishbone.io_modules.broker" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="wishbone.io_modules.broker.Broker">
-<em class="property">class </em><tt class="descclassname">wishbone.io_modules.broker.</tt><tt class="descname">Broker</tt><big>(</big><em>name</em>, <em>host</em>, <em>vhost='/'</em>, <em>username='guest'</em>, <em>password='guest'</em>, <em>prefetch_count=1</em>, <em>no_ack=False</em>, <em>consume_queue='wishbone_in'</em>, <em>delivery_mode=2</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/broker.html#Broker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.broker.Broker" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.broker.</tt><tt class="descname">Broker</tt><big>(</big><em>name</em>, <em>host</em>, <em>vhost='/'</em>, <em>username='guest'</em>, <em>password='guest'</em>, <em>prefetch_count=1</em>, <em>no_ack=False</em>, <em>consume_queue='wishbone_in'</em>, <em>delivery_mode=2</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.broker.Broker" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A Wishbone IO module which handles AMQP0.8 input and output.</strong></p>
 <p>This module handles the IO from and to a message broker.  This module has
 specifically been tested against RabbitMQ.  The module is meant to be resilient
@@ -106,7 +106,7 @@ will be acknowledged with the broker.</li>
 
 <span class="target" id="module-wishbone.io_modules.domainsocket"></span><dl class="class">
 <dt id="wishbone.io_modules.domainsocket.DomainSocket">
-<em class="property">class </em><tt class="descclassname">wishbone.io_modules.domainsocket.</tt><tt class="descname">DomainSocket</tt><big>(</big><em>name</em>, <em>path</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/domainsocket.html#DomainSocket"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.domainsocket.DomainSocket" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.domainsocket.</tt><tt class="descname">DomainSocket</tt><big>(</big><em>name</em>, <em>path</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.domainsocket.DomainSocket" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A Wishbone IO module which accepts external input from a unix domain socket.</strong></p>
 <p>Creates a Unix domain socket to which data can be submitted.</p>
 <p>Parameters:</p>
@@ -126,7 +126,7 @@ will be acknowledged with the broker.</li>
 
 <span class="target" id="module-wishbone.io_modules.inputgenerator"></span><dl class="class">
 <dt id="wishbone.io_modules.inputgenerator.InputGenerator">
-<em class="property">class </em><tt class="descclassname">wishbone.io_modules.inputgenerator.</tt><tt class="descname">InputGenerator</tt><big>(</big><em>name</em>, <em>min_payload=0</em>, <em>max_payload=1</em>, <em>min_interval=0</em>, <em>max_interval=0</em>, <em>min_outage_start=60</em>, <em>max_outage_start=600</em>, <em>min_outage_length=0</em>, <em>max_outage_length=0</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/inputgenerator.html#InputGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.inputgenerator.InputGenerator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.inputgenerator.</tt><tt class="descname">InputGenerator</tt><big>(</big><em>name</em>, <em>min_payload=0</em>, <em>max_payload=1</em>, <em>min_interval=0</em>, <em>max_interval=0</em>, <em>min_outage_start=60</em>, <em>max_outage_start=600</em>, <em>min_outage_length=0</em>, <em>max_outage_length=0</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.inputgenerator.InputGenerator" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A WishBone IO module which generates random data for testing purposes.</strong></p>
 <p>This module allows you to simulate an incoming data stream without acutally 
 having to produce any data yourself.</p>
@@ -154,7 +154,7 @@ having to produce any data yourself.</p>
 
 <span class="target" id="module-wishbone.io_modules.namedpipe"></span><dl class="class">
 <dt id="wishbone.io_modules.namedpipe.NamedPipe">
-<em class="property">class </em><tt class="descclassname">wishbone.io_modules.namedpipe.</tt><tt class="descname">NamedPipe</tt><big>(</big><em>name</em>, <em>path</em><big>)</big><a class="reference internal" href="_modules/wishbone/io_modules/namedpipe.html#NamedPipe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.io_modules.namedpipe.NamedPipe" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.namedpipe.</tt><tt class="descname">NamedPipe</tt><big>(</big><em>name</em>, <em>path</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.namedpipe.NamedPipe" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A Wishbone IO module which accepts external input from a named pipe.</strong></p>
 <p>Creates a named pipe to which data can be submitted.</p>
 <p>Parameters:</p>

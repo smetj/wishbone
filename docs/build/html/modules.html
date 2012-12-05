@@ -54,7 +54,7 @@
 <span id="wishbone-modules"></span><h1>Wishbone modules<a class="headerlink" href="#module-wishbone.modules.brokerheader" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="wishbone.modules.brokerheader.BrokerHeader">
-<em class="property">class </em><tt class="descclassname">wishbone.modules.brokerheader.</tt><tt class="descname">BrokerHeader</tt><big>(</big><em>name</em>, <em>key='wishbone'</em>, <em>exchange=''</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/brokerheader.html#BrokerHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.brokerheader.BrokerHeader" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.modules.brokerheader.</tt><tt class="descname">BrokerHeader</tt><big>(</big><em>name</em>, <em>key='wishbone'</em>, <em>exchange=''</em><big>)</big><a class="headerlink" href="#wishbone.modules.brokerheader.BrokerHeader" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A Wishbone module which adds a wishbone.io_modules.broker header to each
 event</strong>.</p>
 <p>When events go to the outside world via the boker module, it must know which
@@ -79,7 +79,7 @@ to the outboxqueue of the wishbone.io_modules.broker instance.</p>
 
 <span class="target" id="module-wishbone.modules.snappy"></span><dl class="class">
 <dt id="wishbone.modules.snappy.Snappy">
-<em class="property">class </em><tt class="descclassname">wishbone.modules.snappy.</tt><tt class="descname">Snappy</tt><big>(</big><em>name</em>, <em>mode='compress'</em>, <em>purge=True</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/snappy.html#Snappy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.snappy.Snappy" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.modules.snappy.</tt><tt class="descname">Snappy</tt><big>(</big><em>name</em>, <em>mode='compress'</em>, <em>purge=True</em><big>)</big><a class="headerlink" href="#wishbone.modules.snappy.Snappy" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A Wishbone module which compresses or decompresses data using Snappy.</strong></p>
 <dl class="docutils">
 <dt>This module can be initiated in 2 modes:</dt>
@@ -113,7 +113,7 @@ fails, otherwise it will be forwarded in its original state.</p>
 
 <span class="target" id="module-wishbone.modules.gotmessage"></span><dl class="class">
 <dt id="wishbone.modules.gotmessage.GotMessage">
-<em class="property">class </em><tt class="descclassname">wishbone.modules.gotmessage.</tt><tt class="descname">GotMessage</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/gotmessage.html#GotMessage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.gotmessage.GotMessage" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.modules.gotmessage.</tt><tt class="descname">GotMessage</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.modules.gotmessage.GotMessage" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A WishBone module which just logs and drops any passing message.</strong></p>
 <p>The module&#8217;s purpose is mainly for testing purposes.</p>
 <p>Parameters:</p>
@@ -132,7 +132,7 @@ fails, otherwise it will be forwarded in its original state.</p>
 
 <span class="target" id="module-wishbone.modules.jsonvalidator"></span><dl class="class">
 <dt id="wishbone.modules.jsonvalidator.JSONValidator">
-<em class="property">class </em><tt class="descclassname">wishbone.modules.jsonvalidator.</tt><tt class="descname">JSONValidator</tt><big>(</big><em>name</em>, <em>schema=None</em>, <em>convert=False</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/jsonvalidator.html#JSONValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.jsonvalidator.JSONValidator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.modules.jsonvalidator.</tt><tt class="descname">JSONValidator</tt><big>(</big><em>name</em>, <em>schema=None</em>, <em>convert=False</em><big>)</big><a class="headerlink" href="#wishbone.modules.jsonvalidator.JSONValidator" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A Wishbone module which verifies JSON data against a validator schema loaded from file.</strong></p>
 <p>Events consumed from the inbox queue are verified against a Validator schema.  When the event is not a valid JSON document
 or when it doesn&#8217;t match your predifined Validator schema, it is dropped.</p>
@@ -155,7 +155,7 @@ or when it doesn&#8217;t match your predifined Validator schema, it is dropped.<
 
 <span class="target" id="module-wishbone.modules.skeleton"></span><dl class="class">
 <dt id="wishbone.modules.skeleton.Skeleton">
-<em class="property">class </em><tt class="descclassname">wishbone.modules.skeleton.</tt><tt class="descname">Skeleton</tt><big>(</big><em>name</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/skeleton.html#Skeleton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.skeleton.Skeleton" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.modules.skeleton.</tt><tt class="descname">Skeleton</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.modules.skeleton.Skeleton" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Skeleton Wishbone module is a minimal module which does nothing more than
 shoveling data from inbox to outbox.</strong></p>
 <p>It can be used as an example/base for new modules.</p>
@@ -176,7 +176,7 @@ shoveling data from inbox to outbox.</strong></p>
 
 <span class="target" id="module-wishbone.modules.stdout"></span><dl class="class">
 <dt id="wishbone.modules.stdout.STDOUT">
-<em class="property">class </em><tt class="descclassname">wishbone.modules.stdout.</tt><tt class="descname">STDOUT</tt><big>(</big><em>name</em>, <em>complete=False</em>, <em>purge=False</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/stdout.html#STDOUT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.stdout.STDOUT" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.modules.stdout.</tt><tt class="descname">STDOUT</tt><big>(</big><em>name</em>, <em>complete=False</em>, <em>purge=False</em><big>)</big><a class="headerlink" href="#wishbone.modules.stdout.STDOUT" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>The STDOUT Wishbone module is a minimal module which prints each incoming
 event to STDOUT</strong></p>
 <p>After printing the content of the events to STDOUT they are put into the outbox
@@ -202,7 +202,7 @@ only be used for testing or demonstration purposes.</p>
 
 <span class="target" id="module-wishbone.modules.tippingbucket"></span><dl class="class">
 <dt id="wishbone.modules.tippingbucket.TippingBucket">
-<em class="property">class </em><tt class="descclassname">wishbone.modules.tippingbucket.</tt><tt class="descname">TippingBucket</tt><big>(</big><em>name</em>, <em>age=5</em>, <em>size=10000</em>, <em>predefined_header=None</em><big>)</big><a class="reference internal" href="_modules/wishbone/modules/tippingbucket.html#TippingBucket"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.modules.tippingbucket.TippingBucket" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.modules.tippingbucket.</tt><tt class="descname">TippingBucket</tt><big>(</big><em>name</em>, <em>age=5</em>, <em>size=10000</em>, <em>predefined_header=None</em><big>)</big><a class="headerlink" href="#wishbone.modules.tippingbucket.TippingBucket" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>TippingBucket is a Wishbone module which buffers data.</strong></p>
 <p>This module buffers data and dumps it to the output queue on 2 conditions:</p>
 <blockquote>
