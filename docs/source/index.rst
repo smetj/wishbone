@@ -23,7 +23,6 @@ Contents:
 
    introduction
    bootstrapfiles
-   module
    io_modules
    modules
 
