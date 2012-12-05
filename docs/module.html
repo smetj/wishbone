@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>&lt;no title&gt; &mdash; WishBone 0.2 documentation</title>
+    <title>&lt;no title&gt; &mdash; Wishbone master documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.2',
+        VERSION:     'master',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,9 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="WishBone 0.2 documentation" href="index.html" />
-    <link rel="next" title="Wishbone IOmodules" href="io_modules.html" />
-    <link rel="prev" title="Bootstrapfiles" href="bootstrapfiles.html" /> 
+    <link rel="top" title="Wishbone master documentation" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,13 +37,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="io_modules.html" title="Wishbone IOmodules"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="bootstrapfiles.html" title="Bootstrapfiles"
-             accesskey="P">previous</a> |</li>
-        <li><a href="index.html">WishBone 0.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone master documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -56,7 +48,7 @@
             
   <span class="target" id="module-wishbone.server"></span><dl class="class">
 <dt id="wishbone.server.BootStrap">
-<em class="property">class </em><tt class="descclassname">wishbone.server.</tt><tt class="descname">BootStrap</tt><big>(</big><em>name='WishBone'</em>, <em>version='n/a'</em>, <em>description='A WishBone event pipeline setup.'</em>, <em>author='Unknown'</em>, <em>support=''</em><big>)</big><a class="headerlink" href="#wishbone.server.BootStrap" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.server.</tt><tt class="descname">BootStrap</tt><big>(</big><em>name='WishBone'</em>, <em>version='n/a'</em>, <em>description='A WishBone event pipeline setup.'</em>, <em>author='Unknown'</em>, <em>support=''</em><big>)</big><a class="reference internal" href="_modules/wishbone/server.html#BootStrap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.server.BootStrap" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Bootstraps a Wishbone setup using the received configuration.</strong></p>
 <p>Takes care of parsing arguments from command line, reading the bootstrap file
 and initializing the ParallelServer class with the WishboneSkeleton class.
@@ -75,7 +67,7 @@ The accepted parameters are used in the &#8211;help output on the CLI.</p>
 
 <dl class="class">
 <dt id="wishbone.server.WishbBoneSkeleton">
-<em class="property">class </em><tt class="descclassname">wishbone.server.</tt><tt class="descname">WishbBoneSkeleton</tt><big>(</big><em>conf</em><big>)</big><a class="headerlink" href="#wishbone.server.WishbBoneSkeleton" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.server.</tt><tt class="descname">WishbBoneSkeleton</tt><big>(</big><em>conf</em><big>)</big><a class="reference internal" href="_modules/wishbone/server.html#WishbBoneSkeleton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.server.WishbBoneSkeleton" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Loads, initializes and connects the WishBone modules according to the 
 bootstrap configuration.</strong></p>
 <p>This class is responsible for loading and initializing the WishBone classes
@@ -91,7 +83,7 @@ responsible for creating the module connections.</p>
 
 <dl class="class">
 <dt id="wishbone.server.ParallelServer">
-<em class="property">class </em><tt class="descclassname">wishbone.server.</tt><tt class="descname">ParallelServer</tt><big>(</big><em>instances=1</em>, <em>setup=None</em>, <em>setup_args=</em><span class="optional">[</span><span class="optional">]</span>, <em>setup_kwargs={}</em>, <em>command=None</em>, <em>log_level=20</em>, <em>name='Server'</em>, <em>pidfile=None</em><big>)</big><a class="headerlink" href="#wishbone.server.ParallelServer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.server.</tt><tt class="descname">ParallelServer</tt><big>(</big><em>instances=1</em>, <em>setup=None</em>, <em>setup_args=</em><span class="optional">[</span><span class="optional">]</span>, <em>setup_kwargs={}</em>, <em>command=None</em>, <em>log_level=20</em>, <em>name='Server'</em>, <em>pidfile=None</em><big>)</big><a class="reference internal" href="_modules/wishbone/server.html#ParallelServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.server.ParallelServer" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Handles starting, stopping and daemonizing of one or multiple Wishbone instances.</strong></p>
 <p>ParallelServer handles the work related to starting, stopping, backgrounding
 the WishBone setup.</p>
@@ -112,7 +104,7 @@ the WishBone setup.</p>
 
 <span class="target" id="module-wishbone.main"></span><dl class="class">
 <dt id="wishbone.main.Wishbone">
-<em class="property">class </em><tt class="descclassname">wishbone.main.</tt><tt class="descname">Wishbone</tt><big>(</big><em>syslog=False</em>, <em>metrics=True</em>, <em>metrics_interval=10</em>, <em>metrics_dst='logging'</em><big>)</big><a class="headerlink" href="#wishbone.main.Wishbone" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.main.</tt><tt class="descname">Wishbone</tt><big>(</big><em>syslog=False</em>, <em>metrics=True</em>, <em>metrics_interval=10</em>, <em>metrics_dst='logging'</em><big>)</big><a class="reference internal" href="_modules/wishbone/main.html#Wishbone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#wishbone.main.Wishbone" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>The main class in which the Wishbone modules are registered and managed.</strong></p>
 <p>Parameters:</p>
 <blockquote>
@@ -131,12 +123,6 @@ the WishBone setup.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="bootstrapfiles.html"
-                        title="previous chapter">Bootstrapfiles</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="io_modules.html"
-                        title="next chapter">Wishbone IOmodules</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/module.txt"
@@ -168,13 +154,7 @@ the WishBone setup.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="io_modules.html" title="Wishbone IOmodules"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="bootstrapfiles.html" title="Bootstrapfiles"
-             >previous</a> |</li>
-        <li><a href="index.html">WishBone 0.2 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone master documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
