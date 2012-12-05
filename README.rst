@@ -13,7 +13,7 @@ This is done by shoveling events from one module's queue into the other in order
 
 Documentation
 -------------
-http://smetj.github.com/wishbone/index.html
+http://smetj.github.com/wishbone/docs/build/html/index.html
 
 Examples
 --------
