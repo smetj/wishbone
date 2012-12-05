@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # Wishbone documentation build configuration file, created by
-# sphinx-quickstart on Thu Dec  6 00:08:48 2012.
+# sphinx-quickstart on Thu Dec  6 00:23:02 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -25,7 +25,7 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
