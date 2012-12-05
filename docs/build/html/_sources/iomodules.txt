@@ -1,2 +1,0 @@
-.. module:: wishbone.io_modules.broker
-.. autoclass:: Broker
