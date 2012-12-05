@@ -36,6 +36,7 @@ class STDOUT(PrimitiveActor):
     
     Parameters:
     
+        - name (str):       The instance name when initiated.
         - complete (bool):  When True, print the complete event including headers.
         - purge (bool):     When True the message is dropped and not put in outbox.
     

@@ -26,9 +26,17 @@ from wishbone.toolkit import PrimitiveActor
 
 
 class GotMessage(PrimitiveActor):
-    '''A WishBone module which just logs whenever it gets a message and then discards.
-    Also the length of the message is included in the log message.  It's not really useful.
-    It's just made for testing purposes.
+    '''**A WishBone module which just logs and drops any passing message.**
+    
+    The module's purpose is mainly for testing purposes.
+    
+    Parameters:
+    
+        - name (str):   The instance name when initiated.
+    
+    Queues:
+
+        - inbox:    Incoming events.
     '''
     
     def __init__(self, name):
