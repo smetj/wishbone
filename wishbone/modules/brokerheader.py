@@ -23,6 +23,7 @@
 #
 
 from wishbone.toolkit import PrimitiveActor
+import logging
 
 
 class BrokerHeader(PrimitiveActor):

@@ -60,4 +60,4 @@ class STDOUT(PrimitiveActor):
             self.putData(doc)
        
     def shutdown(self):
-        self.logging.info('Shutdown')
+        self.logging.info('Shutdown') 
