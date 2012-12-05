@@ -4,5 +4,4 @@ MANIFEST
 create_rpm/
 wishbone.egg-info/
 build/
-docs/Makefile
 docs/build/doctrees/
