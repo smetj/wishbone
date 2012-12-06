@@ -106,20 +106,48 @@ will be acknowledged with the broker.</li>
 
 <span class="target" id="module-wishbone.io_modules.domainsocket"></span><dl class="class">
 <dt id="wishbone.io_modules.domainsocket.DomainSocket">
-<em class="property">class </em><tt class="descclassname">wishbone.io_modules.domainsocket.</tt><tt class="descname">DomainSocket</tt><big>(</big><em>name</em>, <em>path</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.domainsocket.DomainSocket" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.domainsocket.</tt><tt class="descname">DomainSocket</tt><big>(</big><em>name</em>, <em>path</em>, <em>mode='line'</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.domainsocket.DomainSocket" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A Wishbone IO module which accepts external input from a unix domain socket.</strong></p>
 <p>Creates a Unix domain socket to which data can be submitted.</p>
+<p>The listener can run in 2 different modes:</p>
+<blockquote>
+<div><ul class="simple">
+<li>blob: The incoming data is put into 1 event.</li>
+<li>line: Each new line is treated as a new event.</li>
+</ul>
+</div></blockquote>
 <p>Parameters:</p>
 <blockquote>
 <div><ul class="simple">
-<li>name (str):  The instance name when initiated.</li>
-<li>path (str):  The absolute path of the socket.</li>
+<li>name (str):   The instance name when initiated.</li>
+<li>path (str):   The absolute path of the socket.</li>
+<li>mode (str):   The mode of the listener. [ &#8220;line&#8221;,&#8221;blob&#8221; ]</li>
 </ul>
 </div></blockquote>
 <p>Queues:</p>
 <blockquote>
 <div><ul class="simple">
 <li>inbox:       Data coming from the outside world.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="module-wishbone.io_modules.dumpdata"></span><dl class="class">
+<dt id="wishbone.io_modules.dumpdata.DumpData">
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.dumpdata.</tt><tt class="descname">DumpData</tt><big>(</big><em>name</em>, <em>amount=100</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.dumpdata.DumpData" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A Wishbone IO module which produces 1 batch of x events.</strong></p>
+<p>Generates 1 time upon initialisation a number of events and places them in the inbox queue.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>name (str):   The instance name when initiated.</li>
+<li>amount (int): The number of events to produce.</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:       &#8220;Incoming&#8221; generated data.</li>
 </ul>
 </div></blockquote>
 </dd></dl>

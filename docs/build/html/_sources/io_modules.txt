@@ -8,6 +8,9 @@ Wishbone IOmodules
 .. module:: wishbone.io_modules.domainsocket
 .. autoclass:: DomainSocket
 
+.. module:: wishbone.io_modules.dumpdata
+.. autoclass:: DumpData
+
 .. module:: wishbone.io_modules.inputgenerator
 .. autoclass:: InputGenerator
 
