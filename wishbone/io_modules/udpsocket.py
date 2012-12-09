@@ -28,7 +28,6 @@ from gevent.server import DatagramServer
 from wishbone.toolkit import QueueFunctions, Block
 import logging
 
-
 class UDPSocket(DatagramServer, QueueFunctions, Block):
     '''A Wishbone module which handles UDP input.
     
@@ -40,7 +39,7 @@ class UDPSocket(DatagramServer, QueueFunctions, Block):
         * port:       The port on which the server should listen.
     '''
  
-    def __init__(self, name, port, *args, **kwargs):
+    def __init__(self, name, port):
         DatagramServer.__init__(self, ':'+str(port), *args, **kwargs)
         Block.__init__(self)
         QueueFunctions.__init__(self)

@@ -39,6 +39,7 @@ class STDOUT(PrimitiveActor):
         - name (str):       The instance name when initiated.
         - complete (bool):  When True, print the complete event including headers.
         - purge (bool):     When True the message is dropped and not put in outbox.
+        - counter (bool):   Puts an incremental number for each event in front of each event.
     
     Queues:
     
@@ -46,18 +47,22 @@ class STDOUT(PrimitiveActor):
         - outbox:   Outgoing events.
     '''
     
-    def __init__(self, name, complete=False, purge=False):
+    def __init__(self, name, complete=False, purge=False, counter=False):
         PrimitiveActor.__init__(self, name)
         self.complete=complete
         self.purge=purge
+        self.counter=counter
+        self.c=0
         
     def consume(self,doc):
+        
         if self.complete == False:
-            print doc['data']
+            print '%s - %s'%(self.c,doc['data'])
         else:
-            print doc
+            print '%s - %s'%(self.c,doc['data'])
         if self.purge == False:
             self.putData(doc)
+        self.c+=1
        
     def shutdown(self):
-        self.logging.info('Shutdown') 
+        self.logging.info('Shutdown')
