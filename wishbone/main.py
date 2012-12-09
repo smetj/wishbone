@@ -63,6 +63,7 @@ class Wishbone(Block, Metrics):
     '''
 
     def __init__(self, syslog=False, metrics=True, metrics_interval=10, metrics_dst="logging"):
+            
         self.metrics=metrics
         self.metrics_interval=metrics_interval
         self.metrics_dst=metrics_dst
