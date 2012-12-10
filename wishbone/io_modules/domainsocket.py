@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  domainsocket.py
+#  domainsocketrroutput.py
 #
 #  Copyright 2012 Jelle Smet development@smetj.net
 #
@@ -22,11 +22,13 @@
 #
 #
 
-from os import remove
+from os import remove, path, makedirs
 from gevent.server import StreamServer
 from gevent import Greenlet, socket, sleep
 from gevent.queue import Queue
 from wishbone.toolkit import QueueFunctions, Block
+from uuid import uuid4
+import logging
 
 
 class DomainSocket(Greenlet, QueueFunctions, Block):
@@ -41,36 +43,53 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
 
     Parameters:
 
-        - name (str):   The instance name when initiated.
-        - path (str):   The absolute path of the socket.
-        - mode (str):   The mode of the listener. [ "line","blob" ]
+        - name (str):           The instance name when initiated.
+        - directory (str):      The absolute path of the directory containing the socket.
+        - filename (str):       The name of the socket file. When None a random name is chosen.
+        - mode (str):           The mode of the listener. [ "line","blob" ]
 
     Queues:
 
         - inbox:       Data coming from the outside world.
     '''
 
-    def __init__(self, name, path, mode="line"):
-        self.name=name
-        self.path = path
-        self.mode = mode
+    def __init__(self, name, directory="/tmp", socketname=None, mode="line"):
         Greenlet.__init__(self)
         QueueFunctions.__init__(self)
         Block.__init__(self)
+        self.name=name
+        self.directory=directory
+        self.socketname=socketname
+        self.mode = mode
         self.logging = logging.getLogger( name )
-        self.sock = None
-        self.__setup()
+        
+        self.__createDirectory()
+        self.filename=self.__getSocketName()
+        self.__setupSocket()
+        
         if self.mode == "line":
             self.handle=self.__doLine
         elif self.mode == "blob":
-            self.handle=slef.__doBlob            
+            self.handle=self.__doBlob            
         self.logging.info('Initialiazed in %s mode.'%self.mode)
 
-    def __setup(self):
+    def __setupSocket(self):
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.sock.setblocking(0)
-        self.sock.bind(self.path)
+        self.sock.bind(self.filename)
+        self.logging.info("Socket file %s created"%self.filename)
         self.sock.listen(50)
+    
+    def __createDirectory(self):
+        if not path.exists(self.directory):
+            makedirs(self.directory)
+                
+    def __getSocketName(self):
+        
+        if self.socketname == None:
+            self.socketname = uuid4()
+        return "%s/%s"%(self.directory,self.socketname)
+            
     
     def __doBlob(self, socket, address):
         '''All incoming data is treated as 1 event.'''
@@ -103,5 +122,5 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
             self.shutdown()
 
     def shutdown(self):
-        remove(self.path)
+        remove(self.filename)
         self.logging.info('Shutdown')
