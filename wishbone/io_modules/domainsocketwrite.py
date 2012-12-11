@@ -77,15 +77,15 @@ class DomainSocketWrite(PrimitiveActor):
             self.logging.info("Running poolReaper on %s"%self.path)
             for file in listdir(self.path):
                 filename = "%s/%s"%(self.path,file)
-                #try:
-                mode=os.stat(filename)
-                if stat.S_ISSOCK(mode[0]) == True:
-                    if os.access(filename,os.W_OK) == True:
-                        socketlist.append(filename)
+                try:
+                    mode=os.stat(filename)
+                    if stat.S_ISSOCK(mode[0]) == True:
+                        if os.access(filename,os.W_OK) == True:
+                            socketlist.append(filename)
+                        else:
+                            self.logging.warn("%s is not writable."%filename)
                     else:
-                        self.logging.warn("%s is not writable."%filename)
-                else:
-                    self.logging.warn("%s is not a socket file."%filename)
+                        self.logging.warn("%s is not a socket file."%filename)
                 except Exception as err:
                     self.logging.warn("There was a problem processing %s. Reason: %s"%(file,err))
             if self.socketpool != socketlist:
