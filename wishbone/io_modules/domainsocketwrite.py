@@ -22,16 +22,15 @@
 #
 #
 
-from os import remove, path, makedirs
-from gevent.server import StreamServer
-from gevent import Greenlet, socket, sleep
-from gevent.queue import Queue
-from wishbone.toolkit import QueueFunctions, Block
-from uuid import uuid4
+from wishbone.toolkit import PrimitiveActor
+from os import remove, path, makedirs, listdir
+import os
+from gevent import Greenlet, sleep
+import stat
 import logging
 
 
-class DomainSocketWrite(Greenlet, QueueFunctions, Block):
+class DomainSocketWrite(PrimitiveActor):
     '''**A Wishbone IO module which writes data into a Unix domain socket.**
 
     Writes data into a Unix domain socket.  
@@ -53,23 +52,46 @@ class DomainSocketWrite(Greenlet, QueueFunctions, Block):
         - outbox:   Outgoing events destined to the outside world.
     '''
 
-    def __init__(self, name, path=None):
-        Greenlet.__init__(self)
-        QueueFunctions.__init__(self)
-        Block.__init__(self)
+    def __init__(self, name, pool=True, path="/tmp", reaptime=5):
+        PrimitiveActor.__init__(self, name)
+        
         self.name=name
+        self.pool=pool
         self.path=path
+        self.reaptime=reaptime
+        
+        self.socketpool=[]
         self.logging = logging.getLogger( name )
-        self.logging.info('Initialiazed. in %s mode.'%self.mode)
+        Greenlet.spawn(self.poolReaper)
+        self.logging.info('Initialiazed.')
 
     def handle(self, doc):
         pass
-        
-    def _run(self):
-        #read socket        
 
-    def getStatusSockets(self):
-        pass
+    def poolReaper(self):
+        '''Runs periodically over the socket pool to build a list of available
+        sockets to choose from.'''
+
+        while self.block():
+            socketlist=[]
+            self.logging.info("Running poolReaper on %s"%self.path)
+            for file in listdir(self.path):
+                filename = "%s/%s"%(self.path,file)
+                #try:
+                mode=os.stat(filename)
+                if stat.S_ISSOCK(mode[0]) == True:
+                    if os.access(filename,os.W_OK) == True:
+                        socketlist.append(filename)
+                    else:
+                        self.logging.warn("%s is not writable."%filename)
+                else:
+                    self.logging.warn("%s is not a socket file."%filename)
+                except Exception as err:
+                    self.logging.warn("There was a problem processing %s. Reason: %s"%(file,err))
+            if self.socketpool != socketlist:
+                self.socketpool = socketlist
+            print (socketlist)
+            sleep(self.reaptime)
 
     def shutdown(self):
         self.logging.info('Shutdown')
