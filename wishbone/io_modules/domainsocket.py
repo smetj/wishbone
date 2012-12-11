@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  domainsocketrroutput.py
+#  domainsocket.py
 #
 #  Copyright 2012 Jelle Smet development@smetj.net
 #
@@ -40,12 +40,16 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
 
         - blob: The incoming data is put into 1 event.
         - line: Each new line is treated as a new event.
+    
+    When pool is set to True, then path will considered to be directory.  If false,
+    then path will be the filename of the socket file.
 
     Parameters:
 
         - name (str):           The instance name when initiated.
-        - directory (str):      The absolute path of the directory containing the socket.
-        - filename (str):       The name of the socket file. When None a random name is chosen.
+        - pool (bool):          When true path is considered to be a directory in 
+                                which a socket with random name is created.
+        - path (str):           The location of the directory or socket file.
         - mode (str):           The mode of the listener. [ "line","blob" ]
 
     Queues:
@@ -53,19 +57,17 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
         - inbox:       Data coming from the outside world.
     '''
 
-    def __init__(self, name, directory="/tmp", socketname=None, mode="line"):
+    def __init__(self, name, pool=True, path="/tmp", mode="line"):
         Greenlet.__init__(self)
         QueueFunctions.__init__(self)
         Block.__init__(self)
         self.name=name
-        self.directory=directory
-        self.socketname=socketname
+        self.pool=pool
+        self.path=path
         self.mode = mode
         self.logging = logging.getLogger( name )
         
-        self.__createDirectory()
-        self.filename=self.__getSocketName()
-        self.__setupSocket()
+        self.filename=self.__setupSocket()
         
         if self.mode == "line":
             self.handle=self.__doLine
@@ -74,22 +76,20 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
         self.logging.info('Initialiazed in %s mode.'%self.mode)
 
     def __setupSocket(self):
+        if self.pool == True:
+            if not path.exists(self.path):
+                makedirs(self.path)
+            filename = "%s/%s"%(self.path,uuid4())
+            self.logging.info("Socket pool %s created."%filename)
+        else:
+            filename = self.path
+            self.logging.info("Socket file %s created."%filename)
+                
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.sock.setblocking(0)
-        self.sock.bind(self.filename)
-        self.logging.info("Socket file %s created"%self.filename)
+        self.sock.bind(filename)
         self.sock.listen(50)
-    
-    def __createDirectory(self):
-        if not path.exists(self.directory):
-            makedirs(self.directory)
-                
-    def __getSocketName(self):
-        
-        if self.socketname == None:
-            self.socketname = uuid4()
-        return "%s/%s"%(self.directory,self.socketname)
-            
+        return filename
     
     def __doBlob(self, socket, address):
         '''All incoming data is treated as 1 event.'''
