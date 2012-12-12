@@ -40,7 +40,7 @@ class UDPSocket(DatagramServer, QueueFunctions, Block):
     '''
  
     def __init__(self, name, port):
-        DatagramServer.__init__(self, ':'+str(port), *args, **kwargs)
+        DatagramServer.__init__(self, ':'+str(port))
         Block.__init__(self)
         QueueFunctions.__init__(self)
         self.logging = logging.getLogger( name )
