@@ -77,40 +77,6 @@ to the outboxqueue of the wishbone.io_modules.broker instance.</p>
 </div></blockquote>
 </dd></dl>
 
-<span class="target" id="module-wishbone.modules.snappy"></span><dl class="class">
-<dt id="wishbone.modules.snappy.Snappy">
-<em class="property">class </em><tt class="descclassname">wishbone.modules.snappy.</tt><tt class="descname">Snappy</tt><big>(</big><em>name</em>, <em>mode='compress'</em>, <em>purge=True</em><big>)</big><a class="headerlink" href="#wishbone.modules.snappy.Snappy" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A Wishbone module which compresses or decompresses data using Snappy.</strong></p>
-<dl class="docutils">
-<dt>This module can be initiated in 2 modes:</dt>
-<dd><ul class="first last simple">
-<li>compress</li>
-<li>decompress</li>
-</ul>
-</dd>
-</dl>
-<p>When initiated in &#8220;compress&#8221; mode it will compress all incoming data.  When
-initiated in &#8220;decompress&#8221; mode, it will try to decompress all incoming data.</p>
-<p>When purges is set to True, incoming events will be dropped when decompression
-fails, otherwise it will be forwarded in its original state.</p>
-<p>Watch out, compression is cpu bound, which could impact your event loop.</p>
-<p>Parameters:</p>
-<blockquote>
-<div><ul class="simple">
-<li>name (str):       The instance name when initiated.</li>
-<li>mode (str):       &#8220;compress&#8221; or &#8220;decompress&#8221;</li>
-<li>purge (bool):     When true then the event will be purged if decompression fails.</li>
-</ul>
-</div></blockquote>
-<p>Queues:</p>
-<blockquote>
-<div><ul class="simple">
-<li>inbox:    Incoming events.</li>
-<li>outbox:   Outgoing events.</li>
-</ul>
-</div></blockquote>
-</dd></dl>
-
 <span class="target" id="module-wishbone.modules.gotmessage"></span><dl class="class">
 <dt id="wishbone.modules.gotmessage.GotMessage">
 <em class="property">class </em><tt class="descclassname">wishbone.modules.gotmessage.</tt><tt class="descname">GotMessage</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.modules.gotmessage.GotMessage" title="Permalink to this definition">¶</a></dt>
@@ -174,9 +140,43 @@ shoveling data from inbox to outbox.</strong></p>
 </div></blockquote>
 </dd></dl>
 
+<span class="target" id="module-wishbone.modules.snappy"></span><dl class="class">
+<dt id="wishbone.modules.snappy.Snappy">
+<em class="property">class </em><tt class="descclassname">wishbone.modules.snappy.</tt><tt class="descname">Snappy</tt><big>(</big><em>name</em>, <em>mode='compress'</em>, <em>purge=True</em><big>)</big><a class="headerlink" href="#wishbone.modules.snappy.Snappy" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A Wishbone module which compresses or decompresses data using Snappy.</strong></p>
+<dl class="docutils">
+<dt>This module can be initiated in 2 modes:</dt>
+<dd><ul class="first last simple">
+<li>compress</li>
+<li>decompress</li>
+</ul>
+</dd>
+</dl>
+<p>When initiated in &#8220;compress&#8221; mode it will compress all incoming data.  When
+initiated in &#8220;decompress&#8221; mode, it will try to decompress all incoming data.</p>
+<p>When purges is set to True, incoming events will be dropped when decompression
+fails, otherwise it will be forwarded in its original state.</p>
+<p>Watch out, compression is cpu bound, which could impact your event loop.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>name (str):       The instance name when initiated.</li>
+<li>mode (str):       &#8220;compress&#8221; or &#8220;decompress&#8221;</li>
+<li>purge (bool):     When true then the event will be purged if decompression fails.</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:    Incoming events.</li>
+<li>outbox:   Outgoing events.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
 <span class="target" id="module-wishbone.modules.stdout"></span><dl class="class">
 <dt id="wishbone.modules.stdout.STDOUT">
-<em class="property">class </em><tt class="descclassname">wishbone.modules.stdout.</tt><tt class="descname">STDOUT</tt><big>(</big><em>name</em>, <em>complete=False</em>, <em>purge=False</em><big>)</big><a class="headerlink" href="#wishbone.modules.stdout.STDOUT" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.modules.stdout.</tt><tt class="descname">STDOUT</tt><big>(</big><em>name</em>, <em>complete=False</em>, <em>purge=False</em>, <em>counter=False</em><big>)</big><a class="headerlink" href="#wishbone.modules.stdout.STDOUT" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>The STDOUT Wishbone module is a minimal module which prints each incoming
 event to STDOUT</strong></p>
 <p>After printing the content of the events to STDOUT they are put into the outbox
@@ -189,6 +189,7 @@ only be used for testing or demonstration purposes.</p>
 <li>name (str):       The instance name when initiated.</li>
 <li>complete (bool):  When True, print the complete event including headers.</li>
 <li>purge (bool):     When True the message is dropped and not put in outbox.</li>
+<li>counter (bool):   Puts an incremental number for each event in front of each event.</li>
 </ul>
 </div></blockquote>
 <p>Queues:</p>

@@ -106,7 +106,7 @@ will be acknowledged with the broker.</li>
 
 <span class="target" id="module-wishbone.io_modules.domainsocket"></span><dl class="class">
 <dt id="wishbone.io_modules.domainsocket.DomainSocket">
-<em class="property">class </em><tt class="descclassname">wishbone.io_modules.domainsocket.</tt><tt class="descname">DomainSocket</tt><big>(</big><em>name</em>, <em>path</em>, <em>mode='line'</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.domainsocket.DomainSocket" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.domainsocket.</tt><tt class="descname">DomainSocket</tt><big>(</big><em>name</em>, <em>pool=True</em>, <em>path='/tmp'</em>, <em>mode='line'</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.domainsocket.DomainSocket" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A Wishbone IO module which accepts external input from a unix domain socket.</strong></p>
 <p>Creates a Unix domain socket to which data can be submitted.</p>
 <p>The listener can run in 2 different modes:</p>
@@ -116,18 +116,55 @@ will be acknowledged with the broker.</li>
 <li>line: Each new line is treated as a new event.</li>
 </ul>
 </div></blockquote>
+<p>When pool is set to True, then path will considered to be directory.  If false,
+then path will be the filename of the socket file.</p>
 <p>Parameters:</p>
 <blockquote>
-<div><ul class="simple">
-<li>name (str):   The instance name when initiated.</li>
-<li>path (str):   The absolute path of the socket.</li>
-<li>mode (str):   The mode of the listener. [ &#8220;line&#8221;,&#8221;blob&#8221; ]</li>
+<div><ul>
+<li><p class="first">name (str):           The instance name when initiated.</p>
+</li>
+<li><dl class="first docutils">
+<dt>pool (bool):          When true path is considered to be a directory in </dt>
+<dd><p class="first last">which a socket with random name is created.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">path (str):           The location of the directory or socket file.</p>
+</li>
+<li><p class="first">mode (str):           The mode of the listener. [ &#8220;line&#8221;,&#8221;blob&#8221; ]</p>
+</li>
 </ul>
 </div></blockquote>
 <p>Queues:</p>
 <blockquote>
 <div><ul class="simple">
 <li>inbox:       Data coming from the outside world.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="module-wishbone.io_modules.domainsocketwrite"></span><dl class="class">
+<dt id="wishbone.io_modules.domainsocketwrite.DomainSocketWrite">
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.domainsocketwrite.</tt><tt class="descname">DomainSocketWrite</tt><big>(</big><em>name</em>, <em>pool=True</em>, <em>path='/tmp'</em>, <em>reaptime=5</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.domainsocketwrite.DomainSocketWrite" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A Wishbone IO module which writes data into a Unix domain socket.</strong></p>
+<p>Writes data into a Unix domain socket.</p>
+<p>If pool is True, path is expected to be a directory containing socket files over
+which the module will spread outgoing events.
+If pool if False, path is a socket file to which all outgoing events will be
+submitted.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>name (str):   The instance name when initiated.</li>
+<li>pool (bool):  When True expects path to be a pool of sockets.</li>
+<li>path (str):   The absolute path of the socket file or the socket pool.</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:    Incoming events.</li>
+<li>outbox:   Outgoing events destined to the outside world.</li>
 </ul>
 </div></blockquote>
 </dd></dl>
@@ -196,6 +233,31 @@ having to produce any data yourself.</p>
 <blockquote>
 <div><ul class="simple">
 <li>inbox:    Data coming from the outside world.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<span class="target" id="module-wishbone.io_modules.tcpsocketwrite"></span><dl class="class">
+<dt id="wishbone.io_modules.tcpsocketwrite.TCPSocketWrite">
+<em class="property">class </em><tt class="descclassname">wishbone.io_modules.tcpsocketwrite.</tt><tt class="descname">TCPSocketWrite</tt><big>(</big><em>name</em>, <em>pool=True</em><big>)</big><a class="headerlink" href="#wishbone.io_modules.tcpsocketwrite.TCPSocketWrite" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A Wishbone IO module which writes data to a TCP socket.</strong></p>
+<p>Writes data to a tcp socket.</p>
+<p>If pool is True, path is expected to be a directory containing socket files over
+which the module will spread outgoing events.
+If pool if False, path is a socket file to which all outgoing events will be
+submitted.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>name (str):   The instance name when initiated.</li>
+<li>pool (list):  A list of addresses:port entries to which data needs to be submitted.</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:    Incoming events.</li>
+<li>outbox:   Outgoing events destined to the outside world.</li>
 </ul>
 </div></blockquote>
 </dd></dl>

@@ -8,6 +8,9 @@ Wishbone IOmodules
 .. module:: wishbone.io_modules.domainsocket
 .. autoclass:: DomainSocket
 
+.. module:: wishbone.io_modules.domainsocketwrite
+.. autoclass:: DomainSocketWrite
+
 .. module:: wishbone.io_modules.dumpdata
 .. autoclass:: DumpData
 
@@ -16,6 +19,9 @@ Wishbone IOmodules
 
 .. module:: wishbone.io_modules.namedpipe
 .. autoclass:: NamedPipe
+
+.. module:: wishbone.io_modules.tcpsocketwrite
+.. autoclass:: TCPSocketWrite
 
 .. module:: wishbone.io_modules.udpsocket
 .. autoclass:: UDPSocket
