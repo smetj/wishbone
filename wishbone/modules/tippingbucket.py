@@ -88,7 +88,7 @@ class TippingBucket(PrimitiveActor):
         self.buff_size+=len((doc["data"]))
 
         if self.buff_size > self.size:
-            self.logging.info("Size of buffer exceeded. Flushed.")
+            self.logging.debug("Size of buffer exceeded. Flushed.")
             self.flushBuffer()
 
     def reaper(self):
@@ -98,7 +98,7 @@ class TippingBucket(PrimitiveActor):
             if self.buff_age != 0:
                 if (float(time()) - float(self.buff_age)) > float(self.age):
                     self.flushBuffer()
-                    self.logging.info("Age of buffer exceeded %s seconds. Flushed."%(self.age))
+                    self.logging.debug("Age of buffer exceeded %s seconds. Flushed."%(self.age))
             sleep(0.1)
 
     def flushBuffer(self):
