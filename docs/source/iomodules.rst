@@ -23,5 +23,8 @@ Wishbone IOmodules
 .. module:: wishbone.iomodules.tcpserver
 .. autoclass:: TCPServer
 
+.. module:: wishbone.iomodules.tcpclient
+.. autoclass:: TCPClient
+
 .. module:: wishbone.iomodules.udpserver
 .. autoclass:: UDPServer

@@ -85,7 +85,7 @@ class TCPClient(PrimitiveActor):
                 break
             except Exception as err:
                 self.logging.warn("Failed to write data to %s. Reason: %s"%(self.sockets[destination], err))
-                self.setupSockets()
+                self.sockets=self.setupSockets()
                 sleep(1)
         
     def shutdown(self):
