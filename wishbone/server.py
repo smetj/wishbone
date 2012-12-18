@@ -108,7 +108,8 @@ class BootStrap(Help):
                     setup_args=[conf],
                     command=cli['command'][0],
                     name=name,
-                    log_level=log_level
+                    log_level=log_level,
+                    pidfile=cli['pid']
         )
 
     def parseArguments(self):
@@ -120,7 +121,7 @@ class BootStrap(Help):
         parser.add_argument('--config', dest='config', help='The location of the configuration file.')
         parser.add_argument('--instances', dest='instances', default=1, help='The number of parallel instances to start.')
         parser.add_argument('--loglevel', dest='loglevel', default="info", help='The loglevel you want to use. [info,warn,crit,debug]')
-        parser.add_argument('--pid', dest='pid', default=1, help='The absolute path of the pidfile.')
+        parser.add_argument('--pid', dest='pid', help='The absolute path of the pidfile.')
         return vars(parser.parse_args())
 
     def readConfig(self,filename):
@@ -309,7 +310,6 @@ class ParallelServer(ConfigureLogging):
     def startPid(self, pidfile):
         '''Handles the pid file logic in case we're starting.'''
         pids=[]
-
         try:
             pids = self.readPids(pidfile)
             if self.checkPids(pids):
