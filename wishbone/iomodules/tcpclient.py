@@ -35,6 +35,7 @@ class TCPClient(PrimitiveActor):
     
     If pool is True, path is expected to be a directory containing socket files over
     which the module will spread outgoing events.
+    
     If pool if False, path is a socket file to which all outgoing events will be
     submitted.
         
@@ -84,6 +85,7 @@ class TCPClient(PrimitiveActor):
                 break
             except Exception as err:
                 self.logging.warn("Failed to write data to %s. Reason: %s"%(self.sockets[destination], err))
+                self.setupSockets()
                 sleep(1)
         
     def shutdown(self):
