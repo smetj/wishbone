@@ -79,7 +79,7 @@ class Wishbone(Block, Metrics):
         self.run=self.start
 
     def registerModule(self, config, *args, **kwargs):
-        '''Registers a Wishbone Module into the framework.  All modules used within Wishbone should be regesitered through this function.
+        '''Registers a Wishbone Module into the framework.  All modules used within Wishbone should be registered through this function.
 
         This function receives a tuple containing 3 values.  Any further args or kwargs are used to initialize the actual module you register.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  domainsocketwrite.py
+#  udsclient.py
 #
 #  Copyright 2012 Jelle Smet development@smetj.net
 #
@@ -24,13 +24,14 @@
 
 from wishbone.toolkit import PrimitiveActor
 from os import remove, path, makedirs, listdir
+from itertools import cycle
 import os
-from gevent import Greenlet, sleep
+from gevent import Greenlet, sleep, socket
 import stat
 import logging
 
 
-class DomainSocketWrite(PrimitiveActor):
+class UDSClient(PrimitiveActor):
     '''**A Wishbone IO module which writes data into a Unix domain socket.**
 
     Writes data into a Unix domain socket.  
@@ -52,46 +53,63 @@ class DomainSocketWrite(PrimitiveActor):
         - outbox:   Outgoing events destined to the outside world.
     '''
 
-    def __init__(self, name, pool=True, path="/tmp", reaptime=5):
+    def __init__(self, name, pool=True, path="/tmp", stream=False, reaptime=5):
         PrimitiveActor.__init__(self, name)
         
         self.name=name
         self.pool=pool
         self.path=path
+        self.stream=stream
         self.reaptime=reaptime
         
         self.socketpool=[]
         self.logging = logging.getLogger( name )
-        Greenlet.spawn(self.poolReaper)
+        self.poolReaper()
+        #Greenlet.spawn(self.scheduleReaper)        
         self.logging.info('Initialiazed.')
 
-    def handle(self, doc):
-        pass
+    def consume(self, doc):
+        while self.block() == True:
+            try:
+                sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
+                sock.connect(self.socketcycle.next())
+                sock.sendall(doc["data"])
+                break
+            except Exception as err:
+                self.logging.warn('Connecting failed. Will try again in a second. Reason: %s'%(err))
+                self.poolReaper()
+                sleep(1)
+            finally:
+                sock.close()
+
+    def scheduleReaper(self):
+        while self.block():
+            self.poolReaper()
+            sleep(self.reaptime)
 
     def poolReaper(self):
         '''Runs periodically over the socket pool to build a list of available
         sockets to choose from.'''
 
-        while self.block():
-            socketlist=[]
-            self.logging.info("Running poolReaper on %s"%self.path)
-            for file in listdir(self.path):
-                filename = "%s/%s"%(self.path,file)
-                try:
-                    mode=os.stat(filename)
-                    if stat.S_ISSOCK(mode[0]) == True:
-                        if os.access(filename,os.W_OK) == True:
-                            socketlist.append(filename)
-                        else:
-                            self.logging.warn("%s is not writable."%filename)
+        socketlist=[]
+        self.logging.info("Running poolReaper on %s"%self.path)
+        for file in listdir(self.path):
+            filename = "%s/%s"%(self.path,file)
+            try:
+                mode=os.stat(filename)
+                if stat.S_ISSOCK(mode[0]) == True:
+                    if os.access(filename,os.W_OK) == True:
+                        socketlist.append(filename)
                     else:
-                        self.logging.warn("%s is not a socket file."%filename)
-                except Exception as err:
-                    self.logging.warn("There was a problem processing %s. Reason: %s"%(file,err))
-            if self.socketpool != socketlist:
-                self.socketpool = socketlist
-            print (socketlist)
-            sleep(self.reaptime)
+                        self.logging.warn("%s is not writable."%filename)
+                else:
+                    self.logging.warn("%s is not a socket file."%filename)
+            except Exception as err:
+                self.logging.warn("There was a problem processing %s. Reason: %s"%(file,err))
+        if self.socketpool != socketlist:
+            self.socketpool = socketlist
+            self.socketcycle = cycle(self.socketpool)
 
     def shutdown(self):
         self.logging.info('Shutdown')

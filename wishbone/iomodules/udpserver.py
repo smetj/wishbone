@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  udpsocket.py
+#  UDPServer.py
 #  
 #  Copyright 2012 Jelle Smet development@smetj.net
 #  
@@ -28,7 +28,7 @@ from gevent.server import DatagramServer
 from wishbone.toolkit import QueueFunctions, Block
 import logging
 
-class UDPSocket(DatagramServer, QueueFunctions, Block):
+class UDPServer(DatagramServer, QueueFunctions, Block):
     '''A Wishbone module which handles UDP input.
     
     Data received by the module is put into self.inbox

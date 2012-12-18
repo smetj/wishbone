@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  domainsocket.py
+#  udsserver.py
 #
 #  Copyright 2012 Jelle Smet development@smetj.net
 #
@@ -31,7 +31,7 @@ from uuid import uuid4
 import logging
 
 
-class DomainSocket(Greenlet, QueueFunctions, Block):
+class UDSServer(Greenlet, QueueFunctions, Block):
     '''**A Wishbone IO module which accepts external input from a unix domain socket.**
 
     Creates a Unix domain socket to which data can be submitted.
@@ -50,30 +50,24 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
         - pool (bool):          When true path is considered to be a directory in 
                                 which a socket with random name is created.
         - path (str):           The location of the directory or socket file.
-        - mode (str):           The mode of the listener. [ "line","blob" ]
 
     Queues:
 
         - inbox:       Data coming from the outside world.
     '''
 
-    def __init__(self, name, pool=True, path="/tmp", mode="line"):
+    def __init__(self, name, pool=True, path="/tmp"):
         Greenlet.__init__(self)
         QueueFunctions.__init__(self)
         Block.__init__(self)
         self.name=name
         self.pool=pool
         self.path=path
-        self.mode = mode
         self.logging = logging.getLogger( name )
         
-        self.filename=self.__setupSocket()
+        (self.sock, self.filename)=self.__setupSocket()
         
-        if self.mode == "line":
-            self.handle=self.__doLine
-        elif self.mode == "blob":
-            self.handle=self.__doBlob            
-        self.logging.info('Initialiazed in %s mode.'%self.mode)
+        self.logging.info("Initialiazed")
 
     def __setupSocket(self):
         if self.pool == True:
@@ -85,35 +79,24 @@ class DomainSocket(Greenlet, QueueFunctions, Block):
             filename = self.path
             self.logging.info("Socket file %s created."%filename)
                 
-        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        self.sock.setblocking(0)
-        self.sock.bind(filename)
-        self.sock.listen(50)
-        return filename
+        sock=socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setblocking(0)
+        sock.bind(filename)
+        sock.listen(50)
+        return (sock, filename)
     
-    def __doBlob(self, socket, address):
-        '''All incoming data is treated as 1 event.'''
-
-        fileobj = socket.makefile()
-        data = fileobj.readlines()
-        self.logging.debug ('Data received from %s' % (address) )
-        self.putData({'header':{},'data':''.join(data)}, queue='inbox')
-        fileobj.close()
-
-    def __doLine(self, socket, address):
-        '''Treats every newline as a new event.'''
-
-        fileobj = socket.makefile()
-        while self.block():
-            line = fileobj.readline()
-            if not line:
-                self.logging.debug('Client disconnected.')
+    def handle(self, sock, address):
+        data=[]
+        while True:
+            chunk = sock.recv(8192)
+            if not chunk or chunk == "\n" or chunk == "\r\n":
                 break
             else:
-                self.logging.debug ('Data received from %s' % (address) )
-                self.putData({'header':{},'data':line.rstrip("\n")}, queue='inbox')
-            sleep(0)
-        fileobj.close()
+                data.append(chunk.rstrip('\r\n'))
+        self.logging.debug ('Data received from %s' % (address) )
+        self.putData({'header':{},'data':''.join(data)}, queue='inbox')
+        return sock
 
     def _run(self):
         try:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  tcpsocketwrite.py
+#  tcpclient.py
 #
 #  Copyright 2012 Jelle Smet development@smetj.net
 #
@@ -28,7 +28,7 @@ from random import randint
 import logging
 
 
-class TCPSocketWrite(PrimitiveActor):
+class TCPClient(PrimitiveActor):
     '''**A Wishbone IO module which writes data to a TCP socket.**
 
     Writes data to a tcp socket.  
