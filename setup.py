@@ -43,7 +43,7 @@ setup(
     name=PROJECT,
     version=VERSION,
 
-    description='Write asynchronous event pipelines without callbacks.',
+    description='A Python library to easily write coroutine based event pipeline solutions.',
     long_description=long_description,
 
     author='Jelle Smet',
