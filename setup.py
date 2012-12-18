@@ -24,7 +24,7 @@
 
 PROJECT = 'wishbone'
 
-VERSION = '0.2'
+VERSION = '0.2.1'
 
 
 from setuptools import setup, find_packages
@@ -65,7 +65,7 @@ setup(
     scripts=[],
 
     provides=[],
-    install_requires=['gevent','amqplib','python-snappy','python-daemon','stopwatch','jsonschema','pymongo','pyes','ordereddict','argparse'],
+    install_requires=['gevent','amqplib','python-snappy','python-daemon','stopwatch','jsonschema','pymongo','pyes','ordereddict','argparse','gearman', 'pycrypto'],
     namespace_packages=[],
     packages=find_packages(),
     include_package_data=True,
