@@ -65,6 +65,7 @@ setup(
     scripts=[],
 
     provides=[],
+    dependency_links = ['http://github.com/smetj/gevent/tarball/master#egg=gevent-1.0rc1'],
     install_requires=['gevent','amqplib','python-snappy','python-daemon','stopwatch','jsonschema','pymongo','pyes','ordereddict','argparse','gearman', 'pycrypto'],
     namespace_packages=[],
     packages=find_packages(),
