@@ -20,9 +20,6 @@ Wishbone IOmodules
 .. module:: wishbone.iomodules.namedpipeserver
 .. autoclass:: NamedPipeServer
 
-.. module:: wishbone.iomodules.tcpserver
-.. autoclass:: TCPServer
-
 .. module:: wishbone.iomodules.tcpclient
 .. autoclass:: TCPClient
 
