@@ -18,7 +18,7 @@ When the modules are loaded into the WishBone and the setup has started then the
 
 Although it's not necessarily a strict rule, we could say there are 2 types of modules:
 
-- IO_modules:
+- IOmodules:
  - Receive/submit messages from/to outside the Wishbone framework.
  - Should not alter events or data.
  - Responsible to convert data coming from the outside into the correct Wishbone format.
