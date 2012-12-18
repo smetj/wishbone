@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  namedpipe.py
+#  namedpipeserver.py
 #  
 #  Copyright 2012 Jelle Smet development@smetj.net
 #  
@@ -31,7 +31,7 @@ import logging
 import gevent.core
 
 
-class NamedPipe(Greenlet, QueueFunctions, Block):
+class NamedPipeServer(Greenlet, QueueFunctions, Block):
     '''**A Wishbone IO module which accepts external input from a named pipe.**
     
     Creates a named pipe to which data can be submitted.
