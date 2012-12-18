@@ -23,7 +23,7 @@ Example bootstrap file:
            },
            "bootstrap":{
               "broker":{
-                 "module":"wishbone.io_modules.broker",
+                 "module":"wishbone.iomodules.broker",
                  "class":"Broker",
                  "variables":{
                     "host":"localhost",
