@@ -65,23 +65,30 @@ class UDSClient(PrimitiveActor):
         self.socketpool=[]
         self.logging = logging.getLogger( name )
         self.poolReaper()
-        #Greenlet.spawn(self.scheduleReaper)        
         self.logging.info('Initialiazed.')
 
     def consume(self, doc):
-        while self.block() == True:
+        if isinstance(doc['data'],list):
+            for data in doc["data"]:
+                self.sendToSocket(data)
+        else:
+            self.sendToSocket(doc["data"])
+    
+    def sendToSocket(self, data):
+        while self.block():
             try:
                 sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
-                sock.connect(self.socketcycle.next())
-                sock.sendall(doc["data"])
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                next_socket = self.socketcycle.next()
+                sock.connect(next_socket)
+                sock.sendall(data)
+                self.logging.debug('Data send.')
+                sock.close()
                 break
             except Exception as err:
                 self.logging.warn('Connecting failed. Will try again in a second. Reason: %s'%(err))
                 self.poolReaper()
                 sleep(1)
-            finally:
-                sock.close()
 
     def scheduleReaper(self):
         while self.block():
@@ -89,8 +96,8 @@ class UDSClient(PrimitiveActor):
             sleep(self.reaptime)
 
     def poolReaper(self):
-        '''Runs periodically over the socket pool to build a list of available
-        sockets to choose from.'''
+        '''Runs over the socket pool to build a list of available Unix Domain Sockets
+        to choose from.'''
 
         socketlist=[]
         self.logging.info("Running poolReaper on %s"%self.path)
