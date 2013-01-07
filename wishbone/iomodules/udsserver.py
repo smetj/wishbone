@@ -87,17 +87,13 @@ class UDSServer(Greenlet, QueueFunctions, Block):
         return (sock, filename)
     
     def handle(self, sock, address):
+        sfile = sock.makefile()
         data=[]
-        while True:
-            chunk = sock.recv(8192)
-            if not chunk or chunk == "\n" or chunk == "\r\n":
-                break
-            else:
-                data.append(chunk.rstrip('\r\n'))
-        self.logging.debug ('Data received from %s' % (address) )
-        self.putData({'header':{},'data':''.join(data)}, queue='inbox')
-        return sock
-
+        chunk = sfile.readlines()
+        self.putData({'header':{},'data':''.join(chunk)}, queue='inbox')
+        sfile.close()
+        sock.close()
+        
     def _run(self):
         try:
             StreamServer(self.sock, self.handle).serve_forever()

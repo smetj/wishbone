@@ -35,6 +35,7 @@ from signal import SIGTERM, SIGKILL
 from logging import INFO, DEBUG
 from wishbone.tools import ConfigureLogging
 from wishbone import Wishbone
+#import gevent_profiler
 
 class Help():
     def error(self, message):
@@ -154,9 +155,16 @@ class WishbBoneSkeleton():
     '''
 
     def __init__(self, conf):
+        #gevent_profiler.attach()
+        #gevent_profiler.set_stats_output('/tmp/wishbone-stats.txt')
+        #gevent_profiler.set_summary_output('/tmp/wishbone-summary.txt')
+        #gevent_profiler.set_trace_output('/tmp/wishbone-trace.txt')
+        #gevent_profiler.print_percentages(True)
+        #gevent_profiler.time_blocking(True)
         self.conf=conf
         self.wb = self.setup()
         self.wb.start()
+        #gevent_profiler.detach()
 
     def setup(self):
         wb = Wishbone(  metrics=self.conf.get("system",False),

@@ -43,6 +43,7 @@ class TCPClient(PrimitiveActor):
 
         - name (str):   The instance name when initiated.
         - pool (list):  A list of addresses:port entries to which data needs to be submitted.
+                        Currently a destination is chosen randomly.  More setups will follow.
         
     Queues:
 
@@ -77,6 +78,8 @@ class TCPClient(PrimitiveActor):
         
         if isinstance(doc["data"],list):
             data = '\n'.join(doc["data"]) + '\n'
+        else:
+            data = doc["data"]
             
         while self.block()==True:
             try:

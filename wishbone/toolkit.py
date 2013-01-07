@@ -25,11 +25,12 @@
 import signal, sys
 import logging
 import stopwatch
-from gevent import Greenlet
+from gevent import Greenlet, monkey
 from gevent.queue import Queue
 from gevent.event import Event
 from gevent import sleep
 from copy import deepcopy
+monkey.patch_all()
 
 class QueueFunctions():
     '''A base class for Wishbone Actor classes.  Shouldn't be called directly but is inherited by PrimitiveActor.'''
