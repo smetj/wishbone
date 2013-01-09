@@ -143,7 +143,7 @@ then path will be the filename of the socket file.</p>
 
 <span class="target" id="module-wishbone.iomodules.udsclient"></span><dl class="class">
 <dt id="wishbone.iomodules.udsclient.UDSClient">
-<em class="property">class </em><tt class="descclassname">wishbone.iomodules.udsclient.</tt><tt class="descname">UDSClient</tt><big>(</big><em>name</em>, <em>pool=True</em>, <em>path='/tmp'</em>, <em>stream=False</em>, <em>reaptime=5</em><big>)</big><a class="headerlink" href="#wishbone.iomodules.udsclient.UDSClient" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.iomodules.udsclient.</tt><tt class="descname">UDSClient</tt><big>(</big><em>name</em>, <em>pool=True</em>, <em>path='/tmp'</em><big>)</big><a class="headerlink" href="#wishbone.iomodules.udsclient.UDSClient" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A Wishbone IO module which writes data into a Unix domain socket.</strong></p>
 <p>Writes data into a Unix domain socket.</p>
 <p>If pool is True, path is expected to be a directory containing socket files over
@@ -246,9 +246,15 @@ which the module will spread outgoing events.</p>
 submitted.</p>
 <p>Parameters:</p>
 <blockquote>
-<div><ul class="simple">
-<li>name (str):   The instance name when initiated.</li>
-<li>pool (list):  A list of addresses:port entries to which data needs to be submitted.</li>
+<div><ul>
+<li><p class="first">name (str):   The instance name when initiated.</p>
+</li>
+<li><dl class="first docutils">
+<dt>pool (list):  A list of addresses:port entries to which data needs to be submitted.</dt>
+<dd><p class="first last">Currently a destination is chosen randomly.  More setups will follow.</p>
+</dd>
+</dl>
+</li>
 </ul>
 </div></blockquote>
 <p>Queues:</p>
