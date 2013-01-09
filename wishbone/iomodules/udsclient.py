@@ -53,7 +53,7 @@ class UDSClient(PrimitiveActor):
         - outbox:   Outgoing events destined to the outside world.
     '''
 
-    def __init__(self, name, pool=True, path="/tmp", stream=False, reaptime=5):
+    def __init__(self, name, pool=True, path="/tmp"):
         PrimitiveActor.__init__(self, name)
         
         self.name=name
