@@ -120,12 +120,16 @@ class Wishbone(Block, Metrics):
 
         Both source and destination should be strings.
         '''
-        (src_class,src_queue)=source.split('.')
-        (dst_class,dst_queue)=destination.split('.')
-        src_instance=getattr(self,src_class)
-        dst_instance=getattr(self,dst_class)
-        self.connectors.append(spawn ( self.__connector, getattr(src_instance,src_queue), getattr(dst_instance,dst_queue), getattr(src_instance,"metrics")["queues"][src_queue], getattr(dst_instance,"metrics")["queues"][dst_queue] ))
-
+        try:
+            (src_class,src_queue)=source.split('.')
+            (dst_class,dst_queue)=destination.split('.')
+            src_instance=getattr(self,src_class)
+            dst_instance=getattr(self,dst_class)
+            self.connectors.append(spawn ( self.__connector, getattr(src_instance,src_queue), getattr(dst_instance,dst_queue), getattr(src_instance,"metrics")["queues"][src_queue], getattr(dst_instance,"metrics")["queues"][dst_queue] ))
+        except Exception as err:
+            self.logging.error("Problem connecting modules. Reason: %s"%(err))
+            exit(1)
+            
     def start(self):
         '''Function which starts all registered Wishbone modules.
 
