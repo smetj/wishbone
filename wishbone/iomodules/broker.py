@@ -177,6 +177,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         '''
         self.putData({'header':{'broker_tag':doc.delivery_tag},'data':doc.body}, queue='inbox')
         self.logging.debug('Data received from broker.')
+        sleep()
          
     def produce(self,message):
         '''Is called upon each message going to to the broker infrastructure.

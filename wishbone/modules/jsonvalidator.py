@@ -45,21 +45,23 @@ class JSONValidator(PrimitiveActor):
         - outbox:   Outgoing events.
     '''    
     
-    def __init__(self, name, schema=None, convert=False):
+    def __init__(self, name, schema=False, convert=False):
         PrimitiveActor.__init__(self, name)
         self.name = name
         self.schema = schema
         self.convert = convert
-        self.loadSchema()
-        self.checker = Validator()
+        (self.validator, self.validator_schema) = self.loadValidator(schema)
 
-    def loadSchema(self):
+    def loadValidator(self,schema):
         '''Loads the json-schema definition from disk.'''
-        
-        file = open(self.schema,'r')
-        data = file.readlines()
-        file.close()
-        self.schema=json.loads(''.join(data))
+        if schema == False:
+            self.logging.info("No schema defined, no schema loaded, no validation.")
+            return (False, False)
+        else:
+            file = open(self.schema,'r')
+            data = file.readlines()
+            file.close()
+            return (Validator(), json.loads(''.join(data)))
 
     def consume(self, message):
         '''Executed for each incoming message.'''
@@ -75,5 +77,7 @@ class JSONValidator(PrimitiveActor):
 
     def validateBroker(self,data):
         '''Validates data against the JSON schema.'''
-        
-        self.checker.validate(data,self.schema) 
+        if self.validator == False:
+            return True
+        else:
+            self.validator.validate(data,self.validator_schema)
