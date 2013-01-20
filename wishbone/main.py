@@ -110,7 +110,6 @@ class Wishbone(Block, Metrics):
                 self.modules[-1].outbox
             except:
                 raise Exception("You might have to load QueueFunctions base class into this class.")
-
         except Exception as err:
             self.logging.error("Problem loading module: %s and class %s. Reason: %s" % ( module_name, class_name, err))
             exit(1)
@@ -172,8 +171,7 @@ class Wishbone(Block, Metrics):
             try:
                 module.join(timeout=1)
             except:
-                pass
-                
+                pass                
 
         for connector in self.connectors:
             try:
