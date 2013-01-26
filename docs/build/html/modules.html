@@ -1,31 +1,25 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Wishbone modules &mdash; Wishbone master documentation</title>
-    
+    <title>Wishbone modules &mdash; Wishbone vmaster documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
         VERSION:     'master',
-        COLLAPSE_INDEX: false,
+        COLLAPSE_MODINDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Wishbone master documentation" href="index.html" />
+    <link rel="top" title="Wishbone vmaster documentation" href="index.html" />
     <link rel="prev" title="Wishbone IOmodules" href="iomodules.html" /> 
   </head>
   <body>
@@ -36,12 +30,12 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
+          <a href="modindex.html" title="Global Module Index"
+             accesskey="M">modules</a> |</li>
         <li class="right" >
           <a href="iomodules.html" title="Wishbone IOmodules"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Wishbone master documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone vmaster documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -50,8 +44,8 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-wishbone.modules.brokerheader">
-<span id="wishbone-modules"></span><h1>Wishbone modules<a class="headerlink" href="#module-wishbone.modules.brokerheader" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-wishbone.modules.tippingbucket">
+<h1>Wishbone modules<a class="headerlink" href="#module-wishbone.modules.tippingbucket" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="wishbone.modules.brokerheader.BrokerHeader">
 <em class="property">class </em><tt class="descclassname">wishbone.modules.brokerheader.</tt><tt class="descname">BrokerHeader</tt><big>(</big><em>name</em>, <em>key='wishbone'</em>, <em>exchange=''</em><big>)</big><a class="headerlink" href="#wishbone.modules.brokerheader.BrokerHeader" title="Permalink to this definition">¶</a></dt>
@@ -62,64 +56,64 @@ exchange and routing key to use.  Typically one would connect this outbox queue
 to the outboxqueue of the wishbone.io_modules.broker instance.</p>
 <p>Parameters:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>name (str):       The instance name when initiated.</li>
 <li>key (str):        The routing key to use.</li>
 <li>exchange (str):   The exchange to use.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 <p>Queues:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>inbox:    Incoming events.</li>
 <li>outbox:   Outgoing events.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 </dd></dl>
 
-<span class="target" id="module-wishbone.modules.gotmessage"></span><dl class="class">
+<dl class="class">
 <dt id="wishbone.modules.gotmessage.GotMessage">
 <em class="property">class </em><tt class="descclassname">wishbone.modules.gotmessage.</tt><tt class="descname">GotMessage</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.modules.gotmessage.GotMessage" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A WishBone module which just logs and drops any passing message.</strong></p>
 <p>The module&#8217;s purpose is mainly for testing purposes.</p>
 <p>Parameters:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>name (str):   The instance name when initiated.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 <p>Queues:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>inbox:    Incoming events.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 </dd></dl>
 
-<span class="target" id="module-wishbone.modules.jsonvalidator"></span><dl class="class">
+<dl class="class">
 <dt id="wishbone.modules.jsonvalidator.JSONValidator">
-<em class="property">class </em><tt class="descclassname">wishbone.modules.jsonvalidator.</tt><tt class="descname">JSONValidator</tt><big>(</big><em>name</em>, <em>schema=None</em>, <em>convert=False</em><big>)</big><a class="headerlink" href="#wishbone.modules.jsonvalidator.JSONValidator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.modules.jsonvalidator.</tt><tt class="descname">JSONValidator</tt><big>(</big><em>name</em>, <em>schema=False</em>, <em>convert=False</em><big>)</big><a class="headerlink" href="#wishbone.modules.jsonvalidator.JSONValidator" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A Wishbone module which verifies JSON data against a validator schema loaded from file.</strong></p>
 <p>Events consumed from the inbox queue are verified against a Validator schema.  When the event is not a valid JSON document
 or when it doesn&#8217;t match your predifined Validator schema, it is dropped.</p>
 <p>Parameters:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>name (str):       The instance name when initiated.</li>
 <li>schema (str):     The location and filename of the schema to load.  The schema should follow <a class="reference external" href="http://json-schema.org/">http://json-schema.org/</a> specifications.</li>
 <li>convert (bool):   When True it will aditionally convert the incoming JSON string to a Python object.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 <p>Queues:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>inbox:    Incoming events.</li>
 <li>outbox:   Outgoing events.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 </dd></dl>
 
-<span class="target" id="module-wishbone.modules.skeleton"></span><dl class="class">
+<dl class="class">
 <dt id="wishbone.modules.skeleton.Skeleton">
 <em class="property">class </em><tt class="descclassname">wishbone.modules.skeleton.</tt><tt class="descname">Skeleton</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.modules.skeleton.Skeleton" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>Skeleton Wishbone module is a minimal module which does nothing more than
@@ -127,20 +121,20 @@ shoveling data from inbox to outbox.</strong></p>
 <p>It can be used as an example/base for new modules.</p>
 <p>Parameters:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>name (str):    The instance name when initiated.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 <p>Queues:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>inbox:    Incoming events.</li>
 <li>outbox:   Outgoing events.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 </dd></dl>
 
-<span class="target" id="module-wishbone.modules.snappy"></span><dl class="class">
+<dl class="class">
 <dt id="wishbone.modules.snappy.Snappy">
 <em class="property">class </em><tt class="descclassname">wishbone.modules.snappy.</tt><tt class="descname">Snappy</tt><big>(</big><em>name</em>, <em>mode='compress'</em>, <em>purge=True</em><big>)</big><a class="headerlink" href="#wishbone.modules.snappy.Snappy" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A Wishbone module which compresses or decompresses data using Snappy.</strong></p>
@@ -159,22 +153,22 @@ fails, otherwise it will be forwarded in its original state.</p>
 <p>Watch out, compression is cpu bound, which could impact your event loop.</p>
 <p>Parameters:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>name (str):       The instance name when initiated.</li>
 <li>mode (str):       &#8220;compress&#8221; or &#8220;decompress&#8221;</li>
 <li>purge (bool):     When true then the event will be purged if decompression fails.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 <p>Queues:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>inbox:    Incoming events.</li>
 <li>outbox:   Outgoing events.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 </dd></dl>
 
-<span class="target" id="module-wishbone.modules.stdout"></span><dl class="class">
+<dl class="class">
 <dt id="wishbone.modules.stdout.STDOUT">
 <em class="property">class </em><tt class="descclassname">wishbone.modules.stdout.</tt><tt class="descname">STDOUT</tt><big>(</big><em>name</em>, <em>complete=False</em>, <em>purge=False</em>, <em>counter=False</em><big>)</big><a class="headerlink" href="#wishbone.modules.stdout.STDOUT" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>The STDOUT Wishbone module is a minimal module which prints each incoming
@@ -185,33 +179,33 @@ parameter is True, the complete event is printed to STDOUT.  This module should
 only be used for testing or demonstration purposes.</p>
 <p>Parameters:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>name (str):       The instance name when initiated.</li>
 <li>complete (bool):  When True, print the complete event including headers.</li>
 <li>purge (bool):     When True the message is dropped and not put in outbox.</li>
 <li>counter (bool):   Puts an incremental number for each event in front of each event.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 <p>Queues:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>inbox:    Incoming events.</li>
 <li>outbox:   Outgoing events.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 </dd></dl>
 
-<span class="target" id="module-wishbone.modules.tippingbucket"></span><dl class="class">
+<dl class="class">
 <dt id="wishbone.modules.tippingbucket.TippingBucket">
 <em class="property">class </em><tt class="descclassname">wishbone.modules.tippingbucket.</tt><tt class="descname">TippingBucket</tt><big>(</big><em>name</em>, <em>age=5</em>, <em>size=10000</em>, <em>predefined_header=None</em><big>)</big><a class="headerlink" href="#wishbone.modules.tippingbucket.TippingBucket" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>TippingBucket is a Wishbone module which buffers data.</strong></p>
 <p>This module buffers data and dumps it to the output queue on 2 conditions:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>Last data enteered in buffer is older than x seconds.</li>
 <li>Total data in buffer is x size.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 <p>When the buffer is empty, the header of the first incoming message will be used as the header
 for the message going out containing the content of the buffer.  If you want to override that
 header with a predefined one then use the &lt;predefined_header&gt; option.</p>
@@ -222,25 +216,25 @@ When unicode is used this counter is not going to be realistic anymore.</dd>
 <dt>Disclaimer2:    If you require binary data, encode into base64 or</dt>
 <dd><p class="first">something similar.  In that case take the growth of that into account:</p>
 <blockquote>
-<div>~ output_size = ((input_size - 1) / 3) * 4 + 4</div></blockquote>
+~ output_size = ((input_size - 1) / 3) * 4 + 4</blockquote>
 <p class="last">So 256 bytes binary data results into 344 bytes of Base64 data.</p>
 </dd>
 </dl>
 <p>Parameters:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>age (int):                The time in seconds since the first update when the buffer is flushed.</li>
 <li>size (int):               The total size in bytes of the buffer when it is flushed.</li>
 <li>predefined_header (dict): Assign this header to the buffered event when submitting to outbox.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 <p>Queues:</p>
 <blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li>inbox:    Incoming events.</li>
 <li>outbox:   Outgoing events.</li>
 </ul>
-</div></blockquote>
+</blockquote>
 <p>Todo(smetj): Figure out something smarter to find out the size of the buffer.</p>
 </dd></dl>
 
@@ -252,27 +246,27 @@ When unicode is used this counter is not going to be realistic anymore.</dd>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="iomodules.html"
-                        title="previous chapter">Wishbone IOmodules</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/modules.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="iomodules.html"
+                                  title="previous chapter">Wishbone IOmodules</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/modules.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -284,17 +278,17 @@ When unicode is used this counter is not going to be realistic anymore.</dd>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
+          <a href="modindex.html" title="Global Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="iomodules.html" title="Wishbone IOmodules"
              >previous</a> |</li>
-        <li><a href="index.html">Wishbone master documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone vmaster documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2012, Jelle Smet.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      &copy; Copyright 2012, Jelle Smet.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.6.
     </div>
   </body>
 </html>

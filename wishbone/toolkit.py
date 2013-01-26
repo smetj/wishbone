@@ -32,13 +32,42 @@ from gevent import sleep
 from copy import deepcopy
 monkey.patch_all()
 
-class QueueFunctions():
+class TimeFunctions(object):
+    
+    @classmethod
+    def do(cls, fn):
+        def do(self, *args, **kwargs):            
+            t = stopwatch.Timer()
+            result = fn(self, *args, **kwargs)
+            t.stop()
+            try:
+                self.metrics[fn.__name__]
+            except:
+                self.metrics[fn.__name__]={"total_time":0,"hits":0}
+            self.metrics[fn.__name__]["total_time"] += t.elapsed
+            self.metrics[fn.__name__]["hits"] += 1
+            return result
+        return do
+    
+    def timeConsume(self, fn, data):
+        t = stopwatch.Timer()
+        result = fn(data)
+        t.stop()
+        try:
+            self.metrics[fn.__name__]
+        except:
+            self.metrics[fn.__name__]={"total_time":0,"hits":0}
+        self.metrics[fn.__name__]["total_time"] += t.elapsed
+        self.metrics[fn.__name__]["hits"] += 1
+        return result
+        
+class QueueFunctions(TimeFunctions):
     '''A base class for Wishbone Actor classes.  Shouldn't be called directly but is inherited by PrimitiveActor.'''
     
     def __init__(self):
         self.inbox = Queue(None)
         self.outbox = Queue(None)
-        self.metrics={"functions":{},"queues":{"inbox":{"in":0,"out":0},"outbox":{"in":0,"out":0}}}
+        self.metrics={}
     
     def sendData(self, data, queue='outbox'):
         '''Submits data to one of the module its queues.
@@ -54,7 +83,6 @@ class QueueFunctions():
         if self.checkIntegrity(data):
             try:
                 getattr (self, queue).put ( data )
-                self.incrementMetric(queue, "in")
             except:
                 setattr (self, queue, Queue)
                 getattr (self, queue).put ( data )
@@ -70,20 +98,13 @@ class QueueFunctions():
         to a module as it would have come from the outside world.'''
         
         getattr (self, queue).put ( deepcopy(data) )
-        self.incrementMetric(queue, "in")
     putRaw=sendRaw
     
     def getData(self, queue="inbox"):
         '''Gets data from the queue.'''
         data = getattr (self, queue).get()
-        self.incrementMetric(queue, "out")
         return data
                 
-    def sendCommand(self, data, destination='*', queue='outbox'):
-        '''Placeholder not implemented for the moment.'''
-        
-        self.outbox.put( (destination, data) )
-        
     def checkIntegrity(self, data):
         '''Checks the integrity of the messages passed over the different queues.
         
@@ -101,28 +122,13 @@ class QueueFunctions():
                 return False
         else:
             return False
-
-    def incrementMetric(self, queue, direction):
-        '''Increments the counter of the queue with one in order to keep track of how many messages went through it.'''
-        
-        try:
-            self.metrics["queues"][queue][direction]+=1
-        except:
-            if not hasattr(self, "metrics"):
-                self.metrics={"functions":{},"queues":{"inbox":{"in":0,"out":0},"outbox":{"in":0,"out":0}}}
-            self.metrics["queues"][queue]={"in":0,"out":0}
-            self.metrics["queues"][queue][direction]+=1
-    
+   
     def createQueue(self, name):
         
         try:
             setattr(self,name,Queue(None))
-            self.metrics["queues"][name]={"in":0,"out":0}
         except Exception as err:
             self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
-
-    def logMetrics(self):
-        self.logging.info("Queue metrics %s "%str(self.metrics))
 
 class Block():
     '''A base class providing a global lock.'''
@@ -130,6 +136,7 @@ class Block():
     def __init__(self):
         self.lock=Event()
         signal.signal(signal.SIGINT,self._ignoreSIGINT)
+        
     def block(self):
         '''A simple blocking function.'''
         
@@ -165,37 +172,15 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
         QueueFunctions.__init__(self)
         Block.__init__(self)
         self.name=name
+        self.metrics={}
         self.logging = logging.getLogger( name )
         self.logging.info('Initiated.')
-        
-    def timer(self, function, data):
-        t = stopwatch.Timer()
-        function(data)
-        t.stop()
-        try:
-            self.metrics["functions"][function.__name__]
-        except:
-            self.metrics["functions"][function.__name__]={"called":0,"total_time":0,"max_time":0,"min_time":0,"cur_time":0,"avg_time":0}
-            
-        self.metrics["functions"][function.__name__]['total_time'] += t.elapsed
-        self.metrics["functions"][function.__name__]['called'] += 1
-        self.metrics["functions"][function.__name__]['avg_time'] += self.metrics["functions"][function.__name__]['total_time'] / self.metrics["functions"][function.__name__]['called']
-
-        if self.metrics["functions"][function.__name__]['max_time'] == 0:
-            self.metrics["functions"][function.__name__]['max_time'] = t.elapsed
-        elif t.elapsed > self.metrics["functions"][function.__name__]['max_time']:
-            self.metrics["functions"][function.__name__]['max_time'] = t.elapsed
-        
-        if self.metrics["functions"][function.__name__]['min_time'] == 0:
-            self.metrics["functions"][function.__name__]['min_time'] = t.elapsed
-        if t.elapsed < self.metrics["functions"][function.__name__]['min_time']:
-            self.metrics["functions"][function.__name__]['min_time'] = t.elapsed
          
     def _run(self):
         self.logging.info('Started.')        
         while self.block() == True:
             data = self.getData("inbox")
-            self.timer(self.consume, data)                            
+            self.timeConsume(self.consume, data)                            
         self.release()
                     
     def consume(self, *args, **kwargs):
@@ -204,20 +189,6 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
         This function, when called throws an exception.
         '''
         raise Exception ('You have no consume function in your class.')
-        
-    def command(self, *args, **kwargs):
-        '''A placeholder not implemented for the moment.'''
-        
-        self.logging.info('Initiated.')
-        self.name=name
-        self.block = block
-        self.inbox = Queue(None)
-        self.outbox = Queue(None)
-
-    def logMetrics(self):
-        '''Generates a line with metrics of the spefic module.'''
-        
-        self.logging.info(str(self.metrics))
     
     def shutdown(self):
         '''A function which could be overridden by the Wisbone module.
