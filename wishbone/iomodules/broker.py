@@ -23,13 +23,13 @@
 #  
 
 import logging
-from wishbone.toolkit import QueueFunctions, Block
+from wishbone.toolkit import QueueFunctions, Block, TimeFunctions
 from gevent import Greenlet, spawn, sleep
 from gevent.queue import Queue
 from amqplib import client_0_8 as amqp
 from gevent import monkey;monkey.patch_all()
 
-class Broker(Greenlet, QueueFunctions, Block):
+class Broker(Greenlet, QueueFunctions, Block, TimeFunctions):
     '''**A Wishbone IO module which handles AMQP0.8 input and output.**
     
     This module handles the IO from and to a message broker.  This module has
@@ -43,8 +43,8 @@ class Broker(Greenlet, QueueFunctions, Block):
     - Messages which arrive to outbox and which have an acknowledge tag in the header 
       will be acknowledged with the broker.
     
-    - When a broker_tag is submitted to the "acknowledge" queue, then the message
-      will be acknowledged with the broker.
+    - When a broker_tag is submitted to the "acknowledge" queue using sendRaw(),
+      then the message will be acknowledged at the broker.
     
     All incoming messages should have at least following header:
         
@@ -167,8 +167,9 @@ class Broker(Greenlet, QueueFunctions, Block):
                         self.conn.close()
                     except:
                         pass
-                    break                   
-        
+                    break
+                    
+    @TimeFunctions.do
     def consume(self,doc):
         '''Is called upon each message coming from the broker infrastructure.
         
@@ -178,7 +179,7 @@ class Broker(Greenlet, QueueFunctions, Block):
         self.putData({'header':{'broker_tag':doc.delivery_tag},'data':doc.body}, queue='inbox')
         self.logging.debug('Data received from broker.')
         sleep()
-         
+    
     def produce(self,message):
         '''Is called upon each message going to to the broker infrastructure.
         
@@ -195,7 +196,7 @@ class Broker(Greenlet, QueueFunctions, Block):
             else:
                 raise Exception('Not Connected to broker')
         else:
-            self.logging.warn('Received data for broker without exchange or key information in header. Purged.')
+            self.logging.warn('Received data for broker without exchange or routing key in header. Purged.')
             if message['header'].has_key('broker_tag') and self.no_ack == False:
                 self.incoming.basic_ack(message['header']['broker_tag'])
 

@@ -27,6 +27,7 @@ import signal
 from importlib import import_module
 from gevent import spawn, sleep
 from gevent.queue import Queue
+from gevent.event import Event
 from multiprocessing import current_process
 from string import lstrip
 from toolkit import Block
@@ -45,25 +46,40 @@ class Metrics():
 
     def logMetrics(self):
         while self.block():
-            for module in self.modules:
-                self.logging.info('Metrics %s: %s'%(module.name,str(module.metrics)))
+            self.logging.info(self.collectMetrics())
             sleep(self.metrics_interval)
+
+    def collectMetrics(self):
+        metrics={"functions":{},"connectors":{}}
+
+        for module in self.modules:
+            metrics["functions"][module.name]=module.metrics
+            
+        for connector in self.connectors:
+            metrics["connectors"][connector] = self.connectors[connector].hits
+
+        for instance in metrics["functions"]:
+            for function in metrics["functions"][instance]:
+                metrics["functions"][instance][function]["avg_time"]=metrics["functions"][instance][function]["total_time"]/metrics["functions"][instance][function]["hits"]
+
+        return metrics
 
 class Wishbone(Block, Metrics):
     '''
     **The main class in which the Wishbone modules are registered and managed.**
-    
-    
+
+
 
     Parameters:
 
+        * syslog (bool):                Enable/disable logging to syslog.
         * metrics (bool):               Enable/disable metrics.
         * metrics_interval (int):       The interval metrics need to be emitted.
         * metrics_dst (str):            The destination to write metrics to: [logging]
     '''
 
     def __init__(self, syslog=False, metrics=True, metrics_interval=10, metrics_dst="logging"):
-            
+        
         self.metrics=metrics
         self.metrics_interval=metrics_interval
         self.metrics_dst=metrics_dst
@@ -73,9 +89,9 @@ class Wishbone(Block, Metrics):
         Metrics.__init__(self)
 
         signal.signal(signal.SIGTERM, self.stop)
-        
+
         self.modules=[]
-        self.connectors=[]
+        self.connectors={}
         self.run=self.start
 
     def registerModule(self, config, *args, **kwargs):
@@ -105,7 +121,6 @@ class Wishbone(Block, Metrics):
             self.modules.append(getattr (self, name))
             try:
                 #Do a couple of checks to see whether the loaded module is compliant.
-                self.modules[-1].metrics
                 self.modules[-1].inbox
                 self.modules[-1].outbox
             except:
@@ -119,16 +134,15 @@ class Wishbone(Block, Metrics):
 
         Both source and destination should be strings.
         '''
-        try:
-            (src_class,src_queue)=source.split('.')
-            (dst_class,dst_queue)=destination.split('.')
-            src_instance=getattr(self,src_class)
-            dst_instance=getattr(self,dst_class)
-            self.connectors.append(spawn ( self.__connector, getattr(src_instance,src_queue), getattr(dst_instance,dst_queue), getattr(src_instance,"metrics")["queues"][src_queue], getattr(dst_instance,"metrics")["queues"][dst_queue] ))
-        except Exception as err:
-            self.logging.error("Problem connecting modules. Reason: %s"%(err))
-            exit(1)
-            
+
+        (src_class,src_queue)=source.split('.')
+        (dst_class,dst_queue)=destination.split('.')
+        src_instance = getattr(self,src_class)
+        dst_instance = getattr(self,dst_class)
+        src_queue = getattr(src_instance,src_queue)
+        dst_queue = getattr(dst_instance,dst_queue)
+        self.connectors["%s:%s"%(source,destination)] = Connector(src_queue, dst_queue)
+
     def start(self):
         '''Function which starts all registered Wishbone modules.
 
@@ -137,19 +151,22 @@ class Wishbone(Block, Metrics):
         This function blocks from exiting.
         '''
 
-        for instance in self.__dict__:
+        for module in self.modules:
             try:
-                self.__dict__[instance].start()
+                module.start()
             except:
                 pass
+
+        for connector in self.connectors.keys():
+            self.connectors[connector].start()
 
         if self.metrics == True:
             self.logging.debug('Metrics enabled')
             spawn(self.doMetrics)
         else:
             self.logging.debug('Metrics disabled.')
-        
-        while self.block():   
+
+        while self.block():
             self.wait(0.1)
 
     def stop(self,a,b):
@@ -162,24 +179,21 @@ class Wishbone(Block, Metrics):
         for module in self.modules:
             module.release()
             module.shutdown()
+
             try:
-                module.logMetrics()
-            except:
-                pass
-            self.logging.debug('Waiting 1 second for module %s'%module.name)
-            
-            try:
+                self.logging.debug('Waiting 1 second for module %s'%module.name)
                 module.join(timeout=1)
             except:
-                pass                
+                pass
 
         for connector in self.connectors:
             try:
                 connector.join(timeout=1)
             except:
                 pass
-        
+
         #Now release ourselves
+        self.logging.info(self.collectMetrics())
         self.release()
 
     def __connector(self,source, destination, source_stats, destination_stats):
@@ -196,3 +210,29 @@ class Wishbone(Block, Metrics):
             return '0'
         else:
             return str(current_process().name)
+
+class Connector(Block):
+    ''' A connector class which connects 2 queues to each other and takes care of shuffling the data between them.'''
+
+    def __init__(self,source, destination):
+        Block.__init__(self)
+        self.proceed=Event()
+        self.proceed.set()
+        spawn (self.connector, source, destination)
+        self.hits = 0
+
+    def connector(self, source, destination):
+        '''Suffles data from source to destination.'''
+        while self.block() == True:
+            self.proceed.wait()
+            destination.put(source.get())
+            self.hits += 1
+
+    def start(self):
+        self.proceed.set()
+
+    def pause(self):
+        self.proceed.clear()
+
+    def stop(self):
+        self.release()
