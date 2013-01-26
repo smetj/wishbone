@@ -41,6 +41,7 @@ class MongoDB(Greenlet, QueueFunctions, Block):
         - capped (bool):            Whether the collection is capped.
         - size (int):               Maximum size of the capped collection.
         - max (int):                Maximum number of documents in the capped collection.
+        - autodel_db (bool)         Drop the database on exit.
         - dateconversions (list):   A list of fields to convert date.
 
     Queues:
@@ -48,7 +49,7 @@ class MongoDB(Greenlet, QueueFunctions, Block):
         - outbox:               Messages destined for MongoDB.
     '''
     
-    def __init__(self, name, host, db, collection, capped=False, size=100000,max=100000,dateconversions=[]):
+    def __init__(self, name, host, db, collection, capped=False, size=100000,max=100000,drop_db=False,dateconversions=[]):
         Greenlet.__init__(self)
         Block.__init__(self)
         QueueFunctions.__init__(self)
@@ -61,6 +62,7 @@ class MongoDB(Greenlet, QueueFunctions, Block):
         self.capped=capped
         self.size=size
         self.max=max
+        self.drop_db=drop_db
         self.dateconversions=dateconversions
         self.mongo=None
 
@@ -69,8 +71,8 @@ class MongoDB(Greenlet, QueueFunctions, Block):
         '''
         while self.block() == True:
             try:
-                connection = pymongo.MongoClient(self.host,use_greenlets=True)
-                db = connection[self.db]
+                self.connection = pymongo.MongoClient(self.host,use_greenlets=True)
+                db = self.connection[self.db]
                 try:
                     db.create_collection(self.collection, capped=self.capped, size=self.size, max=self.max)
                 except:
@@ -101,4 +103,7 @@ class MongoDB(Greenlet, QueueFunctions, Block):
                     self.__setup()      
 
     def shutdown(self):
-        pass
+        if self.drop_db == True:
+            self.connection.drop_database(self.db)
+            self.logging.info('Dropped database %s'%(self.db))
+        self.connection.close()
