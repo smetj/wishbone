@@ -117,7 +117,7 @@ class Wishbone(Block, Metrics):
         name = config[2]
         try:
             loaded_module = import_module(module_name)
-            setattr(self, name, getattr (loaded_module, class_name)('Intance #%s:%s'%(self.__currentProcessName(),name), *args, **kwargs))
+            setattr(self, name, getattr (loaded_module, class_name)('Intance #%s:%s'%(self.getCurrentProcessName(),name), *args, **kwargs))
             self.modules.append(getattr (self, name))
             try:
                 #Do a couple of checks to see whether the loaded module is compliant.
@@ -141,7 +141,8 @@ class Wishbone(Block, Metrics):
         dst_instance = getattr(self,dst_class)
         src_queue = getattr(src_instance,src_queue)
         dst_queue = getattr(dst_instance,dst_queue)
-        self.connectors["%s:%s"%(source,destination)] = Connector(src_queue, dst_queue)
+        name = "%s->%s"%(source,destination)
+        self.connectors[name] = Connector(name, src_queue, dst_queue)
 
     def start(self):
         '''Function which starts all registered Wishbone modules.
@@ -196,15 +197,7 @@ class Wishbone(Block, Metrics):
         self.logging.info(self.collectMetrics())
         self.release()
 
-    def __connector(self,source, destination, source_stats, destination_stats):
-        '''Consumes data from source and puts it in destination.'''
-
-        while self.block() == True:
-            destination.put(source.get())
-            source_stats["out"]+=1
-            destination_stats["in"]+=1
-
-    def __currentProcessName(self):
+    def getCurrentProcessName(self):
         '''return the current process name withought the Process- part'''
         if current_process().name == 'Process-1':
             return '0'
@@ -214,11 +207,12 @@ class Wishbone(Block, Metrics):
 class Connector(Block):
     ''' A connector class which connects 2 queues to each other and takes care of shuffling the data between them.'''
 
-    def __init__(self,source, destination):
+    def __init__(self,name, source, destination):
         Block.__init__(self)
         self.proceed=Event()
         self.proceed.set()
         spawn (self.connector, source, destination)
+        self.name=name
         self.hits = 0
 
     def connector(self, source, destination):
@@ -232,7 +226,12 @@ class Connector(Block):
         self.proceed.set()
 
     def pause(self):
+        self.logging.info('Connector %s set to pause')
         self.proceed.clear()
+    
+    def unpause(self):
+        self.logging.info('Connector %s set to unpause.')
+        self.proceed.set()
 
     def stop(self):
         self.release()
