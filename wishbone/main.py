@@ -34,10 +34,12 @@ from toolkit import Block
 from sys import exit
 from time import time
 from copy import deepcopy
+from time import time
 
 class Metrics():
 
     def __init__(self):
+        self.cache={"last_run":time(),"functions":{}}
         if self.metrics_dst == 'logging':
             self.doMetrics = self.logMetrics
 
@@ -50,6 +52,7 @@ class Metrics():
             sleep(self.metrics_interval)
 
     def collectMetrics(self):
+        now = time()
         metrics={"functions":{},"connectors":{}}
 
         for module in self.modules:
@@ -61,7 +64,9 @@ class Metrics():
         for instance in metrics["functions"]:
             for function in metrics["functions"][instance]:
                 metrics["functions"][instance][function]["avg_time"]=metrics["functions"][instance][function]["total_time"]/metrics["functions"][instance][function]["hits"]
-
+                metrics["functions"][instance][function]["hits_per_sec"]=(metrics["functions"][instance][function]["hits"]-self.cache["functions"].get(function,0))/(now-self.cache["last_run"])
+                self.cache["functions"][function]=metrics["functions"][instance][function]["hits"]
+        self.cache["last_run"]=now
         return metrics
 
 class Wishbone(Block, Metrics):
