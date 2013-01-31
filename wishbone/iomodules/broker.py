@@ -3,7 +3,7 @@
 #
 #  broker.py
 #
-#  Copyright 2012 Jelle Smet development@smetj.net
+#  Copyright 2013 Jelle Smet development@smetj.net
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
