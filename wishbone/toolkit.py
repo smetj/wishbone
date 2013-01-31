@@ -36,7 +36,7 @@ class TimeFunctions(object):
     
     @classmethod
     def do(cls, fn):
-        def do(self, *args, **kwargs):            
+        def do(self, *args, **kwargs):
             t = stopwatch.Timer()
             result = fn(self, *args, **kwargs)
             t.stop()
