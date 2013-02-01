@@ -27,7 +27,6 @@ from wishbone.toolkit import QueueFunctions, Block, TimeFunctions
 from gevent import Greenlet, spawn, sleep
 from gevent.queue import Queue
 import amqp
-#from amqp.exceptions import AMQPChannelException, AMQPConnectionException
 from amqp.exceptions import NotFound
 from amqp.exceptions import ConnectionError
 from gevent import monkey;monkey.patch_all()
@@ -106,16 +105,16 @@ class Broker(Greenlet, QueueFunctions, Block, TimeFunctions):
                 try:
                     fn(self, *args, **kwargs)
                     break
-                except NotFound as err:                    
-                    self.logging.error("AMQP %s error. Reason: %s"%(fn.__name__,err))
+                except NotFound as err:
+                    self.logging.error("AMQP error. Function: %s Reason: %s"%(fn.__name__,err))
                     if self.auto_create == True:
                         self.brokerCreateQueue(kwargs["consume_queue"])
                 except ConnectionError as err:
                     sleep_seconds*=2
-                    self.logging.error("AMQP %s error. Reason: %s"%(fn.__name__,err))
+                    self.logging.error("AMQP error. Function: %s Reason: %s"%(fn.__name__,err))
                 except Exception as err:
                     sleep_seconds*=2
-                    self.logging.error("AMQP %s error. Reason: %s"%(fn.__name__,err))
+                    self.logging.error("AMQP error. Function: %s Reason: %s"%(fn.__name__,err))
                 sleep(sleep_seconds)
                 self.logging.info("Sleeping for %s seconds."%sleep_seconds)
         return do
@@ -128,7 +127,7 @@ class Broker(Greenlet, QueueFunctions, Block, TimeFunctions):
             prefetch_count=self.prefetch_count,consume_queue=self.consume_queue,no_ack=self.no_ack
         )
         outgoing = spawn(self.continuousSubmitBroker)
-        ack = spawn(self.continuousAcknowledgeMessage)
+        ack = spawn(self.continuousbrokerAcknowledgeMessage)
 
         while self.block() == True:
             try:
@@ -139,18 +138,18 @@ class Broker(Greenlet, QueueFunctions, Block, TimeFunctions):
     def continuousSubmitBroker(self):
         '''Submits all data from self.outbox into the broker by calling the produce() funtion untill interrupted.'''
         while self.block() == True:
-            self.produceMessage(self.getData("outbox"))
+            self.brokerProduceMessage(self.getData("outbox"))
 
-    def continuousAcknowledgeMessage(self):
+    def continuousbrokerAcknowledgeMessage(self):
         '''A blocking function which continuously consumes the "acknowledge" queue untill interrupted.'''
 
         while self.block() == True:
-            self.acknowledgeMessage(self.getData("acknowledge"))
+            self.brokerAcknowledgeMessage(self.getData("acknowledge"))
 
     @safe
     def brokerSetupConnection(self,host,username,password,virtual_host,prefetch_count,consume_queue,no_ack):
         '''Handles connection and channel creation.  Blocks and retries untill successful or interrupted.'''
-    
+
         self.conn = amqp.Connection(host="%s:5672"%(host), userid=username,password=password, virtual_host=virtual_host, insist=True)
         self.incoming = self.conn.channel()
         self.incoming.basic_qos(prefetch_size=0, prefetch_count=prefetch_count, a_global=False)
@@ -172,8 +171,23 @@ class Broker(Greenlet, QueueFunctions, Block, TimeFunctions):
 
     @safe
     @TimeFunctions.do
-    def acknowledgeMessage(self, ack):
+    def brokerAcknowledgeMessage(self, ack):
         self.incoming.basic_ack(ack)
+
+    @safe
+    def brokerProduceMessage(self,message):
+        '''Is called upon each message going to to the broker infrastructure.'''
+
+        if message["header"].has_key('broker_exchange') and message["header"].has_key('broker_key'):
+            msg = amqp.Message(str(message['data']))
+            msg.properties["delivery_mode"] = self.delivery_mode
+            self.outgoing.basic_publish(msg,exchange=message['header']['broker_exchange'],routing_key=message['header']['broker_key'],mandatory=True)
+            if message['header'].has_key('broker_tag') and self.no_ack == False:
+                self.brokerAcknowledgeMessage(message['header']['broker_tag'])
+        else:
+            self.logging.warn('Received data for broker without exchange or routing key in header. Purged.')
+            if message['header'].has_key('broker_tag') and self.no_ack == False:
+                self.brokerAcknowledgeMessage(message['header']['broker_tag'])
 
     @TimeFunctions.do
     def consumeMessage(self,message):
@@ -185,21 +199,6 @@ class Broker(Greenlet, QueueFunctions, Block, TimeFunctions):
         self.putData({'header':{'broker_tag':message.delivery_tag},'data':message.body}, queue='inbox')
         self.logging.debug('Data received from broker.')
         sleep()
-
-    @safe
-    def produceMessage(self,message):
-        '''Is called upon each message going to to the broker infrastructure.'''
-        
-        if message["header"].has_key('broker_exchange') and message["header"].has_key('broker_key'):
-            msg = amqp.Message(str(message['data']))
-            msg.properties["delivery_mode"] = self.delivery_mode
-            self.outgoing.basic_publish(msg,exchange=message['header']['broker_exchange'],routing_key=message['header']['broker_key'],mandatory=True)
-            if message['header'].has_key('broker_tag') and self.no_ack == False:
-                self.acknowledgeMessage(message['header']['broker_tag'])
-        else:
-            self.logging.warn('Received data for broker without exchange or routing key in header. Purged.')
-            if message['header'].has_key('broker_tag') and self.no_ack == False:
-                self.acknowledgeMessage(message['header']['broker_tag'])
 
     def shutdown(self):
         '''This function is called on shutdown().'''
