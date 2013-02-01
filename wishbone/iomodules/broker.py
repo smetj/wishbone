@@ -191,11 +191,8 @@ class Broker(Greenlet, QueueFunctions, Block, TimeFunctions):
 
     @TimeFunctions.do
     def consumeMessage(self,message):
-        '''Is called upon each message coming from the broker infrastructure.
-
-        It also makes sure the incoming data is encapsulated in the right Wishbone format.
-        When successful, this function acknowledges the message from the broker.
-        '''
+        '''Is called upon each message coming from the broker infrastructure.'''
+        
         self.putData({'header':{'broker_tag':message.delivery_tag},'data':message.body}, queue='inbox')
         self.logging.debug('Data received from broker.')
         sleep()
