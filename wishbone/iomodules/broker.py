@@ -128,7 +128,7 @@ class Broker(Greenlet, QueueFunctions, Block, TimeFunctions):
         )
         outgoing = spawn(self.continuousSubmitBroker)
         ack = spawn(self.continuousbrokerAcknowledgeMessage)
-
+        
         while self.block() == True:
             try:
                 self.incoming.wait()
@@ -149,24 +149,29 @@ class Broker(Greenlet, QueueFunctions, Block, TimeFunctions):
     @safe
     def brokerSetupConnection(self,host,username,password,virtual_host,prefetch_count,consume_queue,no_ack):
         '''Handles connection and channel creation.  Blocks and retries untill successful or interrupted.'''
-
-        self.conn = amqp.Connection(host="%s:5672"%(host), userid=username,password=password, virtual_host=virtual_host, insist=True)
+       
+        self.conn = amqp.Connection(host="%s:5672"%(host), userid=username, password=password, virtual_host=virtual_host)
         self.incoming = self.conn.channel()
         self.incoming.basic_qos(prefetch_size=0, prefetch_count=prefetch_count, a_global=False)
-        self.incoming.basic_consume(queue=consume_queue, callback=self.consumeMessage, no_ack=no_ack)
+        self.incoming.basic_consume(queue=consume_queue, callback=self.consumeMessage, no_ack=no_ack, consumer_tag="incoming")
         self.outgoing = self.conn.channel()
         self.logging.info('Connected to broker')
 
     @safe
     def brokerCreateQueue(self, queue_name):
+        self.incoming.queue_declare( queue=queue_name, auto_delete=False)
         self.logging.info("Creating queue %s"%(queue_name))
 
     @safe
     def brokerCreateExchange(self, broker_name):
+        '''Interestingly we don't seem to be able to detect whether an exchange exists or not.
+        So this function is just a placeholder for the moment.
+        Need to isolate and replicate problem.'''
         pass
 
     @safe
     def brokerCreateBinding(self):
+        '''Just a placeholder for the moment.'''
         pass
 
     @safe
@@ -175,20 +180,21 @@ class Broker(Greenlet, QueueFunctions, Block, TimeFunctions):
         self.incoming.basic_ack(ack)
 
     @safe
+    @TimeFunctions.do
     def brokerProduceMessage(self,message):
         '''Is called upon each message going to to the broker infrastructure.'''
 
         if message["header"].has_key('broker_exchange') and message["header"].has_key('broker_key'):
             msg = amqp.Message(str(message['data']))
             msg.properties["delivery_mode"] = self.delivery_mode
-            self.outgoing.basic_publish(msg,exchange=message['header']['broker_exchange'],routing_key=message['header']['broker_key'],mandatory=True)
+            self.outgoing.basic_publish(msg,exchange=message['header']['broker_exchange'],routing_key=message['header']['broker_key'])
             if message['header'].has_key('broker_tag') and self.no_ack == False:
                 self.brokerAcknowledgeMessage(message['header']['broker_tag'])
         else:
             self.logging.warn('Received data for broker without exchange or routing key in header. Purged.')
             if message['header'].has_key('broker_tag') and self.no_ack == False:
                 self.brokerAcknowledgeMessage(message['header']['broker_tag'])
-
+        
     @TimeFunctions.do
     def consumeMessage(self,message):
         '''Is called upon each message coming from the broker infrastructure.'''
@@ -199,9 +205,9 @@ class Broker(Greenlet, QueueFunctions, Block, TimeFunctions):
 
     def shutdown(self):
         '''This function is called on shutdown().'''
-
         try:
-             self.incoming.basic_cancel('request')
+             self.incoming.close()
+             self.outgoing.close()      
         except:
             pass
         self.logging.info('Shutdown')
