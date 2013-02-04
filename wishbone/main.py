@@ -35,6 +35,7 @@ from sys import exit
 from time import time
 from copy import deepcopy
 from time import time
+from prettytable import PrettyTable
 
 class Metrics():
 
@@ -42,6 +43,8 @@ class Metrics():
         self.cache={"last_run":time(),"functions":{}}
         if self.metrics_dst == 'logging':
             self.doMetrics = self.logMetrics
+        if self.metrics_dst == 'table':
+            self.doMetrics = self.tableMetrics
 
     def doMetrics(self):
         self.logging.warn('You have not defined a valid metric emitter.')
@@ -50,7 +53,36 @@ class Metrics():
         while self.block():
             self.logging.info(self.collectMetrics())
             sleep(self.metrics_interval)
+    
+    def tableMetrics(self):
+        #{'functions': 
+        #    {   u'Intance #0:stdout': {'consume': {'total_time': 0.00074744224548339844, 'hits_per_sec': 0.0, 'hits': 9, 'avg_time': 8.3049138387044266e-05}}, 
+        #        u'Intance #0:broker': {'consumeMessage': {'total_time': 0.0026221275329589844, 'hits_per_sec': 0.0, 'hits': 9, 'avg_time': 0.00029134750366210938}}},
+        #'connectors':
+        #    {   u'broker.inbox->stdout.inbox': 9}}
 
+        #{'functions': {u'Intance #0:stdout': {}, u'Intance #0:broker': {}}, 'connectors': {u'broker.inbox->stdout.inbox': 0}}
+        
+        while self.block():
+        
+            dataset = self.collectMetrics()
+
+            func_table = PrettyTable(["Instance", "Function", "Total time", "Hits per second","Hits","Average time"])
+            for instance in dataset["functions"]:
+                for function in dataset["functions"][instance]:
+                    func_table.add_row([instance, function, dataset["functions"][instance][function]["total_time"], dataset["functions"][instance][function]["hits_per_sec"], dataset["functions"][instance][function]["hits"], dataset["functions"][instance][function]["avg_time"]])
+            
+            conn_table = PrettyTable(["Connector","Hits"])
+            for connector in dataset["connectors"]:
+                conn_table.add_row([connector,dataset["connectors"][connector]])
+            print "Function metrics:"
+            print 
+            print func_table
+            print
+            print "Connector metrics:"
+            print conn_table
+            sleep(self.metrics_interval)
+    
     def collectMetrics(self):
         now = time()
         metrics={"functions":{},"connectors":{}}
