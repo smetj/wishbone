@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  untitled.py
+#  setup.py
 #  
 #  Copyright 2013 Jelle Smet <development@smetj.net>
 #  
