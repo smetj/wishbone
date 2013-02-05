@@ -31,11 +31,12 @@ from gevent.event import Event
 from multiprocessing import current_process
 from string import lstrip
 from toolkit import Block
-from sys import exit
+from sys import exit, stderr
 from time import time
 from copy import deepcopy
 from time import time
 from prettytable import PrettyTable
+from os import system
 
 class Metrics():
 
@@ -68,19 +69,28 @@ class Metrics():
             dataset = self.collectMetrics()
 
             func_table = PrettyTable(["Instance", "Function", "Total time", "Hits per second","Hits","Average time"])
+            func_table.align["Instance"] = "l"
+            func_table.align["Function"] = "l"
+            func_table.align["Total time"] = "r"
+            func_table.align["Hits per second"] = "r"
+            func_table.align["Hits"] = "r"
+            func_table.align["Average time"] = "r"
+            
             for instance in dataset["functions"]:
                 for function in dataset["functions"][instance]:
                     func_table.add_row([instance, function, dataset["functions"][instance][function]["total_time"], dataset["functions"][instance][function]["hits_per_sec"], dataset["functions"][instance][function]["hits"], dataset["functions"][instance][function]["avg_time"]])
             
-            conn_table = PrettyTable(["Connector","Hits"])
+            conn_table = PrettyTable(["Source","Destination","Hits"])
+            conn_table.align["Source"] = "l"
+            conn_table.align["Destination"] = "l"
+            conn_table.align["Hits"] = "r"
+            
             for connector in dataset["connectors"]:
-                conn_table.add_row([connector,dataset["connectors"][connector]])
-            print "Function metrics:"
-            print 
-            print func_table
-            print
-            print "Connector metrics:"
-            print conn_table
+                direction = connector.split("->")
+                conn_table.add_row([direction[0],direction[1],dataset["connectors"][connector]])
+            
+            system('/usr/bin/clear')
+            stderr.write ("Function metrics:\n%s\n\nConnector metrics:\n%s\n"%(func_table, conn_table))
             sleep(self.metrics_interval)
     
     def collectMetrics(self):
@@ -95,8 +105,8 @@ class Metrics():
 
         for instance in metrics["functions"]:
             for function in metrics["functions"][instance]:
-                metrics["functions"][instance][function]["avg_time"]=metrics["functions"][instance][function]["total_time"]/metrics["functions"][instance][function]["hits"]
-                metrics["functions"][instance][function]["hits_per_sec"]=(metrics["functions"][instance][function]["hits"]-self.cache["functions"].get(function,0))/(now-self.cache["last_run"])
+                metrics["functions"][instance][function]["avg_time"]=round(metrics["functions"][instance][function]["total_time"]/metrics["functions"][instance][function]["hits"],6)
+                metrics["functions"][instance][function]["hits_per_sec"]=(metrics["functions"][instance][function]["hits"]-self.cache["functions"].get(function,metrics["functions"][instance][function]["hits"]))
                 self.cache["functions"][function]=metrics["functions"][instance][function]["hits"]
         self.cache["last_run"]=now
         return metrics

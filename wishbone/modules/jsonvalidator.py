@@ -23,10 +23,10 @@
 
 import json
 from jsonschema import Validator
-from wishbone.toolkit import PrimitiveActor
+from wishbone.toolkit import PrimitiveActor, TimeFunctions
 
 
-class JSONValidator(PrimitiveActor):
+class JSONValidator(PrimitiveActor, TimeFunctions):
     '''**A Wishbone module which verifies JSON data against a validator schema loaded from file.**
     
     Events consumed from the inbox queue are verified against a Validator schema.  When the event is not a valid JSON document
@@ -68,14 +68,15 @@ class JSONValidator(PrimitiveActor):
         
         try:
             data = json.loads(message["data"])
-            self.validateBroker(data)
+            self.validate(data)
             if self.convert == True:
                 message['data']=data
             self.putData(message)
         except Exception as err:
             self.logging.warning('Invalid data received and purged. Reason: %s' % (err))
-
-    def validateBroker(self,data):
+    
+    @TimeFunctions.do
+    def validate(self,data):
         '''Validates data against the JSON schema.'''
         if self.validator == False:
             return True
