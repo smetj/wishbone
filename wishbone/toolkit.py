@@ -44,7 +44,7 @@ class TimeFunctions(object):
                 self.metrics[fn.__name__]
             except:
                 self.metrics[fn.__name__]={"total_time":0,"hits":0}
-            self.metrics[fn.__name__]["total_time"] += t.elapsed
+            self.metrics[fn.__name__]["total_time"] += round(t.elapsed,6)
             self.metrics[fn.__name__]["hits"] += 1
             return result
         return do
@@ -57,7 +57,7 @@ class TimeFunctions(object):
             self.metrics[fn.__name__]
         except:
             self.metrics[fn.__name__]={"total_time":0,"hits":0}
-        self.metrics[fn.__name__]["total_time"] += t.elapsed
+        self.metrics[fn.__name__]["total_time"] += round(t.elapsed,6)
         self.metrics[fn.__name__]["hits"] += 1
         return result
         
@@ -180,7 +180,8 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
         self.logging.info('Started.')        
         while self.block() == True:
             data = self.getData("inbox")
-            self.timeConsume(self.consume, data)                            
+            #self.timeConsume(self.consume, data)                            
+            self.consume(data)
         self.release()
                     
     def consume(self, *args, **kwargs):
