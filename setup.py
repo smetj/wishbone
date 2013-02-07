@@ -24,7 +24,7 @@
 
 PROJECT = 'wishbone'
 
-VERSION = '0.2.3'
+VERSION = '0.3.0'
 
 
 from setuptools import setup, find_packages
@@ -66,10 +66,9 @@ setup(
 
     provides=[],
     dependency_links = ['http://github.com/SiteSupport/gevent/tarball/master#egg=gevent-1.0rc1'],
-    install_requires=['gevent','amqplib','python-snappy','python-daemon','stopwatch','jsonschema','pymongo','pyes','ordereddict','argparse','gearman', 'pycrypto'],
+    install_requires=['gevent','python-daemon','stopwatch','argparse'],
     namespace_packages=[],
     packages=find_packages(),
     include_package_data=True,
-
     zip_safe=False,
-    )
+)
