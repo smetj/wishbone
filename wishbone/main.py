@@ -25,6 +25,7 @@
 import logging
 import signal
 from importlib import import_module
+from pkg_resources import iter_entry_points
 from gevent import spawn, sleep
 from gevent.queue import Queue
 from gevent.event import Event
@@ -89,6 +90,7 @@ class Metrics():
                 direction = connector.split("->")
                 conn_table.add_row([direction[0],direction[1],dataset["connectors"][connector]])
             
+            #todo: has to be done differently
             system('/usr/bin/clear')
             stderr.write ("Function metrics:\n%s\n\nConnector metrics:\n%s\n"%(func_table, conn_table))
             sleep(self.metrics_interval)
@@ -98,7 +100,7 @@ class Metrics():
         metrics={"functions":{},"connectors":{}}
 
         for module in self.modules:
-            metrics["functions"][module.name]=module.metrics
+            metrics["functions"][self.modules[module].name]=self.modules[module].metrics
             
         for connector in self.connectors:
             metrics["connectors"][connector] = self.connectors[connector].hits
@@ -137,9 +139,33 @@ class Wishbone(Block, Metrics):
 
         signal.signal(signal.SIGTERM, self.stop)
 
-        self.modules=[]
+        self.modules={}
         self.connectors={}
         self.run=self.start
+    
+    def loadEntrypoint(self, config, *args, **kwargs):
+        
+        group_name = config[0]
+        class_name = config[1]
+        name = config[2]
+        
+        try:
+            for module in iter_entry_points(group="wishbone.%s"%(group_name),name=class_name):
+                loaded_module = module.load()
+            #setattr(self, name, getattr (loaded_module, class_name)('Intance #%s:%s'%(self.getCurrentProcessName(),name), *args, **kwargs))
+            #self.modules.append(getattr (self, name))
+            self.modules[name]=loaded_module('Intance #%s:%s'%(self.getCurrentProcessName(),name), *args, **kwargs)
+            try:
+                #Do a couple of checks to see whether the loaded module is compliant.
+                self.modules[name].inbox
+                self.modules[name].outbox
+            except:
+                raise Exception("You might have to load QueueFunctions base class into this class.")
+        except Exception as err:
+            self.logging.error("Problem loading wishbone.%s.%s. Reason: %s" % ( group_name, class_name, err))
+            exit(1)   
+  
+        
 
     def registerModule(self, config, *args, **kwargs):
         '''Registers a Wishbone Module into the framework.  All modules used within Wishbone should be registered through this function.
@@ -184,10 +210,8 @@ class Wishbone(Block, Metrics):
 
         (src_class,src_queue)=source.split('.')
         (dst_class,dst_queue)=destination.split('.')
-        src_instance = getattr(self,src_class)
-        dst_instance = getattr(self,dst_class)
-        src_queue = getattr(src_instance,src_queue)
-        dst_queue = getattr(dst_instance,dst_queue)
+        src_queue = getattr(self.modules[src_class],src_queue)
+        dst_queue = getattr(self.modules[dst_class],dst_queue)
         name = "%s->%s"%(source,destination)
         self.connectors[name] = Connector(name, src_queue, dst_queue)
 
@@ -201,9 +225,9 @@ class Wishbone(Block, Metrics):
 
         for module in self.modules:
             try:
-                module.start()
-            except:
-                pass
+                self.modules[module].start()
+            except Exception as err:
+                self.logging.warn("I was not able to start module %s. Reason: %s"%(module,err))
 
         for connector in self.connectors.keys():
             self.connectors[connector].start()
@@ -225,8 +249,8 @@ class Wishbone(Block, Metrics):
 
         self.logging.info('Stop received.')
         for module in self.modules:
-            module.release()
-            module.shutdown()
+            self.modules[module].release()
+            self.modules[module].shutdown()
 
             try:
                 self.logging.debug('Waiting 1 second for module %s'%module.name)
