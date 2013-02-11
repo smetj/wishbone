@@ -167,12 +167,12 @@ class WishbBoneSkeleton():
         #gevent_profiler.detach()
 
     def setup(self):
-        wb = Wishbone(  metrics=self.conf["system"].get("metrics",False),
-                        metrics_dst=self.conf["system"].get("metrics_dst","logging"),
-                        metrics_interval=self.conf["system"].get("metrics_interval",10)
+        wb = Wishbone(  metrics=self.conf["metrics"].get("enable",False),
+                        metrics_dst=self.conf["metrics"].get("module","logging"),
+                        metrics_interval=self.conf["metrics"].get("interval",10)
             )
         for module in self.conf["bootstrap"]:
-            wb.registerModule ( (self.conf["bootstrap"][module]["module"],self.conf["bootstrap"][module]["class"],module),
+            wb.loadEntrypoint ( (self.conf["bootstrap"][module]["type"],self.conf["bootstrap"][module]["name"],module),
                                 **self.conf["bootstrap"][module]["variables"]
             )
         for source in self.conf["routingtable"]:
