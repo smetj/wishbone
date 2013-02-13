@@ -32,7 +32,7 @@ from gevent.event import Event
 from multiprocessing import current_process
 from string import lstrip
 from toolkit import Block
-from sys import exit, stderr
+from sys import stderr
 from time import time
 from copy import deepcopy
 from time import time
@@ -55,18 +55,10 @@ class Metrics():
         while self.block():
             self.logging.info(self.collectMetrics())
             sleep(self.metrics_interval)
-    
-    def tableMetrics(self):
-        #{'functions': 
-        #    {   u'Intance #0:stdout': {'consume': {'total_time': 0.00074744224548339844, 'hits_per_sec': 0.0, 'hits': 9, 'avg_time': 8.3049138387044266e-05}}, 
-        #        u'Intance #0:broker': {'consumeMessage': {'total_time': 0.0026221275329589844, 'hits_per_sec': 0.0, 'hits': 9, 'avg_time': 0.00029134750366210938}}},
-        #'connectors':
-        #    {   u'broker.inbox->stdout.inbox': 9}}
 
-        #{'functions': {u'Intance #0:stdout': {}, u'Intance #0:broker': {}}, 'connectors': {u'broker.inbox->stdout.inbox': 0}}
-        
+    def tableMetrics(self):
         while self.block():
-        
+
             dataset = self.collectMetrics()
 
             func_table = PrettyTable(["Instance", "Function", "Total time", "Hits per second","Hits","Average time"])
@@ -76,32 +68,32 @@ class Metrics():
             func_table.align["Hits per second"] = "r"
             func_table.align["Hits"] = "r"
             func_table.align["Average time"] = "r"
-            
+
             for instance in dataset["functions"]:
                 for function in dataset["functions"][instance]:
                     func_table.add_row([instance, function, dataset["functions"][instance][function]["total_time"], dataset["functions"][instance][function]["hits_per_sec"], dataset["functions"][instance][function]["hits"], dataset["functions"][instance][function]["avg_time"]])
-            
+
             conn_table = PrettyTable(["Source","Destination","Hits"])
             conn_table.align["Source"] = "l"
             conn_table.align["Destination"] = "l"
             conn_table.align["Hits"] = "r"
-            
+
             for connector in dataset["connectors"]:
                 direction = connector.split("->")
                 conn_table.add_row([direction[0],direction[1],dataset["connectors"][connector]])
-            
+
             #todo: has to be done differently
             system('/usr/bin/clear')
             stderr.write ("Function metrics:\n%s\n\nConnector metrics:\n%s\n"%(func_table, conn_table))
             sleep(self.metrics_interval)
-    
+
     def collectMetrics(self):
         now = time()
         metrics={"functions":{},"connectors":{}}
 
         for module in self.modules:
             metrics["functions"][self.modules[module].name]=self.modules[module].metrics
-            
+
         for connector in self.connectors:
             metrics["connectors"][connector] = self.connectors[connector].hits
 
@@ -128,12 +120,13 @@ class Wishbone(Block, Metrics):
     '''
 
     def __init__(self, syslog=False, metrics=True, metrics_interval=10, metrics_dst="logging"):
-        
+
         self.metrics=metrics
         self.metrics_interval=metrics_interval
         self.metrics_dst=metrics_dst
 
         self.logging = logging.getLogger( 'Wishbone' )
+        self.logging.info("Wishbone version %s")
         Block.__init__(self)
         Metrics.__init__(self)
 
@@ -142,18 +135,37 @@ class Wishbone(Block, Metrics):
         self.modules={}
         self.connectors={}
         self.run=self.start
-    
+
     def loadEntrypoint(self, config, *args, **kwargs):
-        
+
+        '''Registers a Wishbone Module into the framework.  All modules used within Wishbone should be registered through this function.
+
+        This function receives a tuple containing 3 values.  Any further args or kwargs are used to initialize the actual module you register.
+
+        The config parameter should be a tuple of 3 strings:
+
+            (group_name, class_name, name)
+
+            * group:        The name of the entry point group under which the module is installed.  See module's setup.py
+            * class:        The name of the class to initialize.
+            * name:         The name under which the module should be initialized.
+
+            *args and **kwargs are passed to the class which is initialized.
+
+        self.modules is a dictionary containing all initialized modules.
+        '''
+
         group_name = config[0]
         class_name = config[1]
         name = config[2]
-        
+
         try:
-            for module in iter_entry_points(group="wishbone.%s"%(group_name),name=class_name):
+            loaded_module=None
+            for module in iter_entry_points(group=group_name,name=class_name):
                 loaded_module = module.load()
-            #setattr(self, name, getattr (loaded_module, class_name)('Intance #%s:%s'%(self.getCurrentProcessName(),name), *args, **kwargs))
-            #self.modules.append(getattr (self, name))
+            if loaded_module==None:
+                raise Exception("Group %s does not contain a %s class."%(group_name,class_name))
+                
             self.modules[name]=loaded_module('Intance #%s:%s'%(self.getCurrentProcessName(),name), *args, **kwargs)
             try:
                 #Do a couple of checks to see whether the loaded module is compliant.
@@ -162,45 +174,7 @@ class Wishbone(Block, Metrics):
             except:
                 raise Exception("You might have to load QueueFunctions base class into this class.")
         except Exception as err:
-            self.logging.error("Problem loading wishbone.%s.%s. Reason: %s" % ( group_name, class_name, err))
-            exit(1)   
-  
-        
-
-    def registerModule(self, config, *args, **kwargs):
-        '''Registers a Wishbone Module into the framework.  All modules used within Wishbone should be registered through this function.
-
-        This function receives a tuple containing 3 values.  Any further args or kwargs are used to initialize the actual module you register.
-
-        The config parameter should be a tuple of 3 strings:
-
-            (module, class, name)
-
-            * module:     The name of the module to import.
-            * class:      The name of the class to initialize
-            * name:       The name under which the module should be initialized.
-
-            *args and **kwargs are passed to the class which is initialized.
-
-        self.modules contains a list of all registered modules.  Also, each registered module is registered under self.name, where name is last
-        value of the tuple.'''
-
-        module_name = config[0]
-        class_name = config[1]
-        name = config[2]
-        try:
-            loaded_module = import_module(module_name)
-            setattr(self, name, getattr (loaded_module, class_name)('Intance #%s:%s'%(self.getCurrentProcessName(),name), *args, **kwargs))
-            self.modules.append(getattr (self, name))
-            try:
-                #Do a couple of checks to see whether the loaded module is compliant.
-                self.modules[-1].inbox
-                self.modules[-1].outbox
-            except:
-                raise Exception("You might have to load QueueFunctions base class into this class.")
-        except Exception as err:
-            self.logging.error("Problem loading module: %s and class %s. Reason: %s" % ( module_name, class_name, err))
-            exit(1)
+            raise Exception("Problem loading wishbone.%s.%s. Reason: %s" % ( group_name, class_name, err))
 
     def connect(self, source, destination):
         '''Creates a new background Greenthread which continuously consumes all messages from source into destination.
@@ -299,7 +273,7 @@ class Connector(Block):
     def pause(self):
         self.logging.info('Connector %s set to pause')
         self.proceed.clear()
-    
+
     def unpause(self):
         self.logging.info('Connector %s set to unpause.')
         self.proceed.set()
