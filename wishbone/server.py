@@ -35,7 +35,8 @@ from signal import SIGTERM, SIGKILL
 from logging import INFO, DEBUG
 from wishbone.tools import ConfigureLogging
 from wishbone import Wishbone
-#import gevent_profiler
+from pkg_resources import iter_entry_points
+from prettytable import PrettyTable
 
 class Help():
     def error(self, message):
@@ -48,7 +49,7 @@ class Help():
         print ''
         print '%s'%self.description
         print ''
-        print '%s command --config file [--instances number] [--loglevel level] [--pid filename]'%sys.argv[0]
+        print '%s command --config file [--instances number] [--loglevel level] [--pid filename] [--group groupname]'%sys.argv[0]
         print ''
         print '''
         Commands:
@@ -56,6 +57,8 @@ class Help():
             start           Starts and daemonizes the program into the background.
             stop            Stops a daemonized instance.
             debug           Starts the program in the foreground without detaching.
+            kill            Kills the daemonized instance.
+            list            Lists the available Wishbone modules in group
 
         Parameters:
 
@@ -67,7 +70,9 @@ class Help():
                             Possible values are:
                                 info, warning, critical, debug
 
-            --pid           Defines the location of the pidfile.'''
+            --pid           Defines the location of the pidfile.
+            
+            --group         The name of the module group to list modules from.'''
         print "                            The default value is /tmp/%s.pid"%self.name
         if self.support != '':
             print '''
@@ -100,30 +105,55 @@ class BootStrap(Help):
         self.description=description
         self.author=author
         self.support=support
+        self.allowed_commands=[ "start","stop","debug","kill","list" ]
+        self.cli=self.parseArguments()
+        self.conf=None
+        self.log_level = self.translateLogLevel(self.cli["loglevel"])
+        self.do()
 
-        cli=self.parseArguments()
-        conf=self.readConfig(cli["config"])
-        log_level = self.translateLogLevel(cli["loglevel"])
-        ParallelServer( instances=int(cli['instances']),
-                    setup=WishbBoneSkeleton,
-                    setup_args=[conf],
-                    command=cli['command'][0],
-                    name=name,
-                    log_level=log_level,
-                    pidfile=cli['pid']
-        )
+    def do(self):
+        if self.cli['command'][0] in self.allowed_commands:
+            if self.cli['command'][0] == "list":
+                for group in self.cli['group'].split(','):
+                    modules = PrettyTable(["Entry Point","Module"])
+                    modules.align["Entry Point"] = "l"
+                    modules.align["Module"] = "l"
+                    for module in iter_entry_points(group=group):
+                        modules.add_row(str(module).split(" = "))
+                    print "\nAvailable Wishbone modules in group %s\n"%(group)
+                    print modules
+            else:
+                self.conf=self.readConfig(self.cli["config"])
+                self.initializeParallelserver()
+        else:
+            self.error("That commmand does not exist.")
 
     def parseArguments(self):
-
+        '''Parses the CLI arguments.'''
+        
         parser = argparse.ArgumentParser(add_help=False)
         parser.error = self.error
-        parser.add_argument('command', nargs=1, help='Which command to issue.  start, stop, status or debug.')
+        parser.add_argument('command', nargs=1, help='Which command to issue.  start, stop, kill, debug or list.')
         parser.add_argument('--help', action='store_true', default=False)
         parser.add_argument('--config', dest='config', help='The location of the configuration file.')
         parser.add_argument('--instances', dest='instances', default=1, help='The number of parallel instances to start.')
         parser.add_argument('--loglevel', dest='loglevel', default="info", help='The loglevel you want to use. [info,warn,crit,debug]')
         parser.add_argument('--pid', dest='pid', help='The absolute path of the pidfile.')
+        parser.add_argument('--group', dest='group', default="wishbone.iomodule,wishbone.module", help='The entry point group to list the modules from.')
+        
         return vars(parser.parse_args())
+
+    def initializeParallelserver(self):
+        '''Initializes the parallelserver instance'''
+        
+        ParallelServer( instances=int(self.cli['instances']),
+                    setup=WishbBoneSkeleton,    
+                    setup_args=[self.conf],
+                    command=self.cli['command'][0],
+                    name=self.name,
+                    log_level=self.log_level,
+                    pidfile=self.cli['pid']
+        )
 
     def readConfig(self,filename):
         try:
@@ -155,16 +185,14 @@ class WishbBoneSkeleton():
     '''
 
     def __init__(self, conf):
-        #gevent_profiler.attach()
-        #gevent_profiler.set_stats_output('/tmp/wishbone-stats.txt')
-        #gevent_profiler.set_summary_output('/tmp/wishbone-summary.txt')
-        #gevent_profiler.set_trace_output('/tmp/wishbone-trace.txt')
-        #gevent_profiler.print_percentages(True)
-        #gevent_profiler.time_blocking(True)
         self.conf=conf
-        self.wb = self.setup()
-        self.wb.start()
-        #gevent_profiler.detach()
+        try:
+            self.wb = self.setup()
+        except Exception as err:
+            sys.stderr.write(str(err)+"\n")
+            sys.exit(1)
+        else:
+            self.wb.start()
 
     def setup(self):
         wb = Wishbone(  metrics=self.conf["metrics"].get("enable",False),
@@ -172,7 +200,7 @@ class WishbBoneSkeleton():
                         metrics_interval=self.conf["metrics"].get("interval",10)
             )
         for module in self.conf["bootstrap"]:
-            wb.loadEntrypoint ( (self.conf["bootstrap"][module]["type"],self.conf["bootstrap"][module]["name"],module),
+            wb.loadEntrypoint ( (self.conf["bootstrap"][module]["group"],self.conf["bootstrap"][module]["name"],module),
                                 **self.conf["bootstrap"][module]["variables"]
             )
         for source in self.conf["routingtable"]:
