@@ -42,16 +42,13 @@ from os import system
 class Metrics():
 
     def __init__(self):
-        self.cache={"last_run":time(),"functions":{}}
+        self.metric_cache={"last_run":time(),"functions":{}}
         if self.metrics_dst == 'logging':
             self.doMetrics = self.logMetrics
         if self.metrics_dst == 'table':
             self.doMetrics = self.tableMetrics
 
     def doMetrics(self):
-        self.logging.warn('You have not defined a valid metric emitter.')
-
-    def logMetrics(self):
         while self.block():
             self.logging.info(self.collectMetrics())
             sleep(self.metrics_interval)
@@ -87,29 +84,11 @@ class Metrics():
             stderr.write ("Function metrics:\n%s\n\nConnector metrics:\n%s\n"%(func_table, conn_table))
             sleep(self.metrics_interval)
 
-    def collectMetrics(self):
-        now = time()
-        metrics={"functions":{},"connectors":{}}
+    
 
-        for module in self.modules:
-            metrics["functions"][self.modules[module].name]=self.modules[module].metrics
-
-        for connector in self.connectors:
-            metrics["connectors"][connector] = self.connectors[connector].hits
-
-        for instance in metrics["functions"]:
-            for function in metrics["functions"][instance]:
-                metrics["functions"][instance][function]["avg_time"]=round(metrics["functions"][instance][function]["total_time"]/metrics["functions"][instance][function]["hits"],6)
-                metrics["functions"][instance][function]["hits_per_sec"]=(metrics["functions"][instance][function]["hits"]-self.cache["functions"].get(function,metrics["functions"][instance][function]["hits"]))
-                self.cache["functions"][function]=metrics["functions"][instance][function]["hits"]
-        self.cache["last_run"]=now
-        return metrics
-
-class Wishbone(Block, Metrics):
-    '''
-    **The main class in which the Wishbone modules are registered and managed.**
-
-
+class Wishbone(Block):
+    '''**The main class in which the Wishbone modules are registered and managed.**
+    
 
     Parameters:
 
@@ -119,25 +98,23 @@ class Wishbone(Block, Metrics):
         * metrics_dst (str):            The destination to write metrics to: [logging]
     '''
 
-    def __init__(self, syslog=False, metrics=True, metrics_interval=10, metrics_dst="logging"):
-
-        self.metrics=metrics
-        self.metrics_interval=metrics_interval
-        self.metrics_dst=metrics_dst
-
+    def __init__(self, syslog=False, metric_settings={}):
+        signal.signal(signal.SIGTERM, self.stop)
         self.logging = logging.getLogger( 'Wishbone' )
         self.logging.info("Wishbone version %s")
         Block.__init__(self)
-        Metrics.__init__(self)
-
-        signal.signal(signal.SIGTERM, self.stop)
-
         self.modules={}
         self.connectors={}
+        self.metric_cache={"last_run":time(),"functions":{}}
         self.run=self.start
 
-    def loadEntrypoint(self, config, *args, **kwargs):
-
+    def loadMetric(self, settings):
+        '''Loads the metric module if required.'''
+        if settings != {} and settings["enable"] == True:
+            metric_module=self.loadEntrypoint(settings["group"],settings["module"])
+            
+        
+    def loadModule(self, config, *args, **kwargs):
         '''Registers a Wishbone Module into the framework.  All modules used within Wishbone should be registered through this function.
 
         This function receives a tuple containing 3 values.  Any further args or kwargs are used to initialize the actual module you register.
@@ -154,27 +131,31 @@ class Wishbone(Block, Metrics):
 
         self.modules is a dictionary containing all initialized modules.
         '''
-
         group_name = config[0]
         class_name = config[1]
         name = config[2]
-
+        
+        module = self.loadEntrypoint(group_name, class_name)
+        self.modules[name]=module('Intance #%s:%s'%(self.getCurrentProcessName(),name), *args, **kwargs)
+        try:
+            #Do a couple of checks to see whether the loaded module is compliant.
+            #todo: Flesh out checks.
+            self.modules[name].inbox
+            self.modules[name].outbox
+        except:
+            raise Exception("You might have to load QueueFunctions base class into this class.")
+            
+    def loadEntrypoint(self, group_name, class_name):
         try:
             loaded_module=None
             for module in iter_entry_points(group=group_name,name=class_name):
                 loaded_module = module.load()
             if loaded_module==None:
                 raise Exception("Group %s does not contain a %s class."%(group_name,class_name))
-                
-            self.modules[name]=loaded_module('Intance #%s:%s'%(self.getCurrentProcessName(),name), *args, **kwargs)
-            try:
-                #Do a couple of checks to see whether the loaded module is compliant.
-                self.modules[name].inbox
-                self.modules[name].outbox
-            except:
-                raise Exception("You might have to load QueueFunctions base class into this class.")
+            else:
+                return loaded_module
         except Exception as err:
-            raise Exception("Problem loading wishbone.%s.%s. Reason: %s" % ( group_name, class_name, err))
+            raise Exception("Problem loading %s.%s. Reason: %s" % ( group_name, class_name, err))
 
     def connect(self, source, destination):
         '''Creates a new background Greenthread which continuously consumes all messages from source into destination.
@@ -206,11 +187,11 @@ class Wishbone(Block, Metrics):
         for connector in self.connectors.keys():
             self.connectors[connector].start()
 
-        if self.metrics == True:
-            self.logging.debug('Metrics enabled')
-            spawn(self.doMetrics)
-        else:
-            self.logging.debug('Metrics disabled.')
+        #if self.metrics == True:
+            #self.logging.debug('Metrics enabled')
+            #spawn(self.doMetrics)
+        #else:
+            #self.logging.debug('Metrics disabled.')
 
         while self.block():
             self.wait(0.1)
@@ -248,6 +229,24 @@ class Wishbone(Block, Metrics):
             return '0'
         else:
             return str(current_process().name)
+
+    def collectMetrics(self):
+        now = time()
+        metrics={"functions":{},"connectors":{}}
+
+        for module in self.modules:
+            metrics["functions"][self.modules[module].name]=self.modules[module].metrics
+
+        for connector in self.connectors:
+            metrics["connectors"][connector] = self.connectors[connector].hits
+
+        for instance in metrics["functions"]:
+            for function in metrics["functions"][instance]:
+                metrics["functions"][instance][function]["avg_time"]=round(metrics["functions"][instance][function]["total_time"]/metrics["functions"][instance][function]["hits"],6)
+                metrics["functions"][instance][function]["hits_per_sec"]=(metrics["functions"][instance][function]["hits"]-self.metric_cache["functions"].get(function,metrics["functions"][instance][function]["hits"]))
+                self.metric_cache["functions"][function]=metrics["functions"][instance][function]["hits"]
+        self.metric_cache["last_run"]=now
+        return metrics
 
 class Connector(Block):
     ''' A connector class which connects 2 queues to each other and takes care of shuffling the data between them.'''
