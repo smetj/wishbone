@@ -120,7 +120,7 @@ class BootStrap(Help):
                     modules.align["Module"] = "l"
                     for module in iter_entry_points(group=group):
                         modules.add_row(str(module).split(" = "))
-                    print "\nAvailable Wishbone modules in group %s\n"%(group)
+                    print "\nAvailable Wishbone modules in group %s:\n"%(group)
                     print modules
             else:
                 self.conf=self.readConfig(self.cli["config"])
@@ -139,7 +139,7 @@ class BootStrap(Help):
         parser.add_argument('--instances', dest='instances', default=1, help='The number of parallel instances to start.')
         parser.add_argument('--loglevel', dest='loglevel', default="info", help='The loglevel you want to use. [info,warn,crit,debug]')
         parser.add_argument('--pid', dest='pid', help='The absolute path of the pidfile.')
-        parser.add_argument('--group', dest='group', default="wishbone.iomodule,wishbone.module", help='The entry point group to list the modules from.')
+        parser.add_argument('--group', dest='group', default="wishbone.iomodule,wishbone.module,wishbone.metrics", help='The entry point group to list the modules from.')
         
         return vars(parser.parse_args())
 
@@ -195,14 +195,12 @@ class WishbBoneSkeleton():
             self.wb.start()
 
     def setup(self):
-        wb = Wishbone(  metrics=self.conf["metrics"].get("enable",False),
-                        metrics_dst=self.conf["metrics"].get("module","logging"),
-                        metrics_interval=self.conf["metrics"].get("interval",10)
-            )
+        wb = Wishbone()
         for module in self.conf["bootstrap"]:
-            wb.loadEntrypoint ( (self.conf["bootstrap"][module]["group"],self.conf["bootstrap"][module]["name"],module),
+            wb.loadModule ( (self.conf["bootstrap"][module]["group"],self.conf["bootstrap"][module]["module"],module),
                                 **self.conf["bootstrap"][module]["variables"]
             )
+        wb.loadMetric(self.conf.get("metrics",False))
         for source in self.conf["routingtable"]:
             for destination in self.conf["routingtable"][source]:
                 wb.connect(source,destination)
