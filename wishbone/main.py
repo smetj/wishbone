@@ -36,55 +36,6 @@ from sys import stderr
 from time import time
 from copy import deepcopy
 from time import time
-from prettytable import PrettyTable
-from os import system
-
-class Metrics():
-
-    def __init__(self):
-        self.metric_cache={"last_run":time(),"functions":{}}
-        if self.metrics_dst == 'logging':
-            self.doMetrics = self.logMetrics
-        if self.metrics_dst == 'table':
-            self.doMetrics = self.tableMetrics
-
-    def doMetrics(self):
-        while self.block():
-            self.logging.info(self.collectMetrics())
-            sleep(self.metrics_interval)
-
-    def tableMetrics(self):
-        while self.block():
-
-            dataset = self.collectMetrics()
-
-            func_table = PrettyTable(["Instance", "Function", "Total time", "Hits per second","Hits","Average time"])
-            func_table.align["Instance"] = "l"
-            func_table.align["Function"] = "l"
-            func_table.align["Total time"] = "r"
-            func_table.align["Hits per second"] = "r"
-            func_table.align["Hits"] = "r"
-            func_table.align["Average time"] = "r"
-
-            for instance in dataset["functions"]:
-                for function in dataset["functions"][instance]:
-                    func_table.add_row([instance, function, dataset["functions"][instance][function]["total_time"], dataset["functions"][instance][function]["hits_per_sec"], dataset["functions"][instance][function]["hits"], dataset["functions"][instance][function]["avg_time"]])
-
-            conn_table = PrettyTable(["Source","Destination","Hits"])
-            conn_table.align["Source"] = "l"
-            conn_table.align["Destination"] = "l"
-            conn_table.align["Hits"] = "r"
-
-            for connector in dataset["connectors"]:
-                direction = connector.split("->")
-                conn_table.add_row([direction[0],direction[1],dataset["connectors"][connector]])
-
-            #todo: has to be done differently
-            system('/usr/bin/clear')
-            stderr.write ("Function metrics:\n%s\n\nConnector metrics:\n%s\n"%(func_table, conn_table))
-            sleep(self.metrics_interval)
-
-    
 
 class Wishbone(Block):
     '''**The main class in which the Wishbone modules are registered and managed.**
@@ -98,7 +49,7 @@ class Wishbone(Block):
         * metrics_dst (str):            The destination to write metrics to: [logging]
     '''
 
-    def __init__(self, syslog=False, metric_settings={}):
+    def __init__(self, syslog=False):
         signal.signal(signal.SIGTERM, self.stop)
         self.logging = logging.getLogger( 'Wishbone' )
         self.logging.info("Wishbone version %s")
@@ -111,8 +62,9 @@ class Wishbone(Block):
     def loadMetric(self, settings):
         '''Loads the metric module if required.'''
         if settings != {} and settings["enable"] == True:
-            metric_module=self.loadEntrypoint(settings["group"],settings["module"])
-            
+            module=self.loadEntrypoint(settings["group"],settings["module"])
+            self.metric_module=module(**settings["variables"])
+            spawn(self.collectMetrics,settings["interval"])
         
     def loadModule(self, config, *args, **kwargs):
         '''Registers a Wishbone Module into the framework.  All modules used within Wishbone should be registered through this function.
@@ -187,12 +139,6 @@ class Wishbone(Block):
         for connector in self.connectors.keys():
             self.connectors[connector].start()
 
-        #if self.metrics == True:
-            #self.logging.debug('Metrics enabled')
-            #spawn(self.doMetrics)
-        #else:
-            #self.logging.debug('Metrics disabled.')
-
         while self.block():
             self.wait(0.1)
 
@@ -220,7 +166,6 @@ class Wishbone(Block):
                 pass
 
         #Now release ourselves
-        self.logging.info(self.collectMetrics())
         self.release()
 
     def getCurrentProcessName(self):
@@ -230,23 +175,25 @@ class Wishbone(Block):
         else:
             return str(current_process().name)
 
-    def collectMetrics(self):
-        now = time()
-        metrics={"functions":{},"connectors":{}}
+    def collectMetrics(self,interval):
+        while self.block() == True:
+            now = time()
+            metrics={"functions":{},"connectors":{}}
 
-        for module in self.modules:
-            metrics["functions"][self.modules[module].name]=self.modules[module].metrics
+            for module in self.modules:
+                metrics["functions"][self.modules[module].name]=self.modules[module].metrics
 
-        for connector in self.connectors:
-            metrics["connectors"][connector] = self.connectors[connector].hits
+            for connector in self.connectors:
+                metrics["connectors"][connector] = self.connectors[connector].hits
 
-        for instance in metrics["functions"]:
-            for function in metrics["functions"][instance]:
-                metrics["functions"][instance][function]["avg_time"]=round(metrics["functions"][instance][function]["total_time"]/metrics["functions"][instance][function]["hits"],6)
-                metrics["functions"][instance][function]["hits_per_sec"]=(metrics["functions"][instance][function]["hits"]-self.metric_cache["functions"].get(function,metrics["functions"][instance][function]["hits"]))
-                self.metric_cache["functions"][function]=metrics["functions"][instance][function]["hits"]
-        self.metric_cache["last_run"]=now
-        return metrics
+            for instance in metrics["functions"]:
+                for function in metrics["functions"][instance]:
+                    metrics["functions"][instance][function]["avg_time"]=round(metrics["functions"][instance][function]["total_time"]/metrics["functions"][instance][function]["hits"],6)
+                    metrics["functions"][instance][function]["hits_per_sec"]=(metrics["functions"][instance][function]["hits"]-self.metric_cache["functions"].get(function,metrics["functions"][instance][function]["hits"]))
+                    self.metric_cache["functions"][function]=metrics["functions"][instance][function]["hits"]
+            self.metric_cache["last_run"]=now
+            self.metric_module.do(metrics)
+            sleep(interval)
 
 class Connector(Block):
     ''' A connector class which connects 2 queues to each other and takes care of shuffling the data between them.'''
