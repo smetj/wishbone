@@ -29,6 +29,7 @@ import resource
 import argparse
 import signal
 from multiprocessing import Process
+from jsonschema import validate
 from time import sleep
 from os import getpid, kill, remove, path, getpid
 from signal import SIGTERM, SIGKILL
@@ -160,7 +161,9 @@ class BootStrap(Help):
             f = open(filename, "r")
             config = f.readlines()
             f.close()
-            return json.loads(''.join(config))
+            config = json.loads(''.join(config))
+            self.verifyConfig(config)
+            return config
         except Exception as err:
             print ('An error occurred when processing the config files. Reason: %s'%err)
             sys.exit(1)
@@ -171,6 +174,44 @@ class BootStrap(Help):
         elif loglevel == "info":
             return INFO
 
+    def verifyConfig(self,config):
+        schema={ 
+            "type":"object",
+            "additionalProperties":False,
+            "required":True,
+            "properties":{
+                "system":{
+                    "type":"object",
+                    "additionalProperties":False
+                    },
+                "metrics":{
+                    "type":"object",
+                    "additionalProperties":False,
+                    "required":True,
+                    "properties":{
+                        "enable":{
+                            "type":"boolean"
+                        },
+                        "group":{
+                            "type":"string"
+                        },
+                        "module":{
+                            "type":"string"
+                        },
+                        "interval":{
+                            "type":"integer"
+                        },
+                        "variables":{
+                            "type":"object"
+                        }
+                    }                        
+                },
+                "bootstrap":{"type":"object"},
+                "routingtable":{"type":"object"}
+            }
+        }
+        validate(config,schema)
+        
 class WishbBoneSkeleton():
     '''**Loads, initializes and connects the WishBone modules according to the 
     bootstrap configuration.**
