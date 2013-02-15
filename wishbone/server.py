@@ -189,7 +189,7 @@ class WishbBoneSkeleton():
         try:
             self.wb = self.setup()
         except Exception as err:
-            sys.stderr.write(str(err)+"\n")
+            sys.stderr.write("Wishbone library could not be initialized. Reason: %s\n"%str(err))
             sys.exit(1)
         else:
             self.wb.start()
