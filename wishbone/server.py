@@ -162,7 +162,7 @@ class BootStrap(Help):
             config = f.readlines()
             f.close()
             config = json.loads(''.join(config))
-            self.verifyConfig(config)
+            self.validateConfig(config)
             return config
         except Exception as err:
             print ('An error occurred when processing the config files. Reason: %s'%err)
@@ -174,7 +174,7 @@ class BootStrap(Help):
         elif loglevel == "info":
             return INFO
 
-    def verifyConfig(self,config):
+    def validateConfig(self,config):
         schema={ 
             "type":"object",
             "additionalProperties":False,
