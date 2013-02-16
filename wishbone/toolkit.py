@@ -24,12 +24,12 @@
 
 import signal, sys
 import logging
-import stopwatch
 from gevent import Greenlet, monkey
 from gevent.queue import Queue
 from gevent.event import Event
 from gevent import sleep
 from copy import deepcopy
+from time import time
 monkey.patch_all()
 
 class TimeFunctions(object):
@@ -37,27 +37,27 @@ class TimeFunctions(object):
     @classmethod
     def do(cls, fn):
         def do(self, *args, **kwargs):
-            t = stopwatch.Timer()
+            t = time()
             result = fn(self, *args, **kwargs)
-            t.stop()
+            elapsed=time()-t
             try:
                 self.metrics[fn.__name__]
             except:
                 self.metrics[fn.__name__]={"total_time":0,"hits":0}
-            self.metrics[fn.__name__]["total_time"] += round(t.elapsed,6)
+            self.metrics[fn.__name__]["total_time"] += round(elapsed,6)
             self.metrics[fn.__name__]["hits"] += 1
             return result
         return do
     
     def timeConsume(self, fn, data):
-        t = stopwatch.Timer()
+        t = time()
         result = fn(data)
-        t.stop()
+        elapsed=time()-t
         try:
             self.metrics[fn.__name__]
         except:
             self.metrics[fn.__name__]={"total_time":0,"hits":0}
-        self.metrics[fn.__name__]["total_time"] += round(t.elapsed,6)
+        self.metrics[fn.__name__]["total_time"] += round(elapsed,6)
         self.metrics[fn.__name__]["hits"] += 1
         return result
         
