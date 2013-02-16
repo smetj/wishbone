@@ -202,12 +202,44 @@ class BootStrap(Help):
                             "type":"integer"
                         },
                         "variables":{
-                            "type":"object"
+                            "type":"object",
+                            "additionalProperties":{
+                                "type":"string",
+                                "require":False
+                            }
                         }
                     }                        
                 },
-                "bootstrap":{"type":"object"},
-                "routingtable":{"type":"object"}
+                "bootstrap":{
+                    "type":"object",
+                    "required":True,
+                    "additionalProperties":{
+                        "type":"object",
+                        "required":True,
+                        "additionalProperties":False,
+                        "properties":{
+                            "group":{
+                                "type":"string"
+                            },
+                            "module":{
+                                "type":"string"
+                            },
+                            "variables":{
+                                "type":"object",
+                                "additionalProperties":{
+                                    "type":["string","integer","boolean"]
+                                }
+                            }
+                        }
+                    }
+                },
+                "routingtable":{
+                    "type":"object",
+                    "additionalProperties":{
+                        "type":"array",
+                        "require":True
+                    }
+                }
             }
         }
         validate(config,schema)
