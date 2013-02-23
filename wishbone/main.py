@@ -27,7 +27,8 @@ import signal
 from importlib import import_module
 from pkg_resources import iter_entry_points
 from gevent import spawn, sleep
-from gevent.queue import Queue
+#from gevent.queue import Queue
+from mx.Stack import Stack as Queue
 from gevent.event import Event
 from multiprocessing import current_process
 from string import lstrip
@@ -209,9 +210,12 @@ class Connector(Block):
     def connector(self, source, destination):
         '''Suffles data from source to destination.'''
         while self.block() == True:
-            self.proceed.wait()
-            destination.put(source.get())
-            self.hits += 1
+            while source:                
+                self.proceed.wait()
+                sleep(0)
+                destination.push(source.pop())
+                self.hits += 1
+            sleep(0.1)
 
     def start(self):
         self.proceed.set()
