@@ -25,7 +25,8 @@
 import signal, sys
 import logging
 from gevent import Greenlet, monkey
-from gevent.queue import Queue
+#from gevent.queue import Queue
+from mx.Stack import Stack as Queue
 from gevent.event import Event
 from gevent import sleep
 from copy import deepcopy
@@ -65,8 +66,8 @@ class QueueFunctions(TimeFunctions):
     '''A base class for Wishbone Actor classes.  Shouldn't be called directly but is inherited by PrimitiveActor.'''
     
     def __init__(self):
-        self.inbox = Queue(None)
-        self.outbox = Queue(None)
+        self.inbox = Queue()
+        self.outbox = Queue()
         self.metrics={}
     
     def sendData(self, data, queue='outbox'):
@@ -82,10 +83,10 @@ class QueueFunctions(TimeFunctions):
         
         if self.checkIntegrity(data):
             try:
-                getattr (self, queue).put ( data )
+                getattr (self, queue).push ( data )
             except:
                 setattr (self, queue, Queue)
-                getattr (self, queue).put ( data )
+                getattr (self, queue).push ( data )
         else:
             self.logging.warn('Invalid internal data structure detected. Data is purged. Turn on debugging to see datastructure.')
             self.logging.debug('Invalid data structure: %s' % (data))
@@ -97,13 +98,16 @@ class QueueFunctions(TimeFunctions):
         Allows you to bypass message integrity checking.  Its usage should be sparse, although it's usefull when you want to send data back 
         to a module as it would have come from the outside world.'''
         
-        getattr (self, queue).put ( deepcopy(data) )
+        getattr (self, queue).push ( deepcopy(data) )
     putRaw=sendRaw
     
     def getData(self, queue="inbox"):
-        '''Gets data from the queue.'''
-        data = getattr (self, queue).get()
-        return data
+        '''Gets data from the queue.  Blocks untill data is returned.'''
+        queue = getattr (self, queue)
+        while self.block() == True:
+            while not queue:
+                sleep(0.1)
+            return queue.pop()
                 
     def checkIntegrity(self, data):
         '''Checks the integrity of the messages passed over the different queues.
@@ -126,7 +130,7 @@ class QueueFunctions(TimeFunctions):
     def createQueue(self, name):
         
         try:
-            setattr(self,name,Queue(None))
+            setattr(self,name,Queue())
         except Exception as err:
             self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
 
