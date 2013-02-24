@@ -103,6 +103,7 @@ class QueueFunctions(TimeFunctions):
     
     def getData(self, queue="inbox"):
         '''Gets data from the queue.  Blocks untill data is returned.'''
+        
         queue = getattr (self, queue)
         while self.block() == True:
             while not queue:
