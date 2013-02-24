@@ -25,11 +25,9 @@
 import signal, sys
 import logging
 from gevent import Greenlet, monkey
-#from gevent.queue import Queue
 from mx.Stack import Stack as Queue
 from gevent.event import Event
 from gevent import sleep
-from copy import deepcopy
 from time import time
 monkey.patch_all()
 
@@ -98,7 +96,7 @@ class QueueFunctions(TimeFunctions):
         Allows you to bypass message integrity checking.  Its usage should be sparse, although it's usefull when you want to send data back 
         to a module as it would have come from the outside world.'''
         
-        getattr (self, queue).push ( deepcopy(data) )
+        getattr (self, queue).push ( data )
     putRaw=sendRaw
     
     def getData(self, queue="inbox"):
