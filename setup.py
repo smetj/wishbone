@@ -66,7 +66,7 @@ setup(
 
     provides=[],
     dependency_links = ['http://github.com/SiteSupport/gevent/tarball/master#egg=gevent-1.0rc1'],
-    install_requires=['gevent','python-daemon','egenix-mx-base','argparse'],
+    install_requires=['gevent','python-daemon','egenix-mx-base','argparse','importlib'],
     namespace_packages=[],
     packages=find_packages(),
     include_package_data=True,
