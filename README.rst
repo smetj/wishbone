@@ -11,6 +11,19 @@ How?
 In this context, "event pipelines" would be best described as a collection of isolated functions connected into a workflow through which events travel and change.
 This is done by shoveling events from one module's queue into the other in order to create a "flow-chart like" event pipeline. A Wishbone module follows the Unix philosophy of writing programs that do one thing and do it well. Within a Wishbone instance, the modules are running pseudo-concurrently using greenlets on top of a libevent event loop thanks to the the great Gevent library.  Wishbone also offers the possibility to start multiple concurrent processes each with a Wishbone (libevent) instance.
 
+Installing
+----------
+
+Through Pypi:
+
+	$ easy_install wishbone
+
+Or the latest development branch from Github:
+
+	$ git clone git@github.com:smetj/wishbone.git
+	$ cd wishbone
+	$ sudo python setup.py install
+
 Documentation
 -------------
 http://smetj.github.com/wishbone/docs/build/html/index.html
@@ -18,3 +31,7 @@ http://smetj.github.com/wishbone/docs/build/html/index.html
 Examples
 --------
 https://github.com/smetj/experiments/tree/master/python/wishbone
+
+Support
+-------
+Drop me an email or post a message on https://groups.google.com/forum/?fromgroups#!forum/python-wishbone
