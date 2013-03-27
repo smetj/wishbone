@@ -17,14 +17,19 @@ Example bootstrap file:
 
         {
            "system":{
-              "metrics":true,
-              "metrics_interval":10,
-              "metrics_dst":"logging"
+           },
+           "metrics":{
+              "enable":true,
+              "group":"wishbone.metrics",
+              "module":"Log",
+              "interval":5,
+              "variables":{
+              }
            },
            "bootstrap":{
               "broker":{
-                 "module":"wishbone.iomodules.broker",
-                 "class":"Broker",
+                 "group":"wishbone.iomodule",
+                 "module":"Broker",
                  "variables":{
                     "host":"localhost",
                     "vhost":"/",
@@ -36,8 +41,8 @@ Example bootstrap file:
                  }
               },
               "loopback":{
-                 "module":"wishbone.modules.brokerloopback",
-                 "class":"BrokerLoopback",
+                 "group":"wishbone.module",
+                 "module":"BrokerLoopback",
                  "variables":{
                     "key":"wishbone",
                     "exchange":"",
@@ -57,19 +62,25 @@ Example bootstrap file:
 
 .. _bootstrapfiles_system:
 
-**A bootstrap file consists out of 3 sections:**
+**A bootstrap file consists out of 4 sections:**
 
 system
 ------
 
-This is an optional section.  It allows to you to configure the characteristics of the Wishbone setup.
-Currently the available options here are:
+This is an optional section.  It is reserverd for future use.
+
+metrics
+-------
+
+The metrics section is obligatory.  It allows you to define a module which will handle the metrics.
 
 Parameters:
 
-- metrics (bool):               When true metrics are emitted every $metrics_interval seconds to $metrics_dst.
-- metrics_interval (int):       The interval in seconds between dumping metrics. Default 10 seconds.
-- metrics_dst (string):         Where to dump to metrics to. Default "logging". 
+- enable (bool):                When true, metrics are emitted.
+- group (string):               Defines the entrypoint group in which the module is stored.
+- module (string):              The name of the module (entrypoint).
+- interval (int):               The interval in seconds between dumping metrics. Default 10 seconds.
+- variables (dict):             Variables the module might require.
 
 bootstrap
 ---------
@@ -82,8 +93,8 @@ One section out consists out of following structure:
 .. code-block:: text
 
     "The instance name when initiated.":{
-                "module":"the name of the Python module to load",
-                "class":"The name of the Python class to load",
+                "group":"the name of the group containing the module. This is an entrypoint group.",
+                "module":"The name of the Wishbone module to load. (Entrypoint)",
                 "variables":{
                     "parameter1":x,
                     "parameter2":y,
