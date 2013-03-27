@@ -1,39 +1,7 @@
-# Sphinx inventory version 1
+# Sphinx inventory version 2
 # Project: Wishbone
 # Version: master
-wishbone.server mod module.html
-wishbone.iomodules.inputgenerator mod iomodules.html
-wishbone.main mod module.html
-wishbone.iomodules.udsserver mod iomodules.html
-wishbone.iomodules.namedpipeserver mod iomodules.html
-wishbone.iomodules.dumpdata mod iomodules.html
-wishbone.iomodules.broker mod iomodules.html
-wishbone.modules.tippingbucket mod modules.html
-wishbone.iomodules.udpserver mod iomodules.html
-wishbone.modules.skeleton mod modules.html
-wishbone.modules.jsonvalidator mod modules.html
-wishbone.iomodules.udsclient mod iomodules.html
-wishbone.iomodules.tcpclient mod iomodules.html
-wishbone.modules.brokerheader mod modules.html
-wishbone.modules.snappy mod modules.html
-wishbone.modules.gotmessage mod modules.html
-wishbone.modules.stdout mod modules.html
-wishbone.server.ParallelServer class module.html
-wishbone.server.WishbBoneSkeleton class module.html
-wishbone.iomodules.udsserver.UDSServer class iomodules.html
-wishbone.modules.skeleton.Skeleton class modules.html
-wishbone.modules.gotmessage.GotMessage class modules.html
-wishbone.iomodules.inputgenerator.InputGenerator class iomodules.html
-wishbone.server.BootStrap class module.html
-wishbone.modules.stdout.STDOUT class modules.html
-wishbone.iomodules.broker.Broker class iomodules.html
-wishbone.iomodules.dumpdata.DumpData class iomodules.html
-wishbone.modules.brokerheader.BrokerHeader class modules.html
-wishbone.iomodules.namedpipeserver.NamedPipeServer class iomodules.html
-wishbone.modules.snappy.Snappy class modules.html
-wishbone.iomodules.udpserver.UDPServer class iomodules.html
-wishbone.iomodules.tcpclient.TCPClient class iomodules.html
-wishbone.modules.jsonvalidator.JSONValidator class modules.html
-wishbone.main.Wishbone class module.html
-wishbone.iomodules.udsclient.UDSClient class iomodules.html
-wishbone.modules.tippingbucket.TippingBucket class modules.html
+# The remainder of this file is compressed using zlib.
+x⁄mã=
+Ä ÄwOÒ†VÉ÷∆∂Ü Ëñ/ûiP∑è–°ı˚±^'ÒÇeGbAﬁ¬~sõE££•
+F/OB^ƒ∫üÈ£˘Hi@q¨∫ÀŸúÇI(dã˜1ƒCÏõ!ÂT∫4◊–î=àËIc

@@ -1,26 +1,31 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Bootstrapfiles &mdash; Wishbone vmaster documentation</title>
+    <title>Bootstrapfiles &mdash; Wishbone master documentation</title>
+    
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
         VERSION:     'master',
-        COLLAPSE_MODINDEX: false,
+        COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Wishbone vmaster documentation" href="index.html" />
-    <link rel="next" title="Wishbone IOmodules" href="iomodules.html" />
+    <link rel="top" title="Wishbone master documentation" href="index.html" />
     <link rel="prev" title="Introduction" href="introduction.html" /> 
   </head>
   <body>
@@ -31,15 +36,9 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="modindex.html" title="Global Module Index"
-             accesskey="M">modules</a> |</li>
-        <li class="right" >
-          <a href="iomodules.html" title="Wishbone IOmodules"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
           <a href="introduction.html" title="Introduction"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Wishbone vmaster documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone master documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -58,14 +57,19 @@ It&#8217;s a practical way to deliver a fully configurable Wishbone based soluti
 <p>Example bootstrap file:</p>
 <div class="highlight-text"><div class="highlight"><pre>{
    &quot;system&quot;:{
-      &quot;metrics&quot;:true,
-      &quot;metrics_interval&quot;:10,
-      &quot;metrics_dst&quot;:&quot;logging&quot;
+   },
+   &quot;metrics&quot;:{
+      &quot;enable&quot;:true,
+      &quot;group&quot;:&quot;wishbone.metrics&quot;,
+      &quot;module&quot;:&quot;Log&quot;,
+      &quot;interval&quot;:5,
+      &quot;variables&quot;:{
+      }
    },
    &quot;bootstrap&quot;:{
       &quot;broker&quot;:{
-         &quot;module&quot;:&quot;wishbone.iomodules.broker&quot;,
-         &quot;class&quot;:&quot;Broker&quot;,
+         &quot;group&quot;:&quot;wishbone.iomodule&quot;,
+         &quot;module&quot;:&quot;Broker&quot;,
          &quot;variables&quot;:{
             &quot;host&quot;:&quot;localhost&quot;,
             &quot;vhost&quot;:&quot;/&quot;,
@@ -77,8 +81,8 @@ It&#8217;s a practical way to deliver a fully configurable Wishbone based soluti
          }
       },
       &quot;loopback&quot;:{
-         &quot;module&quot;:&quot;wishbone.modules.brokerloopback&quot;,
-         &quot;class&quot;:&quot;BrokerLoopback&quot;,
+         &quot;group&quot;:&quot;wishbone.module&quot;,
+         &quot;module&quot;:&quot;BrokerLoopback&quot;,
          &quot;variables&quot;:{
             &quot;key&quot;:&quot;wishbone&quot;,
             &quot;exchange&quot;:&quot;&quot;,
@@ -97,17 +101,22 @@ It&#8217;s a practical way to deliver a fully configurable Wishbone based soluti
 }
 </pre></div>
 </div>
-<p id="bootstrapfiles-system"><strong>A bootstrap file consists out of 3 sections:</strong></p>
+<p id="bootstrapfiles-system"><strong>A bootstrap file consists out of 4 sections:</strong></p>
 </div>
 <div class="section" id="system">
 <h2>system<a class="headerlink" href="#system" title="Permalink to this headline">¶</a></h2>
-<p>This is an optional section.  It allows to you to configure the characteristics of the Wishbone setup.
-Currently the available options here are:</p>
+<p>This is an optional section.  It is reserverd for future use.</p>
+</div>
+<div class="section" id="metrics">
+<h2>metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
+<p>The metrics section is obligatory.  It allows you to define a module which will handle the metrics.</p>
 <p>Parameters:</p>
 <ul class="simple">
-<li>metrics (bool):               When true metrics are emitted every $metrics_interval seconds to $metrics_dst.</li>
-<li>metrics_interval (int):       The interval in seconds between dumping metrics. Default 10 seconds.</li>
-<li>metrics_dst (string):         Where to dump to metrics to. Default &#8220;logging&#8221;.</li>
+<li>enable (bool):                When true, metrics are emitted.</li>
+<li>group (string):               Defines the entrypoint group in which the module is stored.</li>
+<li>module (string):              The name of the module (entrypoint).</li>
+<li>interval (int):               The interval in seconds between dumping metrics. Default 10 seconds.</li>
+<li>variables (dict):             Variables the module might require.</li>
 </ul>
 </div>
 <div class="section" id="bootstrap">
@@ -116,8 +125,8 @@ Currently the available options here are:</p>
 The modules should be loadable from the Python search path, otherwise Wishbone will not be able to load them.</p>
 <p>One section out consists out of following structure:</p>
 <div class="highlight-text"><div class="highlight"><pre>&quot;The instance name when initiated.&quot;:{
-            &quot;module&quot;:&quot;the name of the Python module to load&quot;,
-            &quot;class&quot;:&quot;The name of the Python class to load&quot;,
+            &quot;group&quot;:&quot;the name of the group containing the module. This is an entrypoint group.&quot;,
+            &quot;module&quot;:&quot;The name of the Wishbone module to load. (Entrypoint)&quot;,
             &quot;variables&quot;:{
                 &quot;parameter1&quot;:x,
                 &quot;parameter2&quot;:y,
@@ -132,11 +141,11 @@ The modules should be loadable from the Python search path, otherwise Wishbone w
 <p>The routing table determines which queues are connected to each other.</p>
 <p>Currently we have 2 kinds of connections:</p>
 <blockquote>
-<ul class="simple">
+<div><ul class="simple">
 <li>1-1   : The most standard connection. Events from 1 queue go into another queue.</li>
 <li>1-n   : 1 to many connection.  This duplicates the events from 1 queue to each queue it is connected to.</li>
 </ul>
-</blockquote>
+</div></blockquote>
 <p>The routing table has following format:</p>
 <div class="highlight-text"><div class="highlight"><pre>&quot;routingtable&quot;:{
     &quot;bootstrapInstanceName.queueName&quot;:[
@@ -157,41 +166,39 @@ The modules should be loadable from the Python search path, otherwise Wishbone w
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-            <h3><a href="index.html">Table Of Contents</a></h3>
-            <ul>
-<li><a class="reference external" href="#">Bootstrapfiles</a><ul>
-<li><a class="reference external" href="#introduction">Introduction</a></li>
-<li><a class="reference external" href="#system">system</a></li>
-<li><a class="reference external" href="#bootstrap">bootstrap</a></li>
-<li><a class="reference external" href="#routingtable">routingtable</a></li>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Bootstrapfiles</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#system">system</a></li>
+<li><a class="reference internal" href="#metrics">metrics</a></li>
+<li><a class="reference internal" href="#bootstrap">bootstrap</a></li>
+<li><a class="reference internal" href="#routingtable">routingtable</a></li>
 </ul>
 </li>
 </ul>
 
-            <h4>Previous topic</h4>
-            <p class="topless"><a href="introduction.html"
-                                  title="previous chapter">Introduction</a></p>
-            <h4>Next topic</h4>
-            <p class="topless"><a href="iomodules.html"
-                                  title="next chapter">Wishbone IOmodules</a></p>
-            <h3>This Page</h3>
-            <ul class="this-page-menu">
-              <li><a href="_sources/bootstrapfiles.txt"
-                     rel="nofollow">Show Source</a></li>
-            </ul>
-          <div id="searchbox" style="display: none">
-            <h3>Quick search</h3>
-              <form class="search" action="search.html" method="get">
-                <input type="text" name="q" size="18" />
-                <input type="submit" value="Go" />
-                <input type="hidden" name="check_keywords" value="yes" />
-                <input type="hidden" name="area" value="default" />
-              </form>
-              <p class="searchtip" style="font-size: 90%">
-              Enter search terms or a module, class or function name.
-              </p>
-          </div>
-          <script type="text/javascript">$('#searchbox').show(0);</script>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="introduction.html"
+                        title="previous chapter">Introduction</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/bootstrapfiles.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -203,20 +210,14 @@ The modules should be loadable from the Python search path, otherwise Wishbone w
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="modindex.html" title="Global Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="iomodules.html" title="Wishbone IOmodules"
-             >next</a> |</li>
-        <li class="right" >
           <a href="introduction.html" title="Introduction"
              >previous</a> |</li>
-        <li><a href="index.html">Wishbone vmaster documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone master documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-      &copy; Copyright 2012, Jelle Smet.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.6.
+        &copy; Copyright 2012, Jelle Smet.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
