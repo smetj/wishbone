@@ -72,9 +72,10 @@ class Help():
                                 info, warning, critical, debug
 
             --pid           Defines the location of the pidfile.
+                            The default value is /tmp/%s.pid
             
-            --group         The name of the module group to list modules from.'''
-        print "                            The default value is /tmp/%s.pid"%self.name
+            --group         The name of the module group to list modules from.'''%(self.name)
+
         if self.support != '':
             print '''
 

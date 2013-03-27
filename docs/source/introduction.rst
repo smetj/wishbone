@@ -2,7 +2,7 @@
 Introduction
 ============
 
-A Wishbone Event Pipeline Setup typically receives data from a source such as an UDP listener or a message broker like RabbitMQ.  The incoming data then travels a set of modules, each with a specific function, after which the data exits to a destination.
+A Wishbone event pipeline setup typically receives data from some external source such as an UDP server or a message broker like RabbitMQ.  The incoming data then travels a set of modules, each with a specific function, after which the data exits to a destination.
 
 Wishbone can bootstrap an event pipeline setups using a configuration file, which allows you to easily alter the configuration of your setup.
 The Parallelserver implementation allows you to start, stop and daemonize one or multiple parallel setups using a bootstrap configuration file.
@@ -19,16 +19,23 @@ When the modules are loaded into the WishBone and the setup has started then the
 Although it's not necessarily a strict rule, we could say there are 2 types of modules:
 
 - IOmodules:
- - Receive/submit messages from/to outside the Wishbone framework.
- - Should not alter events or data.
- - Responsible to convert data coming from the outside into the correct Wishbone format.
+ - Receive data from or submit data outside the Wishbone framework.
+ - Responsible to convert data coming from the outside into the correct internal Wishbone format.
 
 - Modules:
  - Receive, process and submit events to other modules.
 
 You can find an example for a basic module here:
 
-`<https://github.com/smetj/wishbone/blob/master/wishbone/modules/stdout.py>`_
+`<https://github.com/smetj/wishboneModules/blob/master/modules/wb_stdout/wb_stdout/stdout.py>`_
+
+Modules are made available to Wishbone by creating an entrypoint in either the wishbone.module or wishbone.iomodule entrypoint group.
+Here you can find an example setup.py which installs a module and adds an entrypoint for Wishbone to work with:
+
+`<https://github.com/smetj/wishboneModules/blob/master/modules/wb_stdout/setup.py>`_
+
+You can use the "list" server command to list all modules available to Wishbone.
+
 
 Routing
 -------
@@ -83,25 +90,33 @@ Argument parsing.
 
         This setup generates a feedback loop to the RabbitMQ message broker.
 
-        ./brokertest command --config file [--instances number] [--loglevel level] [--pid filename]
+        /usr/bin/brokertest command --config file [--instances number] [--loglevel level] [--pid filename] [--group groupname]
 
-            Commands:
 
-                       start           Starts and daemonizes the program into the background.
-                       stop            Stops a daemonized instance.
-                       debug           Starts the program in the foreground without detaching.
+        Commands:
 
-            Parameters:
-                       --config        The filename of the bootstrap config file.
+            start           Starts and daemonizes the program into the background.
+            stop            Stops a daemonized instance.
+            debug           Starts the program in the foreground without detaching.
+            kill            Kills the daemonized instance.
+            list            Lists the available Wishbone modules in group
 
-                       --instances     The number of parallel instances to start. Default is 1.
+        Parameters:
 
-                       --loglevel      Defines the loglevel to use. Default is "info"
-                                       Possible values are:
-                                          info, warning, critical, debug
+            --config        The filename of the bootstrap config file.
 
-                       --pid           Defines the location of the pidfile.
-                                       The default value is /tmp/BrokerTest.pid
+            --instances     The number of parallel instances to start. Default is 1.
+
+            --loglevel      Defines the loglevel to use. Default is "info".
+                            Possible values are:
+                                info, warning, critical, debug
+
+            --pid           Defines the location of the pidfile.
+                            The default value is /tmp/PySeps.pid
+            
+            --group         The name of the module group to list modules from.
+                            
+
                      
                                       
             Support: https://groups.google.com/forum/?fromgroups=#!forum/python-wishbone
@@ -122,11 +137,15 @@ Bootstrapping
 -------------
 
 :class:`wishbone.server.ParallelServer` reads the configuration file (using the --config parameter) and starts a setup according to the configuration.
-The configuration file (bootstrap file) is in JSON format and consists out of 3 big parts:
+The configuration file (bootstrap file) is in JSON format and consists out of 4 big parts:
 
 - system
 
-  Contains settings which control the behaviour of the complete setup.
+  Optional and currently unused.  Reserved for future usage.
+  
+- metrics  
+  
+  Contains settings which controls how the internal metrics are handled.
 
 - bootstrap
 
