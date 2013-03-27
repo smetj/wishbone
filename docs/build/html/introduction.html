@@ -80,10 +80,12 @@ The framework takes care of forwarding the content the outbox queue to the next 
 <li>Receive, process and submit events to other modules.</li>
 </ul>
 </div></blockquote>
+<p>The Wishbone modules are hosted on Github:</p>
+<p><a class="reference external" href="https://github.com/smetj/wishboneModules">https://github.com/smetj/wishboneModules</a></p>
 <p>You can find an example for a basic module here:</p>
 <p><a class="reference external" href="https://github.com/smetj/wishboneModules/blob/master/modules/wb_stdout/wb_stdout/stdout.py">https://github.com/smetj/wishboneModules/blob/master/modules/wb_stdout/wb_stdout/stdout.py</a></p>
-<p>Modules are made available to Wishbone by creating an entrypoint in either the wishbone.module or wishbone.iomodule entrypoint group.
-Here you can find an example setup.py which installs a module and adds an entrypoint for Wishbone to work with:</p>
+<p>Modules are installed and available to Wishbone by creating an entrypoint.
+Here you can find an example setup.py which installs a module named STDOUT in the wishbone.module group:</p>
 <p><a class="reference external" href="https://github.com/smetj/wishboneModules/blob/master/modules/wb_stdout/setup.py">https://github.com/smetj/wishboneModules/blob/master/modules/wb_stdout/setup.py</a></p>
 <p>You can use the &#8220;list&#8221; server command to list all modules available to Wishbone.</p>
 <div class="section" id="routing">

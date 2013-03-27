@@ -25,12 +25,17 @@ Although it's not necessarily a strict rule, we could say there are 2 types of m
 - Modules:
  - Receive, process and submit events to other modules.
 
+The Wishbone modules are hosted on Github:
+
+`<https://github.com/smetj/wishboneModules>`_
+
+
 You can find an example for a basic module here:
 
 `<https://github.com/smetj/wishboneModules/blob/master/modules/wb_stdout/wb_stdout/stdout.py>`_
 
-Modules are made available to Wishbone by creating an entrypoint in either the wishbone.module or wishbone.iomodule entrypoint group.
-Here you can find an example setup.py which installs a module and adds an entrypoint for Wishbone to work with:
+Modules are installed and available to Wishbone by creating an entrypoint.
+Here you can find an example setup.py which installs a module named STDOUT in the wishbone.module group:
 
 `<https://github.com/smetj/wishboneModules/blob/master/modules/wb_stdout/setup.py>`_
 
