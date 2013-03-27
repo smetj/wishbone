@@ -21,7 +21,9 @@ Through Pypi:
 Or the latest development branch from Github:
 
 	$ git clone git@github.com:smetj/wishbone.git
+
 	$ cd wishbone
+	
 	$ sudo python setup.py install
 
 Documentation
