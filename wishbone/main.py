@@ -119,18 +119,12 @@ class Wishbone(Block):
         (src_class,src_queue)=source.split('.')
         (dst_class,dst_queue)=destination.split('.')
 
-        try:
-            self.modules[src_class].createQueue(src_queue)
-            self.logging.debug('Queue %s created for module %s'%(src_queue, src_class))
-        except:
-            pass
-        try:
-            self.modules[dst_class].createQueue(dst_queue)
-            self.logging.debug('Queue %s created for module %s'%(dst_queue, dst_class))
-        except:
-            pass
+        self.modules[src_class].createQueue(src_queue)
         src_queue = getattr(self.modules[src_class],src_queue)
+
+        self.modules[dst_class].createQueue(dst_queue)
         dst_queue = getattr(self.modules[dst_class],dst_queue)
+
         name = "%s->%s"%(source,destination)
         self.connectors[name] = Connector(name, src_queue, dst_queue)
 
