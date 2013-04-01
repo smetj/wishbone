@@ -40,7 +40,7 @@ from time import time
 
 class Wishbone(Block):
     '''**The main class in which the Wishbone modules are registered and managed.**
-    
+
 
     Parameters:
 
@@ -66,7 +66,7 @@ class Wishbone(Block):
             module=self.loadEntrypoint(settings["group"],settings["module"])
             self.metric_module=module(**settings["variables"])
             spawn(self.collectMetrics,settings["interval"])
-        
+
     def loadModule(self, config, *args, **kwargs):
         '''Registers a Wishbone Module into the framework.  All modules used within Wishbone should be registered through this function.
 
@@ -87,7 +87,7 @@ class Wishbone(Block):
         group_name = config[0]
         class_name = config[1]
         name = config[2]
-        
+
         module = self.loadEntrypoint(group_name, class_name)
         self.modules[name]=module('Intance #%s:%s'%(self.getCurrentProcessName(),name), *args, **kwargs)
         try:
@@ -97,7 +97,7 @@ class Wishbone(Block):
             self.modules[name].outbox
         except:
             raise Exception("You might have to load QueueFunctions base class into this class.")
-            
+
     def loadEntrypoint(self, group_name, class_name):
         try:
             loaded_module=None
@@ -118,6 +118,17 @@ class Wishbone(Block):
 
         (src_class,src_queue)=source.split('.')
         (dst_class,dst_queue)=destination.split('.')
+
+        try:
+            self.modules[src_class].createQueue(src_queue)
+            self.logging.debug('Queue %s created for module %s'%(src_queue, src_class))
+        except:
+            pass
+        try:
+            self.modules[dst_class].createQueue(dst_queue)
+            self.logging.debug('Queue %s created for module %s'%(dst_queue, dst_class))
+        except:
+            pass
         src_queue = getattr(self.modules[src_class],src_queue)
         dst_queue = getattr(self.modules[dst_class],dst_queue)
         name = "%s->%s"%(source,destination)
@@ -210,7 +221,7 @@ class Connector(Block):
     def connector(self, source, destination):
         '''Suffles data from source to destination.'''
         while self.block() == True:
-            while source:                
+            while source:
                 self.proceed.wait()
                 sleep(0)
                 destination.push(source.pop())
