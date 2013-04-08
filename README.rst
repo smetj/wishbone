@@ -3,13 +3,25 @@ WishBone
 
 What?
 -----
-A Python library to easily write coroutine based event pipeline solutions.
+
+A Python library to write asynchronous event pipeline servers with minimal
+effort.
 
 How?
 ----
 
-In this context, "event pipelines" would be best described as a collection of isolated functions connected into a workflow through which events travel and change.
-This is done by shoveling events from one module's queue into the other in order to create a "flow-chart like" event pipeline. A Wishbone module follows the Unix philosophy of writing programs that do one thing and do it well. Within a Wishbone instance, the modules are running pseudo-concurrently using greenlets on top of a libevent event loop thanks to the the great Gevent library.  Wishbone also offers the possibility to start multiple concurrent processes each with a Wishbone (libevent) instance.
+The WishBone Python library offers a framework to write asynchronous event
+pipeline servers with minimal effort.
+
+In this context, event pipelines are best described as a collection of
+concurrent modules which consume, process and produce events to their
+respective queues. The Wishbone module queues are connected to one another
+forming a pipeline through which events travel.  One or more interconnected
+Wishbone modules form a Wishbone Server. Wishbone servers can be configured
+and controlled from from command line using bootstrap files.  Bootstrap files
+allow to easily cherry-pick Wishbone modules and to define how events travel
+through them.  Multiple identical Wishbone instances can be started offering
+parallel execution.
 
 Installing
 ----------
@@ -23,7 +35,7 @@ Or the latest development branch from Github:
 	$ git clone git@github.com:smetj/wishbone.git
 
 	$ cd wishbone
-	
+
 	$ sudo python setup.py install
 
 Documentation
@@ -36,4 +48,6 @@ https://github.com/smetj/experiments/tree/master/python/wishbone
 
 Support
 -------
-Drop me an email or post a message on https://groups.google.com/forum/?fromgroups#!forum/python-wishbone
+
+Drop me an email or post a message on
+https://groups.google.com/forum/?fromgroups#!forum/python-wishbone
