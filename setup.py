@@ -78,4 +78,9 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
+    entry_points={
+        'console_scripts': [
+        'wisbhone = wishbone.instance:main'
+            ]
+    },
 )
