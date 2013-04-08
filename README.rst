@@ -4,7 +4,7 @@ WishBone
 What?
 -----
 
-A Python library to write asynchronous pipeline servers with minimal
+A Python library to write asynchronous event pipeline servers with minimal
 effort.
 
 How?
