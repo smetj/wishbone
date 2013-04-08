@@ -53,7 +53,8 @@ Once Wishbone is installed you can try to execute it:
 
 	The default Wisbone server.
 
-	/usr/bin/wisbhone command --config file [--instances number] [--loglevel level] [--pid filename] [--group groupname]
+	/usr/bin/wisbhone command --config file [--instances number] [--loglevel level]
+	[--pid filename] [--group groupname]
 
 
 	        Commands:
