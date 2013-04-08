@@ -93,9 +93,6 @@ Once Wishbone is installed you can try to execute it:
 Using the list command you can check which Wishbone modules you have installed
 and available.
 
-If you don't have any Wishbone modules installed yet please visit
-https://github.com/smetj/wishboneModules
-
 ::
 
 	[smetj@indigo ~]$ wisbhone list
@@ -141,6 +138,8 @@ https://github.com/smetj/wishboneModules
 
 	[smetj@indigo ~]$
 
+If you don't have any Wishbone modules installed yet please visit
+https://github.com/smetj/wishboneModules
 
 Have a look on
 https://github.com/smetj/experiments/tree/master/python/wishbone for example
