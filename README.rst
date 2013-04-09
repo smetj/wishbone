@@ -48,7 +48,7 @@ Once Wishbone is installed you can try to execute it:
 
 ::
 
-	[smetj@indigo ~]$ wisbhone
+	[smetj@indigo ~]$ wishbone
 	Wishbone version 0.1                                          	Jelle Smet
 
 	The default Wisbone server.
@@ -95,7 +95,7 @@ and available.
 
 ::
 
-	[smetj@indigo ~]$ wisbhone list
+	[smetj@indigo ~]$ wishbone list
 
 	Available Wishbone modules in group wishbone.iomodule:
 
