@@ -80,7 +80,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-        'wisbhone = wishbone.instance:main'
+        'wishbone = wishbone.instance:main'
             ]
     },
 )
