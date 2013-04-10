@@ -73,7 +73,7 @@ class Help():
 
             --pid           Defines the location of the pidfile.
                             The default value is /tmp/%s.pid
-            
+
             --group         The name of the module group to list modules from.'''%(self.name)
 
         if self.support != '':
@@ -86,13 +86,13 @@ Support:
 
 class BootStrap(Help):
     '''**Bootstraps a Wishbone setup using the received configuration.**
-            
+
     Takes care of parsing arguments from command line, reading the bootstrap file
     and initializing the ParallelServer class with the WishboneSkeleton class.
     The accepted parameters are used in the --help output on the CLI.
-    
+
     Parameters:
-    
+
         - name (str):           The name of the WishBone setup.
         - version (str):        The version of the WishBone setup.
         - description (str):    A brief description explaining the setup.
@@ -132,7 +132,7 @@ class BootStrap(Help):
 
     def parseArguments(self):
         '''Parses the CLI arguments.'''
-        
+
         parser = argparse.ArgumentParser(add_help=False)
         parser.error = self.error
         parser.add_argument('command', nargs=1, help='Which command to issue.  start, stop, kill, debug or list.')
@@ -142,14 +142,14 @@ class BootStrap(Help):
         parser.add_argument('--loglevel', dest='loglevel', default="info", help='The loglevel you want to use. [info,warn,crit,debug]')
         parser.add_argument('--pid', dest='pid', help='The absolute path of the pidfile.')
         parser.add_argument('--group', dest='group', default="wishbone.iomodule,wishbone.module,wishbone.metrics", help='The entry point group to list the modules from.')
-        
+
         return vars(parser.parse_args())
 
     def initializeParallelserver(self):
         '''Initializes the parallelserver instance'''
-        
+
         ParallelServer( instances=int(self.cli['instances']),
-                    setup=WishbBoneSkeleton,    
+                    setup=WishbBoneSkeleton,
                     setup_args=[self.conf],
                     command=self.cli['command'][0],
                     name=self.name,
@@ -176,7 +176,7 @@ class BootStrap(Help):
             return INFO
 
     def validateConfig(self,config):
-        schema={ 
+        schema={
             "type":"object",
             "additionalProperties":False,
             "required":True,
@@ -209,7 +209,7 @@ class BootStrap(Help):
                                 "require":False
                             }
                         }
-                    }                        
+                    }
                 },
                 "bootstrap":{
                     "type":"object",
@@ -244,18 +244,18 @@ class BootStrap(Help):
             }
         }
         validate(config,schema)
-        
+
 class WishbBoneSkeleton():
-    '''**Loads, initializes and connects the WishBone modules according to the 
+    '''**Loads, initializes and connects the WishBone modules according to the
     bootstrap configuration.**
-    
+
     This class is responsible for loading and initializing the WishBone classes
     using the parameter values defined in the bootstrap file.  This class is also
     responsible for creating the module connections.
-    
+
     Parameters:
-    
-            - conf (dict):      A dictionary containing the bootstrap config file.    
+
+            - conf (dict):      A dictionary containing the bootstrap config file.
     '''
 
     def __init__(self, conf):
@@ -282,7 +282,7 @@ class WishbBoneSkeleton():
 
 class ParallelServer(ConfigureLogging):
     '''**Handles starting, stopping and daemonizing of one or multiple Wishbone instances.**
-    
+
     ParallelServer handles the work related to starting, stopping, backgrounding
     the WishBone setup.
 
@@ -364,15 +364,15 @@ class ParallelServer(ConfigureLogging):
 
     def sendStop(self, a, b):
         '''Stops the environment by sending sigint to all processes'''
-        
+
         for process in self.processes:
             process.terminate()
             process.join()
-        self.block=False       
-    
+        self.block=False
+
     def stop(self):
         '''Stops the environment.'''
-        
+
         self.logging.info('SIGINT received. Stopping processes gracefully.')
         myself = getpid()
         for pid in self.stopPid(self.pidfile):
@@ -401,7 +401,7 @@ class ParallelServer(ConfigureLogging):
             kill(int(pid),SIGTERM)
         except:
             pass
-    
+
     def sendSIGKILL(self, pid):
         '''Sends sigkill signal to the pid.'''
         try:

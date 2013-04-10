@@ -24,10 +24,9 @@
 
 import signal, sys
 import logging
-from gevent import Greenlet, monkey
-from mx.Stack import Stack as Queue
+from gevent import Greenlet, monkey, sleep, spawn
 from gevent.event import Event
-from gevent import sleep
+from mx.Stack import Stack as Queue
 from time import time
 monkey.patch_all()
 
@@ -67,6 +66,7 @@ class QueueFunctions(TimeFunctions):
         self.inbox = Queue()
         self.outbox = Queue()
         self.metrics={}
+        self.registered_consumers=[]
 
     def sendData(self, data, queue='outbox'):
         '''Submits data to one of the module its queues.
@@ -127,11 +127,19 @@ class QueueFunctions(TimeFunctions):
             return False
 
     def createQueue(self, name):
+        '''Creates a queue.
+        '''
 
         try:
             setattr(self,name,Queue())
         except Exception as err:
             self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
+
+    def registerConsumer(self, queue, f):
+        '''
+        Registers a function to consume the content of a queue.
+        '''
+        self.registered_consumers.append((queue,f))
 
 class Block():
     '''A base class providing a global lock.'''
@@ -177,15 +185,19 @@ class PrimitiveActor(Greenlet, QueueFunctions, Block):
         self.name=name
         self.metrics={}
         self.logging = logging.getLogger( name )
+        self.registerConsumer("inbox",self.consume)
         self.logging.info('Initiated.')
 
     def _run(self):
         self.logging.info('Started.')
+        for rc in self.registered_consumers:
+            spawn(self.__consumer,rc[0],rc[1])
+        self.wait()
+
+    def __consumer(self, q, f):
+        self.logging.info("Queue %s is consumed by function %s"%(q,f.__name__))
         while self.block() == True:
-            data = self.getData("inbox")
-            #self.timeConsume(self.consume, data)
-            self.consume(data)
-        self.release()
+            f((self.getData(q)))
 
     def consume(self, *args, **kwargs):
         '''A function which should be overridden by the Wishbone module.
