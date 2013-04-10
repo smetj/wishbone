@@ -90,6 +90,7 @@ class Wishbone(Block):
 
         module = self.loadEntrypoint(group_name, class_name)
         self.modules[name]=module('Intance #%s:%s'%(self.getCurrentProcessName(),name), *args, **kwargs)
+
         try:
             #Do a couple of checks to see whether the loaded module is compliant.
             #todo: Flesh out checks.
