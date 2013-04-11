@@ -24,7 +24,7 @@
 
 PROJECT = 'wishbone'
 
-VERSION = '0.3.0'
+VERSION = '0.3.1beta'
 
 
 from setuptools import setup, find_packages
