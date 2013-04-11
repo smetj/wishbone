@@ -98,15 +98,17 @@ class BootStrap(Help):
         - description (str):    A brief description explaining the setup.
         - author (str):         The name of the author.
         - support (str):        Contains support information.  When emty, no support information is shown.
+        - groups (list):        A list of entrypoints to show.  What has been defined with --group will be included.
     '''
 
-    def __init__(self,name="WishBone", version="n/a", description="A WishBone event pipeline setup.", author="Unknown", support=""):
+    def __init__(self,name="WishBone", version="n/a", description="A WishBone event pipeline setup.", author="Unknown", support="", groups=[]):
 
         self.name=name
         self.version=version
         self.description=description
         self.author=author
         self.support=support
+        self.groups=groups
         self.allowed_commands=[ "start","stop","debug","kill","list" ]
         self.cli=self.parseArguments()
         self.conf=None
@@ -116,7 +118,7 @@ class BootStrap(Help):
     def do(self):
         if self.cli['command'][0] in self.allowed_commands:
             if self.cli['command'][0] == "list":
-                for group in self.cli['group'].split(','):
+                for group in self.groups+self.cli['group'].split(','):
                     modules = PrettyTable(["Entry Point","Module"])
                     modules.align["Entry Point"] = "l"
                     modules.align["Module"] = "l"
