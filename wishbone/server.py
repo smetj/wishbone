@@ -207,7 +207,6 @@ class BootStrap(Help):
                         "variables":{
                             "type":"object",
                             "additionalProperties":{
-                                "type":"string",
                                 "require":False
                             }
                         }
