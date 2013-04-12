@@ -229,7 +229,7 @@ class BootStrap(Help):
                             "variables":{
                                 "type":"object",
                                 "additionalProperties":{
-                                    "type":["string","integer","boolean"]
+                                    "type":["string","integer","boolean","array"]
                                 }
                             }
                         }
@@ -360,8 +360,11 @@ class ParallelServer(ConfigureLogging):
         self.writePids(self.collectPids())
         self.logging.info('Started with pids: %s' % ', '.join(map(str, self.pids)))
         while self.block:
-            sleep(1)
-        self.removePids()
+            try:
+                sleep(1)
+            except KeyboardInterrupt:
+                self.block=False
+                self.removePids()
 
     def sendStop(self, a, b):
         '''Stops the environment by sending sigint to all processes'''
