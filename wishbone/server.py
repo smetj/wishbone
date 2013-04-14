@@ -23,6 +23,13 @@
 #
 
 import daemon
+try:
+    daemon.DaemonContext
+except:
+    print ("It looks like you don't have the right daemon version installed.")
+    print ("This version should be installed: https://pypi.python.org/pypi/python-daemon")
+    raise Exception
+
 import json
 import sys
 import resource
