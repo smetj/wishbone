@@ -363,8 +363,8 @@ class ParallelServer(ConfigureLogging):
             try:
                 sleep(1)
             except KeyboardInterrupt:
-                self.block=False
-                self.removePids()
+                self.sendStop(None, None)
+                #self.stop()
 
     def sendStop(self, a, b):
         '''Stops the environment by sending sigint to all processes'''
