@@ -153,8 +153,7 @@ class Wishbone(Block):
         for connector in self.connectors.keys():
             self.connectors[connector].start()
 
-        while self.block():
-            self.wait(0.1)
+        self.wait()
 
     def stop(self,a,b):
         '''Function which stops all registered Wishbone modules.
@@ -223,8 +222,8 @@ class Connector(Block):
 
     def __init__(self,name, source, destination):
         Block.__init__(self)
-        self.proceed=Event()
-        self.proceed.set()
+        # self.proceed=Event()
+        # self.proceed.set()
         spawn (self.connector, source, destination)
         self.name=name
         self.hits = 0
@@ -233,22 +232,23 @@ class Connector(Block):
         '''Suffles data from source to destination.'''
         while self.block() == True:
             while source:
-                self.proceed.wait()
+                #self.proceed.wait()
                 sleep(0)
                 destination.push(source.pop())
                 self.hits += 1
             sleep(0.1)
 
     def start(self):
-        self.proceed.set()
+        pass
+        # self.proceed.set()
 
-    def pause(self):
-        self.logging.info('Connector %s set to pause')
-        self.proceed.clear()
+    # def pause(self):
+    #     self.logging.info('Connector %s set to pause')
+    #     self.proceed.clear()
 
-    def unpause(self):
-        self.logging.info('Connector %s set to unpause.')
-        self.proceed.set()
+    # def unpause(self):
+    #     self.logging.info('Connector %s set to unpause.')
+    #     self.proceed.set()
 
     def stop(self):
         self.release()
