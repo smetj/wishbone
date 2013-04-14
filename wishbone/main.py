@@ -37,6 +37,9 @@ from sys import stderr
 from time import time
 from copy import deepcopy
 from time import time
+from os import environ
+if environ.has_key("wishbone_profiler"):
+    import gevent_profiler
 
 class Wishbone(Block):
     '''**The main class in which the Wishbone modules are registered and managed.**
@@ -50,7 +53,7 @@ class Wishbone(Block):
         * metrics_dst (str):            The destination to write metrics to: [logging]
     '''
 
-    def __init__(self, syslog=False):
+    def __init__(self, syslog=False, trace=True):
         signal.signal(signal.SIGTERM, self.stop)
         self.logging = logging.getLogger( 'Wishbone' )
         self.logging.info("Wishbone version %s")
@@ -58,6 +61,7 @@ class Wishbone(Block):
         self.modules={}
         self.connectors={}
         self.metric_cache={"last_run":time(),"functions":{}}
+        self.trace=trace
         self.run=self.start
 
     def loadMetric(self, settings):
@@ -137,6 +141,9 @@ class Wishbone(Block):
         This function blocks from exiting.
         '''
 
+        if environ.has_key("wishbone_profiler"):
+            self.__setupTrace()
+
         for module in self.modules:
             try:
                 self.modules[module].start()
@@ -172,6 +179,9 @@ class Wishbone(Block):
             except:
                 pass
 
+        if environ.has_key("wishbone_profiler"):
+            gevent_profiler.detach()
+
         #Now release ourselves
         self.release()
 
@@ -201,6 +211,12 @@ class Wishbone(Block):
             self.metric_cache["last_run"]=now
             self.metric_module.do(metrics)
             sleep(interval)
+
+    def __setupTrace(self):
+        gevent_profiler.set_stats_output("/tmp/wishbone_%s.stats"%(self.getCurrentProcessName()))
+        gevent_profiler.set_summary_output("/tmp/wishbone_%s.summary"%(self.getCurrentProcessName()))
+        gevent_profiler.set_trace_output("/tmp/wishbone_%s.trace"%(self.getCurrentProcessName()))
+        gevent_profiler.attach()
 
 class Connector(Block):
     ''' A connector class which connects 2 queues to each other and takes care of shuffling the data between them.'''
