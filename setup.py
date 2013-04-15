@@ -34,7 +34,7 @@ from fnmatch import fnmatchcase
 import os
 import sys
 
-install_requires=['gevent','python-daemon','egenix-mx-base','argparse']
+install_requires=['gevent>=1.0dev','python-daemon','egenix-mx-base','argparse']
 
 try:
     import importlib
@@ -72,7 +72,7 @@ setup(
     scripts=[],
 
     provides=[],
-    dependency_links=['http://github.com/SiteSupport/gevent/tarball/master#egg=gevent-1.0rc1'],
+    dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.0dev'],
     install_requires=install_requires,
     namespace_packages=[],
     packages=find_packages(),
