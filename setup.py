@@ -24,7 +24,7 @@
 
 PROJECT = 'wishbone'
 
-VERSION = '0.3.1'
+VERSION = '0.3.2beta'
 
 
 from setuptools import setup, find_packages
@@ -50,7 +50,7 @@ setup(
     name=PROJECT,
     version=VERSION,
 
-    description='A Python library to easily write coroutine based event pipeline solutions.',
+    description='A Python library to write asynchronous event pipeline servers with minimal effort.',
     long_description=long_description,
 
     author='Jelle Smet',
