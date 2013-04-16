@@ -1,6 +1,12 @@
 Wishbone changelog
 ==================
 
+Version 0.32
+~~~~~~~~~~~~
+
+- Enforce JSON validate Draft3 when a recent version of jsonschema is
+  installed.
+
 Version 0.31
 ~~~~~~~~~~~~
 

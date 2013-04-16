@@ -36,7 +36,10 @@ import resource
 import argparse
 import signal
 from multiprocessing import Process
-from jsonschema import validate
+try:
+    from jsonschema import Draft3Validator as validate
+except:
+    from jsonschema import validate
 from time import sleep
 from os import getpid, kill, remove, path, getpid
 from signal import SIGTERM, SIGKILL
