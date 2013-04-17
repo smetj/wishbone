@@ -70,11 +70,11 @@ class Help():
             stop            Stops a daemonized instance.
             debug           Starts the program in the foreground without detaching.
             kill            Kills the daemonized instance.
-            list            Lists the available Wishbone modules in group
+            list            Lists the available Wishbone modules in group.
 
         Parameters:
 
-            --config        The filename of the bootstrap config file.
+            --config        The filename of the bootstrap config file. Obligatory except with list command.
 
             --instances     The number of parallel instances to start. Default is 1.
 
