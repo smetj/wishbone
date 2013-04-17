@@ -22,6 +22,7 @@
 #
 #
 
+import gevent.monkey; gevent.monkey.patch_thread()
 import daemon
 try:
     daemon.DaemonContext
@@ -155,7 +156,13 @@ class BootStrap(Help):
         parser.add_argument('--pid', dest='pid', help='The absolute path of the pidfile.')
         parser.add_argument('--group', dest='group', default="wishbone.iomodule,wishbone.module,wishbone.metrics", help='The entry point group to list the modules from.')
 
-        return vars(parser.parse_args())
+        #try:
+        arguments = parser.parse_args()
+        return vars()
+        # except:
+        #     import gevent
+        #     gevent.shutdown()
+        #     raise
 
     def initializeParallelserver(self):
         '''Initializes the parallelserver instance'''
