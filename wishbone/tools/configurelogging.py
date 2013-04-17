@@ -23,9 +23,7 @@
 #
 
 import logging
-import sys
-import os
-import resource
+from sys import stdout
 
 class LogFilter(logging.Filter):
     '''Logging() Filter wich only allows Wishbone related logging.'''
@@ -42,7 +40,7 @@ class BOMLessFormatter(logging.Formatter):
     #http://serverfault.com/questions/407643/rsyslog-update-on-amazon-linux-suddenly-treats-info-level-messages-as-emerg
     def format(self, record):
         return logging.Formatter.format(self, record).encode('utf-8')
-        
+
 class ConfigureLogging():
 
     def initRootLogger(self, name='', syslog=False, loglevel=logging.INFO):
@@ -51,7 +49,7 @@ class ConfigureLogging():
             format = '%(asctime)s %(levelname)s %(name)s: %(message)s'
             self.logging = logging.getLogger()
             self.logging.setLevel(loglevel)
-            self.stream = logging.StreamHandler(sys.stdout)
+            self.stream = logging.StreamHandler(stdout)
             formatter = logging.Formatter(format)
             self.stream.setFormatter(formatter)
             self.stream.addFilter(LogFilter())
@@ -62,7 +60,7 @@ class ConfigureLogging():
             self.logging = logging.getLogger()
             self.logging.setLevel(loglevel)
             stream = SysLogHandler(address='/dev/log')
-            
+
             formatter = BOMLessFormatter(format)
             stream.setFormatter(formatter)
             stream.addFilter(LogFilter())
