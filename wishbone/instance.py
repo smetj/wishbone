@@ -27,7 +27,7 @@ from wishbone.server import BootStrap
 def main():
     BootStrap(name="Wishbone",
         description="The default Wisbone server.",
-        version="0.1",
+        version="0.3.2beta",
         author="Jelle Smet",
         support="https://groups.google.com/forum/?fromgroups#!forum/python-wishbone"
     )
