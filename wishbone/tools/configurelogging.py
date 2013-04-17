@@ -22,6 +22,7 @@
 #
 #
 
+import gevent.monkey; gevent.monkey.patch_thread()
 import logging
 from sys import stdout
 

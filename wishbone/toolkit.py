@@ -22,6 +22,7 @@
 #
 #
 
+import gevent.monkey; gevent.monkey.patch_thread()
 import signal, sys
 import logging
 from gevent import Greenlet, monkey, sleep, spawn
