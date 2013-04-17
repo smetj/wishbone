@@ -7,6 +7,7 @@ Version 0.32
 - Enforce JSON validate Draft3 when a recent version of jsonschema is
   installed.
 - Fixed bug issuing "Exception KeyError" on exit.
+- Verify if a config file is provided and if not return a useful error.
 
 Version 0.31
 ~~~~~~~~~~~~
