@@ -156,8 +156,10 @@ class BootStrap(Help):
         parser.add_argument('--pid', dest='pid', help='The absolute path of the pidfile.')
         parser.add_argument('--group', dest='group', default="wishbone.iomodule,wishbone.module,wishbone.metrics", help='The entry point group to list the modules from.')
 
-        arguments = parser.parse_args()
-        return vars(arguments)
+        arguments = vars(parser.parse_args())
+        if arguments["config"] == None:
+            self.error("No configuration file provided.")
+        return arguments
 
     def initializeParallelserver(self):
         '''Initializes the parallelserver instance'''
