@@ -8,6 +8,7 @@ Version 0.32
   installed.
 - Fixed bug issuing "Exception KeyError" on exit.
 - Verify if a config file is provided and if not return a useful error.
+- Autocreate queue when submitting message to non existing queue.
 
 Version 0.31
 ~~~~~~~~~~~~
