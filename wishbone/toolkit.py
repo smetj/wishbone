@@ -84,7 +84,8 @@ class QueueFunctions(TimeFunctions):
             try:
                 getattr (self, queue).push(data)
             except AttributeError:
-                self.logging.warn("Module %s has no queue %s. Data purged."%(self.name, queue))
+                self.createQueue(queue)
+                getattr (self, queue).push(data)
 
         else:
             self.logging.warn('Invalid internal data structure detected. Data is purged. Turn on debugging to see datastructure.')
@@ -133,6 +134,7 @@ class QueueFunctions(TimeFunctions):
 
         try:
             setattr(self,name,Queue())
+            self.logging.info('Created module queue named %s.'%(name))
         except Exception as err:
             self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
 
