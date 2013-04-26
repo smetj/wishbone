@@ -244,7 +244,7 @@ class BootStrap(Help):
                             "variables":{
                                 "type":"object",
                                 "additionalProperties":{
-                                    "type":["string","integer","boolean","array"]
+                                    "type":["string","integer","boolean","array","float"]
                                 }
                             }
                         }
