@@ -2,7 +2,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  queuefunctions.py
 #
 #  Copyright 2013 Jelle Smet <development@smetj.net>
 #
@@ -23,8 +23,23 @@
 #
 #
 
-from wishbonequeue import WishboneQueue
-from queuefunctions import QueueFunctions
-from consumer import Consumer
-from qlogging import QLogging
-from queuepool import QueuePool
+from wishbone.tools import WishboneQueue
+from wishbone.tools import QueuePool
+
+class QueueFunctions():
+
+    def __init__(self):
+
+        self.queue=QueuePool()
+
+    def createQueue(self, name, ack=False):
+        '''Creates a Queue'''
+        try:
+            setattr(self.queue, name, WishboneQueue(ack))
+            self.logging.info('Created module queue named %s.'%(name))
+        except Exception as err:
+            self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
+
+    def sendEvent(self, data, header={}, queue="outbox"):
+        getattr (self.queue, queue).put({"header":header, "data":data})
+

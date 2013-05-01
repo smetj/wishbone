@@ -2,7 +2,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  queuepool.py
 #
 #  Copyright 2013 Jelle Smet <development@smetj.net>
 #
@@ -23,8 +23,29 @@
 #
 #
 
-from wishbonequeue import WishboneQueue
-from queuefunctions import QueueFunctions
-from consumer import Consumer
-from qlogging import QLogging
-from queuepool import QueuePool
+class QueuePool():
+
+    def __init__(self):
+        pass
+
+    def shutdown(self):
+        '''Closes all queues in preparation of actor shutdown.'''
+
+        for q in self.__dict__.keys():
+            self.__dict__[q].lock()
+            self.__dict__[q].cancelAll()
+
+    def messagesLeft(self):
+        '''Checks each queue whether there are any messages left.'''
+        qs=[]
+        for q in self.__dict__.keys():
+            if not self.__dict__[q].empty():
+                qs.append(q)
+        if len(qs) == 0:
+            return False
+        else:
+            return qs
+
+    def dump(self, name):
+        '''Convenience function to self.<name>.dump'''
+        return self.__dict__[name].dump()
