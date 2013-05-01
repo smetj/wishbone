@@ -1,13 +1,14 @@
 #!/usr/bin/env python
+#
 # -*- coding: utf-8 -*-
 #
-#  instance.py
+#  base.py
 #
 #  Copyright 2013 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 3 of the License, or
+#  the Free Software Foundation; either version 2 of the License, or
 #  (at your option) any later version.
 #
 #  This program is distributed in the hope that it will be useful,
@@ -22,15 +23,17 @@
 #
 #
 
-from wishbone.server import BootStrap
+from wishbone.tools import QueueFunctions
+from wishbone.tools import QLogging
+from wishbone.tools import Consumer
 
-def main():
-    BootStrap(name="Wishbone",
-        description="The default Wisbone server.",
-        version="0.3.2beta",
-        author="Jelle Smet",
-        support="https://groups.google.com/forum/?fromgroups#!forum/python-wishbone"
-    )
+class BaseActor(QueueFunctions):
+    def __init__(self, name):
+        QueueFunctions.__init__(self)
+        self.logging=QLogging(name)
+        self.logging.info("Initiated")
 
-if __name__ == '__main__':
-    main()
+class Actor(BaseActor, Consumer):
+    def __init__(self, name):
+        BaseActor.__init__(self, name)
+        Consumer.__init__(self)
