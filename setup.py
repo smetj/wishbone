@@ -24,7 +24,7 @@
 
 PROJECT = 'wishbone'
 
-VERSION = '0.3.2beta'
+VERSION = '0.4.0beta'
 
 
 from setuptools import setup, find_packages
@@ -72,7 +72,7 @@ setup(
     scripts=[],
 
     provides=[],
-    dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.0dev'],
+    dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.0dev','https://downloads.egenix.com/python/index/ucs4#egg=egenix-mx-base-3.2.6'],
     install_requires=install_requires,
     namespace_packages=[],
     packages=find_packages(),
