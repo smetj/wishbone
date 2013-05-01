@@ -1,6 +1,13 @@
 Wishbone changelog
 ==================
 
+Version 0.4
+~~~~~~~~~~~
+
+- Complete write of all components.
+- Queues offer more functionality like acknowledgements, locking, statistics.
+- Better gevent aware locking mechanisms.
+
 Version 0.32
 ~~~~~~~~~~~~
 
