@@ -23,35 +23,44 @@
 #
 #
 
-from mx.Queue import Queue, EmptyError
+from mx.Stack import Stack, EmptyError
 from gevent.event import Event
+from gevent import spawn, sleep
 from itertools import count
 from time import time
 
 class WishboneQueue():
-    def __init__(self, ack=False):
-        self.__q=Queue()
+    def __init__(self, ack=False, shrink_interval=10, max=0):
+        self.__q=Stack()
         self.__acktable={}
         self.__ackticket=count()
         self.__in=0
         self.__out=0
         self.__ack=0
+        self.__shrink_interval=int(shrink_interval)
         self.__cache={}
-        self.__lock=0
         self.__getlock=Event()
+        self.__getlock.set()
+        self.__putlock=Event()
+        self.__putlock.set()
+        self.__data_available=Event()
         if ack == True:
             self.get=self.__getAck
         else:
             self.get=self.__getNoAck
+        spawn(self.__shrinkMonitor,self.__shrink_interval)
 
-    def put(self, element):
+    def put(self, element, timeout=None):
         '''Puts element in queue'''
-        if self.__lock != 1:
-            self.__in+=1
-            self.__q.push(element)
-            self.__getlock.set()
-        else:
-            raise Exception ('Queue is locked.')
+
+        try:
+            self.__putlock.wait(timeout)
+        except:
+            raise Exception ('Queue is locked from incoming data.')
+
+        self.__q.push(element)
+        self.__in+=1
+        self.__data_available.set()
 
     def get(self):
         '''Gets an element from the queue.
@@ -60,27 +69,51 @@ class WishboneQueue():
 
         pass
 
-    def __getNoAck(self):
+    def getLock(self):
+        '''Locks getting data from queue.'''
+
+        self.__getlock.clear()
+
+    def getUnlock(self):
+        '''Unlocks getting data from queue.'''
+
+        self.__getlock.set()
+        spawn(self.__shrinkMonitor,self.__shrink_interval)
+
+    def putLock(self):
+        '''Locks putting data in queue.'''
+
+        self.__putlock.clear()
+
+    def putUnlock(self):
+        '''Unlocks putting data in queue.'''
+
+        self.__putlock.set()
+
+    def __getNoAck(self, timeout=None):
         '''Gets an element from the queue.
 
         Blocks when empty until an element is returned.'''
 
-        if self.locked() == False:
+        try:
+            self.__getlock.wait(timeout)
+        except:
+            raise Exception ('Queue is locked from outgoing data.')
+
+        while True:
             try:
                 data = self.__q.pop()
                 self.__out+=1
                 return data
             except EmptyError:
-                self.__getlock.clear()
-                self.__getlock.wait()
-        else:
-            raise Exception ('The queue is locked.')
+                self.__data_available.clear()
+                self.__data_available.wait()
 
     def __getAck(self):
         '''Gets an element from the queue with acknowledgement.
 
         Blocks when empty until an element is returned.'''
-        if self.locked() == False:
+        if self.locked()[0] == False:
             data=self.__q.pop()
             ticket=next(self.__ackticket)
             self.__acktable[ticket]=data
@@ -114,47 +147,46 @@ class WishboneQueue():
             return False
 
     def cancelAll(self):
-        '''Cancels all acknoledgement tickets.
+        '''Cancels all acknowledgement tickets.
 
         All unacknowledged elements are send back to the queue.
         '''
 
         for event in self.__acktable.keys():
             self.__q.push(self.__acktable[event])
+            sleep()
         self.__acktable={}
 
     def dump(self):
         '''Dumps and returns the queue in tuple format.
         '''
-        help(self.__q)
-        print self.__q.as_tuple()
+
         for event in self.__q.as_tuple():
             yield event
+            sleep()
 
     def lock(self):
         '''Sets queue in locked state.
 
         When in locked state, elements can not be added or consumed.'''
-        self.__getlock.set()
-        self.__lock=1
+
+        self.getLock()
+        self.putLock()
 
     def locked(self):
         '''Returns whether the queue is in locked or unlocked state.
 
-        True means locked, False means unlocked.
+        True means locked, False means unlocked.'''
 
-        '''
-
-        if self.__lock==1:
-            return True
-        else:
-            return False
+        return (not self.__getlock.isSet(), not self.__putlock.isSet())
 
     def unlock(self):
         '''Sets queue in unlocked state.
 
         When in unlocked state, elements can be added or consumed.'''
-        self.__lock=0
+
+        self.getUnlock()
+        self.putUnlock()
 
     def size(self):
         '''Returns a tuple of the queue and unacknowledged the size of the queue.'''
@@ -191,3 +223,16 @@ class WishboneQueue():
         self.__cache[name]=(time(), value)
         #print "%s - %s"%(self.__cache[name][1], amount)
         return (self.__cache[name][1] - amount)/(self.__cache[name][0]-timex)
+
+    def __shrinkMonitor(self, interval):
+        while self.locked() == False:
+            self.shrink()
+            sleep(interval)
+
+    def shrink(self):
+        '''Can be called to shrink the allocated memory to the minimum required to hold the
+        number of elments currently in the Stack.
+
+        http://www.egenix.com/products/python/mxBase/mxStack/doc/#_Toc293606071
+        '''
+        self.__q.resize()

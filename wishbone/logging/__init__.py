@@ -2,7 +2,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-#  qlogging.py
+#  __init__.py
 #
 #  Copyright 2013 Jelle Smet <development@smetj.net>
 #
@@ -23,30 +23,4 @@
 #
 #
 
-
-from wishbone.tools import WishboneQueue
-from time import time
-
-class QLogging():
-
-    def __init__(self, name):
-        self.logs=WishboneQueue()
-        self.name=name
-
-    def __log(self, level, message):
-        #print ((level, time(), self.name, message))
-        self.logs.put({"header":{},"data":(level, time(), self.name, message)})
-
-    def debug(self, message):
-        self.__log("debug",message)
-
-    def warning(self, message):
-        self.__log("warning",message)
-    warn=warning
-
-    def critical(self, message):
-        self.__log("critical",message)
-    crit=critical
-
-    def info(self, message):
-        self.__log("info",message)
+from stdout import STDOUT
