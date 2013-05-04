@@ -2,7 +2,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-#  qlogging.py
+#  stdout.py
 #
 #  Copyright 2013 Jelle Smet <development@smetj.net>
 #
@@ -23,30 +23,26 @@
 #
 #
 
+from wishbone import Actor
+from time import strftime, localtime
 
-from wishbone.tools import WishboneQueue
-from time import time
 
-class QLogging():
 
-    def __init__(self, name):
-        self.logs=WishboneQueue()
-        self.name=name
+class STDOUT(Actor):
 
-    def __log(self, level, message):
-        #print ((level, time(), self.name, message))
-        self.logs.put({"header":{},"data":(level, time(), self.name, message)})
+    def __init__(self, debug=False):
+        self.debug=debug
+        Actor.__init__(self, 'Logging')
+        self.logging.info("Initiated")
 
-    def debug(self, message):
-        self.__log("debug",message)
-
-    def warning(self, message):
-        self.__log("warning",message)
-    warn=warning
-
-    def critical(self, message):
-        self.__log("critical",message)
-    crit=critical
-
-    def info(self, message):
-        self.__log("info",message)
+    def consume(self, event):
+        #('info', 1367682301.430527, 'Router', 'Received SIGINT. Shutting down.')
+        if event["data"][0] == "debug" and self.debug == False:
+            pass
+        else:
+            print ("%s %s %s %s: %s"%(
+                strftime("%Y-%m-%dT%H:%M:%S", localtime(event["data"][1])),
+                "Process",
+                event["data"][2],
+                event["data"][0],
+                event["data"][3]))
