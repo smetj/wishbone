@@ -24,22 +24,49 @@
 #
 
 from wishbone.tools import WishboneQueue
-from wishbone.tools import QueuePool
+
 
 class QueueFunctions():
 
     def __init__(self):
-
+        from wishbone.tools import QueuePool
         self.queue=QueuePool()
 
     def createQueue(self, name, ack=False):
-        '''Creates a Queue'''
+        '''Creates a Queue.
+
+        When ack is defined it means each consumed event has to be acknowledged.
+        This is not implemented yet.'''
+
         try:
             setattr(self.queue, name, WishboneQueue(ack))
             self.logging.info('Created module queue named %s.'%(name))
         except Exception as err:
             self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
 
-    def sendEvent(self, data, header={}, queue="outbox"):
+    def getLog(self):
+        '''Retrieves a log from the log queue.'''
+
+        return self.logging.logs.get()
+
+    def createEvent(self, data, header={}, queue="outbox"):
+        '''Produces an event to the requested queue.
+
+        Blocks untill the queue is in unlocked state.'''
+
         getattr (self.queue, queue).put({"header":header, "data":data})
+
+    def sendEvent(self, event, queue="outbox"):
+        '''Sends a raw event to the requested queue.
+
+        Blocks untill the queue is in unlocked state.'''
+
+        getattr (self.queue, queue).put(event)
+
+    def getEvent(self, queue="inbox"):
+        '''Consumes an event from the requested queue.
+
+        Blocks untill the queue is in unlocked state.'''
+
+        return getattr (self.queue, queue).get()
 

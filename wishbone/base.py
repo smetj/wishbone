@@ -29,6 +29,7 @@ from wishbone.tools import Consumer
 
 class BaseActor(QueueFunctions):
     def __init__(self, name):
+        self.name=name
         QueueFunctions.__init__(self)
         self.logging=QLogging(name)
         self.logging.info("Initiated")
