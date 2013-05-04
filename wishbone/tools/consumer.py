@@ -36,6 +36,7 @@ class Consumer():
         self.__greenlet=[]
 
     def start(self):
+        self.logging.info("Started")
         for c in self.__consumers:
             self.__greenlet.append(spawn(self.__consumer, c[0], c[1]))
             self.logging.info('Function %s started to consume queue %s.'%(str(c[0]),str(c[1])))
@@ -49,6 +50,10 @@ class Consumer():
             self.logging.info('Shutdown')
     stop=shutdown
 
+    def block(self):
+        '''Convenience function which blocks untill the actor is in stopped state.'''
+        self.__block.wait()
+
     def registerConsumer(self, fc, q):
         """Registers <fc> as a consuming function for the given queue <q>."""
         self.__consumers.append((fc, q))
@@ -61,7 +66,7 @@ class Consumer():
                 fc(event)
             else:
                 self.logging.warn('Invalid internal data structure detected. Data is purged. Turn on debugging to see datastructure.')
-                self.logging.debug('Invalid data structure: %s' % (event))
+                #self.logging.debug('Invalid data structure: %s' % (event))
             sleep()
         self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
 
