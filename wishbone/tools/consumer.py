@@ -46,7 +46,7 @@ class Consumer():
             self.logging.warn('Already shutdown.')
         else:
             self.__block.set()
-            self.queue.shutdown()
+            self.queuepool.shutdown()
             self.logging.info('Shutdown')
     stop=shutdown
 
@@ -74,7 +74,7 @@ class Consumer():
         '''Create in- and outbox and a consumer consuming inbox.'''
         self.createQueue('inbox')
         self.createQueue('outbox')
-        self.registerConsumer(self.consume, self.queue.inbox)
+        self.registerConsumer(self.consume, self.queuepool.inbox)
 
     def __checkIntegrity(self, event):
         '''Checks the integrity of the messages passed over the different queues.
