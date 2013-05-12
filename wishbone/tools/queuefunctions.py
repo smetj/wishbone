@@ -30,7 +30,7 @@ class QueueFunctions():
 
     def __init__(self):
         from wishbone.tools import QueuePool
-        self.queue=QueuePool()
+        self.queuepool=QueuePool()
 
     def createQueue(self, name, ack=False):
         '''Creates a Queue.
@@ -39,7 +39,7 @@ class QueueFunctions():
         This is not implemented yet.'''
 
         try:
-            setattr(self.queue, name, WishboneQueue(ack))
+            setattr(self.queuepool, name, WishboneQueue(ack))
             self.logging.info('Created module queue named %s.'%(name))
         except Exception as err:
             self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
@@ -54,19 +54,19 @@ class QueueFunctions():
 
         Blocks untill the queue is in unlocked state.'''
 
-        getattr (self.queue, queue).put({"header":header, "data":data})
+        getattr (self.queuepool, queue).put({"header":header, "data":data})
 
     def sendEvent(self, event, queue="outbox"):
         '''Sends a raw event to the requested queue.
 
         Blocks untill the queue is in unlocked state.'''
 
-        getattr (self.queue, queue).put(event)
+        getattr (self.queuepool, queue).put(event)
 
     def getEvent(self, queue="inbox"):
         '''Consumes an event from the requested queue.
 
         Blocks untill the queue is in unlocked state.'''
 
-        return getattr (self.queue, queue).get()
+        return getattr (self.queuepool, queue).get()
 

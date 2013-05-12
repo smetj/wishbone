@@ -35,6 +35,11 @@ class QueuePool():
             self.__dict__[q].lock()
             self.__dict__[q].cancelAll()
 
+    def listQueues(self):
+        '''return a list of available queues in the queuepool.'''
+
+        return self.__dict__.keys()
+
     def messagesLeft(self):
         '''Checks each queue whether there are any messages left.'''
         qs=[]
