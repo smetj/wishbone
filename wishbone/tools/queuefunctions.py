@@ -25,7 +25,6 @@
 
 from wishbone.tools import WishboneQueue
 
-
 class QueueFunctions():
 
     def __init__(self):

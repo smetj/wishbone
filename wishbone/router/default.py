@@ -139,11 +139,15 @@ class Default():
         '''A background greenlet which periodically gathers the metrics of all
         queues in all registered modules. These metrics are then forwarded to
         the registered metrics module.'''
-
         while not self.__block.isSet():
+            metrics={"queue":{},"function":{}}
             for module in self.__modules:
+                if hasattr(self.__modules[module], "metrics"):
+                    for fn in self.__modules[module].metrics:
+                        metrics["function"]["%s.%s"%(module, fn)]=self.__modules[module].metrics[fn]
                 for queue in self.__modules[module].queuepool.listQueues():
-                    print getattr(self.__modules[module].queuepool, queue).stats()
+                        metrics["queue"]["%s.%s"%(module, queue)]=getattr(self.__modules[module].queuepool, queue).stats()
+            print metrics
             sleep(self.interval)
 
     def __forwardRouterLogs(self):
