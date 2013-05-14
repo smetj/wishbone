@@ -30,6 +30,23 @@ from itertools import count
 from time import time
 
 class WishboneQueue():
+
+    '''A queue used to organize communication messaging between Wishbone Actors.
+
+    Parameters:
+
+        - ack(bool):            Each consumed message has to be acknowledged.
+                                (default False)
+
+        - shrink_interval(int)  Compacts the queue every X seconds.
+                                (default 10)
+
+        - max (int)             Defines the maximum size of the queue. A value
+                                of 0 means unlimited.
+                                (default 0)
+
+    '''
+
     def __init__(self, ack=False, shrink_interval=10, max=0):
         self.__q=Stack()
         self.__acktable={}
@@ -113,7 +130,7 @@ class WishboneQueue():
         '''Gets an element from the queue with acknowledgement.
 
         Blocks when empty until an element is returned.'''
-        if self.locked()[0] == False:
+        if self.isLocked() == False:
             data=self.__q.pop()
             ticket=next(self.__ackticket)
             self.__acktable[ticket]=data
@@ -173,7 +190,7 @@ class WishboneQueue():
         self.getLock()
         self.putLock()
 
-    def locked(self):
+    def isLocked(self):
         '''Returns whether the queue is in locked or unlocked state.
 
         True means locked, False means unlocked.'''
@@ -214,6 +231,14 @@ class WishboneQueue():
             "out_rate": self.__rate("out_rate",self.__out),
             "ack_rate":self.__rate("ack_rate",self.__ack)}
 
+    def shrink(self):
+        '''Can be called to shrink the allocated memory to the minimum required to hold the
+        number of elments currently in the Stack.
+
+        http://www.egenix.com/products/python/mxBase/mxStack/doc/#_Toc293606071
+        '''
+        self.__q.resize()
+
     def __rate(self, name, value):
         if not self.__cache.has_key(name):
             self.__cache[name]=(time(), value)
@@ -225,14 +250,12 @@ class WishboneQueue():
         return (self.__cache[name][1] - amount)/(self.__cache[name][0]-timex)
 
     def __shrinkMonitor(self, interval):
-        while self.locked() == False:
+
+        '''Greenlet which runs in background executing self.shrink() at the
+        chosen interval.'''
+
+        while self.isLocked() == False:
             self.shrink()
             sleep(interval)
 
-    def shrink(self):
-        '''Can be called to shrink the allocated memory to the minimum required to hold the
-        number of elments currently in the Stack.
 
-        http://www.egenix.com/products/python/mxBase/mxStack/doc/#_Toc293606071
-        '''
-        self.__q.resize()
