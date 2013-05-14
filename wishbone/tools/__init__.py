@@ -28,3 +28,4 @@ from queuefunctions import QueueFunctions
 from consumer import Consumer
 from qlogging import QLogging
 from queuepool import QueuePool
+from measure import Measure

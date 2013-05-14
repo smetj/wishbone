@@ -28,12 +28,14 @@ from gevent.event import Event
 
 class Consumer():
 
-    def __init__(self):
+    def __init__(self, setupbasic=True):
         self.__consumers=[]
         self.__block=Event()
         self.__block.clear()
-        self.__setupBasic()
+        if setupbasic == True:
+            self.__setupBasic()
         self.__greenlet=[]
+        self.metrics={}
 
     def start(self):
         self.logging.info("Started")
