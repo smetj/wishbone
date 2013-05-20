@@ -35,6 +35,6 @@ class BaseActor(QueueFunctions):
         self.logging.info("Initiated")
 
 class Actor(BaseActor, Consumer):
-    def __init__(self, name):
+    def __init__(self, name, limit=0):
         BaseActor.__init__(self, name)
-        Consumer.__init__(self)
+        Consumer.__init__(self, limit=limit)

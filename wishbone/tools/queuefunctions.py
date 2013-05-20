@@ -56,9 +56,7 @@ class QueueFunctions():
         getattr (self.queuepool, queue).put({"header":header, "data":data})
 
     def sendEvent(self, event, queue="outbox"):
-        '''Sends a raw event to the requested queue.
-
-        Blocks untill the queue is in unlocked state.'''
+        '''Sends a raw event to the requested queue.'''
 
         getattr (self.queuepool, queue).put(event)
 
@@ -69,3 +67,17 @@ class QueueFunctions():
 
         return getattr (self.queuepool, queue).get()
 
+    def acknowledgeEvent(self, ticket, queue="outbox"):
+        '''Acknowledges event.'''
+
+        getattr (self.queuepool, queue).acknowledge(ticket)
+
+    def cancelEvent(self, ticket, queue="outbox"):
+        '''Cancels event.'''
+
+        getattr (self.queuepool, queue).cancel(ticket)
+
+    def waitUntilData(self, queue="inbox"):
+        '''Blocks untill data arrives in queue'''
+
+        getattr(self.queuepool, queue).waitUntilData()

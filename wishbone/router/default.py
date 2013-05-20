@@ -24,8 +24,9 @@
 #
 
 from wishbone.tools import QLogging
-from gevent import spawn, sleep, signal
+from gevent import spawn, sleep, signal, joinall
 from gevent.event import Event
+from mx.Stack import EmptyError
 
 class Default():
     '''The default Wishbone router.
@@ -60,9 +61,22 @@ class Default():
         # self.__metrics=metrics.start()
 
         self.__modules={}
-        self.__running=[]
+        self.__thread_consume=[]
+        self.__thread_metrics=[]
+        self.__thread_logs=[]
         self.__block=Event()
         self.__block.clear()
+        self.__exit=Event()
+        self.__exit.clear()
+
+        self.__runConsumers=Event()
+        self.__runConsumers.clear()
+
+        self.__runMetrics=Event()
+        self.__runMetrics.clear()
+
+        self.__runLogs=Event()
+        self.__runLogs.clear()
 
     def start(self):
         '''Starts the router and all registerd modules.
@@ -81,22 +95,32 @@ class Default():
 
     def stop(self):
         '''Stops the router and all registered modules.
-
-
-        Executes following steps:
-
-            - Calls each registered module's stop() function.
-            - Blocks untill the registered log module is empty.
-            - Blocks untill the registered metrics module is empty.
-            - When done makes the block() function unblocking.
         '''
 
         self.logging.info('Stopping.')
+
+
+        #Wait for all consumers
+        self.__runConsumers.set()
+        for thread in self.__thread_consume:
+            thread.join()
+
+        #Stop all modules
+        self.__block.set()
         for module in self.__modules.keys():
             self.__modules[module].stop()
-        while not self.logging.logs.empty():
-            sleep(0.5)
-        self.__block.set()
+
+        #Stop all metric forwarders
+        self.__runMetrics.set()
+        for thread in self.__thread_metrics:
+            thread.join()
+
+        #Wait for all log forwarders
+        self.__runLogs.set()
+        for thread in self.__thread_logs:
+            thread.kill()
+
+        self.__exit.set()
 
     def register(self, module):
         '''Registers a Wishbone actor into the router.'''
@@ -105,16 +129,16 @@ class Default():
 
         # Start to forward this module's logs to the registered
         # logging module.
-        spawn (self.__forwardLogging, module)
+        self.__thread_logs.append(spawn (self.__forwardLogging, module))
 
         # Start to forward this module's metrics to the registered
         # metrics module.
-        spawn (self.__forwardMetrics, module)
+        self.__thread_metrics.append(spawn (self.__forwardMetrics, module))
 
     def connect(self, producer, consumer):
         '''Connects a producing queue to a consuming queue.'''
 
-        self.__running.append(spawn (self.__consume, producer, consumer))
+        self.__thread_consume.append(spawn (self.__consume, producer, consumer))
 
     def block(self):
         ''' A convenience function which blocks untill all registered
@@ -123,14 +147,14 @@ class Default():
         Becomes unblocked when stop() is called and finisehd.
         '''
 
-        self.__block.wait()
+        self.__exit.wait()
 
     def __forwardLogging(self, module):
 
         '''A background greenlet which consumes the logs from a module and
         forwards them to the registered logging module.'''
 
-        while not self.__block.isSet():
+        while not self.__runLogs.isSet():
             log = module.getLog()
             self.__logging.sendEvent(log, queue='inbox')
 
@@ -139,14 +163,13 @@ class Default():
         '''A background greenlet which periodically gathers the metrics of all
         queues in all registered modules. These metrics are then forwarded to
         the registered metrics module.'''
-        while not self.__block.isSet():
+        while not self.__runMetrics.isSet():
             metrics={"queue":{},"function":{}}
-            for module in self.__modules:
-                if hasattr(self.__modules[module], "metrics"):
-                    for fn in self.__modules[module].metrics:
-                        metrics["function"]["%s.%s"%(module, fn)]=self.__modules[module].metrics[fn]
-                for queue in self.__modules[module].queuepool.listQueues():
-                        metrics["queue"]["%s.%s"%(module, queue)]=getattr(self.__modules[module].queuepool, queue).stats()
+            if hasattr(module, "metrics"):
+                for fn in module.metrics:
+                    metrics["function"]["%s.%s"%(module.name, fn)]=module.metrics[fn]
+            for queue in module.queuepool.listQueues():
+                metrics["queue"]["%s.%s"%(module.name, queue)]=getattr(module.queuepool, queue).stats()
             print metrics
             sleep(self.interval)
 
@@ -156,17 +179,27 @@ class Default():
         router to the registered logging module.'''
 
         while not self.__block.isSet():
-            self.__logging.sendEvent(self.logging.logs.get(),'inbox')
+            log = self.logging.logs.get()
+            self.__logging.sendEvent(log,'inbox')
 
     def __consume(self, producer, consumer):
 
-        '''The background greenlet which continuously consumes the producing
+        '''The background greenthread which continuously consumes the producing
         queue and dumps that data into the consuming queue.'''
 
         (out_name, out_queue) = producer.split('.')
         (in_name, in_queue) = consumer.split('.')
-        while not self.__block.isSet():
-            self.__modules[in_name].sendEvent(self.__modules[out_name].getEvent(out_queue), in_queue)
+        while not self.__runConsumers.isSet():
+            try:
+                (event, ticket) = self.__modules[out_name].getEvent(out_queue)
+                try:
+                    self.__modules[in_name].sendEvent(event, in_queue)
+                    self.__modules[out_name].acknowledgeEvent(ticket)
+                except:
+                    self.__modules[out_name].cancelEvent(ticket)
+            except EmptyError:
+                self.__modules[out_name].waitUntilData(out_queue)
+                pass
 
     def __signal_handler(self):
 
