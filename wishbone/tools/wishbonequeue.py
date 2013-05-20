@@ -67,16 +67,24 @@ class WishboneQueue():
             self.get=self.__getNoAck
         spawn(self.__shrinkMonitor,self.__shrink_interval)
 
-    def put(self, element, timeout=None):
-        '''Puts element in queue'''
+    def put(self, element):
+        '''Puts element in queue.
+        '''
 
-        try:
-            self.__putlock.wait(timeout)
-        except:
-            raise Exception ('Queue is locked from incoming data.')
+        if not self.__putlock.isSet():
+            raise Exception('Queue is locked.')
+        else:
+            self.__q.push(element)
+            self.__in+=1
+            self.__data_available.set()
+
+    def rescue(self, element):
+        '''Puts element to the queue overriding any locks.
+
+        Obviously the order is not preserved.
+        '''
 
         self.__q.push(element)
-        self.__in+=1
         self.__data_available.set()
 
     def get(self):
@@ -98,7 +106,8 @@ class WishboneQueue():
         spawn(self.__shrinkMonitor,self.__shrink_interval)
 
     def putLock(self):
-        '''Locks putting data in queue.'''
+        '''Locks putting data in queue.
+        '''
 
         self.__putlock.clear()
 
@@ -112,31 +121,34 @@ class WishboneQueue():
 
         Blocks when empty until an element is returned.'''
 
-        try:
-            self.__getlock.wait(timeout)
-        except:
-            raise Exception ('Queue is locked from outgoing data.')
+        if not self.__getlock.isSet():
+            raise Exception ("Queue is locked for outgoing data.")
 
-        while True:
+        while self.__getlock.isSet():
             try:
                 data = self.__q.pop()
                 self.__out+=1
                 return data
             except EmptyError:
                 self.__data_available.clear()
-                self.__data_available.wait()
+                self.__data_available.wait(1)
 
     def __getAck(self):
         '''Gets an element from the queue with acknowledgement.
 
         Blocks when empty until an element is returned.'''
-        if self.isLocked() == False:
-            data=self.__q.pop()
-            ticket=next(self.__ackticket)
-            self.__acktable[ticket]=data
-            return (data,ticket)
-        else:
-            raise Exception ('The queue is locked.')
+        if not self.__getlock.isSet():
+            raise Exception ("Queue is locked for outgoing data.")
+
+        while self.__getlock.isSet():
+            try:
+                data = self.__q.pop()
+                ticket=next(self.__ackticket)
+                self.__acktable[ticket]=data
+                return (data, ticket)
+            except EmptyError:
+                self.__data_available.clear()
+                raise EmptyError
 
     def acknowledge(self, ticket):
         '''Acknowledges a previously consumed element.'''
@@ -238,6 +250,11 @@ class WishboneQueue():
         http://www.egenix.com/products/python/mxBase/mxStack/doc/#_Toc293606071
         '''
         self.__q.resize()
+
+    def waitUntilData(self):
+        '''Blocks untill data is available'''
+
+        self.__data_available.wait(timeout=1)
 
     def __rate(self, name, value):
         if not self.__cache.has_key(name):
