@@ -56,10 +56,17 @@ class WishboneQueue():
         self.__ack=0
         self.__shrink_interval=int(shrink_interval)
         self.__cache={}
+
         self.__getlock=Event()
         self.__getlock.set()
+        self.__getblock=Event()
+        self.__getblock.set()
+
         self.__putlock=Event()
         self.__putlock.set()
+        self.__putblock=Event()
+        self.__putblock.set()
+
         self.__data_available=Event()
         if ack == True:
             self.get=self.__getAck
@@ -70,6 +77,7 @@ class WishboneQueue():
     def put(self, element):
         '''Puts element in queue.
         '''
+        self.__putblock.wait()
 
         if not self.__putlock.isSet():
             raise Exception('Queue is locked.')
@@ -77,15 +85,6 @@ class WishboneQueue():
             self.__q.push(element)
             self.__in+=1
             self.__data_available.set()
-
-    def rescue(self, element):
-        '''Puts element to the queue overriding any locks.
-
-        Obviously the order is not preserved.
-        '''
-
-        self.__q.push(element)
-        self.__data_available.set()
 
     def get(self):
         '''Gets an element from the queue.
@@ -105,6 +104,16 @@ class WishboneQueue():
         self.__getlock.set()
         spawn(self.__shrinkMonitor,self.__shrink_interval)
 
+    def getBlock(self):
+        '''Blocks on getting data from queue.'''
+
+        self.__getblock.clear()
+
+    def getUnblock(self):
+        '''Unblocks getting data from queue.'''
+
+        self.__getblock.set()
+
     def putLock(self):
         '''Locks putting data in queue.
         '''
@@ -115,6 +124,17 @@ class WishboneQueue():
         '''Unlocks putting data in queue.'''
 
         self.__putlock.set()
+
+    def putBlock(self):
+        '''Blocks putting data in queue.
+        '''
+
+        self.__putblock.clear()
+
+    def putUnblock(self):
+        '''Unblocks putting data in queue.'''
+
+        self.__putblock.set()
 
     def __getNoAck(self, timeout=None):
         '''Gets an element from the queue.
