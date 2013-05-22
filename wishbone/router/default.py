@@ -195,11 +195,11 @@ class Default():
                 try:
                     self.__modules[in_name].sendEvent(event, in_queue)
                     self.__modules[out_name].acknowledgeEvent(ticket)
-                except:
+                except Exception as err:
+                    self.logging.debug("Could not submit event to queue %s. Reason: %s"%(in_queue, err))
                     self.__modules[out_name].cancelEvent(ticket)
             except EmptyError:
                 self.__modules[out_name].waitUntilData(out_queue)
-                pass
 
     def __signal_handler(self):
 
@@ -208,3 +208,21 @@ class Default():
 
         self.logging.info("Received SIGINT. Shutting down.")
         self.stop()
+
+    def __checkIntegrity(self, event):
+        '''Checks the integrity of the messages passed over the different queues.
+
+        The format of the messages should be:
+
+        { 'headers': {}, data: {} }'''
+
+        if type(event) is dict:
+            if len(event.keys()) == 2:
+                if event.has_key('header') and event.has_key('data'):
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False

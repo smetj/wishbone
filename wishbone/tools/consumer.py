@@ -80,17 +80,23 @@ class Consumer():
         as a variable.  There is no limit on the number of greenthreads
         spawned. """
 
+        def executor(fc, event, ticket, q):
+            try:
+                fc(event)
+            except Exception as err:
+                q.cancel(ticket)
+            else:
+                q.acknowledge(ticket)
+
         while not self.__block.isSet():
             try:
                 (event, ticket) = q.get()
             except:
                 q.waitUntilData()
             else:
-                if self.__checkIntegrity(event) == True:
-                    spawn (fc,event)
-                else:
-                    self.logging.warn('Invalid internal data structure detected. Data is purged. Turn on debugging to see data structure.')
-                    self.logging.debug('Invalid data structure: %s' % str(event))
+                #spawn (executor,fc, event, ticket, q)
+                fc(event)
+                q.acknowledge(ticket)
             sleep()
         self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
 
@@ -106,19 +112,23 @@ class Consumer():
         queue artificially limited which as a result controls the number of
         concurrent greenthreads. """
 
-        concurrent = Semaphore(self.limit+1)
+        concurrent = Semaphore(self.limit)
 
         def executor(fc, event, ticket, q, concurrent):
-            fc(event)
-            q.acknowledge(ticket)
+            try:
+                fc(event)
+            except Exception as err:
+                q.cancel(ticket)
+            else:
+                q.acknowledge(ticket)
+                q.putUnblock()
             concurrent.release()
-            q.putUnlock()
 
         while not self.__block.isSet():
             try:
                 concurrent.acquire()
             except:
-                q.putLock()
+                q.putBlock()
                 concurrent.wait()
             else:
                 try:
@@ -126,11 +136,7 @@ class Consumer():
                 except:
                     q.waitUntilData()
                 else:
-                    if self.__checkIntegrity(event) == True:
-                        spawn(executor,fc, event, ticket, q, concurrent)
-                    else:
-                        self.logging.warn('Invalid internal data structure detected. Data is purged. Turn on debugging to see data structure.')
-                        self.logging.debug('Invalid data structure: %s' % (event))
+                    spawn(executor,fc, event, ticket, q, concurrent)
             sleep()
 
         self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
@@ -140,24 +146,6 @@ class Consumer():
         self.createQueue('inbox', ack=True)
         self.createQueue('outbox', ack=True)
         self.registerConsumer(self.consume, self.queuepool.inbox)
-
-    def __checkIntegrity(self, event):
-        '''Checks the integrity of the messages passed over the different queues.
-
-        The format of the messages should be:
-
-        { 'headers': {}, data: {} }'''
-
-        if type(event) is dict:
-            if len(event.keys()) == 2:
-                if event.has_key('header') and event.has_key('data'):
-                    return True
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
 
     def consume(self, event):
         '''Raises error when user didn't define this function in his module.'''
