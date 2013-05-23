@@ -68,6 +68,8 @@ class WishboneQueue():
         self.__putblock.set()
 
         self.__data_available=Event()
+        self.__data_available.clear()
+
         if ack == True:
             self.get=self.__getAck
         else:
@@ -77,14 +79,18 @@ class WishboneQueue():
     def put(self, element):
         '''Puts element in queue.
         '''
-        self.__putblock.wait()
 
-        if not self.__putlock.isSet():
-            raise Exception('Queue is locked.')
-        else:
-            self.__q.push(element)
-            self.__in+=1
-            self.__data_available.set()
+        self.__q.push(element)
+        self.__data_available.set()
+
+        # self.__putblock.wait()
+
+        # if not self.__putlock.isSet():
+        #     raise Exception('Queue is locked.')
+        # else:
+        #     self.__q.push(element)
+        #     self.__in+=1
+        #     self.__data_available.set()
 
     def get(self):
         '''Gets an element from the queue.
@@ -141,17 +147,24 @@ class WishboneQueue():
 
         Blocks when empty until an element is returned.'''
 
-        if not self.__getlock.isSet():
-            raise Exception ("Queue is locked for outgoing data.")
+        try:
+            return self.__q.pop()
+        except:
+            self.__data_available.clear()
+            self.__data_available.wait()
+            return self.__q.pop()
 
-        while self.__getlock.isSet():
-            try:
-                data = self.__q.pop()
-                self.__out+=1
-                return data
-            except EmptyError:
-                self.__data_available.clear()
-                self.__data_available.wait(1)
+        # if not self.__getlock.isSet():
+        #     raise Exception ("Queue is locked for outgoing data.")
+
+        # while self.__getlock.isSet():
+        #     try:
+        #         data = self.__q.pop()
+        #         self.__out+=1
+        #         return data
+        #     except EmptyError:
+        #         self.__data_available.clear()
+        #         self.__data_available.wait(1)
 
     def __getAck(self):
         '''Gets an element from the queue with acknowledgement.
