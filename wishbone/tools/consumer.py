@@ -92,7 +92,7 @@ class Consumer():
             try:
                 event = q.get()
                 fc(event)
-                sleep()
+                #sleep()
             except:
                 q.waitUntilData()
 
@@ -135,7 +135,7 @@ class Consumer():
                     q.waitUntilData()
                 else:
                     spawn(executor,fc, event, ticket, q, concurrent)
-            sleep()
+            #sleep()
 
         self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
 
