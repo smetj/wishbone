@@ -80,24 +80,22 @@ class Consumer():
         as a variable.  There is no limit on the number of greenthreads
         spawned. """
 
-        def executor(fc, event, ticket, q):
-            try:
-                fc(event)
-            except Exception as err:
-                q.cancel(ticket)
-            else:
-                q.acknowledge(ticket)
+        # def executor(fc, event, ticket, q):
+        #     try:
+        #         fc(event)
+        #     except Exception as err:
+        #         q.cancel(ticket)
+        #     else:
+        #         q.acknowledge(ticket)
 
         while not self.__block.isSet():
             try:
-                (event, ticket) = q.get()
+                event = q.get()
+                fc(event)
+                sleep()
             except:
                 q.waitUntilData()
-            else:
-                #spawn (executor,fc, event, ticket, q)
-                fc(event)
-                q.acknowledge(ticket)
-            sleep()
+
         self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
 
     def __doPooledConsume(self, fc, q):
@@ -143,8 +141,8 @@ class Consumer():
 
     def __setupBasic(self):
         '''Create in- and outbox and a consumer consuming inbox.'''
-        self.createQueue('inbox', ack=True)
-        self.createQueue('outbox', ack=True)
+        self.createQueue('inbox', ack=False)
+        self.createQueue('outbox', ack=False)
         self.registerConsumer(self.consume, self.queuepool.inbox)
 
     def consume(self, event):
