@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    #!/usr/bin/env python
 #
 # -*- coding: utf-8 -*-
 #
@@ -155,8 +155,8 @@ class Default():
         forwards them to the registered logging module.'''
 
         while not self.__runLogs.isSet():
-            log = module.getLog()
-            self.__logging.sendEvent(log, queue='inbox')
+            log = module.logging.logs.get()
+            self.__logging.queuepool.inbox.put(log)
 
     def __forwardMetrics(self, module):
 
@@ -180,26 +180,16 @@ class Default():
 
         while not self.__block.isSet():
             log = self.logging.logs.get()
-            self.__logging.sendEvent(log,'inbox')
+            self.__logging.sendEvent(log, queue='inbox')
 
     def __consume(self, producer, consumer):
 
         '''The background greenthread which continuously consumes the producing
         queue and dumps that data into the consuming queue.'''
 
-        (out_name, out_queue) = producer.split('.')
-        (in_name, in_queue) = consumer.split('.')
         while not self.__runConsumers.isSet():
-            try:
-                (event, ticket) = self.__modules[out_name].getEvent(out_queue)
-                try:
-                    self.__modules[in_name].sendEvent(event, in_queue)
-                    self.__modules[out_name].acknowledgeEvent(ticket)
-                except Exception as err:
-                    self.logging.debug("Could not submit event to queue %s. Reason: %s"%(in_queue, err))
-                    self.__modules[out_name].cancelEvent(ticket)
-            except EmptyError:
-                self.__modules[out_name].waitUntilData(out_queue)
+            consumer.put(producer.get())
+
 
     def __signal_handler(self):
 
