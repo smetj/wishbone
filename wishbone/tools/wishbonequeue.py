@@ -147,12 +147,17 @@ class WishboneQueue():
 
         Blocks when empty until an element is returned.'''
 
-        try:
-            return self.__q.pop()
-        except:
-            self.__data_available.clear()
-            self.__data_available.wait()
-            return self.__q.pop()
+        while True:
+            if len(self.__q)=0:
+                sleep(0.1)
+            else:
+                return self.__q.pop()
+        # try:
+        #     return self.__q.pop()
+        # except:
+        #     self.__data_available.clear()
+        #     self.__data_available.wait()
+        #     return self.__q.pop()
 
         # if not self.__getlock.isSet():
         #     raise Exception ("Queue is locked for outgoing data.")
@@ -216,7 +221,7 @@ class WishboneQueue():
 
         for event in self.__acktable.keys():
             self.__q.push(self.__acktable[event])
-            sleep()
+            #sleep()
         self.__acktable={}
 
     def dump(self):
@@ -225,7 +230,7 @@ class WishboneQueue():
 
         for event in self.__q.as_tuple():
             yield event
-            sleep()
+            #sleep()
 
     def lock(self):
         '''Sets queue in locked state.
@@ -287,7 +292,7 @@ class WishboneQueue():
     def waitUntilData(self):
         '''Blocks untill data is available'''
 
-        self.__data_available.wait(timeout=1)
+        self.__data_available.wait()
 
     def __rate(self, name, value):
         if not self.__cache.has_key(name):
