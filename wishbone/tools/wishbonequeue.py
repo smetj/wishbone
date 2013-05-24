@@ -148,7 +148,7 @@ class WishboneQueue():
         Blocks when empty until an element is returned.'''
 
         while True:
-            if len(self.__q)=0:
+            if len(self.__q)==0:
                 sleep(0.1)
             else:
                 return self.__q.pop()
