@@ -34,7 +34,7 @@ from fnmatch import fnmatchcase
 import os
 import sys
 
-install_requires=['gevent>=1.0dev','python-daemon','egenix-mx-base>=3.2.6','argparse','wb_log','greenlet>=0.3.2','jsonschema','prettytable']
+install_requires=['gevent>=1.0dev','argparse','greenlet>=0.3.2','jsonschema','prettytable']
 
 try:
     import importlib
