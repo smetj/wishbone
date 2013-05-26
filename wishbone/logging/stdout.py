@@ -25,6 +25,7 @@
 
 from wishbone import Actor
 from time import strftime, localtime
+from time import time
 
 
 
@@ -38,12 +39,17 @@ class STDOUT(Actor):
 
     def consume(self, event):
         #('info', 1367682301.430527, 'Router', 'Received SIGINT. Shutting down.')
-        if event["data"][0] == "debug" and self.debug == False:
-            pass
+
+        if isinstance(event["data"], tuple):
+            if event["data"][0] in [ "debug","warning","critical","info"]:
+                if event["data"][0] == "debug" and self.debug == False:
+                    pass
+                else:
+                    print ("%s %s %s %s: %s"%(
+                        strftime("%Y-%m-%dT%H:%M:%S", localtime(event["data"][1])),
+                        "Process",
+                        event["data"][2],
+                        event["data"][0],
+                        event["data"][3]))
         else:
-            print ("%s %s %s %s: %s"%(
-                strftime("%Y-%m-%dT%H:%M:%S", localtime(event["data"][1])),
-                "Process",
-                event["data"][2],
-                event["data"][0],
-                event["data"][3]))
+            print "%s %s"%(strftime("%Y-%m-%dT%H:%M:%S", localtime(time())), str(event["data"]))

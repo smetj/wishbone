@@ -26,6 +26,7 @@ from gevent import spawn, sleep, joinall
 from gevent import Greenlet
 from gevent.event import Event
 from gevent.coros import Semaphore
+from wishbone.errors import QueueInLocked, QueueOutLocked
 
 class Consumer():
 
@@ -37,7 +38,7 @@ class Consumer():
             self.__setupBasic()
         self.limit=limit
         if limit == 0:
-            self.__doConsume = self.__doInfiniteConsume
+            self.__doConsume = self.__doSequentialConsume
         else:
             self.__doConsume = self.__doPooledConsume
         self.__greenlet=[]
@@ -66,6 +67,9 @@ class Consumer():
         self.__doConsumes.append((fc, q))
 
     def loop(self):
+        '''Convenience funtion which returns True untill stop() has
+        been called.'''
+
         return not self.__block.isSet()
 
     def __doConsume(self):
@@ -74,7 +78,7 @@ class Consumer():
         Will be replaced by self.__doInfiniteConsume or
         self.__doPoolConsume depending on init.'''
 
-    def __doInfiniteConsume(self, fc, q):
+    def __doSequentialConsume(self, fc, q):
 
         """Executes <fc> against each element popped from <q>.
 
@@ -82,20 +86,17 @@ class Consumer():
         as a variable.  There is no limit on the number of greenthreads
         spawned. """
 
-        # def executor(fc, event, ticket, q):
-        #     try:
-        #         fc(event)
-        #     except Exception as err:
-        #         q.cancel(ticket)
-        #     else:
-        #         q.acknowledge(ticket)
-
         while self.loop():
             try:
                 event = q.get()
-                fc(event)
-            except:
-                q.waitUntilData()
+                try:
+                    fc(event)
+                except Exception as err:
+                    self.logging.warning("Error executing consume function.  Reason: %s"%(event))
+                    q.rescue(event)
+            except QueueOutLocked:
+                sleep(0.1)
+            sleep()
 
         self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
 
@@ -113,30 +114,29 @@ class Consumer():
 
         concurrent = Semaphore(self.limit)
 
-        def executor(fc, event, ticket, q, concurrent):
+        def executor(fc, event, q, concurrent):
             try:
                 fc(event)
             except Exception as err:
-                q.cancel(ticket)
+                q.rescue(event)
             else:
-                q.acknowledge(ticket)
-                q.putUnblock()
+                q.putUnlock()
             concurrent.release()
 
-        while not self.__block.isSet():
+        while self.loop():
             try:
                 concurrent.acquire()
             except:
-                q.putBlock()
+                q.putLock()
                 concurrent.wait()
             else:
                 try:
-                    (event, ticket) = q.get()
-                except:
-                    q.waitUntilData()
+                    event = q.get()
+                except QueueOutLocked:
+                    sleep(0.1)
                 else:
-                    spawn(executor,fc, event, ticket, q, concurrent)
-            #sleep()
+                    spawn(executor,fc, event, q, concurrent)
+            sleep()
 
         self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
 
