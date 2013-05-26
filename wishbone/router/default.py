@@ -25,6 +25,7 @@
 
 from wishbone.tools import QLogging
 from wishbone.tools import WishboneQueue
+from collections import deque
 from gevent import spawn, sleep, signal, joinall, kill
 from gevent.event import Event
 
@@ -39,10 +40,19 @@ class Default():
 
     SIGINT is intercepted and initiates a proper shutdown sequence.
 
+    Parameters:
+
+        - interval(int):    The interval metrics are polled from each module
+        - rescue(bool):     Whether to extract any events stuck in one of
+                            the queues and write that to a cache file.  Next
+                            startup the events are read from the cache and
+                            inserted into the same queue again.
+
     '''
 
-    def __init__(self, interval=10):
+    def __init__(self, interval=10, rescue=False):
         self.interval=interval
+        self.rescue=rescue
 
         signal(2, self.__signal_handler)
         self.logging=QLogging("Router")
@@ -70,57 +80,31 @@ class Default():
         self.__runLogs=Event()
         self.__runLogs.clear()
 
-        # self.__runMetrics=Event()
-        # self.__runMetrics.clear()
+    def block(self):
+        ''' A convenience function which blocks untill all registered
+        modules are in a stopped state.
 
-    def start(self):
-        '''Starts the router and all registerd modules.
-
-        Executes following steps:
-
-            - Starts the registered logging module.
-            - Starts the registered metrics module.
-            - Calls each registered module's start() function.
+        Becomes unblocked when stop() is called and finisehd.
         '''
 
-        self.logging.info('Starting.')
-        for module in self.__modules.keys():
-            self.__modules[module]["module"].start()
+        self.__exit.wait()
 
-    def stop(self):
-        '''Stops the router and all registered modules.
+    def connect(self, producer, consumer):
+        '''Connects a producing queue to a consuming queue.'''
+
+        if isinstance(producer._WishboneQueue__q, deque) and isinstance(consumer._WishboneQueue__q, deque):
+            self.__thread_consume.append(spawn (self.__forwardEvents, producer, consumer))
+        else:
+            raise Exception("Not a WishboneQueue.")
+
+    def doRescue(self):
+        '''Runs over each queue to extract any left behind messages.
         '''
 
-        self.logging.info('Stopping.')
-
-
-        #Stop modules in reverse order
         for module in reversed(self.__order):
-            self.__modules[module]["module"].stop()
-            while not self.__modules[module]["module"].logging.logs.empty():
-                sleep(0.1)
-
-        self.__runConsumers.set()
-
-        for thread in self.__thread_consume:
-            try:
-                thread.join(1)
-            except:
-                thread.kill()
-
-        self.__runLogs.set()
-        for thread in self.__thread_metrics:
-            try:
-                thread.join(1)
-            except:
-                thread.kill()
-
-        # for module in reversed(self.__order):
-        #     for queue in self.__modules[module]["module"].queuepool.messagesLeft():
-        #         for blah in self.__modules[module]["module"].queuepool.dump(queue):
-        #             print blah
-
-        self.__exit.set()
+            for queue in self.__modules[module]["module"].queuepool.messagesLeft():
+                for blah in self.__modules[module]["module"].queuepool.dump(queue):
+                    print blah
 
     def register(self, module):
         '''Registers a Wishbone actor into the router.'''
@@ -139,34 +123,67 @@ class Default():
         # metrics module.
         self.__modules[module.name]["metricsfwd"]=spawn (self.__forwardMetrics, module)
 
-    def connect(self, producer, consumer):
-        '''Connects a producing queue to a consuming queue.'''
+    def start(self):
+        '''Starts the router and all registerd modules.
 
-        self.__thread_consume.append(spawn (self.__forwardEvents, producer, consumer))
+        Executes following steps:
 
-    def block(self):
-        ''' A convenience function which blocks untill all registered
-        modules are in a stopped state.
-
-        Becomes unblocked when stop() is called and finisehd.
+            - Starts the registered logging module.
+            - Starts the registered metrics module.
+            - Calls each registered module's start() function.
         '''
 
-        self.__exit.wait()
+        self.logging.info('Starting.')
+        for module in self.__modules.keys():
+            self.__modules[module]["module"].start()
 
-    # def __forwardLogs(self, module):
+    def stop(self):
+        '''Stops the router and all registered modules.
 
-    #     '''A background greenlet which consumes the logs from a module and
-    #     forwards them to the registered logging module.'''
+        The modules are stopped in the reverse order they were registered. The
+        first module registered is never actually stopped.  The reason for
+        this is to register the logging module first, to be able to handle
+        logs untill the end.
 
-    #     while not self.__runLogs.isSet():
-    #         log = module.logging.logs.get()
-    #         self.logs.put(log)
+        This approch is subject to change, but for the time being this is it.
+        '''
+
+        self.logging.info('Stopping.')
+
+
+        #Stops all modules (except the 1st one registered) in reverse order
+        for module in reversed(self.__order[1:]):
+            self.__modules[module]["module"].stop()
+            while not self.__modules[module]["module"].logging.logs.empty():
+                sleep(0.1)
+
+        self.__runConsumers.set()
+
+        for thread in self.__thread_consume:
+            sleep()
+            try:
+                thread.join(0.5)
+            except:
+                thread.kill()
+
+        self.__runLogs.set()
+        for thread in self.__thread_metrics:
+            try:
+                thread.join(0.5)
+            except:
+                thread.kill()
+
+        if self.rescue:
+            self.doRescue()
+
+        self.__exit.set()
 
     def __forwardMetrics(self, module):
 
         '''A background greenlet which periodically gathers the metrics of all
         queues in all registered modules. These metrics are then forwarded to
         the registered metrics module.'''
+
         while not self.__runConsumers.isSet():
             metrics={"queue":{},"function":{}}
             if hasattr(module, "metrics"):
@@ -228,9 +245,10 @@ class Default():
     def __checkIntegrity(self, event):
         '''Checks the integrity of the messages passed over the different queues.
 
-        The format of the messages should be:
+        The format of the messages should be
 
-        { 'headers': {}, data: {} }'''
+        { 'headers': {}, data: {} }
+        '''
 
         if type(event) is dict:
             if len(event.keys()) == 2:
