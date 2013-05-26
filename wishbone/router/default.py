@@ -24,9 +24,9 @@
 #
 
 from wishbone.tools import QLogging
-from gevent import spawn, sleep, signal, joinall
+from wishbone.tools import WishboneQueue
+from gevent import spawn, sleep, signal, joinall, kill
 from gevent.event import Event
-from mx.Stack import EmptyError
 
 class Default():
     '''The default Wishbone router.
@@ -37,30 +37,25 @@ class Default():
         - Forward the logs from all modules to the logging module
         - Forward the metrics from all modules to the metrics module.
 
-    SIGINT is intercepted and starts a proper shutdown sequence.
+    SIGINT is intercepted and initiates a proper shutdown sequence.
 
     '''
 
-    def __init__(self, logging=None, metrics=None, interval=10):
-        signal(2, self.__signal_handler)
-
-        # Start the local logging instance
-        ##################################
-        self.logging=QLogging("Router")
-        spawn (self.__forwardRouterLogs)
-
-        # Start the logging module.
-        ###########################
-        self.__logging=logging
-        self.__logging.start()
-
-        # Start the metrics module.
-        ###########################
+    def __init__(self, interval=10):
         self.interval=interval
-        # self.__metrics=metrics
-        # self.__metrics=metrics.start()
+
+        signal(2, self.__signal_handler)
+        self.logging=QLogging("Router")
+        self.logs=WishboneQueue()
+        self.metrics=WishboneQueue()
+
+        # Forward router's logs to logging queue.
+        #########################################
+        spawn (self.__forwardEvents, self.logging.logs, self.logs)
 
         self.__modules={}
+        self.__order=[]
+
         self.__thread_consume=[]
         self.__thread_metrics=[]
         self.__thread_logs=[]
@@ -72,11 +67,11 @@ class Default():
         self.__runConsumers=Event()
         self.__runConsumers.clear()
 
-        self.__runMetrics=Event()
-        self.__runMetrics.clear()
-
         self.__runLogs=Event()
         self.__runLogs.clear()
+
+        # self.__runMetrics=Event()
+        # self.__runMetrics.clear()
 
     def start(self):
         '''Starts the router and all registerd modules.
@@ -88,10 +83,9 @@ class Default():
             - Calls each registered module's start() function.
         '''
 
-        self.__logging.start()
         self.logging.info('Starting.')
         for module in self.__modules.keys():
-            self.__modules[module].start()
+            self.__modules[module]["module"].start()
 
     def stop(self):
         '''Stops the router and all registered modules.
@@ -100,45 +94,55 @@ class Default():
         self.logging.info('Stopping.')
 
 
-        #Wait for all consumers
+        #Stop modules in reverse order
+        for module in reversed(self.__order):
+            self.__modules[module]["module"].stop()
+            while not self.__modules[module]["module"].logging.logs.empty():
+                sleep(0.1)
+
         self.__runConsumers.set()
+
         for thread in self.__thread_consume:
-            thread.join()
+            try:
+                thread.join(1)
+            except:
+                thread.kill()
 
-        #Stop all modules
-        self.__block.set()
-        for module in self.__modules.keys():
-            self.__modules[module].stop()
-
-        #Stop all metric forwarders
-        self.__runMetrics.set()
-        for thread in self.__thread_metrics:
-            thread.join()
-
-        #Wait for all log forwarders
         self.__runLogs.set()
-        for thread in self.__thread_logs:
-            thread.kill()
+        for thread in self.__thread_metrics:
+            try:
+                thread.join(1)
+            except:
+                thread.kill()
+
+        # for module in reversed(self.__order):
+        #     for queue in self.__modules[module]["module"].queuepool.messagesLeft():
+        #         for blah in self.__modules[module]["module"].queuepool.dump(queue):
+        #             print blah
 
         self.__exit.set()
 
     def register(self, module):
         '''Registers a Wishbone actor into the router.'''
 
-        self.__modules[module.name]=module
+        self.__order.append(module.name)
+        if not self.__modules.has_key(module.name):
+            self.__modules[module.name]={"module":None, "loggingfwd":None, "metricsfwd":None}
+
+        self.__modules[module.name]["module"]=module
 
         # Start to forward this module's logs to the registered
         # logging module.
-        self.__thread_logs.append(spawn (self.__forwardLogging, module))
+        self.__modules[module.name]["loggingfwd"]=spawn (self.__forwardLogs, module.logging.logs, self.logs)
 
         # Start to forward this module's metrics to the registered
         # metrics module.
-        self.__thread_metrics.append(spawn (self.__forwardMetrics, module))
+        self.__modules[module.name]["metricsfwd"]=spawn (self.__forwardMetrics, module)
 
     def connect(self, producer, consumer):
         '''Connects a producing queue to a consuming queue.'''
 
-        self.__thread_consume.append(spawn (self.__consume, producer, consumer))
+        self.__thread_consume.append(spawn (self.__forwardEvents, producer, consumer))
 
     def block(self):
         ''' A convenience function which blocks untill all registered
@@ -149,47 +153,69 @@ class Default():
 
         self.__exit.wait()
 
-    def __forwardLogging(self, module):
+    # def __forwardLogs(self, module):
 
-        '''A background greenlet which consumes the logs from a module and
-        forwards them to the registered logging module.'''
+    #     '''A background greenlet which consumes the logs from a module and
+    #     forwards them to the registered logging module.'''
 
-        while not self.__runLogs.isSet():
-            log = module.logging.logs.get()
-            self.__logging.queuepool.inbox.put(log)
+    #     while not self.__runLogs.isSet():
+    #         log = module.logging.logs.get()
+    #         self.logs.put(log)
 
     def __forwardMetrics(self, module):
 
         '''A background greenlet which periodically gathers the metrics of all
         queues in all registered modules. These metrics are then forwarded to
         the registered metrics module.'''
-        while not self.__runMetrics.isSet():
+        while not self.__runConsumers.isSet():
             metrics={"queue":{},"function":{}}
             if hasattr(module, "metrics"):
                 for fn in module.metrics:
                     metrics["function"]["%s.%s"%(module.name, fn)]=module.metrics[fn]
             for queue in module.queuepool.listQueues():
                 metrics["queue"]["%s.%s"%(module.name, queue)]=getattr(module.queuepool, queue).stats()
-            print metrics
+            self.metrics.put({"header":{},"data":metrics})
             sleep(self.interval)
 
-    def __forwardRouterLogs(self):
-
-        '''A background greenlet which forwards the logs created by this
-        router to the registered logging module.'''
-
-        while not self.__block.isSet():
-            log = self.logging.logs.get()
-            self.__logging.sendEvent(log, queue='inbox')
-
-    def __consume(self, producer, consumer):
+    def __forwardEvents(self, producer, consumer):
 
         '''The background greenthread which continuously consumes the producing
         queue and dumps that data into the consuming queue.'''
 
         while not self.__runConsumers.isSet():
-            consumer.put(producer.get())
+            try:
+                data = producer.get()
+            except:
+                sleep(0.1)
+            else:
+                if self.__checkIntegrity(data):
+                    try:
+                        consumer.put(data)
+                    except:
+                        producer.rescue(data)
+                else:
+                    self.logging.warn("Invalid event format.")
+                    self.logging.debug("Invalid event format. %s"%(data))
 
+    def __forwardLogs(self, producer, consumer):
+
+        '''The background greenthread which continuously consumes the producing
+        queue and dumps that data into the consuming queue.'''
+
+        while not self.__runLogs.isSet():
+            try:
+                data = producer.get()
+            except:
+                sleep(0.1)
+            else:
+                if self.__checkIntegrity(data):
+                    try:
+                        consumer.put(data)
+                    except:
+                        producer.rescue(data)
+                else:
+                    self.logging.warn("Invalid event format.")
+                    self.logging.debug("Invalid event format. %s"%(data))
 
     def __signal_handler(self):
 

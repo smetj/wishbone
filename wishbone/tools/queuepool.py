@@ -33,7 +33,6 @@ class QueuePool():
 
         for q in self.__dict__.keys():
             self.__dict__[q].lock()
-            self.__dict__[q].cancelAll()
 
     def listQueues(self):
         '''return a list of available queues in the queuepool.'''
@@ -47,7 +46,7 @@ class QueuePool():
             if not self.__dict__[q].empty():
                 qs.append(q)
         if len(qs) == 0:
-            return False
+            return []
         else:
             return qs
 
