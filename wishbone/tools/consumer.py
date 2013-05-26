@@ -54,7 +54,6 @@ class Consumer():
             self.logging.warn('Already shutdown.')
         else:
             self.__block.set()
-            self.queuepool.shutdown()
             self.logging.info('Shutdown')
     stop=shutdown
 
@@ -65,6 +64,9 @@ class Consumer():
     def registerConsumer(self, fc, q, pooled=0):
         """Registers <fc> as a consuming function for the given queue <q>."""
         self.__doConsumes.append((fc, q))
+
+    def loop(self):
+        return not self.__block.isSet()
 
     def __doConsume(self):
         '''Just a placeholder.
@@ -88,11 +90,10 @@ class Consumer():
         #     else:
         #         q.acknowledge(ticket)
 
-        while not self.__block.isSet():
+        while self.loop():
             try:
                 event = q.get()
                 fc(event)
-                #sleep()
             except:
                 q.waitUntilData()
 
@@ -141,8 +142,8 @@ class Consumer():
 
     def __setupBasic(self):
         '''Create in- and outbox and a consumer consuming inbox.'''
-        self.createQueue('inbox', ack=False)
-        self.createQueue('outbox', ack=False)
+        self.createQueue('inbox')
+        self.createQueue('outbox')
         self.registerConsumer(self.consume, self.queuepool.inbox)
 
     def consume(self, event):

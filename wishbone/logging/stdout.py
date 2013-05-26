@@ -30,7 +30,8 @@ from time import strftime, localtime
 
 class STDOUT(Actor):
 
-    def __init__(self, debug=False):
+    def __init__(self, name, debug=False):
+        self.name=name
         self.debug=debug
         Actor.__init__(self, 'Logging')
         self.logging.info("Initiated")

@@ -31,14 +31,14 @@ class QueueFunctions():
         from wishbone.tools import QueuePool
         self.queuepool=QueuePool()
 
-    def createQueue(self, name, ack=False):
+    def createQueue(self, name):
         '''Creates a Queue.
 
         When ack is defined it means each consumed event has to be acknowledged.
         This is not implemented yet.'''
 
         try:
-            setattr(self.queuepool, name, WishboneQueue(ack))
+            setattr(self.queuepool, name, WishboneQueue())
             self.logging.info('Created module queue named %s.'%(name))
         except Exception as err:
             self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
@@ -47,35 +47,6 @@ class QueueFunctions():
         '''Retrieves a log from the log queue.'''
 
         return self.logging.logs.get()
-
-    def createEvent(self, data, header={}, queue="outbox"):
-        '''Produces an event to the requested queue.
-
-        Blocks untill the queue is in unlocked state.'''
-
-        getattr (self.queuepool, queue).put({"header":header, "data":data})
-
-    def sendEvent(self, event, queue="outbox"):
-        '''Sends a raw event to the requested queue.'''
-
-        getattr (self.queuepool, queue).put(event)
-
-    def getEvent(self, queue="inbox"):
-        '''Consumes an event from the requested queue.
-
-        Blocks untill the queue is in unlocked state.'''
-
-        return getattr (self.queuepool, queue).get()
-
-    def acknowledgeEvent(self, ticket, queue="outbox"):
-        '''Acknowledges event.'''
-
-        getattr (self.queuepool, queue).acknowledge(ticket)
-
-    def cancelEvent(self, ticket, queue="outbox"):
-        '''Cancels event.'''
-
-        getattr (self.queuepool, queue).cancel(ticket)
 
     def waitUntilData(self, queue="inbox"):
         '''Blocks untill data arrives in queue'''
