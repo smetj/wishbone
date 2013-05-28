@@ -63,12 +63,11 @@ class Default():
         #########################################
         spawn (self.__forwardEvents, self.logging.logs, self.logs)
 
-        self.__modules={}
-        self.__order=[]
+        self.__modules=[]
+        self.__fwd_metrics=[]
+        self.__fwd_logs=[]
+        self.__fwd_events=[]
 
-        self.__thread_consume=[]
-        self.__thread_metrics=[]
-        self.__thread_logs=[]
         self.__block=Event()
         self.__block.clear()
         self.__exit=Event()
@@ -93,7 +92,7 @@ class Default():
         '''Connects a producing queue to a consuming queue.'''
 
         if isinstance(producer._WishboneQueue__q, deque) and isinstance(consumer._WishboneQueue__q, deque):
-            self.__thread_consume.append(spawn (self.__forwardEvents, producer, consumer))
+            self.__fwd_events.append(spawn (self.__forwardEvents, producer, consumer))
         else:
             raise Exception("Not a WishboneQueue.")
 
@@ -101,27 +100,23 @@ class Default():
         '''Runs over each queue to extract any left behind messages.
         '''
 
-        for module in reversed(self.__order):
-            for queue in self.__modules[module]["module"].queuepool.messagesLeft():
-                for blah in self.__modules[module]["module"].queuepool.dump(queue):
+        for module in reversed(self.__modules):
+            for queue in module.queuepool.messagesLeft():
+                for blah in module.queuepool.dump(queue):
                     print blah
 
     def register(self, module):
         '''Registers a Wishbone actor into the router.'''
 
-        self.__order.append(module.name)
-        if not self.__modules.has_key(module.name):
-            self.__modules[module.name]={"module":None, "loggingfwd":None, "metricsfwd":None}
-
-        self.__modules[module.name]["module"]=module
+        self.__modules.append(module)
 
         # Start to forward this module's logs to the registered
         # logging module.
-        self.__modules[module.name]["loggingfwd"]=spawn (self.__forwardLogs, module.logging.logs, self.logs)
+        self.__fwd_logs.append(spawn (self.__forwardLogs, module.logging.logs, self.logs))
 
         # Start to forward this module's metrics to the registered
         # metrics module.
-        self.__modules[module.name]["metricsfwd"]=spawn (self.__forwardMetrics, module)
+        self.__fwd_metrics.append(spawn (self.__forwardMetrics, module))
 
     def start(self):
         '''Starts the router and all registerd modules.
@@ -134,8 +129,8 @@ class Default():
         '''
 
         self.logging.info('Starting.')
-        for module in self.__modules.keys():
-            self.__modules[module]["module"].start()
+        for module in self.__modules:
+            module.start()
 
     def stop(self):
         '''Stops the router and all registered modules.
@@ -152,22 +147,20 @@ class Default():
 
 
         #Stops all modules (except the 1st one registered) in reverse order
-        for module in reversed(self.__order[1:]):
-            self.__modules[module]["module"].stop()
-            while not self.__modules[module]["module"].logging.logs.empty():
-                sleep(0.1)
+        for module in reversed(self.__modules[1:]):
+            module.stop()
+            for thread in module._Consumer__greenlet:
+                thread.join(1)
+                thread.kill()
 
         self.__runConsumers.set()
-
-        for thread in self.__thread_consume:
-            sleep()
+        for thread in self.__fwd_events:
             try:
                 thread.join(0.5)
             except:
                 thread.kill()
 
-        self.__runLogs.set()
-        for thread in self.__thread_metrics:
+        for thread in self.__fwd_metrics:
             try:
                 thread.join(0.5)
             except:
