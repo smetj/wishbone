@@ -26,7 +26,7 @@
 from wishbone import Actor
 from time import time
 from gevent import socket
-
+from wishbone.tools import Measure
 
 class STDOUT(Actor):
 
@@ -40,6 +40,7 @@ class STDOUT(Actor):
             pass
         self.logging.info("Initiated")
 
+    @Measure.runTime
     def consume(self, event):
         for item in [ "queue","function" ]:
             for one in event["data"][item]:

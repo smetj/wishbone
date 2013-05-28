@@ -23,11 +23,7 @@
 #
 #
 
-
-class QueueInLocked(Exception):
-    pass
-
-class QueueOutLocked(Exception):
+class QueueLocked(Exception):
     pass
 
 class QueueEmpty(Exception):

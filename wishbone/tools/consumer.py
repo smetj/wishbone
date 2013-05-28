@@ -26,7 +26,7 @@ from gevent import spawn, sleep, joinall
 from gevent import Greenlet
 from gevent.event import Event
 from gevent.coros import Semaphore
-from wishbone.errors import QueueInLocked, QueueOutLocked
+from wishbone.errors import QueueLocked
 
 class Consumer():
 
@@ -55,6 +55,7 @@ class Consumer():
             self.logging.warn('Already shutdown.')
         else:
             self.__block.set()
+            self.queuepool.shutdown()
             self.logging.info('Shutdown')
     stop=shutdown
 
@@ -94,7 +95,7 @@ class Consumer():
                 except Exception as err:
                     self.logging.warning("Error executing consume function.  Reason: %s"%(event))
                     q.rescue(event)
-            except QueueOutLocked:
+            except QueueLocked:
                 sleep(0.1)
             sleep()
 
@@ -132,7 +133,7 @@ class Consumer():
             else:
                 try:
                     event = q.get()
-                except QueueOutLocked:
+                except QueueLocked:
                     sleep(0.1)
                 else:
                     spawn(executor,fc, event, q, concurrent)
