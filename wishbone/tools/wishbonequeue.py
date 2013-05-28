@@ -23,7 +23,7 @@
 #
 #
 
-from wishbone.errors import QueueInLocked, QueueOutLocked, QueueEmpty
+from wishbone.errors import QueueLocked, QueueEmpty
 from collections import deque
 from gevent.event import Event
 from gevent import sleep
@@ -77,8 +77,8 @@ class WishboneQueue():
                 self.__out+=1
                 return data
             except IndexError:
-                sleep(0.05)
-        raise QueueOutLocked('Locked.')
+                sleep(0.1)
+        raise QueueLocked('Locked for outgoing data.')
 
     def getLock(self):
         '''Locks getting data from queue.'''
@@ -110,7 +110,7 @@ class WishboneQueue():
         '''
 
         if self.__putlock == True:
-            raise QueueInLocked('Queue is locked.')
+            raise QueueLocked('Locked for incoming data.')
 
         self.__q.append(element)
         self.__in+=1
