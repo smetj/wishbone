@@ -117,7 +117,7 @@ class Default():
 
         # Start to forward this module's metrics to the registered
         # metrics module.
-        self.__fwd_metrics.append(spawn (self.__forwardMetrics, module))
+        self.__fwd_metrics.append(spawn (self.__gatherMetrics, module))
 
     def start(self):
         '''Starts the router and all registerd modules.
@@ -167,7 +167,7 @@ class Default():
         self.__exit.set()
 
 
-    def __forwardMetrics(self, module):
+    def __gatherMetrics(self, module):
 
         '''A background greenlet which periodically gathers the metrics of all
         queues in all registered modules. These metrics are then forwarded to
@@ -187,8 +187,9 @@ class Default():
 
         '''The background greenthread which continuously consumes the producing
         queue and dumps that data into the consuming queue.'''
-
+        cycler=0
         while not self.__runConsumers.isSet():
+            cycler += 1
             try:
                 data = producer.get()
             except:
@@ -202,7 +203,9 @@ class Default():
                 else:
                     self.logging.warn("Invalid event format.")
                     self.logging.debug("Invalid event format. %s"%(data))
-            sleep()
+            if cycler == 100:
+                cycler=0
+                sleep()
 
 
     def __forwardLogs(self, producer, consumer):
