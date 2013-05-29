@@ -24,3 +24,4 @@
 #
 
 from stdout import STDOUT
+from graphite import Graphite

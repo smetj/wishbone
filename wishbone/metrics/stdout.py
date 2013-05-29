@@ -46,6 +46,6 @@ class STDOUT(Actor):
             for one in event["data"][item]:
                 for two in event["data"][item][one]:
                     try:
-                        self.s.sendall("wishbone.%s.%s.%s %s %s\n"%(item, one, two, event["data"][item][one][two], time()))
+                        self.s.send("wishbone.%s.%s.%s %s %s\n"%(item, one, two, event["data"][item][one][two], time()))
                     except:
                         pass

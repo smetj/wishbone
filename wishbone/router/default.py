@@ -28,6 +28,7 @@ from wishbone.tools import WishboneQueue
 from collections import deque
 from gevent import spawn, sleep, signal, joinall, kill
 from gevent.event import Event
+from gevent import Greenlet
 
 class Default():
     '''The default Wishbone router.
@@ -149,27 +150,22 @@ class Default():
         #Stops all modules (except the 1st one registered) in reverse order
         for module in reversed(self.__modules[1:]):
             module.stop()
-            for thread in module._Consumer__greenlet:
-                thread.join(1)
-                thread.kill()
+            while module.logging.logs.size() > 0:
+                sleep(0.1)
 
         self.__runConsumers.set()
-        for thread in self.__fwd_events:
-            try:
-                thread.join(0.5)
-            except:
-                thread.kill()
 
-        for thread in self.__fwd_metrics:
-            try:
-                thread.join(0.5)
-            except:
-                thread.kill()
+        for thread in self.__fwd_events + self.__fwd_metrics:
+            thread.join(1)
+            Greenlet.kill(thread, block=False)
+
+
 
         if self.rescue:
             self.doRescue()
 
         self.__exit.set()
+
 
     def __forwardMetrics(self, module):
 
@@ -201,11 +197,13 @@ class Default():
                 if self.__checkIntegrity(data):
                     try:
                         consumer.put(data)
-                    except:
+                    except Exception as err:
                         producer.rescue(data)
                 else:
                     self.logging.warn("Invalid event format.")
                     self.logging.debug("Invalid event format. %s"%(data))
+            sleep()
+
 
     def __forwardLogs(self, producer, consumer):
 
@@ -226,6 +224,7 @@ class Default():
                 else:
                     self.logging.warn("Invalid event format.")
                     self.logging.debug("Invalid event format. %s"%(data))
+            sleep()
 
     def __signal_handler(self):
 
