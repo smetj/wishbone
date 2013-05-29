@@ -87,18 +87,17 @@ class Consumer():
         as a variable.  There is no limit on the number of greenthreads
         spawned. """
 
+        cycler=0
         while self.loop():
+            cycler+=1
             try:
                 event = q.get()
                 fc(event)
-                # try:
-                #     fc(event)
-                # except Exception as err:
-                #     self.logging.warning("Error executing consume function.  Reason: %s"%(event))
-                #     q.rescue(event)
             except QueueLocked:
                 sleep(0.1)
-            sleep()
+            if cycler == 100:
+                cycler=0
+                sleep()
 
         self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
 
