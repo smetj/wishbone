@@ -90,11 +90,12 @@ class Consumer():
         while self.loop():
             try:
                 event = q.get()
-                try:
-                    fc(event)
-                except Exception as err:
-                    self.logging.warning("Error executing consume function.  Reason: %s"%(event))
-                    q.rescue(event)
+                fc(event)
+                # try:
+                #     fc(event)
+                # except Exception as err:
+                #     self.logging.warning("Error executing consume function.  Reason: %s"%(event))
+                #     q.rescue(event)
             except QueueLocked:
                 sleep(0.1)
             sleep()
