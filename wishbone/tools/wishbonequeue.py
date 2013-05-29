@@ -77,7 +77,7 @@ class WishboneQueue():
                 self.__out+=1
                 return data
             except IndexError:
-                sleep(0.5)
+                sleep(0.1)
         raise QueueLocked('Locked for outgoing data.')
 
     def getLock(self):
