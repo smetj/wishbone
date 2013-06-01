@@ -104,7 +104,7 @@ class Default():
         for module in reversed(self.__modules):
             for queue in module.queuepool.messagesLeft():
                 for blah in module.queuepool.dump(queue):
-                    print blah
+                    print (blah)
 
     def register(self, module):
         '''Registers a Wishbone actor into the router.'''
@@ -247,7 +247,7 @@ class Default():
 
         if type(event) is dict:
             if len(event.keys()) == 2:
-                if event.has_key('header') and event.has_key('data'):
+                if "header" in event and "data" in event:
                     return True
                 else:
                     return False

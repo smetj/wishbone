@@ -159,7 +159,7 @@ class WishboneQueue():
         self.__data_available.wait()
 
     def __rate(self, name, value):
-        if not self.__cache.has_key(name):
+        if not name in self.__cache:
             self.__cache[name]=(time(), value)
             return 0
 

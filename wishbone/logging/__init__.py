@@ -23,4 +23,4 @@
 #
 #
 
-from stdout import STDOUT
+from wishbone.logging.stdout import STDOUT
