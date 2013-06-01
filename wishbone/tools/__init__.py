@@ -23,9 +23,9 @@
 #
 #
 
-from wishbonequeue import WishboneQueue
-from queuefunctions import QueueFunctions
-from consumer import Consumer
-from qlogging import QLogging
-from queuepool import QueuePool
-from measure import Measure
+from wishbone.tools.wishbonequeue import WishboneQueue
+from wishbone.tools.queuefunctions import QueueFunctions
+from wishbone.tools.consumer import Consumer
+from wishbone.tools.qlogging import QLogging
+from wishbone.tools.queuepool import QueuePool
+from wishbone.tools.measure import Measure

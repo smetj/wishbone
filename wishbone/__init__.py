@@ -23,5 +23,5 @@
 #
 #
 
-from base import Actor
-from base import BaseActor
+from wishbone.base import Actor
+from wishbone.base import BaseActor
