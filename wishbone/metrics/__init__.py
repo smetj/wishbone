@@ -23,5 +23,5 @@
 #
 #
 
-from stdout import STDOUT
-from graphite import Graphite
+#from stdout import STDOUT
+from wishbone.metrics.graphite import Graphite

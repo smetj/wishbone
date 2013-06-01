@@ -23,4 +23,4 @@
 #
 #
 
-from default import Default
+from wishbone.router.default import Default

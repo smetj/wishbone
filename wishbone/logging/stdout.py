@@ -52,4 +52,4 @@ class STDOUT(Actor):
                         event["data"][0],
                         event["data"][3]))
         else:
-            print "%s %s"%(strftime("%Y-%m-%dT%H:%M:%S", localtime(time())), str(event["data"]))
+            print ("%s %s"%(strftime("%Y-%m-%dT%H:%M:%S", localtime(time())), str(event["data"])))
