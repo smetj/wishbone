@@ -29,6 +29,7 @@ from collections import deque
 from gevent import spawn, sleep, signal, joinall, kill
 from gevent.event import Event
 from gevent import Greenlet
+from collections import OrderedDict
 
 class Default():
     '''The default Wishbone router.
@@ -64,7 +65,8 @@ class Default():
         #########################################
         spawn (self.__forwardEvents, self.logging.logs, self.logs)
 
-        self.__modules=[]
+        self.__container={}
+        self.__modules=OrderedDict()
         self.__fwd_metrics=[]
         self.__fwd_logs=[]
         self.__fwd_events=[]
@@ -92,10 +94,21 @@ class Default():
     def connect(self, producer, consumer):
         '''Connects a producing queue to a consuming queue.'''
 
-        if isinstance(producer._WishboneQueue__q, deque) and isinstance(consumer._WishboneQueue__q, deque):
-            self.__fwd_events.append(spawn (self.__forwardEvents, producer, consumer))
+        def getQueue(instance):
+            (a,b) = instance.split(".")
+            return getattr(self.__modules[a].queuepool, b)
+
+        if not '.' in producer:
+            producer_instance = getattr(self, producer)
         else:
-            raise Exception("Not a WishboneQueue.")
+            producer_instance = getQueue(producer)
+
+        try:
+            consumer_instance = getQueue(consumer)
+        except Exception:
+            raise Exception ("Queue %s does not exist"%(consumer))
+        else:
+            self.__fwd_events.append(spawn (self.__forwardEvents, producer_instance, consumer_instance))
 
     def doRescue(self):
         '''Runs over each queue to extract any left behind messages.
@@ -106,18 +119,29 @@ class Default():
                 for blah in module.queuepool.dump(queue):
                     print (blah)
 
-    def register(self, module):
-        '''Registers a Wishbone actor into the router.'''
+    def register(self, module, *args, **kwargs):
+        '''Registers a Wishbone actor into the router.
+        '''
 
-        self.__modules.append(module)
+        if len(module) < 3:
+            raise Exception("The module tuple requires 3 values.")
+
+        limit = module[2]
+        name = module[1]
+        module = module[0]
+
+        if limit > 0:
+            self.__modules[name]=module(name, limit, *args, **kwargs)
+        else:
+            self.__modules[name]=module(name, *args, **kwargs)
 
         # Start to forward this module's logs to the registered
         # logging module.
-        self.__fwd_logs.append(spawn (self.__forwardLogs, module.logging.logs, self.logs))
+        self.__fwd_logs.append(spawn (self.__forwardLogs, self.__modules[name].logging.logs, self.logs))
 
         # Start to forward this module's metrics to the registered
         # metrics module.
-        self.__fwd_metrics.append(spawn (self.__gatherMetrics, module))
+        self.__fwd_metrics.append(spawn (self.__gatherMetrics, self.__modules[name]))
 
     def start(self):
         '''Starts the router and all registerd modules.
@@ -131,7 +155,7 @@ class Default():
 
         self.logging.info('Starting.')
         for module in self.__modules:
-            module.start()
+            self.__modules[module].start()
 
     def stop(self):
         '''Stops the router and all registered modules.
@@ -146,26 +170,24 @@ class Default():
 
         self.logging.info('Stopping.')
 
-
         #Stops all modules (except the 1st one registered) in reverse order
-        for module in reversed(self.__modules[1:]):
-            module.stop()
-            while module.logging.logs.size() > 0:
+        for module in reversed(self.__modules.keys()[1:]):
+            self.__modules[module].stop()
+            while self.__modules[module].logging.logs.size() > 0:
                 sleep(0.1)
 
-        self.__runConsumers.set()
+        while self.__modules[self.__modules.keys()[0]].queuepool.inbox.size() > 0 or self.logs.size() > 0:
+            sleep(0.1)
 
         for thread in self.__fwd_events + self.__fwd_metrics:
-            thread.join(1)
             Greenlet.kill(thread, block=False)
 
-
+        self.__runConsumers.set()
 
         if self.rescue:
             self.doRescue()
 
         self.__exit.set()
-
 
     def __gatherMetrics(self, module):
 
@@ -207,7 +229,6 @@ class Default():
                 cycler=0
                 sleep()
 
-
     def __forwardLogs(self, producer, consumer):
 
         '''The background greenthread which continuously consumes the producing
@@ -244,14 +265,15 @@ class Default():
 
         { 'headers': {}, data: {} }
         '''
+        return True
 
-        if type(event) is dict:
-            if len(event.keys()) == 2:
-                if "header" in event and "data" in event:
-                    return True
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
+        # if type(event) is dict:
+        #     if len(event.keys()) == 2:
+        #         if "header" in event and "data" in event:
+        #             return True
+        #         else:
+        #             return False
+        #     else:
+        #         return False
+        # else:
+        #     return False

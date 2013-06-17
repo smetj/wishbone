@@ -94,6 +94,10 @@ class Consumer():
                 event = q.get()
                 fc(event)
             except QueueLocked:
+                try:
+                    q.rescue(event)
+                except:
+                    pass
                 sleep(0.1)
             if cycler == 100:
                 cycler=0
