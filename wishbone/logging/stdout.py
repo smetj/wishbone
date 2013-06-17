@@ -47,9 +47,9 @@ class STDOUT(Actor):
                 else:
                     print ("%s %s %s %s: %s"%(
                         strftime("%Y-%m-%dT%H:%M:%S", localtime(event["data"][1])),
-                        "Process",
-                        event["data"][2],
+                        "pid-%s"%(event["data"][2]),
+                        event["data"][3],
                         event["data"][0],
-                        event["data"][3]))
+                        event["data"][4]))
         else:
             print ("%s %s"%(strftime("%Y-%m-%dT%H:%M:%S", localtime(time())), str(event["data"])))

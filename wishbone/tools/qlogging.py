@@ -26,16 +26,18 @@
 
 from wishbone.tools import WishboneQueue
 from time import time
+from os import getpid
 
 class QLogging():
 
     def __init__(self, name):
         self.logs=WishboneQueue()
         self.name=name
+        self.pid=getpid()
 
     def __log(self, level, message):
         #print ((level, time(), self.name, message))
-        self.logs.put({"header":{},"data":(level, time(), self.name, message)})
+        self.logs.put({"header":{},"data":(level, time(), self.pid, self.name, message)})
 
     def debug(self, message):
         self.__log("debug",message)
