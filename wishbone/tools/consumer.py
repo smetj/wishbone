@@ -38,8 +38,10 @@ class Consumer():
             self.__setupBasic()
         self.limit=limit
         if limit == 0:
+            self.logging.info("Limit is 0.  Doing sequential consume.")
             self.__doConsume = self.__doSequentialConsume
         else:
+            self.logging.info("Limit is %s.  Doing pooled consume."%(self.limit))
             self.__doConsume = self.__doPooledConsume
         self.__greenlet=[]
         self.metrics={}
@@ -63,7 +65,7 @@ class Consumer():
         '''Convenience function which blocks untill the actor is in stopped state.'''
         self.__block.wait()
 
-    def registerConsumer(self, fc, q, pooled=0):
+    def registerConsumer(self, fc, q):
         """Registers <fc> as a consuming function for the given queue <q>."""
         self.__doConsumes.append((fc, q))
 
@@ -94,11 +96,12 @@ class Consumer():
                 event = q.get()
                 fc(event)
             except QueueLocked:
-                try:
-                    q.rescue(event)
-                except:
-                    pass
-                sleep(0.1)
+                self.logging.warn("Queue %s locked."%(str(q)))
+                sleep()
+            except Exception as err:
+                self.logging.warn("Problem executing %s. Sleeping for a second. Reason: %s"%(str(fc),err))
+                q.rescue(event)
+                sleep(1)
             if cycler == 100:
                 cycler=0
                 sleep()
@@ -123,7 +126,9 @@ class Consumer():
             try:
                 fc(event)
             except Exception as err:
+                self.logging.warn("Problem executing %s. Sleeping for a second. Reason: %s"%(str(fc),err))
                 q.rescue(event)
+                sleep(1)
             else:
                 q.putUnlock()
             concurrent.release()
