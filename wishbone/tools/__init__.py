@@ -29,4 +29,3 @@ from wishbone.tools.consumer import Consumer
 from wishbone.tools.qlogging import QLogging
 from wishbone.tools.queuepool import QueuePool
 from wishbone.tools.measure import Measure
-from wishbone.tools.processcontainer import ProcessContainer
