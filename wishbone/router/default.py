@@ -265,15 +265,15 @@ class Default():
 
         { 'headers': {}, data: {} }
         '''
-        return True
+        #return True
 
-        # if type(event) is dict:
-        #     if len(event.keys()) == 2:
-        #         if "header" in event and "data" in event:
-        #             return True
-        #         else:
-        #             return False
-        #     else:
-        #         return False
-        # else:
-        #     return False
+        if type(event) is dict:
+            if len(event.keys()) == 2:
+                if "header" in event and "data" in event:
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False

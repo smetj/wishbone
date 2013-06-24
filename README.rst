@@ -13,12 +13,8 @@ How?
 The WishBone Python library offers a framework to write asynchronous event
 pipeline servers with minimal effort.  In this context, event pipelines are
 best described as a collection of concurrently running modules which consume,
-process and produce events. Wishbone module queues are connected to one
-another forming a pipeline through which these events travel.  Wishbone
-servers can be configured and controlled from from command line using
-bootstrap files. Bootstrap files allow to cherry-pick Wishbone modules and to
-define how events travel through them.  Multiple identical Wishbone instances
-can run as separate processes offering parallel execution.
+process and produce events. Wishbone module are connected to one another using
+queues forming a pipeline through which these events travel.
 
 Installing
 ----------
@@ -43,6 +39,11 @@ http://smetj.github.com/wishbone/docs/build/html/index.html
 
 Examples
 --------
+
+::
+
+
+
 
 Once Wishbone is installed you can try to execute it:
 
