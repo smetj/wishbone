@@ -53,12 +53,13 @@ class Consumer():
             self.logging.info('Function %s started to consume queue %s.'%(str(c[0]),str(c[1])))
 
     def shutdown(self):
+
         if self.__block.isSet():
             self.logging.warn('Already shutdown.')
         else:
+            self.logging.info('Shutdown')
             self.__block.set()
             self.queuepool.shutdown()
-            self.logging.info('Shutdown')
     stop=shutdown
 
     def block(self):

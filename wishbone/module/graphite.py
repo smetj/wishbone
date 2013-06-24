@@ -62,4 +62,3 @@ class Graphite(Actor):
                         self.queuepool.outbox.put({"header":{}, "data":"wishbone.%s.%s.%s.%s %s %s\n"%(self.script_name, item, one, two, event["data"][item][one][two], time())})
                     except:
                         pass
-
