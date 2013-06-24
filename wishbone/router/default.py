@@ -25,6 +25,7 @@
 
 from wishbone.tools import QLogging
 from wishbone.tools import WishboneQueue
+from wishbone.errors import QueueMissing
 from collections import deque
 from gevent import spawn, sleep, signal, joinall, kill
 from gevent.event import Event
@@ -65,11 +66,10 @@ class Default():
         #########################################
         spawn (self.__forwardEvents, self.logging.logs, self.logs)
 
-        self.__container={}
-        self.__modules=OrderedDict()
-        self.__fwd_metrics=[]
-        self.__fwd_logs=[]
-        self.__fwd_events=[]
+        #self.__modules = OrderedDict()
+        self.__modules = {}
+        self.__logmodule = None
+        self.__metricmodule = None
 
         self.__block=Event()
         self.__block.clear()
@@ -94,21 +94,16 @@ class Default():
     def connect(self, producer, consumer):
         '''Connects a producing queue to a consuming queue.'''
 
-        def getQueue(instance):
-            (a,b) = instance.split(".")
-            return getattr(self.__modules[a].queuepool, b)
+        (producer_module, producer_queue) = producer.split(".")
+        (consumer_module, consumer_queue) = consumer.split(".")
 
-        if not '.' in producer:
-            producer_instance = getattr(self, producer)
-        else:
-            producer_instance = getQueue(producer)
-
+        producer_queue = getattr(self.__modules[producer_module]["instance"].queuepool, producer_queue)
         try:
-            consumer_instance = getQueue(consumer)
+            consumer_queue = getattr(self.__modules[consumer_module]["instance"].queuepool, consumer_queue)
         except Exception:
             raise Exception ("Queue %s does not exist"%(consumer))
         else:
-            self.__fwd_events.append(spawn (self.__forwardEvents, producer_instance, consumer_instance))
+            self.__modules[consumer_module]["link"]=spawn (self.__forwardEvents, producer_queue, consumer_queue)
 
     def doRescue(self):
         '''Runs over each queue to extract any left behind messages.
@@ -130,18 +125,100 @@ class Default():
         name = module[1]
         module = module[0]
 
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "link":None}
+
         if limit > 0:
-            self.__modules[name]=module(name, limit, *args, **kwargs)
+            self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
         else:
-            self.__modules[name]=module(name, *args, **kwargs)
+            self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
         # Start to forward this module's logs to the registered
         # logging module.
-        self.__fwd_logs.append(spawn (self.__forwardLogs, self.__modules[name].logging.logs, self.logs))
+        self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
 
         # Start to forward this module's metrics to the registered
         # metrics module.
-        self.__fwd_metrics.append(spawn (self.__gatherMetrics, self.__modules[name]))
+        self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
+
+    def registerLogModule(self, module, queue, *args, **kwargs):
+        '''Registers and connects the module to the router's log queue.
+
+        If this method is not called (no module connected to it) the queue is
+        automatically connected to a Null module.
+
+        Parameters:
+
+            module(instance)        An initialized wishbone module.
+            queue(str)              The name of the module's queue to connect to.
+            *args(list)             Positional arguments to pass to thevmodule.
+            **kwargs(dict)          Named arguments to pass to the module.
+        '''
+
+        if len(module) < 3:
+            raise Exception("The module tuple requires 3 values.")
+
+        limit = module[2]
+        name = module[1]
+        module = module[0]
+
+        self.__logmodule = name
+
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "link":None}
+
+        if limit > 0:
+            self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
+        else:
+            self.__modules[name]["instance"]=module(name, *args, **kwargs)
+
+        self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
+        self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
+
+        try:
+            queue = getattr(self.__modules[name]["instance"].queuepool, queue)
+        except Exception:
+            raise QueueMissing("Queue %s does not exist in module %s"%(queue, module))
+
+        self.__modules[name]["link"] = spawn (self.__forwardEvents, self.logs, queue)
+
+    def registerMetricModule(self, module, queue, *args, **kwargs):
+        '''Registers and connects the module to the router's log queue.
+
+        If this method is not called (no module connected to it) the queue is
+        automatically connected to a Null module.
+        Parameters:
+
+            module(instance)        An initialized wishbone module.
+            queue(str)              The name of the module's queue to connect to.
+            *args(list)             Positional arguments to pass to thevmodule.
+            **kwargs(dict)          Named arguments to pass to the module.
+        '''
+
+        if len(module) < 3:
+            raise Exception("The module tuple requires 3 values.")
+
+        limit = module[2]
+        name = module[1]
+        module = module[0]
+
+        self.__metricmodule = name
+
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "link":None}
+
+        if limit > 0:
+            self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
+        else:
+            self.__modules[name]["instance"]=module(name, *args, **kwargs)
+
+
+        self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
+        self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
+
+        try:
+            queue = getattr(self.__modules[name]["instance"].queuepool, queue)
+        except Exception:
+            raise QueueMissing("Queue %s does not exist in module %s."%(queue, module))
+
+        self.__modules[name]["link"] = spawn (self.__forwardEvents, self.metrics, queue)
 
     def start(self):
         '''Starts the router and all registerd modules.
@@ -155,7 +232,7 @@ class Default():
 
         self.logging.info('Starting.')
         for module in self.__modules:
-            self.__modules[module].start()
+            self.__modules[module]["instance"].start()
 
     def stop(self):
         '''Stops the router and all registered modules.
@@ -171,16 +248,16 @@ class Default():
         self.logging.info('Stopping.')
 
         #Stops all modules (except the 1st one registered) in reverse order
-        for module in reversed(self.__modules.keys()[1:]):
-            self.__modules[module].stop()
-            while self.__modules[module].logging.logs.size() > 0:
-                sleep(0.1)
+        for module in self.__modules.keys():
+            if module in [self.__logmodule, self.__metricmodule, "stdout"]:
+                continue
+            else:
+                self.__modules[module]["instance"].stop()
+                while self.__modules[module]["instance"].logging.logs.size() > 0:
+                    sleep(0.5)
 
-        while self.__modules[self.__modules.keys()[0]].queuepool.inbox.size() > 0 or self.logs.size() > 0:
-            sleep(0.1)
-
-        for thread in self.__fwd_events + self.__fwd_metrics:
-            Greenlet.kill(thread, block=False)
+        while self.__modules[self.__logmodule]["instance"].queuepool.inbox.size() > 0 or self.logs.size() > 0:
+            sleep(0.5)
 
         self.__runConsumers.set()
 
