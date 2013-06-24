@@ -33,9 +33,7 @@ class QueueFunctions():
 
     def createQueue(self, name):
         '''Creates a Queue.
-
-        When ack is defined it means each consumed event has to be acknowledged.
-        This is not implemented yet.'''
+        '''
 
         try:
             setattr(self.queuepool, name, WishboneQueue())

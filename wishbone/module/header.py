@@ -2,13 +2,13 @@
 #
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  header.py
 #
 #  Copyright 2013 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
+#  the Free Software Foundation; either version 3 of the License, or
 #  (at your option) any later version.
 #
 #  This program is distributed in the hope that it will be useful,
@@ -23,5 +23,22 @@
 #
 #
 
-#from stdout import STDOUT
-from wishbone.metrics.graphite import Graphite
+from wishbone import Actor
+
+
+class Header(Actor):
+    '''* A builtin Wishbone module which adds the defined dictionary
+    to the header of each passing event.*
+
+    Parameters:
+
+        name(str):  The name of the module
+    '''
+
+    def __init__(self, name, header={}):
+        Actor.__init__(self, name, limit=0)
+        self.header=header
+
+    def consume(self, event):
+        event["header"].update(self.header)
+        self.poolqueue.outbox.put(event)
