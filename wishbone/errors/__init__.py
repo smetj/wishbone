@@ -28,3 +28,6 @@ class QueueLocked(Exception):
 
 class QueueEmpty(Exception):
     pass
+
+class QueueMissing(Exception):
+    pass
