@@ -97,13 +97,21 @@ class Default():
         (producer_module, producer_queue) = producer.split(".")
         (consumer_module, consumer_queue) = consumer.split(".")
 
-        producer_queue = getattr(self.__modules[producer_module]["instance"].queuepool, producer_queue)
-        try:
-            consumer_queue = getattr(self.__modules[consumer_module]["instance"].queuepool, consumer_queue)
-        except Exception:
-            raise Exception ("Queue %s does not exist"%(consumer))
-        else:
-            self.__modules[consumer_module]["link"]=spawn (self.__forwardEvents, producer_queue, consumer_queue)
+        while True:
+            try:
+                producer_queue_instance = getattr(self.__modules[producer_module]["instance"].queuepool, producer_queue)
+                break
+            except:
+                self.logging.info("Queue %s does not exist in module %s.  Autocreate queue."%(producer_queue, producer_module))
+
+        while True:
+            try:
+                consumer_queue_instance = getattr(self.__modules[consumer_module]["instance"].queuepool, consumer_queue)
+                break
+            except :
+                self.logging.info("Queue %s does not exist in module %s.  Autocreate queue."%(producer_queue, producer_module))
+
+        self.__modules[consumer_module]["link"]=spawn (self.__forwardEvents, producer_queue_instance, consumer_queue_instance)
 
     def doRescue(self):
         '''Runs over each queue to extract any left behind messages.

@@ -27,7 +27,7 @@ from wishbone import Actor
 
 
 class Null(Actor):
-    '''* A Wishbone module which accepts events and does nothing with them.*
+    '''* A builtin Wishbone module which accepts events and does nothing with them.*
 
     Useful to make sure a queue is consumed but the events are purged.
 
