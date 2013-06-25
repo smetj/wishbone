@@ -25,12 +25,11 @@
 
 from wishbone.tools import QLogging
 from wishbone.tools import WishboneQueue
-from wishbone.errors import QueueMissing
-from collections import deque
-from gevent import spawn, sleep, signal, joinall, kill
+from wishbone.errors import QueueMissing, QueueOccupied
+from gevent import spawn, sleep, signal, joinall, kill, Greenlet
 from gevent.event import Event
-from gevent import Greenlet
 from collections import OrderedDict
+from uuid import uuid4
 
 class Default():
     '''The default Wishbone router.
@@ -46,14 +45,19 @@ class Default():
     Parameters:
 
         - interval(int):    The interval metrics are polled from each module
+
         - rescue(bool):     Whether to extract any events stuck in one of
                             the queues and write that to a cache file.  Next
                             startup the events are read from the cache and
                             inserted into the same queue again.
 
+        - uuid(bool):       If True, adds a uuid4 value in the header of each
+                            event if not present when forwarded from one queue
+                            to the other. (default False)
+
     '''
 
-    def __init__(self, interval=10, rescue=False):
+    def __init__(self, interval=10, rescue=False, uuid=False):
         self.interval=interval
         self.rescue=rescue
 
@@ -61,6 +65,12 @@ class Default():
         self.logging=QLogging("Router")
         self.logs=WishboneQueue()
         self.metrics=WishboneQueue()
+
+        if uuid == True:
+            self.__UUID = self.__doUUID
+        else:
+            self.__UUID = self.__noUUID
+
 
         # Forward router's logs to logging queue.
         #########################################
@@ -70,6 +80,7 @@ class Default():
         self.__modules = {}
         self.__logmodule = None
         self.__metricmodule = None
+        self.__map=[]
 
         self.__block=Event()
         self.__block.clear()
@@ -92,10 +103,36 @@ class Default():
         self.__exit.wait()
 
     def connect(self, producer, consumer):
-        '''Connects a producing queue to a consuming queue.'''
+        '''Connects a producing queue to a consuming queue.
 
-        (producer_module, producer_queue) = producer.split(".")
-        (consumer_module, consumer_queue) = consumer.split(".")
+        A separate greenthread consumes the events from the consumer queue and
+        submits these to the producer queue. When a non existing queue is
+        defined, it is autocreated.
+
+        The notation of queue names is:
+
+            modulename.queuename
+
+        Parameters:
+
+            producer(string):   The name of the producing module queue.
+            consumer(string):   The name of the consumnig module queue.
+
+        '''
+        try:
+            (producer_module, producer_queue) = producer.split(".")
+        except ValueError:
+            raise Exception("A queue name should have format 'module.queue'. Got '%s' instead"%(producer))
+
+        try:
+            (consumer_module, consumer_queue) = consumer.split(".")
+        except ValueError:
+            raise Exception("A queue name should have format 'module.queue'. Got '%s' instead"%(consumer))
+
+        if not self.__modules.has_key(producer_module):
+            raise Exception("There is no Wishbone module registered with name '%s'"%(producer_module))
+        if not self.__modules.has_key(consumer_module):
+            raise Exception("There is no Wishbone module registered with name '%s'"%(consumer_module))
 
         while True:
             try:
@@ -103,6 +140,7 @@ class Default():
                 break
             except:
                 self.logging.info("Queue %s does not exist in module %s.  Autocreate queue."%(producer_queue, producer_module))
+                self.__modules[producer_module]["instance"].createQueue(producer_queue)
 
         while True:
             try:
@@ -110,8 +148,19 @@ class Default():
                 break
             except :
                 self.logging.info("Queue %s does not exist in module %s.  Autocreate queue."%(producer_queue, producer_module))
+                self.__modules[consumer_module]["instance"].createQueue(consumer_queue)
 
-        self.__modules[consumer_module]["link"]=spawn (self.__forwardEvents, producer_queue_instance, consumer_queue_instance)
+        if self.__modules[consumer_module]["connections"].has_key(consumer_queue):
+            raise QueueOccupied("Queue %s of module %s is already connected."%(consumer_queue, consumer_module))
+
+        if self.__modules[producer_module]["connections"].has_key(producer_queue):
+            raise QueueOccupied("Queue %s of module %s is already connected."%(producer_queue, producer_module))
+
+        self.__modules[consumer_module]["connections"]={}
+
+        self.__modules[consumer_module]["connections"][consumer_queue]=spawn (self.__forwardEvents, producer_queue_instance, consumer_queue_instance)
+        #store a reference of the greenthread to the other side.
+        self.__modules[producer_module]["connections"][producer_queue]=self.__modules[consumer_module]["connections"][consumer_queue]
 
     def doRescue(self):
         '''Runs over each queue to extract any left behind messages.
@@ -133,7 +182,7 @@ class Default():
         name = module[1]
         module = module[0]
 
-        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "link":None}
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}}
 
         if limit > 0:
             self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
@@ -171,7 +220,7 @@ class Default():
 
         self.__logmodule = name
 
-        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "link":None}
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}}
 
         if limit > 0:
             self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
@@ -186,7 +235,7 @@ class Default():
         except Exception:
             raise QueueMissing("Queue %s does not exist in module %s"%(queue, module))
 
-        self.__modules[name]["link"] = spawn (self.__forwardEvents, self.logs, queue)
+        self.__modules[name]["connections"][queue] = spawn (self.__forwardEvents, self.logs, queue)
 
     def registerMetricModule(self, module, queue, *args, **kwargs):
         '''Registers and connects the module to the router's log queue.
@@ -210,7 +259,7 @@ class Default():
 
         self.__metricmodule = name
 
-        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "link":None}
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}}
 
         if limit > 0:
             self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
@@ -226,7 +275,7 @@ class Default():
         except Exception:
             raise QueueMissing("Queue %s does not exist in module %s."%(queue, module))
 
-        self.__modules[name]["link"] = spawn (self.__forwardEvents, self.metrics, queue)
+        self.__modules[name]["connections"][queue] = spawn (self.__forwardEvents, self.metrics, queue)
 
     def start(self):
         '''Starts the router and all registerd modules.
@@ -294,22 +343,27 @@ class Default():
 
         '''The background greenthread which continuously consumes the producing
         queue and dumps that data into the consuming queue.'''
+
+        #todo(smetj): make this cycler setup more dynamic?  Auto adjust the amount
+        #cycles before context switch to achieve sweetspot?
+
         cycler=0
         while not self.__runConsumers.isSet():
             cycler += 1
             try:
-                data = producer.get()
+                event = producer.get()
             except:
                 sleep(0.1)
             else:
-                if self.__checkIntegrity(data):
+                if self.__checkIntegrity(event):
+                    event=self.__UUID(event)
                     try:
-                        consumer.put(data)
+                        consumer.put(event)
                     except Exception as err:
-                        producer.rescue(data)
+                        producer.rescue(event)
                 else:
                     self.logging.warn("Invalid event format.")
-                    self.logging.debug("Invalid event format. %s"%(data))
+                    self.logging.debug("Invalid event format. %s"%(event))
             if cycler == 100:
                 cycler=0
                 sleep()
@@ -319,7 +373,13 @@ class Default():
         '''The background greenthread which continuously consumes the producing
         queue and dumps that data into the consuming queue.'''
 
+        #todo(smetj): When not context switching logs are more serialized instead
+        #of interleaved.  Might have to give it some though whether this is an
+        #issue or not.
+
+        cycler=0
         while not self.__runLogs.isSet():
+            cycler+=1
             try:
                 data = producer.get()
             except:
@@ -333,7 +393,9 @@ class Default():
                 else:
                     self.logging.warn("Invalid event format.")
                     self.logging.debug("Invalid event format. %s"%(data))
-            sleep()
+            if cycler == 1:
+                cycler=0
+                sleep()
 
     def __signal_handler(self):
 
@@ -350,7 +412,6 @@ class Default():
 
         { 'headers': {}, data: {} }
         '''
-        #return True
 
         if type(event) is dict:
             if len(event.keys()) == 2:
@@ -362,3 +423,14 @@ class Default():
                 return False
         else:
             return False
+
+    def __doUUID(self, event):
+        try:
+            event["header"]["uuid"]
+        except:
+            event["header"]["uuid"] = str(uuid4())
+        return event
+
+    def __noUUID(self, event):
+        return event
+

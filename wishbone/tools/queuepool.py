@@ -35,9 +35,14 @@ class QueuePool():
             self.__dict__[q].lock()
 
     def listQueues(self):
-        '''return a list of available queues in the queuepool.'''
+        '''return the list of queue names from the queuepool.'''
 
         return self.__dict__.keys()
+
+    def getQueueInstances(self):
+        '''Return the list of queue instances from the queuepool.'''
+
+        return {name:self.__dict__[name] for name in self.__dict__.keys()}
 
     def messagesLeft(self):
         '''Checks each queue whether there are any messages left.'''
