@@ -27,3 +27,4 @@ from wishbone.module.null import Null
 from wishbone.module.graphite import Graphite
 from wishbone.module.stdout import STDOUT
 from wishbone.module.logformatfilter import LogFormatFilter
+from wishbone.module.fanout import Fanout
