@@ -34,3 +34,6 @@ nosetests.xml
 .project
 .pydevproject
 
+# Sublime
+wishbone.sublime-project
+wishbone.sublime-workspace
