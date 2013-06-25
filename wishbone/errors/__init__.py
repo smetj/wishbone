@@ -31,3 +31,6 @@ class QueueEmpty(Exception):
 
 class QueueMissing(Exception):
     pass
+
+class QueueOccupied(Exception):
+    pass

@@ -48,6 +48,12 @@ class Consumer():
 
     def start(self):
         self.logging.info("Started")
+        try:
+            self.preHook()
+            self.logging.debug("Prehook found and executed.")
+        except:
+            pass
+
         for c in self.__doConsumes:
             self.__greenlet.append(spawn(self.__doConsume, c[0], c[1]))
             self.logging.info('Function %s started to consume queue %s.'%(str(c[0]),str(c[1])))

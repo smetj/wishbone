@@ -28,7 +28,7 @@ from wishbone import Actor
 class Format():
 
     def __init__(self, complete, counter):
-        self.counter=-1
+        self.countervalue=-1
         if complete == True:
             self.complete = self.__returnComplete
         else:
@@ -48,8 +48,8 @@ class Format():
         return event["data"]
 
     def __returnCounter(self, event):
-        counter += 1
-        return "%s - %s"%(self.counter, event)
+        self.countervalue += 1
+        return "%s - %s"%(self.countervalue, event)
 
     def __returnNoCounter(self, event):
         return event
