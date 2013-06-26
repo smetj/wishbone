@@ -24,6 +24,7 @@
 #
 
 from wishbone import Actor
+from copy import deepcopy
 
 
 class Fanout(Actor):
@@ -31,20 +32,35 @@ class Fanout(Actor):
     '''**A builtin Wishbone module which duplicates incoming events to all
     connected queues.**
 
-    Queues can only have a 1 to 1 relationship.  If events have to go from
-    1 to many queues, the Fanout module might be helpful.
+    Create a "1 to n" relationship with queues.  Events arriving in inbox
+    are then copied to each queue connected to this module.  Keep in mind
+    that the outbox queue is never used.
+
+    When clone is True, each incoming event is duplicated for each outgoing
+    queue.  This might be usefull if you require to change the content of the
+    events later down the pipeline.  Otherwise references are used which means
+    changing the event will change it everywhere in the current Wishbone
+    framework.
+
 
     Parameters:
 
-        name(str):  The name of the module
+        name(str):      The name of the module.
+
+        clone(bool):    When True actually makes a copy instead of passing
+                        a reference.
 
     Queues:
 
         inbox:  Incoming events
     '''
 
-    def __init__(self, name):
+    def __init__(self, name, clone=False):
         Actor.__init__(self, name, limit=0)
+        if clone == False:
+            self.consume = self.__consumeNoDeep
+        else:
+            self.consume = self.__consumeDeep
 
     def preHook(self):
         destination_queues = self.queuepool.getQueueInstances()
@@ -55,3 +71,12 @@ class Fanout(Actor):
     def consume(self, event):
         for queue in self.destination_queues:
             queue.put(event)
+
+    def __consumeNoDeep(self, event):
+        for queue in self.destination_queues:
+            queue.put(event)
+
+    def __consumeDeep(self, event):
+        for queue in self.destination_queues:
+            queue.put(deepcopy(event))
+
