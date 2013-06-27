@@ -29,3 +29,4 @@ from wishbone.module.stdout import STDOUT
 from wishbone.module.logformatfilter import LogFormatFilter
 from wishbone.module.fanout import Fanout
 from wishbone.module.funnel import Funnel
+from wishbone.module.header import Header
