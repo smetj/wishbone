@@ -34,3 +34,6 @@ class QueueMissing(Exception):
 
 class QueueOccupied(Exception):
     pass
+
+class SetupError(Exception):
+    pass
