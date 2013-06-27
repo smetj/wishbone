@@ -26,7 +26,7 @@ from gevent import spawn, sleep, joinall
 from gevent import Greenlet
 from gevent.event import Event
 from gevent.coros import Semaphore
-from wishbone.errors import QueueLocked
+from wishbone.errors import QueueLocked, SetupError
 
 class Consumer():
 
@@ -166,4 +166,4 @@ class Consumer():
     def consume(self, event):
         '''Raises error when user didn't define this function in his module.'''
 
-        raise ("You should define a consume function.")
+        raise SetupError("You should define a consume function.")
