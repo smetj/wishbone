@@ -41,4 +41,4 @@ class Header(Actor):
 
     def consume(self, event):
         event["header"].update(self.header)
-        self.poolqueue.outbox.put(event)
+        self.queuepool.outbox.put(event)

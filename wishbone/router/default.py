@@ -25,7 +25,7 @@
 
 from wishbone.tools import QLogging
 from wishbone.tools import WishboneQueue
-from wishbone.errors import QueueMissing, QueueOccupied
+from wishbone.errors import QueueMissing, QueueOccupied, SetupError
 from gevent import spawn, sleep, signal, joinall, kill, Greenlet
 from gevent.event import Event
 from collections import OrderedDict
@@ -178,7 +178,7 @@ class Default():
         if len(module) < 3:
             raise Exception("The module tuple requires 3 values.")
 
-        limit = module[2]
+        limit = int(module[2])
         name = module[1]
         module = module[0]
 
@@ -212,7 +212,7 @@ class Default():
         '''
 
         if len(module) < 3:
-            raise Exception("The module tuple requires 3 values.")
+            raise SetupError("The module tuple requires 3 values.")
 
         limit = module[2]
         name = module[1]
@@ -251,7 +251,7 @@ class Default():
         '''
 
         if len(module) < 3:
-            raise Exception("The module tuple requires 3 values.")
+            raise SetupERror("The module tuple requires 3 values.")
 
         limit = module[2]
         name = module[1]
