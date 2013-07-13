@@ -34,6 +34,8 @@ class Consumer():
         self.__doConsumes=[]
         self.__block=Event()
         self.__block.clear()
+        self.__context_switch_counter=0
+
         if setupbasic == True:
             self.__setupBasic()
         self.limit=limit
@@ -74,6 +76,22 @@ class Consumer():
     def loop(self):
         '''Convenience function which returns True until stop() has
         been called.'''
+
+        return not self.__block.isSet()
+
+    def loopContextSwitch(self):
+        '''Convenience function which return True untill stop() has
+        been called.  Executes a context switch every x times it
+        has been called.  Required when looping over functionality
+        which blocks the gevent loop.'''
+
+        self.__context_switch_counter+=1
+
+        if self.__context_switch_counter == 100:
+            self.__context_switch_counter=0
+            sleep()
+        else:
+            self.__context_switch_counter+=1
 
         return not self.__block.isSet()
 
