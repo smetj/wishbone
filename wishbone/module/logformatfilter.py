@@ -55,7 +55,7 @@ class LogFormatFilter(Actor):
                 event["data"] = ("%s %s %s %s: %s"%(
                     strftime("%Y-%m-%dT%H:%M:%S", localtime(event["data"][1])),
                     "pid-%s"%(event["data"][2]),
-                    event["data"][3],
                     event["data"][0],
+                    event["data"][3],
                     event["data"][4]))
                 self.queuepool.outbox.put(event)

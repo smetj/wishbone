@@ -48,10 +48,12 @@ class Consumer():
 
     def start(self):
         self.logging.info("Started")
+
         try:
             self.preHook()
             self.logging.debug("Prehook found and executed.")
-        except:
+        except AttributeError:
+            self.logging.debug("Prehook not found.")
             pass
 
         for c in self.__doConsumes:
@@ -77,10 +79,25 @@ class Consumer():
         self.__doConsumes.append((fc, q))
 
     def loop(self):
-        '''Convenience funtion which returns True untill stop() has
+        '''Convenience function which returns True until stop() has
         been called.'''
 
         return not self.__block.isSet()
+
+    def loopSwitch(self, fc, *args, **kwargs):
+
+        '''Convenience function which executes <fc> indefinitely but does a
+        Gevent context switch every <times> until self.loop() returns False.
+        '''
+
+        x=0
+        while self.loop():
+            if x == 100:
+                sleep(0)
+                x=0
+            else:
+                x+=1
+                fc(*args, **kwargs)
 
     def __doConsume(self):
         '''Just a placeholder.
