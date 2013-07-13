@@ -72,15 +72,37 @@ setup(
     scripts=[],
 
     provides=[],
-    dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.0dev','https://downloads.egenix.com/python/index/ucs4/egenix-mx-base/3.2.6/egenix-mx-base-3.2.6.tar.gz#egg=egenix-mx-base-3.2.6'],
+    dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.0dev'],
     install_requires=install_requires,
     namespace_packages=[],
     packages=find_packages(),
-    include_package_data=True,
     zip_safe=False,
     entry_points={
-        'console_scripts': [
-        'wishbone = wishbone.instance:main'
+        'console_scripts': ['wishbone = wishbone.bootstrap:Bootstrap'],
+        'wishbone.builtin.routing': [
+            'fanout = wishbone.module.fanout:Fanout',
+            'funnel = wishbone.module.funnel:Funnel',
+            'roundrobin = wishbone.module.roundrobin:RoundRobin'
+             ],
+        'wishbone.builtin.logging': [
+            'logformatfilter = wishbone.module.logformatfilter'
+            ],
+        'wishbone.builtin.metrics': [
+            'graphite = wishbone.module.header:Graphite',
+            ],
+        'wishbone.builtin.function': [
+            'header = wishbone.module.header:Header',
+            'tippingbucket = wishbone.moduole.tippingbucket',
+            ],
+        'wishbone.builtin.output': [
+            'null = wishbone.module.null',
+            'stdout = wishbone.module.stdout'
+            ],
+        'wishbone.input': [
+            ],
+        'wishbone.output': [
+            ],
+        'wishbone.function': [
             ]
-    },
+    }
 )
