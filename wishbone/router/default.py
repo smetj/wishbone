@@ -291,9 +291,9 @@ class Default():
         for module in self.__modules:
             try:
                 self.__modules[module]["instance"].preHook()
-                self.logging.debug("Prehook found and executed.")
+                self.logging.debug("Prehook found for module %s and executed."%(module))
             except AttributeError:
-                self.logging.debug("Prehook not found.")
+                self.logging.debug("Prehook not found for module %s."%(module))
 
             self.__modules[module]["instance"].start()
 
@@ -315,6 +315,12 @@ class Default():
             if module in [self.__logmodule, self.__metricmodule, "stdout"]:
                 continue
             else:
+                try:
+                    self.__modules[module]["instance"].postHook()
+                    self.logging.debug("Posthook found for module %s and executed."%(module))
+                except AttributeError:
+                    self.logging.debug("Posthook not found for module %s."%(module))
+
                 self.__modules[module]["instance"].stop()
                 while self.__modules[module]["instance"].logging.logs.size() > 0:
                     sleep(0.5)
