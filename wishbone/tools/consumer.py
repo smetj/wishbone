@@ -85,6 +85,8 @@ class Consumer():
         has been called.  Required when looping over functionality
         which blocks the gevent loop.'''
 
+        #todo(smetj): fixed to 100, make it variable?
+
         self.__context_switch_counter+=1
 
         if self.__context_switch_counter == 100:
