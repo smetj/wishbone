@@ -289,6 +289,12 @@ class Default():
 
         self.logging.info('Starting.')
         for module in self.__modules:
+            try:
+                self.__modules[module]["instance"].preHook()
+                self.logging.debug("Prehook found and executed.")
+            except AttributeError:
+                self.logging.debug("Prehook not found.")
+
             self.__modules[module]["instance"].start()
 
     def stop(self):
