@@ -79,24 +79,24 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:Bootstrap'],
-        'wishbone.builtin.routing': [
+        'wishbone.builtin.flow': [
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
-            'roundrobin = wishbone.module.roundrobin:RoundRobin'
+            'roundrobin = wishbone.module.roundrobin:RoundRobin',
+            'tippingbucket = wishbone.module.tippingbucket:TippingBucket'
              ],
         'wishbone.builtin.logging': [
-            'logformatfilter = wishbone.module.logformatfilter'
+            'logformatfilter = wishbone.module.logformatfilter:LogFormatFilter'
             ],
         'wishbone.builtin.metrics': [
-            'graphite = wishbone.module.header:Graphite',
+            'graphite = wishbone.module.graphite:Graphite',
             ],
         'wishbone.builtin.function': [
             'header = wishbone.module.header:Header',
-            'tippingbucket = wishbone.moduole.tippingbucket',
             ],
         'wishbone.builtin.output': [
-            'null = wishbone.module.null',
-            'stdout = wishbone.module.stdout'
+            'null = wishbone.module.null:Null',
+            'stdout = wishbone.module.stdout:STDOUT'
             ],
         'wishbone.input': [
             ],
