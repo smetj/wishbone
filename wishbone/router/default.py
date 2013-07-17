@@ -393,18 +393,18 @@ class Default():
         while not self.__runLogs.isSet():
             cycler+=1
             try:
-                data = producer.get()
+                event = producer.get()
             except:
                 sleep(0.1)
             else:
-                if self.__checkIntegrity(data):
+                if self.__checkIntegrity(event):
                     try:
-                        consumer.put(data)
+                        consumer.put(event)
                     except:
-                        producer.rescue(data)
+                        producer.rescue(event)
                 else:
                     self.logging.warn("Invalid event format.")
-                    self.logging.debug("Invalid event format. %s"%(data))
+                    self.logging.debug("Invalid event format. %s"%(event))
             if cycler == 1:
                 cycler=0
                 sleep()
