@@ -45,6 +45,7 @@ class WishboneQueue():
         self.__in=0
         self.__out=0
         self.__cache={}
+        self.__last_rate=0
 
         self.__getlock=False
         self.__putlock=False
@@ -188,7 +189,11 @@ class WishboneQueue():
             self.__cache[name]=(time(), value)
             return 0
 
-        (timex, amount)=self.__cache[name]
-        self.__cache[name]=(time(), value)
-        #print "%s - %s"%(self.__cache[name][1], amount)
-        return (self.__cache[name][1] - amount)/(self.__cache[name][0]-timex)
+        (time_then, amount_then)=self.__cache[name]
+        (time_now, amount_now)=time(), value
+
+        if time_now - time_then >= 1:
+            self.__cache[name]=(time_now, amount_now)
+            self.__last_rate = (amount_now - amount_then)/(time_now-time_then)
+
+        return self.__last_rate
