@@ -27,8 +27,9 @@ from gevent import Greenlet
 from gevent.event import Event
 from gevent.coros import Semaphore
 from wishbone.errors import QueueLocked, SetupError
+from wishbone.tools import LoopContextSwitcher
 
-class Consumer():
+class Consumer(LoopContextSwitcher):
 
     def __init__(self, setupbasic=True, limit=0):
         self.__doConsumes=[]
@@ -74,43 +75,70 @@ class Consumer():
         self.__doConsumes.append((fc, q))
 
     def loop(self):
-        '''Convenience function which returns True until stop() has
-        been called.'''
+
+        '''Convenience function which returns True until stop() has be been
+        called.  A word of caution.  Since we're dealing with eventloops,
+        if you use a loop which doesn't have any gevent aware code in it
+        then you'll block the event loop.'''
 
         return not self.__block.isSet()
 
-    def loopContextSwitch(self):
-        '''Convenience function which return True untill stop() has
-        been called.  Executes a context switch every x times it
-        has been called.  Required when looping over functionality
-        which blocks the gevent loop.'''
+    # def loopContextSwitch(self):
+    #     '''Convenience function which return True untill stop() has
+    #     been called.  Executes a context switch every x times it
+    #     has been called.  Required when looping over functionality
+    #     which blocks the gevent loop.'''
 
-        #todo(smetj): fixed to 100, make it variable?
+    #     #todo(smetj): fixed to 100, make it variable?
 
-        self.__context_switch_counter+=1
+    #     if self.__context_switch_counter >= 100:
+    #         self.__context_switch_counter=0
+    #         sleep(0)
+    #     else:
+    #         self.__context_switch_counter+=1
 
-        if self.__context_switch_counter == 100:
-            self.__context_switch_counter=0
-            sleep()
-        else:
-            self.__context_switch_counter+=1
+    #     return not self.__block.isSet()
 
-        return not self.__block.isSet()
+    # def loopSwitch(self, fc, iterations, *args, **kwargs):
 
-    def loopSwitch(self, fc, *args, **kwargs):
+    #     '''
+    #     Convenience function which executes <fc> indefinitely but does a
+    #     Gevent context switch every <iterations> until self.loop() returns
+    #     False.
+    #     '''
 
-        '''Convenience function which executes <fc> indefinitely but does a
-        Gevent context switch every <times> until self.loop() returns False.
-        '''
+    #     x=0
+    #     while self.loop():
+    #         if x == iterations:
+    #             sleep(0)
+    #             x=0
+    #         else:
+    #             x+=1
+    #             fc(*args, **kwargs)
 
-        x=0
-        while self.loop():
-            if x == 100:
-                sleep(0)
-                x=0
-            else:
-                x+=1
-                fc(*args, **kwargs)
+    # def getContextSwitcher(self, iterations):
+
+    #     '''
+    #     Returns a ContextSwitch object which returns the state of self.loop
+    #     and does a context switch each <iterations> times it has been called.
+    #     '''
+
+    #     class ContextSwitch():
+    #         def __init__(self, iterations, loop):
+    #             self.iterations = iterations
+    #             self.loop = loop
+    #             self.__counter = 0
+
+    #         def do(self):
+    #             if self.__counter >= self.iterations:
+    #                 self.__counter=0
+    #                 sleep()
+    #             else:
+    #                 self.__counter+=1
+
+    #             return self.loop
+
+    #     return ( ContextSwitch(iterations, self.loop), iterations )
 
     def __doConsume(self):
         '''Just a placeholder.
