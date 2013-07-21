@@ -25,13 +25,14 @@
 
 from wishbone.tools import QLogging
 from wishbone.tools import WishboneQueue
-from wishbone.errors import QueueMissing, QueueOccupied, SetupError
+from wishbone.tools import LoopContextSwitcher
+from wishbone.errors import QueueMissing, QueueOccupied, SetupError, QueueFull, QueueLocked
 from gevent import spawn, sleep, signal, joinall, kill, Greenlet
 from gevent.event import Event
 from collections import OrderedDict
 from uuid import uuid4
 
-class Default():
+class Default(LoopContextSwitcher):
     '''The default Wishbone router.
 
     A router is responsible to:
@@ -170,6 +171,13 @@ class Default():
             for queue in module.queuepool.messagesLeft():
                 for blah in module.queuepool.dump(queue):
                     print (blah)
+
+    def loop(self):
+
+        '''Convenience funtion which returns a bool indicating the router is in running or stop state.'''
+
+        return not self.__runConsumers.isSet()
+
 
     def register(self, module, *args, **kwargs):
         '''Registers a Wishbone actor into the router.
@@ -359,9 +367,9 @@ class Default():
         #todo(smetj): make this cycler setup more dynamic?  Auto adjust the amount
         #cycles before context switch to achieve sweetspot?
 
-        cycler=0
-        while not self.__runConsumers.isSet():
-            cycler += 1
+        context_switch_loop = self.getContextSwitcher(100, self.loop)
+
+        while context_switch_loop.do():
             try:
                 event = producer.get()
             except:
@@ -371,14 +379,16 @@ class Default():
                     event=self.__UUID(event)
                     try:
                         consumer.put(event)
-                    except Exception as err:
+                    except QueueLocked:
                         producer.rescue(event)
+                        sleep(0.1)
+                    except QueueFull:
+                        producer.rescue(event)
+                        sleep(0.1)
+
                 else:
                     self.logging.warn("Invalid event format.")
                     self.logging.debug("Invalid event format. %s"%(event))
-            if cycler == 100:
-                cycler=0
-                sleep()
 
     def __forwardLogs(self, producer, consumer):
 
@@ -389,9 +399,9 @@ class Default():
         #of interleaved.  Might have to give it some though whether this is an
         #issue or not.
 
-        cycler=0
-        while not self.__runLogs.isSet():
-            cycler+=1
+        context_switch_loop = self.getContextSwitcher(10, self.loop)
+
+        while context_switch_loop.do():
             try:
                 event = producer.get()
             except:
@@ -405,9 +415,6 @@ class Default():
                 else:
                     self.logging.warn("Invalid event format.")
                     self.logging.debug("Invalid event format. %s"%(event))
-            if cycler == 1:
-                cycler=0
-                sleep()
 
     def __signal_handler(self):
 
