@@ -23,7 +23,7 @@
 #
 #
 
-from wishbone.errors import QueueLocked, QueueEmpty
+from wishbone.errors import QueueLocked, QueueEmpty, QueueFull
 from collections import deque
 from gevent.event import Event
 from gevent import sleep
@@ -32,9 +32,15 @@ from time import time
 class WishboneQueue():
 
     '''A queue used to organize communication messaging between Wishbone Actors.
+
+    Parameters:
+
+        - max_size (int):   The max number of elements in the queue.  0 is unlimited
+                            Default: 0
     '''
 
-    def __init__(self):
+    def __init__(self, max_size=0):
+        self.max_size = max_size
         self.__q=deque()
         self.__in=0
         self.__out=0
@@ -45,6 +51,11 @@ class WishboneQueue():
 
         self.__data_available=Event()
         self.__data_available.clear()
+
+        if max_size == 0:
+            self.put = self.__putNoLimit
+        else:
+            self.put = self.__putLimit
 
     def clear(self):
         '''Clears the queue.'''
@@ -105,12 +116,26 @@ class WishboneQueue():
         self.getLock()
         self.putLock()
 
-    def put(self, element):
+    def __putNoLimit(self, element):
         '''Puts element in queue.
         '''
 
         if self.__putlock == True:
             raise QueueLocked('Locked for incoming data.')
+
+        self.__q.append(element)
+        self.__in+=1
+        self.__data_available.set()
+
+    def __putLimit(self, element):
+        '''Puts element in queue.
+        '''
+
+        if self.__putlock == True:
+            raise QueueLocked('Locked for incoming data.')
+
+        if len(self.__q) == self.max_size:
+            raise QueueFull('Queue reached max capacity of %s elements.'%(self.max_size))
 
         self.__q.append(element)
         self.__in+=1

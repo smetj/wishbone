@@ -25,6 +25,7 @@
 
 from wishbone.tools.wishbonequeue import WishboneQueue
 from wishbone.tools.queuefunctions import QueueFunctions
+from wishbone.tools.loopcontextswitcher import LoopContextSwitcher
 from wishbone.tools.consumer import Consumer
 from wishbone.tools.qlogging import QLogging
 from wishbone.tools.queuepool import QueuePool
