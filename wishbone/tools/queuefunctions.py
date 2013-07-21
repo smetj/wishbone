@@ -31,13 +31,13 @@ class QueueFunctions():
         from wishbone.tools import QueuePool
         self.queuepool=QueuePool()
 
-    def createQueue(self, name):
+    def createQueue(self, name, max_size=0):
         '''Creates a Queue.
         '''
 
         try:
-            setattr(self.queuepool, name, WishboneQueue())
-            self.logging.info('Created module queue named %s.'%(name))
+            setattr(self.queuepool, name, WishboneQueue(max_size))
+            self.logging.info('Created module queue named %s with max_size %s.'%(name, max_size))
         except Exception as err:
             self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
 
