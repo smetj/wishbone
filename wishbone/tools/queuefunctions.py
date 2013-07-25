@@ -41,6 +41,17 @@ class QueueFunctions():
         except Exception as err:
             self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
 
+    def deleteQueue(self, name):
+        '''Deletes a Queue.
+        '''
+
+        try:
+            del self.queuepool.__dict__[name]
+            self.logging.info('Deleted module queue named %s.'%(name))
+        except Exception as err:
+            self.logging.warn('Problem deleting queue %s.  Reason: %s.'%(name, err))
+
+
     def getLog(self):
         '''Retrieves a log from the log queue.'''
 
