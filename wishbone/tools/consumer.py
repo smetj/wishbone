@@ -31,12 +31,11 @@ from wishbone.tools import LoopContextSwitcher
 
 class Consumer(LoopContextSwitcher):
 
-    def __init__(self, setupbasic=True, limit=0):
+    def __init__(self, setupbasic=True, context_switch=100, limit=0):
         self.__doConsumes=[]
         self.__block=Event()
         self.__block.clear()
-        self.__context_switch_counter=0
-
+        self.context_switch=context_switch
         if setupbasic == True:
             self.__setupBasic()
         self.limit=limit
@@ -83,63 +82,6 @@ class Consumer(LoopContextSwitcher):
 
         return not self.__block.isSet()
 
-    # def loopContextSwitch(self):
-    #     '''Convenience function which return True untill stop() has
-    #     been called.  Executes a context switch every x times it
-    #     has been called.  Required when looping over functionality
-    #     which blocks the gevent loop.'''
-
-    #     #todo(smetj): fixed to 100, make it variable?
-
-    #     if self.__context_switch_counter >= 100:
-    #         self.__context_switch_counter=0
-    #         sleep(0)
-    #     else:
-    #         self.__context_switch_counter+=1
-
-    #     return not self.__block.isSet()
-
-    # def loopSwitch(self, fc, iterations, *args, **kwargs):
-
-    #     '''
-    #     Convenience function which executes <fc> indefinitely but does a
-    #     Gevent context switch every <iterations> until self.loop() returns
-    #     False.
-    #     '''
-
-    #     x=0
-    #     while self.loop():
-    #         if x == iterations:
-    #             sleep(0)
-    #             x=0
-    #         else:
-    #             x+=1
-    #             fc(*args, **kwargs)
-
-    # def getContextSwitcher(self, iterations):
-
-    #     '''
-    #     Returns a ContextSwitch object which returns the state of self.loop
-    #     and does a context switch each <iterations> times it has been called.
-    #     '''
-
-    #     class ContextSwitch():
-    #         def __init__(self, iterations, loop):
-    #             self.iterations = iterations
-    #             self.loop = loop
-    #             self.__counter = 0
-
-    #         def do(self):
-    #             if self.__counter >= self.iterations:
-    #                 self.__counter=0
-    #                 sleep()
-    #             else:
-    #                 self.__counter+=1
-
-    #             return self.loop
-
-    #     return ( ContextSwitch(iterations, self.loop), iterations )
-
     def __doConsume(self):
         '''Just a placeholder.
 
@@ -154,22 +96,22 @@ class Consumer(LoopContextSwitcher):
         as a variable.  There is no limit on the number of greenthreads
         spawned. """
 
-        cycler=0
-        while self.loop():
-            cycler+=1
+        context_switch_loop = self.getContextSwitcher(self.context_switch, self.loop)
+
+        while context_switch_loop.do():
             try:
                 event = q.get()
-                fc(event)
             except QueueLocked:
-                self.logging.warn("Queue %s locked."%(str(q)))
-                sleep()
-            except Exception as err:
-                self.logging.warn("Problem executing %s. Sleeping for a second. Reason: %s"%(str(fc),err))
                 q.rescue(event)
-                sleep(1)
-            if cycler == 100:
-                cycler=0
-                sleep()
+                self.logging.warn("Queue %s locked."%(str(q)))
+                q.waitUntilGetAllowed()
+            else:
+                try:
+                    fc(event)
+                except Exception as err:
+                    self.logging.warn("Problem executing %s. Sleeping for a second. Reason: %s"%(str(fc),err))
+                    q.rescue(event)
+                    sleep(1)
 
         self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
 
