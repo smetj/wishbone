@@ -82,7 +82,6 @@ class Default(LoopContextSwitcher):
         #########################################
         spawn (self.__forwardEvents, self.logging.logs, self.logs)
 
-        #self.__modules = OrderedDict()
         self.__modules = {}
         self.__logmodule = None
         self.__metricmodule = None
