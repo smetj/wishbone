@@ -48,10 +48,21 @@ class WishboneQueue():
         self.__last_rate=0
 
         self.__getlock=False
+        self.__getlock_event=Event()
+        self.__getlock_event.set()
+
         self.__putlock=False
+        self.__putlock_event=Event()
+        self.__putlock_event.set()
+
+        self.__free_place=Event()
+        self.__free_place.set()
+
 
         self.__data_available=Event()
         self.__data_available.clear()
+
+
 
         if max_size == 0:
             self.put = self.__putNoLimit
@@ -86,6 +97,7 @@ class WishboneQueue():
         while self.__getlock == False:
             try:
                 data = self.__q.popleft()
+                self.__free_place.set()
                 self.__out+=1
                 return data
             except IndexError:
@@ -95,11 +107,13 @@ class WishboneQueue():
     def getLock(self):
         '''Locks getting data from queue.'''
 
+        self.__getlock_event.clear()
         self.__getlock=True
 
     def getUnlock(self):
         '''Unlocks getting data from queue.'''
 
+        self.__getlock_event.set()
         self.__getlock=False
 
     def isLocked(self):
@@ -136,6 +150,7 @@ class WishboneQueue():
             raise QueueLocked('Locked for incoming data.')
 
         if len(self.__q) == self.max_size:
+            self.__free_place.clear()
             raise QueueFull('Queue reached max capacity of %s elements.'%(self.max_size))
 
         self.__q.append(element)
@@ -146,11 +161,13 @@ class WishboneQueue():
         '''Locks putting data in queue.
         '''
 
+        self.__putlock_event.clear()
         self.__putlock=True
 
     def putUnlock(self):
         '''Unlocks putting data in queue.'''
 
+        self.__putlock_event.set()
         self.__putlock=False
 
     def rescue(self, data):
@@ -183,6 +200,21 @@ class WishboneQueue():
         if self.__putlock == True:
             return
         self.__data_available.wait()
+
+    def waitUntilPutAllowed(self):
+        '''Blocks until writing data into the queue is allowed again.'''
+
+        self.__putlock_event.wait()
+
+    def waitUntilGetAllowed(self):
+        '''Blocks until getting data from the queue is allowed again.'''
+
+        self.__getlock_event.wait()
+
+    def waitUntilFreePlace(self):
+        '''Blocks until we have at least 1 slot free in the queue.'''
+
+        self.__free_place.wait()
 
     def __rate(self, name, value):
         if not name in self.__cache:
