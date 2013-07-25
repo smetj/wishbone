@@ -47,6 +47,10 @@ class Default(LoopContextSwitcher):
 
         - interval(int):    The interval metrics are polled from each module
 
+        - context_switch(int):  How many events to shuffle from queue to
+                                queue before issuing a context switch.
+                                Default: 100
+
         - rescue(bool):     Whether to extract any events stuck in one of
                             the queues and write that to a cache file.  Next
                             startup the events are read from the cache and
@@ -58,8 +62,9 @@ class Default(LoopContextSwitcher):
 
     '''
 
-    def __init__(self, interval=10, rescue=False, uuid=False):
+    def __init__(self, interval=10, context_switch=100, rescue=False, uuid=False):
         self.interval=interval
+        self.context_switch=context_switch
         self.rescue=rescue
 
         signal(2, self.__signal_handler)
@@ -177,7 +182,6 @@ class Default(LoopContextSwitcher):
         '''Convenience funtion which returns a bool indicating the router is in running or stop state.'''
 
         return not self.__runConsumers.isSet()
-
 
     def register(self, module, *args, **kwargs):
         '''Registers a Wishbone actor into the router.
@@ -359,7 +363,7 @@ class Default(LoopContextSwitcher):
             self.metrics.put({"header":{},"data":metrics})
             sleep(self.interval)
 
-    def __forwardEvents(self, producer, consumer):
+    def __forwardEvents(self, source, destination):
 
         '''The background greenthread which continuously consumes the producing
         queue and dumps that data into the consuming queue.'''
@@ -367,30 +371,33 @@ class Default(LoopContextSwitcher):
         #todo(smetj): make this cycler setup more dynamic?  Auto adjust the amount
         #cycles before context switch to achieve sweetspot?
 
-        context_switch_loop = self.getContextSwitcher(100, self.loop)
+        context_switch_loop = self.getContextSwitcher(self.context_switch, self.loop)
 
         while context_switch_loop.do():
             try:
-                event = producer.get()
-            except:
-                sleep(0.1)
+                event = source.get()
+            except QueueLocked:
+                source.waitUntilGetAllowed()
             else:
                 if self.__checkIntegrity(event):
                     event=self.__UUID(event)
                     try:
-                        consumer.put(event)
+                        destination.put(event)
                     except QueueLocked:
-                        producer.rescue(event)
-                        sleep(0.1)
+                        source.putLock()
+                        source.rescue(event)
+                        destination.waitUntilPutAllowed()
+                        source.putUnlock()
                     except QueueFull:
-                        producer.rescue(event)
-                        sleep(0.1)
-
+                        source.putLock()
+                        source.rescue(event)
+                        destination.waitUntilFreePlace()
+                        source.putUnlock()
                 else:
                     self.logging.warn("Invalid event format.")
                     self.logging.debug("Invalid event format. %s"%(event))
 
-    def __forwardLogs(self, producer, consumer):
+    def __forwardLogs(self, source, destination):
 
         '''The background greenthread which continuously consumes the producing
         queue and dumps that data into the consuming queue.'''
@@ -403,15 +410,15 @@ class Default(LoopContextSwitcher):
 
         while context_switch_loop.do():
             try:
-                event = producer.get()
+                event = source.get()
             except:
                 sleep(0.1)
             else:
                 if self.__checkIntegrity(event):
                     try:
-                        consumer.put(event)
+                        destination.put(event)
                     except:
-                        producer.rescue(event)
+                        source.rescue(event)
                 else:
                     self.logging.warn("Invalid event format.")
                     self.logging.debug("Invalid event format. %s"%(event))
