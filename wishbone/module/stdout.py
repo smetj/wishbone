@@ -57,28 +57,26 @@ class Format():
 class STDOUT(Actor):
     '''**A builtin Wishbone module prints events to STDOUT.**
 
-    After printing the content of the events to STDOUT they are put into the outbox
-    queue unless otherwise defined using the purge parameter.  When the complete
-    parameter is True, the complete event is printed to STDOUT.
+    Prints incoming events to STDOUT. When <complete> is True,
+    the complete event including headers is printed to STDOUT.
 
     Parameters:
 
         - name (str):       The instance name when initiated.
-        - enable (bool):    When True, prints to STDOUT, when false not.
+
         - complete (bool):  When True, print the complete event including headers.
-        - purge (bool):     When True the message is dropped and not put in outbox.
+
         - counter (bool):   Puts an incremental number for each event in front of each event.
 
     Queues:
 
         - inbox:    Incoming events.
-        - outbox:   Outgoing events.
     '''
 
-    def __init__(self, name, complete=False, purge=False, counter=False):
+    def __init__(self, name, complete=False, counter=False):
         Actor.__init__(self, name, limit=0)
+        self.queueDelete("outbox")
         self.complete=complete
-        self.purge=purge
         self.counter=counter
         self.format=Format(complete, counter)
 
@@ -87,8 +85,3 @@ class STDOUT(Actor):
         #This should be changed into stdout.write() but that's not gevent friendly
 
         print self.format.do(event)
-        if self.purge == False:
-            self.queuepool.outbox(doc)
-
-    def shutdown(self):
-        self.logging.info('Shutdown')
