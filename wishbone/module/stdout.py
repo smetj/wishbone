@@ -75,7 +75,7 @@ class STDOUT(Actor):
 
     def __init__(self, name, complete=False, counter=False):
         Actor.__init__(self, name, limit=0)
-        self.queueDelete("outbox")
+        self.deleteQueue("outbox")
         self.complete=complete
         self.counter=counter
         self.format=Format(complete, counter)
