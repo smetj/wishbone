@@ -102,7 +102,6 @@ class Consumer(LoopContextSwitcher):
             try:
                 event = q.get()
             except QueueLocked:
-                q.rescue(event)
                 self.logging.warn("Queue %s locked."%(str(q)))
                 q.waitUntilGetAllowed()
             else:
