@@ -93,7 +93,7 @@ class Consumer(LoopContextSwitcher):
         '''
 
         while self.loop():
-            try
+            try:
                 destination.put(event)
                 break
             except QueueFull:
