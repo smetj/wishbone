@@ -78,7 +78,7 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     entry_points={
-        'console_scripts': ['wishbone = wishbone.bootstrap:Bootstrap'],
+        'console_scripts': ['wishbone = wishbone.bootstrap:main'],
         'wishbone.builtin.flow': [
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
