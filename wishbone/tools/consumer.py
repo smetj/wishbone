@@ -82,7 +82,7 @@ class Consumer(LoopContextSwitcher):
 
         return not self.__block.isSet()
 
-    def putEVent(self, event, destination):
+    def putEvent(self, event, destination):
 
         '''Convenience function submits <event> into <destination> queue.
         When this fails due to QueueFull or QueueLocked, the function will

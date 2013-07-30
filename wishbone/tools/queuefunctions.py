@@ -56,8 +56,3 @@ class QueueFunctions():
         '''Retrieves a log from the log queue.'''
 
         return self.logging.logs.get()
-
-    def waitUntilData(self, queue="inbox"):
-        '''Blocks untill data arrives in queue'''
-
-        getattr(self.queuepool, queue).waitUntilData()
