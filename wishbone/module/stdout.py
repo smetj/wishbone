@@ -23,7 +23,8 @@
 #
 
 from wishbone import Actor
-#from sys import stdout
+#from gevent import monkey;monkey.patch_sys()
+from sys import stdout
 
 class Format():
 
@@ -81,7 +82,6 @@ class STDOUT(Actor):
         self.format=Format(complete, counter)
 
     def consume(self,event):
-        #todo(smetj): This module makes use of the print() function.
-        #This should be changed into stdout.write() but that's not gevent friendly
-
-        print self.format.do(event)
+        #todo(smet) This should work in a gevent context but it doesn't. Bug?
+        #sys.stdout.write(self.format.do(event))
+        print(self.format.do(event))

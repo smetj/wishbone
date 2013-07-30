@@ -26,7 +26,7 @@ from gevent import spawn, sleep, joinall
 from gevent import Greenlet
 from gevent.event import Event
 from gevent.coros import Semaphore
-from wishbone.errors import QueueLocked, SetupError
+from wishbone.errors import QueueLocked, SetupError, QueueFull
 from wishbone.tools import LoopContextSwitcher
 
 class Consumer(LoopContextSwitcher):
@@ -49,6 +49,8 @@ class Consumer(LoopContextSwitcher):
         self.metrics={}
 
     def start(self):
+        '''Starts to execute all the modules registered <self.consume> functions.'''
+
         self.logging.info("Started")
 
         for c in self.__doConsumes:
@@ -56,6 +58,7 @@ class Consumer(LoopContextSwitcher):
             self.logging.info('Function %s started to consume queue %s.'%(str(c[0]),str(c[1])))
 
     def shutdown(self):
+        '''Stops each module by making <self.loop> return False and which unblocks <self.block>'''
 
         if self.__block.isSet():
             self.logging.warn('Already shutdown.')
@@ -67,14 +70,15 @@ class Consumer(LoopContextSwitcher):
 
     def block(self):
         '''Convenience function which blocks untill the actor is in stopped state.'''
+
         self.__block.wait()
 
     def registerConsumer(self, fc, q):
-        """Registers <fc> as a consuming function for the given queue <q>."""
+        '''Registers <fc> as a consuming function for the given queue <q>.'''
+
         self.__doConsumes.append((fc, q))
 
     def loop(self):
-
         '''Convenience function which returns True until stop() has be been
         called.  A word of caution.  Since we're dealing with eventloops,
         if you use a loop which doesn't have any gevent aware code in it
@@ -83,7 +87,6 @@ class Consumer(LoopContextSwitcher):
         return not self.__block.isSet()
 
     def putEvent(self, event, destination):
-
         '''Convenience function submits <event> into <destination> queue.
         When this fails due to QueueFull or QueueLocked, the function will
         block untill the error state disappeard and will resubmit the event
@@ -96,7 +99,7 @@ class Consumer(LoopContextSwitcher):
             try:
                 destination.put(event)
                 break
-            except QueueFull:
+            except QueueLocked:
                 destination.waitUntilPutAllowed()
             except QueueFull:
                 destination.waitUntilFreePlace()
@@ -109,12 +112,11 @@ class Consumer(LoopContextSwitcher):
         self.__doPoolConsume depending on init.'''
 
     def __doSequentialConsume(self, fc, q):
-
-        """Executes <fc> against each element popped from <q>.
+        '''Executes <fc> against each element popped from <q>.
 
         For each popped element <fc> is spawned as a greenlet with the element
         as a variable.  There is no limit on the number of greenthreads
-        spawned. """
+        spawned. '''
 
         context_switch_loop = self.getContextSwitcher(self.context_switch, self.loop)
 
@@ -135,7 +137,7 @@ class Consumer(LoopContextSwitcher):
         self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
 
     def __doPooledConsume(self, fc, q):
-        """Executes <fc> against each element popped from <q>.
+        '''Executes <fc> against each element popped from <q>.
 
         For each popped element <fc> is spawned as a greenlet with the element
         as a variable.  There is a limit on the number of greenthreads
@@ -144,7 +146,7 @@ class Consumer(LoopContextSwitcher):
         and unlocked whenever a slot is free.  Actually this doesn't limit the
         number of allowed greenthreads but it keeps  incoming data to the
         queue artificially limited which as a result controls the number of
-        concurrent greenthreads. """
+        concurrent greenthreads. '''
 
         concurrent = Semaphore(self.limit)
 
