@@ -82,6 +82,26 @@ class Consumer(LoopContextSwitcher):
 
         return not self.__block.isSet()
 
+    def putEVent(self, event, destination):
+
+        '''Convenience function submits <event> into <destination> queue.
+        When this fails due to QueueFull or QueueLocked, the function will
+        block untill the error state disappeard and will resubmit the event
+        after which it will exit.
+
+        Should ideally be used by input modules.
+        '''
+
+        while self.loop():
+            try
+                destination.put(event)
+                break
+            except QueueFull:
+                destination.waitUntilPutAllowed()
+            except QueueFull:
+                destination.waitUntilFreePlace()
+
+
     def __doConsume(self):
         '''Just a placeholder.
 
