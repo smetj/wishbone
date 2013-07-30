@@ -32,8 +32,7 @@ class QueueFunctions():
         self.queuepool=QueuePool()
 
     def createQueue(self, name, max_size=0):
-        '''Creates a Queue.
-        '''
+        '''Creates a queue in <self.queuepool> named <name> with a size of <max_size>'''
 
         try:
             setattr(self.queuepool, name, WishboneQueue(max_size))
@@ -42,17 +41,10 @@ class QueueFunctions():
             self.logging.warn('I could not create the queue named %s. Reason: %s'%(name, err))
 
     def deleteQueue(self, name):
-        '''Deletes a Queue.
-        '''
+        '''Deletes the <name> queue from <self.queuepool>.'''
 
         try:
             del self.queuepool.__dict__[name]
             self.logging.info('Deleted module queue named %s.'%(name))
         except Exception as err:
             self.logging.warn('Problem deleting queue %s.  Reason: %s.'%(name, err))
-
-
-    def getLog(self):
-        '''Retrieves a log from the log queue.'''
-
-        return self.logging.logs.get()
