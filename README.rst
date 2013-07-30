@@ -4,17 +4,17 @@ WishBone
 What?
 -----
 
-A Python library to write asynchronous event pipeline servers with minimal
-effort.
+A Gevent based Python library to write asynchronous event pipeline servers
+with minimal effort.
 
 How?
 ----
 
 The WishBone Python library offers a framework to write asynchronous event
 pipeline servers with minimal effort.  In this context, event pipelines are
-best described as a collection of concurrently running modules which consume,
-process and produce events. Wishbone module are connected to one another using
-queues forming a pipeline through which these events travel.
+best described as a collection of coroutines which consume, process and
+produce events. Wishbone modules are connected to one another using queues
+forming a pipeline through which these events travel.
 
 Installing
 ----------
