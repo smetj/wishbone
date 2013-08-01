@@ -208,7 +208,7 @@ class Default(LoopContextSwitcher):
         # metrics module.
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
 
-    def registerLogModule(self, module, queue, *args, **kwargs):
+    def registerLogModule(self, module, *args, **kwargs):
         '''Registers and connects the module to the router's log queue.
 
         If this method is not called (no module connected to it) the queue is
@@ -217,7 +217,6 @@ class Default(LoopContextSwitcher):
         Parameters:
 
             module(instance)        An initialized wishbone module.
-            queue(str)              The name of the module's queue to connect to.
             *args(list)             Positional arguments to pass to thevmodule.
             **kwargs(dict)          Named arguments to pass to the module.
         '''
@@ -241,14 +240,9 @@ class Default(LoopContextSwitcher):
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
 
-        try:
-            queue = getattr(self.__modules[name]["instance"].queuepool, queue)
-        except Exception:
-            raise QueueMissing("Queue %s does not exist in module %s"%(queue, module))
+        self.__modules[name]["connections"]["inbox"] = spawn (self.__forwardEvents, self.logs, self.__modules[name]["instance"].queuepool.inbox)
 
-        self.__modules[name]["connections"][queue] = spawn (self.__forwardEvents, self.logs, queue)
-
-    def registerMetricModule(self, module, queue, *args, **kwargs):
+    def registerMetricModule(self, module, *args, **kwargs):
         '''Registers and connects the module to the router's log queue.
 
         If this method is not called (no module connected to it) the queue is
@@ -256,7 +250,6 @@ class Default(LoopContextSwitcher):
         Parameters:
 
             module(instance)        An initialized wishbone module.
-            queue(str)              The name of the module's queue to connect to.
             *args(list)             Positional arguments to pass to thevmodule.
             **kwargs(dict)          Named arguments to pass to the module.
         '''
@@ -280,13 +273,7 @@ class Default(LoopContextSwitcher):
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
-
-        try:
-            queue = getattr(self.__modules[name]["instance"].queuepool, queue)
-        except Exception:
-            raise QueueMissing("Queue %s does not exist in module %s."%(queue, module))
-
-        self.__modules[name]["connections"][queue] = spawn (self.__forwardEvents, self.metrics, queue)
+        self.__modules[name]["connections"]["inbox"] = spawn (self.__forwardEvents, self.metrics, self.__modules[name]["instance"].queuepool.inbox)
 
     def start(self):
         '''Starts the router and all registerd modules.
