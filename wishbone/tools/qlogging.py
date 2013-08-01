@@ -39,16 +39,31 @@ class QLogging():
         #print ((level, time(), self.name, message))
         self.logs.put({"header":{},"data":(level, time(), self.pid, self.name, message)})
 
-    def debug(self, message):
-        self.__log("debug",message)
+    def emergency(self, message):
+        self.__log(0, message)
+    emerg=emergency
 
-    def warning(self, message):
-        self.__log("warning",message)
-    warn=warning
+    def alert(self, message):
+        self.__log(1, message)
 
     def critical(self, message):
-        self.__log("critical",message)
+        self.__log(2, message)
     crit=critical
 
-    def info(self, message):
-        self.__log("info",message)
+    def error(self, message):
+        self.__log(3, message)
+    err=error
+
+    def warning(self, message):
+        self.__log(4, message)
+    warn=warning
+
+    def notice(self, message):
+        self.__log(5, message)
+
+    def informational(self, message):
+        self.__log(6, message)
+    info=informational
+
+    def debug(self, message):
+        self.__log(7, message)
