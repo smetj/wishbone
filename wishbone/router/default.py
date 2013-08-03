@@ -312,12 +312,10 @@ class Default(LoopContextSwitcher):
     def stop(self):
         '''Stops the router and all registered modules.
 
-        The modules are stopped in the reverse order they were registered. The
-        first module registered is never actually stopped.  The reason for
-        this is to register the logging module first, to be able to handle
-        logs untill the end.
-
-        This approch is subject to change, but for the time being this is it.
+        It stops all the modules except the modules connected
+        to the logs or metrics endpoint to ensure these event
+        streams survive untill the end.  All other modules
+        are shutdown in the order they have been registered.
         '''
 
         self.logging.info('Stopping.')
