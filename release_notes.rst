@@ -4,9 +4,15 @@ Wishbone changelog
 Version 0.4
 ~~~~~~~~~~~
 
-- Complete write of all components.
-- Queues offer more functionality like acknowledgements, locking, statistics.
+- Complete rewrite of all components.
+- Queues offer more functionality like locking, statistics.
 - Better gevent aware locking mechanisms.
+- Possibility to lock/unlock queues based on upstream throughput.
+- Metrics endpoint can be connected to regular pipe structure.
+- Logs endpoint can be connected to regular pipe structure.
+- Bootstrap files in YAML format.
+- Wisbone categories: flow, logging, metrics, function, input, output
+- Definable gevent context switch when looping.
 
 Version 0.32
 ~~~~~~~~~~~~

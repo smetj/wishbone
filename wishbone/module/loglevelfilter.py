@@ -28,7 +28,7 @@ from time import strftime, localtime
 from time import time
 
 
-class Filter(Actor):
+class LogLevelFilter(Actor):
     '''*A builtin Wishbone module which formats and filters Wishbone log events.
 
     Incoming Wishbone log events are tuples with following format:
