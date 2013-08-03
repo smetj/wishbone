@@ -123,6 +123,7 @@ class Default(LoopContextSwitcher):
             consumer(string):   The name of the consumnig module queue.
 
         '''
+
         try:
             (producer_module, producer_queue) = producer.split(".")
         except ValueError:
@@ -132,6 +133,8 @@ class Default(LoopContextSwitcher):
             (consumer_module, consumer_queue) = consumer.split(".")
         except ValueError:
             raise Exception("A queue name should have format 'module.queue'. Got '%s' instead"%(consumer))
+
+        self.__modules[producer_module]["children"].append(consumer_module)
 
         if not self.__modules.has_key(producer_module):
             raise Exception("There is no Wishbone module registered with name '%s'"%(producer_module))
@@ -166,9 +169,17 @@ class Default(LoopContextSwitcher):
         #store a reference of the greenthread to the other side.
         self.__modules[producer_module]["connections"][producer_queue]=self.__modules[consumer_module]["connections"][consumer_queue]
 
-    def getChildren(self, module):
-        for child in self.__modules[module]["connections"]:
-            print child
+    def getChildren(self, instance):
+        children=[]
+
+        def getChild(instance, children):
+            if len(self.__modules[instance]["children"]) > 0:
+                for child in self.__modules[instance]["children"]:
+                    getChild(child, children)
+                    children.append(child)
+
+        getChild(instance, children)
+        return children
 
     def doRescue(self):
         '''Runs over each queue to extract any left behind messages.
@@ -196,7 +207,7 @@ class Default(LoopContextSwitcher):
         name = module[1]
         module = module[0]
 
-        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}}
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children":[]}
 
         if limit > 0:
             self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
@@ -233,7 +244,7 @@ class Default(LoopContextSwitcher):
 
         self.__logmodule = name
 
-        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}}
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": []}
 
         if limit > 0:
             self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
@@ -266,7 +277,7 @@ class Default(LoopContextSwitcher):
 
         self.__metricmodule = name
 
-        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}}
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": []}
 
         if limit > 0:
             self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
@@ -312,9 +323,10 @@ class Default(LoopContextSwitcher):
         self.logging.info('Stopping.')
 
         for module in self.__modules.keys():
-            if module in [self.__logmodule, self.__metricmodule, "stdout"]:
+            if module in self.getChildren(self.__logmodule)+self.getChildren(self.__metricmodule):
                 continue
             else:
+                print module
                 try:
                     self.__modules[module]["instance"].postHook()
                     self.logging.debug("Posthook found for module %s and executed."%(module))
@@ -323,6 +335,7 @@ class Default(LoopContextSwitcher):
 
                 self.__modules[module]["instance"].stop()
                 while self.__modules[module]["instance"].logging.logs.size() > 0:
+                    print "blah"
                     sleep(0.5)
 
         while self.__modules[self.__logmodule]["instance"].queuepool.inbox.size() > 0 or self.logs.size() > 0:
