@@ -25,18 +25,15 @@
 
 from wishbone.router import Default
 from pkg_resources import iter_entry_points
+from multiprocessing import Process
 import argparse
 import yaml
 import sys
-
+import time
 
 class Initialize():
-    def __init__(self, command, filename, instances, loglevel, pid):
-        self.command=command
+    def __init__(self, filename):
         self.filename=filename
-        self.instances=instances
-        self.loglevel=loglevel
-        self.pid=pid
         self.config=None
         self.router=Default(interval=1, rescue=False, uuid=False)
 
@@ -162,14 +159,38 @@ class Dispatch():
     def __init__(self):
         pass
 
-    def start(self, command, config, instances, loglevel, pid):
-        start = Start(command, config, instances, loglevel, pid)
-        start.do()
-
-    def debug(self, command, config, instances, loglevel, pid):
-        debug = Debug(command, config, instances, loglevel, pid)
+    def wishboneInstance(self, config):
+        debug=Debug(config)
         debug.setup()
         debug.start()
+
+    def start(self, config, instances, pid):
+        if instances == 1:
+            start = Start(command, config, instances, pid)
+            start.do()
+        else:
+            pass
+
+    def debug(self, command, config, instances, pid):
+        if instances == 1:
+            debug = Debug(config)
+            debug.setup()
+            debug.start()
+        else:
+            procs = []
+            for wb in range(instances):
+                procs.append(Process(target=self.wishboneInstance, args=(config,)))
+                procs[-1].daemon=True
+                procs[-1].start()
+
+            try:
+                while True:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                for proc in procs:
+                    proc.join()
+
+
 
     def stop(self, command, pid):
         print command
