@@ -308,7 +308,6 @@ class Default(LoopContextSwitcher):
 
         self.logging.info('Stopping.')
 
-        #Stops all modules (except the 1st one registered) in reverse order
         for module in self.__modules.keys():
             if module in [self.__logmodule, self.__metricmodule, "stdout"]:
                 continue

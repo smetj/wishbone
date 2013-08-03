@@ -23,17 +23,100 @@
 #
 #
 
+from wishbone.router import Default
+from pkg_resources import iter_entry_points
 import argparse
+import yaml
+import sys
 
-class Start():
 
-    def __init__(self, command, config, instances, loglevel, pid):
-        pass
+class Initialize():
+    def __init__(self, command, filename, instances, loglevel, pid):
+        self.command=command
+        self.filename=filename
+        self.instances=instances
+        self.loglevel=loglevel
+        self.pid=pid
+        self.config=None
+        self.router=Default(interval=1, rescue=False, uuid=False)
 
-class Debug():
+    def setup(self):
+        self.config=self.loadConfig(self.filename)
+        self.setupLogging()
+        self.setupMetrics()
+        self.setupModules()
+        self.setupConnections()
 
-    def __init__(self, command, config, instances, loglevel, pid):
-        pass
+    def setupMetrics(self):
+        if "metrics" in self.config:
+            for instance in self.config["metrics"]:
+                module = self.loadModule(self.config["metrics"]["instance"]["module"])
+                self.router.registerMetricModule((module, "metrics", 0), **self.config["metrics"][instance].get("arguments",{}))
+        else:
+            module = self.loadModule("wishbone.builtin.output.null")
+            self.router.registerMetricModule((module, "metrics_null", 0))
+
+    def setupModules(self):
+        for instance in self.config["modules"]:
+            module = self.loadModule(self.config["modules"][instance]["module"])
+            self.router.register((module, instance, 0), **self.config["modules"][instance].get("arguments",{}))
+
+    def setupConnections(self):
+        for connection in self.config["routingtable"]:
+            source=connection.split('->')[0].strip()
+            destination=connection.split('->')[1].strip()
+            self.router.connect(source, destination)
+
+    def loadConfig(self, filename):
+        try:
+            with open (filename, 'r') as f:
+                return yaml.load(f)
+        except Exception as err:
+            print "Failed to load config file.  Reason: %s"%(err)
+            sys.exit(1)
+
+    def loadModule(self, entrypoint):
+        e=entrypoint.split('.')
+        name=e[-1]
+        del(e[-1])
+        group=".".join(e)
+        module_instance=None
+
+        for module in iter_entry_points(group=group, name=name):
+            try:
+                module_instance=module.load()
+            except Exception as err:
+                print "Problem loading module %s  Reason: %s"%(module, err)
+                sys.exit(1)
+
+        if module_instance != None:
+            return module_instance
+        else:
+            print "Failed to load module %s  Reason: Not found"%(entrypoint)
+            sys.exit(1)
+
+class Start(Initialize):
+    pass
+
+class Debug(Initialize):
+
+    def setupLogging(self):
+        if "logs" in self.config:
+            for instance in self.config["logs"]:
+                module = self.loadModule(self.config["logs"][instance]["module"])
+                self.router.registerLogModule((module, "logformatfilter", 0), **self.config["logs"][instance].get("arguments",{}))
+        else:
+            loglevelfilter=self.loadModule("wishbone.builtin.logging.loglevelfilter")
+            self.router.registerLogModule((loglevelfilter, "loglevelfilter", 0))
+
+            stdout=self.loadModule("wishbone.builtin.output.stdout")
+            self.router.register((stdout, "stdout", 0))
+
+            self.router.connect("loglevelfilter.outbox", "stdout.inbox")
+
+    def start(self):
+        self.router.start()
+        self.router.block()
 
 class Stop():
 
@@ -56,10 +139,13 @@ class Dispatch():
         pass
 
     def start(self, command, config, instances, loglevel, pid):
-        print command
+        start = Start(command, config, instances, loglevel, pid)
+        start.do()
 
     def debug(self, command, config, instances, loglevel, pid):
-        print command
+        debug = Debug(command, config, instances, loglevel, pid)
+        debug.setup()
+        debug.start()
 
     def stop(self, command, pid):
         print command
