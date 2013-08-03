@@ -77,7 +77,6 @@ class Default(LoopContextSwitcher):
         else:
             self.__UUID = self.__noUUID
 
-
         # Forward router's logs to logging queue.
         #########################################
         spawn (self.__forwardEvents, self.logging.logs, self.logs)
@@ -166,6 +165,10 @@ class Default(LoopContextSwitcher):
         self.__modules[consumer_module]["connections"][consumer_queue]=spawn (self.__forwardEvents, producer_queue_instance, consumer_queue_instance)
         #store a reference of the greenthread to the other side.
         self.__modules[producer_module]["connections"][producer_queue]=self.__modules[consumer_module]["connections"][consumer_queue]
+
+    def getChildren(self, module):
+        for child in self.__modules[module]["connections"]:
+            print child
 
     def doRescue(self):
         '''Runs over each queue to extract any left behind messages.

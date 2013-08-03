@@ -115,6 +115,7 @@ class Debug(Initialize):
             self.router.connect("loglevelfilter.outbox", "stdout.inbox")
 
     def start(self):
+        self.router.getChildren("loglevelfilter")
         self.router.start()
         self.router.block()
 
