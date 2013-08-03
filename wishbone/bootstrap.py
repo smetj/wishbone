@@ -48,6 +48,12 @@ class Initialize():
         self.setupConnections()
 
     def setupMetrics(self):
+        '''Sets up the metrics portion of the Wishbone instance.
+
+        If no metrics section is defined in the bootstrap file it connects the
+        null module to the metrics starting point to make sure that queue
+        isn't filling up. '''
+
         if "metrics" in self.config:
             for instance in self.config["metrics"]:
                 module = self.loadModule(self.config["metrics"]["instance"]["module"])
@@ -57,17 +63,26 @@ class Initialize():
             self.router.registerMetricModule((module, "metrics_null", 0))
 
     def setupModules(self):
+        '''Registers all bootstrap file defined modules in the router.'''
+
+
         for instance in self.config["modules"]:
             module = self.loadModule(self.config["modules"][instance]["module"])
             self.router.register((module, instance, 0), **self.config["modules"][instance].get("arguments",{}))
 
     def setupConnections(self):
+        '''Makes all connections defined in the bootstrap file.'''
+
         for connection in self.config["routingtable"]:
             source=connection.split('->')[0].strip()
             destination=connection.split('->')[1].strip()
             self.router.connect(source, destination)
 
     def loadConfig(self, filename):
+
+        '''Loads the bootstrap file from disk and converts it from YAML to
+        Python object.'''
+
         try:
             with open (filename, 'r') as f:
                 return yaml.load(f)
@@ -76,6 +91,8 @@ class Initialize():
             sys.exit(1)
 
     def loadModule(self, entrypoint):
+        '''Loads a module from an entrypoint string and returns it.'''
+
         e=entrypoint.split('.')
         name=e[-1]
         del(e[-1])
@@ -101,6 +118,11 @@ class Start(Initialize):
 class Debug(Initialize):
 
     def setupLogging(self):
+        '''Sets up logging in case we're running in debug mode.
+
+        If the bootstrap file has no log section logs are written to stdout.
+        '''
+
         if "logs" in self.config:
             for instance in self.config["logs"]:
                 module = self.loadModule(self.config["logs"][instance]["module"])
@@ -115,7 +137,8 @@ class Debug(Initialize):
             self.router.connect("loglevelfilter.outbox", "stdout.inbox")
 
     def start(self):
-        self.router.getChildren("loglevelfilter")
+        '''Starts the Wishbone instance bootstrapped from file.'''
+
         self.router.start()
         self.router.block()
 
