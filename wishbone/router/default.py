@@ -323,10 +323,9 @@ class Default(LoopContextSwitcher):
         self.logging.info('Stopping.')
 
         for module in self.__modules.keys():
-            if module in self.getChildren(self.__logmodule)+self.getChildren(self.__metricmodule):
+            if module in [self.__logmodule, self.__metricmodule]+self.getChildren(self.__logmodule)+self.getChildren(self.__metricmodule):
                 continue
             else:
-                print module
                 try:
                     self.__modules[module]["instance"].postHook()
                     self.logging.debug("Posthook found for module %s and executed."%(module))
@@ -335,7 +334,6 @@ class Default(LoopContextSwitcher):
 
                 self.__modules[module]["instance"].stop()
                 while self.__modules[module]["instance"].logging.logs.size() > 0:
-                    print "blah"
                     sleep(0.5)
 
         while self.__modules[self.__logmodule]["instance"].queuepool.inbox.size() > 0 or self.logs.size() > 0:
