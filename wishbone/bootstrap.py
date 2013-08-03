@@ -187,13 +187,11 @@ def main():
     start = subparsers.add_parser('start', description="Starts a Wishbone instance and detaches to the background.  Logs are written to syslog.")
     start.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
     start.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
-    start.add_argument('--loglevel', type=str, dest='loglevel', choices=['info','warn','crit','debug'], default='info', help='The maximum loglevel to show.')
     start.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
 
     debug = subparsers.add_parser('debug', description="Starts a Wishbone instance in foreground and writes logs to STDOUT.")
     debug.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
     debug.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
-    debug.add_argument('--loglevel', type=str, dest='loglevel', choices=['info','warn','crit','debug'], default='info', help='The maximum loglevel to show.')
     debug.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
 
     stop = subparsers.add_parser('stop', description="Tries to gracefully stop the Wishbone instance.")
