@@ -32,3 +32,4 @@ from wishbone.module.funnel import Funnel
 from wishbone.module.header import Header
 from wishbone.module.tippingbucket import TippingBucket
 from wishbone.module.lockbuffer import LockBuffer
+from wishbone.module.humanlogformatter import HumanLogFormatter

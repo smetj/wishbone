@@ -2,7 +2,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-#  stdout.py
+#  loglevelfilter.py
 #
 #  Copyright 2013 Jelle Smet <development@smetj.net>
 #
@@ -29,13 +29,7 @@ from time import time
 
 
 class LogLevelFilter(Actor):
-    '''*A builtin Wishbone module which formats and filters Wishbone log events.
-
-    Incoming Wishbone log events are tuples with following format:
-
-    ('info', 1367682301.430527, 'Router', 'Received SIGINT. Shutting down.')
-
-    Parameters:
+    '''**A builtin Wishbone module which filters Wishbone log events.**
 
         name(str)       :   The name of the module.
 
@@ -47,15 +41,9 @@ class LogLevelFilter(Actor):
         Actor.__init__(self, name, limit=0)
         self.name=name
         self.max_level=max_level
-        self.levels={0:"emergency",1:"alert",2:"critical",3:"error",4:"warning",5:"notice",6:"informational",7:"debug"}
         self.logging.info("Initiated")
 
     def consume(self, event):
+
         if event["data"][0] <= self.max_level:
-            event["data"] = ("%s %s %s %s: %s"%(
-                strftime("%Y-%m-%dT%H:%M:%S", localtime(event["data"][1])),
-                "pid-%s"%(event["data"][2]),
-                self.levels[event["data"][0]],
-                event["data"][3],
-                event["data"][4]))
             self.queuepool.outbox.put(event)
