@@ -89,7 +89,8 @@ setup(
             'tippingbucket = wishbone.module.tippingbucket:TippingBucket'
              ],
         'wishbone.builtin.logging': [
-            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
+            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
+            'humanlogformatter = wishbone.module.humanlogformatter:HumanLogFormatter'
             ],
         'wishbone.builtin.metrics': [
             'graphite = wishbone.module.graphite:Graphite',
