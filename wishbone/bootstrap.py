@@ -128,10 +128,14 @@ class Debug(Initialize):
             loglevelfilter=self.loadModule("wishbone.builtin.logging.loglevelfilter")
             self.router.registerLogModule((loglevelfilter, "loglevelfilter", 0))
 
+            humanlogformatter=self.loadModule("wishbone.builtin.logging.humanlogformatter")
+            self.router.register((humanlogformatter, "humanlogformatter", 0))
+
             stdout=self.loadModule("wishbone.builtin.output.stdout")
             self.router.register((stdout, "stdout", 0))
 
-            self.router.connect("loglevelfilter.outbox", "stdout.inbox")
+            self.router.connect("loglevelfilter.outbox", "humanlogformatter.inbox")
+            self.router.connect("humanlogformatter.outbox", "stdout.inbox")
 
     def start(self):
         '''Starts the Wishbone instance bootstrapped from file.'''
