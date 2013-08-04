@@ -82,6 +82,7 @@ setup(
         'wishbone.builtin.flow': [
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
+            'lockbuffer = wishbone.module.lockbuffer:LockBuffer',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
             'tippingbucket = wishbone.module.tippingbucket:TippingBucket'
              ],
