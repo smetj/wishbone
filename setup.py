@@ -64,10 +64,12 @@ setup(
                  'Programming Language :: Python',
                  'Programming Language :: Python :: 2',
                  'Programming Language :: Python :: 2.7',
+                 'Programming Language :: Python :: 3.3',
+                 'Programming Language :: PyPy   :: 2.0.2',
                  'Intended Audience :: Developers',
                  ],
 
-    platforms=['Any'],
+    platforms=['Linux'],
 
     scripts=[],
 
