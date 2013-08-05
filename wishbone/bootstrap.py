@@ -26,10 +26,13 @@
 from wishbone.router import Default
 from pkg_resources import iter_entry_points
 from multiprocessing import Process
+import signal
+import daemon
 import argparse
 import yaml
 import sys
 import time
+import os
 
 class Initialize():
     def __init__(self, filename):
@@ -109,6 +112,12 @@ class Initialize():
             print "Failed to load module %s  Reason: Not found"%(entrypoint)
             sys.exit(1)
 
+    def start(self):
+        '''Starts the Wishbone instance bootstrapped from file.'''
+
+        self.router.start()
+        self.router.block()
+
 class Start(Initialize):
 
     def setupLogging(self):
@@ -129,12 +138,6 @@ class Start(Initialize):
             self.router.register((syslog, "syslog", 0))
 
             self.router.connect("loglevelfilter.outbox", "syslog.inbox")
-
-    def start(self):
-        '''Starts the Wishbone instance bootstrapped from file.'''
-
-        self.router.start()
-        self.router.block()
 
 class Debug(Initialize):
 
@@ -161,12 +164,6 @@ class Debug(Initialize):
             self.router.connect("loglevelfilter.outbox", "humanlogformatter.inbox")
             self.router.connect("humanlogformatter.outbox", "stdout.inbox")
 
-    def start(self):
-        '''Starts the Wishbone instance bootstrapped from file.'''
-
-        self.router.start()
-        self.router.block()
-
 class Stop():
 
     def __init__(self, command, pid):
@@ -185,61 +182,84 @@ class List():
 class Dispatch():
 
     def __init__(self):
-        pass
+        self.procs=[]
 
-    def wishboneInstance(self, config):
-        debug=Debug(config)
-        debug.setup()
-        debug.start()
+    def createDebugInstance(self, config):
+        instance=Debug(config)
+        instance.setup()
+        instance.start()
+
+    def createStartInstance(self, config):
+        instance=Start(config)
+        instance.setup()
+        instance.start()
+
+    def daemonize(self, config, instances, pid):
+        if instances == 1:
+            self.createStartInstance(config)
+        else:
+            procs = []
+            for wb in range(instances):
+                procs.append(Process(target=self.createStartInstance, args=(config,)))
+                procs[-1].daemon=True
+                procs[-1].start()
+
+            try:
+                self.writePids([str(a.pid) for a in procs], pid)
+                while True:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                for proc in procs:
+                    proc.join()
+
+    def debug(self, command, config, instances):
+        if instances == 1:
+            self.createDebugInstance(config)
+        else:
+            procs = []
+            for wb in range(instances):
+                procs.append(Process(target=self.createDebugInstance, args=(config,)))
+                procs[-1].daemon=True
+                procs[-1].start()
+
+            try:
+                while True:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                for proc in procs:
+                    proc.join()
 
     def start(self, command, config, instances, pid):
-        if instances == 1:
-            start = Start(config)
-            start.setup()
-            start.start()
-        else:
-            procs = []
-            for wb in range(instances):
-                procs.append(Process(target=self.wishboneInstance, args=(config,)))
-                procs[-1].daemon=True
-                procs[-1].start()
 
-            try:
-                while True:
-                    time.sleep(1)
-            except KeyboardInterrupt:
-                for proc in procs:
-                    proc.join()
-
-    def debug(self, command, config, instances, pid):
-        if instances == 1:
-            debug = Debug(config)
-            debug.setup()
-            debug.start()
-        else:
-            procs = []
-            for wb in range(instances):
-                procs.append(Process(target=self.wishboneInstance, args=(config,)))
-                procs[-1].daemon=True
-                procs[-1].start()
-
-            try:
-                while True:
-                    time.sleep(1)
-            except KeyboardInterrupt:
-                for proc in procs:
-                    proc.join()
-
-
+        print "Starting %s wishbone instances in background.  Logs are written to syslog. Pidfile is %s"%(instances, pid)
+        with daemon.DaemonContext(stdout = sys.stdout, stderr = sys.stderr, working_directory=os.getcwd()):
+            self.daemonize(config, instances, pid)
 
     def stop(self, command, pid):
-        print command
+        pids=[str(a.strip()) for a in self.readPids(pid)]
+        print "Stopping Wishbone instances with pids: %s"%(",".join(pids))
+        for pid in pids:
+            print "Stopping instance with pid %s"%(pid)
+            os.kill(int(pid), signal.SIGINT)
+            while True:
+                try:
+                    os.kill(int(pid), 0)
+                except:
+                    break
 
     def kill(self, command, pid):
         print command
 
     def list(self, command, group):
         print command
+
+    def writePids(self, pids, filename):
+        with open (filename,'w') as f:
+            f.write("\n".join(pids))
+
+    def readPids(self, filename):
+        with open (filename,'r') as f:
+            return f.readlines()
 
 def main():
     parser = argparse.ArgumentParser(description='Wishbone bootstrap server.')
@@ -253,7 +273,6 @@ def main():
     debug = subparsers.add_parser('debug', description="Starts a Wishbone instance in foreground and writes logs to STDOUT.")
     debug.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
     debug.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
-    debug.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
 
     stop = subparsers.add_parser('stop', description="Tries to gracefully stop the Wishbone instance.")
     stop.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
