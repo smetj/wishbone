@@ -90,7 +90,8 @@ setup(
              ],
         'wishbone.builtin.logging': [
             'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
-            'humanlogformatter = wishbone.module.humanlogformatter:HumanLogFormatter'
+            'humanlogformatter = wishbone.module.humanlogformatter:HumanLogFormatter',
+            'syslog = wishbone.module.wbsyslog:Syslog',
             ],
         'wishbone.builtin.metrics': [
             'graphite = wishbone.module.graphite:Graphite',
