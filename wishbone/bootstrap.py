@@ -110,7 +110,31 @@ class Initialize():
             sys.exit(1)
 
 class Start(Initialize):
-    pass
+
+    def setupLogging(self):
+        '''Sets up logging in case we're running in start mode.
+
+        If the bootstrap file has no log section logs are written to syslog.
+        '''
+
+        if "logs" in self.config:
+            for instance in self.config["logs"]:
+                module = self.loadModule(self.config["logs"][instance]["module"])
+                self.router.registerLogModule((module, "logformatfilter", 0), **self.config["logs"][instance].get("arguments",{}))
+        else:
+            loglevelfilter=self.loadModule("wishbone.builtin.logging.loglevelfilter")
+            self.router.registerLogModule((loglevelfilter, "loglevelfilter", 0))
+
+            syslog=self.loadModule("wishbone.builtin.logging.syslog")
+            self.router.register((syslog, "syslog", 0))
+
+            self.router.connect("loglevelfilter.outbox", "syslog.inbox")
+
+    def start(self):
+        '''Starts the Wishbone instance bootstrapped from file.'''
+
+        self.router.start()
+        self.router.block()
 
 class Debug(Initialize):
 
@@ -168,12 +192,24 @@ class Dispatch():
         debug.setup()
         debug.start()
 
-    def start(self, config, instances, pid):
+    def start(self, command, config, instances, pid):
         if instances == 1:
-            start = Start(command, config, instances, pid)
-            start.do()
+            start = Start(config)
+            start.setup()
+            start.start()
         else:
-            pass
+            procs = []
+            for wb in range(instances):
+                procs.append(Process(target=self.wishboneInstance, args=(config,)))
+                procs[-1].daemon=True
+                procs[-1].start()
+
+            try:
+                while True:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                for proc in procs:
+                    proc.join()
 
     def debug(self, command, config, instances, pid):
         if instances == 1:
