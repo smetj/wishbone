@@ -31,8 +31,7 @@ from sys import argv
 
 class Graphite(Actor):
 
-    '''*A builtin Wishbone module which formats the internal metric format into a
-    Graphite compatible format.*
+    '''**A builtin Wishbone module which formats the internal metric format into Graphite format.**
 
     The module finds out the script name it runs from, strips of the .py part
     and uses that as part of the metric name.  For example:

@@ -26,6 +26,7 @@
 from wishbone.router import Default
 from pkg_resources import iter_entry_points
 from multiprocessing import Process
+from prettytable import PrettyTable
 import signal
 import daemon
 import argparse
@@ -33,6 +34,7 @@ import yaml
 import sys
 import time
 import os
+import re
 
 class PidHandling():
     def writePids(self, pids, filename):
@@ -216,8 +218,38 @@ class Kill(PidHandling):
 
 class List():
 
-    def __init__(self, command, group ):
-        pass
+    def __init__(self, group ):
+        self.group=group
+
+    def do(self):
+        '''Produces an overview of all available Wishbone modules.'''
+
+        groups=[ "wishbone.builtin.logging", "wishbone.builtin.metrics", "wishbone.builtin.flow"
+        "wishbone.builtin.function", "wishbone.builtin.output", "wishbone.input",
+        "wishbone.output","wishbone.function"]
+
+        print ("Available Wishbone modules:")
+        table = PrettyTable(["Group","Module","Description"])
+        table.align["Group"]='l'
+        table.align["Module"]='l'
+        table.align["Description"]='l'
+        if self.group == None:
+            for group in groups:
+                for module in iter_entry_points(group=group, name=None):
+                    table.add_row([group, str(module).split()[0], self.extractSummary(module)])
+                    group=""
+                table.add_row(["","",""])
+        print table
+
+    def extractSummary(self, entrypoint):
+        try:
+            doc=entrypoint.load().__doc__
+        except Exception as err:
+            return "! -> Unable to load.  Reason: %s"%(err)
+        try:
+            return re.search('.*?\*\*(.*?)\*\*', doc, re.DOTALL ).group(1)
+        except:
+            return "No description found."
 
 class Dispatch(PidHandling):
 
@@ -284,7 +316,8 @@ class Dispatch(PidHandling):
         kill.do()
 
     def list(self, command, group):
-        print command
+        lst=List(group)
+        lst.do()
 
 def main():
     parser = argparse.ArgumentParser(description='Wishbone bootstrap server.')
@@ -306,7 +339,7 @@ def main():
     kill.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
 
     llist = subparsers.add_parser('list', description="Lists the available Wishbone modules.")
-    llist.add_argument('--group', type=str, dest='group', default='all', help='List the modules of this group type.')
+    llist.add_argument('--group', type=str, dest='group', default=None, help='List the modules of this group type.')
 
     arguments=vars(parser.parse_args())
 
