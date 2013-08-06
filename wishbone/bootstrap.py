@@ -34,6 +34,18 @@ import sys
 import time
 import os
 
+class PidHandling():
+    def writePids(self, pids, filename):
+        with open (filename,'w') as f:
+            f.write("\n".join(pids))
+
+    def readPids(self, filename):
+        with open (filename,'r') as f:
+            return [str(a.strip()) for a in f.readlines()]
+
+    def deletePids(self, filename):
+        os.remove(filename)
+
 class Initialize():
     def __init__(self, filename):
         self.filename=filename
@@ -164,22 +176,50 @@ class Debug(Initialize):
             self.router.connect("loglevelfilter.outbox", "humanlogformatter.inbox")
             self.router.connect("humanlogformatter.outbox", "stdout.inbox")
 
-class Stop():
+class Stop(PidHandling):
 
-    def __init__(self, command, pid):
-        pass
+    def __init__(self, pid):
+        self.pid=pid
 
-class Kill():
+    def do(self):
+        '''Initiates the stopping process.'''
 
-    def __init__(self, command, pid):
-        pass
+        pids=self.readPids(self.pid)
+        for pid in pids:
+            os.kill(int(pid), signal.SIGINT)
+        sys.stdout.write("Stopping instances .")
+        for pid in pids:
+            while True:
+                sys.stdout.write(".")
+                sys.stdout.flush()
+                try:
+                    os.kill(int(pid), 0)
+                    time.sleep(1)
+                except:
+                    break
+        self.deletePids(self.pid)
+        print("")
+
+class Kill(PidHandling):
+
+    def __init__(self, pid):
+        self.pid=pid
+
+    def do(self):
+        '''Kills all processes.'''
+
+        print ("Killing all processes")
+        pids=self.readPids(self.pid)
+        for pid in pids:
+            os.kill(int(pid), signal.SIGKILL)
+        self.deletePids(self.pid)
 
 class List():
 
     def __init__(self, command, group ):
         pass
 
-class Dispatch():
+class Dispatch(PidHandling):
 
     def __init__(self):
         self.procs=[]
@@ -196,6 +236,7 @@ class Dispatch():
 
     def daemonize(self, config, instances, pid):
         if instances == 1:
+            self.writePids([str(os.getpid())], pid)
             self.createStartInstance(config)
         else:
             procs = []
@@ -203,9 +244,8 @@ class Dispatch():
                 procs.append(Process(target=self.createStartInstance, args=(config,)))
                 procs[-1].daemon=True
                 procs[-1].start()
-
             try:
-                self.writePids([str(a.pid) for a in procs], pid)
+                self.writePids([str(a.pid) for a in procs]+[str(os.getpid())], pid)
                 while True:
                     time.sleep(1)
             except KeyboardInterrupt:
@@ -236,30 +276,15 @@ class Dispatch():
             self.daemonize(config, instances, pid)
 
     def stop(self, command, pid):
-        pids=[str(a.strip()) for a in self.readPids(pid)]
-        print "Stopping Wishbone instances with pids: %s"%(",".join(pids))
-        for pid in pids:
-            print "Stopping instance with pid %s"%(pid)
-            os.kill(int(pid), signal.SIGINT)
-            while True:
-                try:
-                    os.kill(int(pid), 0)
-                except:
-                    break
+        stop=Stop(pid)
+        stop.do()
 
     def kill(self, command, pid):
-        print command
+        kill=Kill(pid)
+        kill.do()
 
     def list(self, command, group):
         print command
-
-    def writePids(self, pids, filename):
-        with open (filename,'w') as f:
-            f.write("\n".join(pids))
-
-    def readPids(self, filename):
-        with open (filename,'r') as f:
-            return f.readlines()
 
 def main():
     parser = argparse.ArgumentParser(description='Wishbone bootstrap server.')
