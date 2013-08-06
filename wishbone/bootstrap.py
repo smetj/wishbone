@@ -233,12 +233,16 @@ class List():
         table.align["Group"]='l'
         table.align["Module"]='l'
         table.align["Description"]='l'
-        if self.group == None:
-            for group in groups:
-                for module in iter_entry_points(group=group, name=None):
-                    table.add_row([group, str(module).split()[0], self.extractSummary(module)])
-                    group=""
-                table.add_row(["","",""])
+
+        if self.group != None:
+            groups = [self.group]
+
+        for group in groups:
+            for module in iter_entry_points(group=group, name=None):
+                table.add_row([group, str(module).split()[0], self.extractSummary(module)])
+                group=""
+            table.add_row(["","",""])
+
         print table
 
     def extractSummary(self, entrypoint):
