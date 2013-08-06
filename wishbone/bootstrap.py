@@ -42,8 +42,12 @@ class PidHandling():
             f.write("\n".join(pids))
 
     def readPids(self, filename):
-        with open (filename,'r') as f:
-            return [str(a.strip()) for a in f.readlines()]
+        try:
+            with open (filename,'r') as f:
+                return [str(a.strip()) for a in f.readlines()]
+        except Exception as err:
+            print "Unable to open pidfile %s.  Reason: %s"%(filename, err)
+            sys.exit(0)
 
     def deletePids(self, filename):
         os.remove(filename)
