@@ -34,3 +34,5 @@ from wishbone.module.tippingbucket import TippingBucket
 from wishbone.module.lockbuffer import LockBuffer
 from wishbone.module.humanlogformatter import HumanLogFormatter
 from wishbone.module.wbsyslog import Syslog
+from wishbone.module.testevent import TestEvent
+from wishbone.module.roundrobin import RoundRobin
