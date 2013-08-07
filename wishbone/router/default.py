@@ -300,6 +300,15 @@ class Default(LoopContextSwitcher):
         '''
 
         self.logging.info('Starting.')
+
+        if self.__logmodule == None:
+            from wishbone.module import Null
+            self.registerLogModule((Null, "__null_logs", 0))
+
+        if self.__metricmodule == None:
+            from wishbone.module import Null
+            self.registerMetricModule((Null, "__null_metrics", 0))
+
         for module in self.__modules:
             try:
                 self.__modules[module]["instance"].preHook()
