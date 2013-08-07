@@ -52,16 +52,21 @@ class RoundRobin(Actor):
 
     def __init__(self, name, randomize=False):
         Actor.__init__(self, name, limit=0)
+        self.deleteQueue("outbox")
+        self.randomize=randomize
+        self.logging.info("Initiated.")
+
+    def preHook(self):
         destination_queues = self.queuepool.getQueueInstances()
         del(destination_queues["inbox"])
-        del(destination_queues["outbox"])
+
         self.destination_queues = [destination_queues[queue] for queue in destination_queues.keys()]
 
-        if randomize == False:
-            self.cycle = cycle(self.distination_queues)
-            self.choose=self.__chooseNextQueue
+        if self.randomize == False:
+            self.cycle = cycle(self.destination_queues)
+            self.chooseQueue=self.__chooseNextQueue
         else:
-            self.choose=self.__chooseRandomQueue
+            self.chooseQueue=self.__chooseRandomQueue
 
     def consume(self, event):
         self.chooseQueue().put(event)
