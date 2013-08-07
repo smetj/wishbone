@@ -240,8 +240,8 @@ class List(ModuleHandling):
         '''Produces an overview of all available Wishbone modules.'''
 
         groups=[ "wishbone.builtin.logging", "wishbone.builtin.metrics", "wishbone.builtin.flow",
-        "wishbone.builtin.function", "wishbone.builtin.output", "wishbone.input",
-        "wishbone.output","wishbone.function"]
+        "wishbone.builtin.function", "wishbone.builtin.input","wishbone.builtin.output",
+        "wishbone.input","wishbone.output","wishbone.function"]
 
         print ("Available Wishbone modules:")
         table = PrettyTable(["Group","Module","Description"])
