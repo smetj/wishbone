@@ -66,8 +66,13 @@ class STDOUT(Actor):
         - name (str):       The instance name when initiated.
 
         - complete (bool):  When True, print the complete event including headers.
+                            Default: False
 
         - counter (bool):   Puts an incremental number for each event in front of each event.
+                            Default: False
+
+        - prefix (str):     Puts the prefix in front of each printed event.
+                            Default: ""
 
     Queues:
 
