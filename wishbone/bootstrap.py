@@ -239,7 +239,7 @@ class List(ModuleHandling):
     def do(self):
         '''Produces an overview of all available Wishbone modules.'''
 
-        groups=[ "wishbone.builtin.logging", "wishbone.builtin.metrics", "wishbone.builtin.flow"
+        groups=[ "wishbone.builtin.logging", "wishbone.builtin.metrics", "wishbone.builtin.flow",
         "wishbone.builtin.function", "wishbone.builtin.output", "wishbone.input",
         "wishbone.output","wishbone.function"]
 
