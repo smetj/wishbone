@@ -52,7 +52,40 @@ class PidHandling():
     def deletePids(self, filename):
         os.remove(filename)
 
-class Initialize():
+class ModuleHandling():
+    def extractSummary(self, entrypoint):
+        try:
+            doc=entrypoint.load().__doc__
+        except Exception as err:
+            return "! -> Unable to load.  Reason: %s"%(err)
+        try:
+            return re.search('.*?\*\*(.*?)\*\*', doc, re.DOTALL ).group(1)
+        except:
+            return "No description found."
+
+    def loadModule(self, entrypoint):
+        '''Loads a module from an entrypoint string and returns it.'''
+
+        e=entrypoint.split('.')
+        name=e[-1]
+        del(e[-1])
+        group=".".join(e)
+        module_instance=None
+
+        for module in iter_entry_points(group=group, name=name):
+            try:
+                module_instance=module.load()
+            except Exception as err:
+                print "Problem loading module %s  Reason: %s"%(module, err)
+                sys.exit(1)
+
+        if module_instance != None:
+            return module_instance
+        else:
+            print "Failed to load module %s  Reason: Not found"%(entrypoint)
+            sys.exit(1)
+
+class Initialize(ModuleHandling):
     def __init__(self, filename):
         self.filename=filename
         self.config=None
@@ -106,28 +139,6 @@ class Initialize():
                 return yaml.load(f)
         except Exception as err:
             print "Failed to load config file.  Reason: %s"%(err)
-            sys.exit(1)
-
-    def loadModule(self, entrypoint):
-        '''Loads a module from an entrypoint string and returns it.'''
-
-        e=entrypoint.split('.')
-        name=e[-1]
-        del(e[-1])
-        group=".".join(e)
-        module_instance=None
-
-        for module in iter_entry_points(group=group, name=name):
-            try:
-                module_instance=module.load()
-            except Exception as err:
-                print "Problem loading module %s  Reason: %s"%(module, err)
-                sys.exit(1)
-
-        if module_instance != None:
-            return module_instance
-        else:
-            print "Failed to load module %s  Reason: Not found"%(entrypoint)
             sys.exit(1)
 
     def start(self):
@@ -220,7 +231,7 @@ class Kill(PidHandling):
             os.kill(int(pid), signal.SIGKILL)
         self.deletePids(self.pid)
 
-class List():
+class List(ModuleHandling):
 
     def __init__(self, group ):
         self.group=group
@@ -249,15 +260,14 @@ class List():
 
         print table
 
-    def extractSummary(self, entrypoint):
-        try:
-            doc=entrypoint.load().__doc__
-        except Exception as err:
-            return "! -> Unable to load.  Reason: %s"%(err)
-        try:
-            return re.search('.*?\*\*(.*?)\*\*', doc, re.DOTALL ).group(1)
-        except:
-            return "No description found."
+class Show(ModuleHandling):
+
+    def __init__(self, module):
+        self.module=module
+
+    def do(self):
+        module = self.loadModule(self.module)
+        print module.__doc__
 
 class Dispatch(PidHandling):
 
@@ -327,6 +337,10 @@ class Dispatch(PidHandling):
         lst=List(group)
         lst.do()
 
+    def show(self, command, module):
+        show=Show(module)
+        show.do()
+
 def main():
     parser = argparse.ArgumentParser(description='Wishbone bootstrap server.')
     subparsers = parser.add_subparsers(dest='command')
@@ -348,6 +362,9 @@ def main():
 
     llist = subparsers.add_parser('list', description="Lists the available Wishbone modules.")
     llist.add_argument('--group', type=str, dest='group', default=None, help='List the modules of this group type.')
+
+    show = subparsers.add_parser('show', description="Shows the details of a module.")
+    show.add_argument('module', type=str, help='Shows the documentation of the module. ')
 
     arguments=vars(parser.parse_args())
 
