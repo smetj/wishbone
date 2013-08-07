@@ -74,14 +74,15 @@ class STDOUT(Actor):
         - inbox:    Incoming events.
     '''
 
-    def __init__(self, name, complete=False, counter=False):
+    def __init__(self, name, complete=False, counter=False, prefix=""):
         Actor.__init__(self, name, limit=0)
         self.deleteQueue("outbox")
         self.complete=complete
         self.counter=counter
+        self.prefix=prefix
         self.format=Format(complete, counter)
 
     def consume(self,event):
         #todo(smet) This should work in a gevent context but it doesn't. Bug?
         #sys.stdout.write(self.format.do(event))
-        print(self.format.do(event))
+        print("%s%s"%(self.prefix,self.format.do(event)))
