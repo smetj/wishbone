@@ -98,6 +98,9 @@ setup(
         'wishbone.builtin.function': [
             'header = wishbone.module.header:Header',
             ],
+        'wishbone.builtin.input': [
+            'testevent = wishbone.module.testevent:TestEvent'
+            ],
         'wishbone.builtin.output': [
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
