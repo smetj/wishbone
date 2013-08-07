@@ -25,7 +25,7 @@
 from wishbone import Actor
 
 class LockBuffer(Actor):
-    '''**A builtin Wishbone with a fixed size inbox queue.**
+    '''**A builtin Wishbone module with a fixed size inbox queue.**
 
     This module shovels events from inbox to outbox.  The
     inbox however is fixed in size which locks the downstream
