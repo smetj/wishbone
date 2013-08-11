@@ -30,18 +30,22 @@ import sys
 import os
 
 class Syslog(Actor):
-    '''**Writes Wishbone internal log formatted events to syslog.**
+    '''**Writes Wishbone log events to syslog.**
+
+    Logevents have following format:
 
     (6, 1367682301.430527, 'Router', 'Received SIGINT. Shutting down.')
 
-        Paramters:
+    The first value corresponds to the syslog severity level.
 
-            name(str)       :   The name of the module.
+        Parameters
+
+            - name(str) :   The name of the module.
 
 
         Queues:
 
-            inbox: incoming events
+            - inbox: incoming events
     '''
 
     def __init__(self, name):
