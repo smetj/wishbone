@@ -108,10 +108,10 @@ class Initialize(ModuleHandling):
         if "metrics" in self.config:
             for instance in self.config["metrics"]:
                 module = self.loadModule(self.config["metrics"]["instance"]["module"])
-                self.router.registerMetricModule((module, "metrics", 0), **self.config["metrics"][instance].get("arguments",{}))
+                self.router.registerMetricModule(module, "metrics", **self.config["metrics"][instance].get("arguments",{}))
         else:
             module = self.loadModule("wishbone.builtin.output.null")
-            self.router.registerMetricModule((module, "metrics_null", 0))
+            self.router.registerMetricModule(module, "metrics_null")
 
     def setupModules(self):
         '''Registers all bootstrap file defined modules in the router.'''
@@ -119,7 +119,7 @@ class Initialize(ModuleHandling):
 
         for instance in self.config["modules"]:
             module = self.loadModule(self.config["modules"][instance]["module"])
-            self.router.register((module, instance, 0), **self.config["modules"][instance].get("arguments",{}))
+            self.router.register(module, instance, **self.config["modules"][instance].get("arguments",{}))
 
     def setupConnections(self):
         '''Makes all connections defined in the bootstrap file.'''
@@ -158,13 +158,13 @@ class Start(Initialize):
         if "logs" in self.config:
             for instance in self.config["logs"]:
                 module = self.loadModule(self.config["logs"][instance]["module"])
-                self.router.registerLogModule((module, "logformatfilter", 0), **self.config["logs"][instance].get("arguments",{}))
+                self.router.registerLogModule(module, "logformatfilter", **self.config["logs"][instance].get("arguments",{}))
         else:
             loglevelfilter=self.loadModule("wishbone.builtin.logging.loglevelfilter")
-            self.router.registerLogModule((loglevelfilter, "loglevelfilter", 0))
+            self.router.registerLogModule(loglevelfilter, "loglevelfilter")
 
             syslog=self.loadModule("wishbone.builtin.logging.syslog")
-            self.router.register((syslog, "syslog", 0))
+            self.router.register(syslog, "syslog")
 
             self.router.connect("loglevelfilter.outbox", "syslog.inbox")
 
@@ -179,16 +179,16 @@ class Debug(Initialize):
         if "logs" in self.config:
             for instance in self.config["logs"]:
                 module = self.loadModule(self.config["logs"][instance]["module"])
-                self.router.registerLogModule((module, "logformatfilter", 0), **self.config["logs"][instance].get("arguments",{}))
+                self.router.registerLogModule(module, "logformatfilter", **self.config["logs"][instance].get("arguments",{}))
         else:
             loglevelfilter=self.loadModule("wishbone.builtin.logging.loglevelfilter")
-            self.router.registerLogModule((loglevelfilter, "loglevelfilter", 0))
+            self.router.registerLogModule(loglevelfilter, "loglevelfilter")
 
             humanlogformatter=self.loadModule("wishbone.builtin.logging.humanlogformatter")
-            self.router.register((humanlogformatter, "humanlogformatter", 0))
+            self.router.register(humanlogformatter, "humanlogformatter")
 
             stdout=self.loadModule("wishbone.builtin.output.stdout")
-            self.router.register((stdout, "stdout", 0))
+            self.router.register(stdout, "stdout")
 
             self.router.connect("loglevelfilter.outbox", "humanlogformatter.inbox")
             self.router.connect("humanlogformatter.outbox", "stdout.inbox")

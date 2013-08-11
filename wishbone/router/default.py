@@ -113,14 +113,15 @@ class Default(LoopContextSwitcher):
         submits these to the producer queue. When a non existing queue is
         defined, it is autocreated.
 
-        The notation of queue names is:
+        The syntax of queue names is:
 
-            modulename.queuename
+            module_instance_name.queuename
 
         Parameters:
 
-            producer(string):   The name of the producing module queue.
-            consumer(string):   The name of the consumnig module queue.
+            - producer(str):   The name of the producing module queue.
+
+            - consumer(str):   The name of the consuming module queue.
 
         '''
 
@@ -196,23 +197,31 @@ class Default(LoopContextSwitcher):
 
         return not self.__runConsumers.isSet()
 
-    def register(self, module, *args, **kwargs):
+    def register(self, module, name, *args, **kwargs):
         '''Registers a Wishbone actor into the router.
+
+        Parameters:
+
+            module(module)          A wishbone module.
+            name(string)            The name to assign to the module insance.
+            args(list)              Positional arguments to pass to the module.
+            kwargs(dict)            Named arguments to pass to the module.
         '''
 
-        if len(module) < 3:
-            raise Exception("The module tuple requires 3 values.")
+        # if len(module) < 3:
+        #     raise Exception("The module tuple requires 3 values.")
 
-        limit = int(module[2])
-        name = module[1]
-        module = module[0]
+        # limit = int(module[2])
+        # name = module[1]
+        # module = module[0]
 
         self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children":[]}
+        self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
-        if limit > 0:
-            self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
-        else:
-            self.__modules[name]["instance"]=module(name, *args, **kwargs)
+        # if limit > 0:
+        #     self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
+        # else:
+        #     self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
         # Start to forward this module's logs to the registered
         # logging module.
@@ -222,7 +231,7 @@ class Default(LoopContextSwitcher):
         # metrics module.
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
 
-    def registerLogModule(self, module, *args, **kwargs):
+    def registerLogModule(self, module, name, *args, **kwargs):
         '''Registers and connects the module to the router's log queue.
 
         If this method is not called (no module connected to it) the queue is
@@ -230,59 +239,63 @@ class Default(LoopContextSwitcher):
 
         Parameters:
 
-            module(instance)        An initialized wishbone module.
-            *args(list)             Positional arguments to pass to thevmodule.
-            **kwargs(dict)          Named arguments to pass to the module.
+            module(module)          A wishbone module.
+            name(string)            The name to assign to the module insance.
+            args(list)              Positional arguments to pass to the module.
+            kwargs(dict)            Named arguments to pass to the module.
         '''
 
-        if len(module) < 3:
-            raise SetupError("The module tuple requires 3 values.")
+        # if len(module) < 3:
+        #     raise SetupError("The module tuple requires 3 values.")
 
-        limit = module[2]
-        name = module[1]
-        module = module[0]
+        # limit = module[2]
+        # name = module[1]
+        # module = module[0]
 
         self.__logmodule = name
 
         self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": []}
+        self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
-        if limit > 0:
-            self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
-        else:
-            self.__modules[name]["instance"]=module(name, *args, **kwargs)
+        # if limit > 0:
+        #     self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
+        # else:
+        #     self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
 
         self.__modules[name]["connections"]["inbox"] = spawn (self.__forwardEvents, self.logs, self.__modules[name]["instance"].queuepool.inbox)
 
-    def registerMetricModule(self, module, *args, **kwargs):
+    def registerMetricModule(self, module, name, *args, **kwargs):
         '''Registers and connects the module to the router's log queue.
 
         If this method is not called (no module connected to it) the queue is
         automatically connected to a Null module.
+
         Parameters:
 
-            module(instance)        An initialized wishbone module.
-            *args(list)             Positional arguments to pass to thevmodule.
-            **kwargs(dict)          Named arguments to pass to the module.
+            module(module)          A wishbone module.
+            name(string)            The name to assign to the module insance.
+            args(list)              Positional arguments to pass to the module.
+            kwargs(dict)            Named arguments to pass to the module.
         '''
 
-        if len(module) < 3:
-            raise SetupERror("The module tuple requires 3 values.")
+        # if len(module) < 3:
+        #     raise SetupERror("The module tuple requires 3 values.")
 
-        limit = module[2]
-        name = module[1]
-        module = module[0]
+        # limit = module[2]
+        # name = module[1]
+        # module = module[0]
 
         self.__metricmodule = name
-
         self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": []}
+        self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
-        if limit > 0:
-            self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
-        else:
-            self.__modules[name]["instance"]=module(name, *args, **kwargs)
+        # if limit > 0:
+        #     self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
+        # else:
+        #     self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
@@ -303,11 +316,11 @@ class Default(LoopContextSwitcher):
 
         if self.__logmodule == None:
             from wishbone.module import Null
-            self.registerLogModule((Null, "__null_logs", 0))
+            self.registerLogModule(Null, "__null_logs")
 
         if self.__metricmodule == None:
             from wishbone.module import Null
-            self.registerMetricModule((Null, "__null_metrics", 0))
+            self.registerMetricModule(Null, "__null_metrics")
 
         for module in self.__modules:
             try:
