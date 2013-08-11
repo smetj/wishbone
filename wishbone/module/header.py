@@ -32,12 +32,13 @@ class Header(Actor):
 
     Parameters:
 
-        name(str):  The name of the module
+        - name(str):  The name of the module
 
     Queues:
 
-        inbox:      Incoming events.
-        outbox:     Outgoing modified events.
+        - inbox:      Incoming events.
+
+        - outbox:     Outgoing modified events.
 
     '''
 
