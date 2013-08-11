@@ -27,13 +27,18 @@ from wishbone import Actor
 
 
 class Null(Actor):
-    '''**A builtin Wishbone module which accepts events and does nothing with them.**
+    '''**Accepts events and purges these without any further processing.**
 
-    Useful to make sure a queue is consumed but the events are purged.
+    Useful to discard a stream of events.
 
     Parameters:
 
-        name(str):  The name of the module
+        - name(str):  The name of the module
+
+
+    Queues:
+
+        - inbox:    incoming events
     '''
 
     def __init__(self, name):

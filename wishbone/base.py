@@ -35,6 +35,26 @@ class BaseActor(QueueFunctions):
         self.logging.info("Initiated")
 
 class Actor(BaseActor, Consumer):
+    '''**This baseclass provides the functionality required to build a Wishbone module**
+
+        Parameters:
+
+            - name(string):         The name of the module.
+
+            - setupbasic(bool):     When True, does some assumptions on how to setup the module.
+                                    Default: True
+
+            - context_switch(int):  Execute a context switch every <context_switch> messages
+                                    consumed from a queue.
+                                    Default: 100
+
+            - limit(int):           When more than 0 the <consume> function is executed in a
+                                    greenthread allowing parallel execution for each incoming
+                                    event.  A threadpool of size <limit> is used to limit the
+                                    number of parallel greenthreads.
+                                    Default: 0
+
+    '''
     def __init__(self, name,  setupbasic=True, context_switch=100, limit=0):
         BaseActor.__init__(self, name)
         Consumer.__init__(self, setupbasic=setupbasic, context_switch=context_switch, limit=limit)
