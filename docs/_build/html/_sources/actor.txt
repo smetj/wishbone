@@ -26,45 +26,9 @@ Example
 As an example, let's make a module which reverses the content of incoming
 events and optionally converts the first letter into a capital.
 
-.. code-block:: python
+.. literalinclude:: examples/reversedata.py
+   :language: python
    :linenos:
-
-    from wishbone import Actor
-
-
-    class ReverseData(Actor):
-        '''**Sample module which reverses incoming events.**
-
-        Parameters:
-
-            - name (str):       The instance name.
-
-            - capitalize(bool): When True capitalizes the
-                                first letter.
-                                Default: True
-
-        Queues:
-
-            - inbox:    Incoming events.
-            - outbox:   Outgoing events.
-        '''
-
-        def __init__(self, name, capitalize=False):
-            Actor.__init__(self, name, setupbasic=True)
-            self.capitalize=capitalize
-            self.logging.info("Initialized")
-
-        def consume(self, event):
-
-            data = event["data"]
-
-            data = [::-1]
-
-            if self.capitalize == True:
-                data = data.title()
-            event["data"]=data
-
-            self.queuepool.outbox.put(event)
 
 --------
 
@@ -128,5 +92,3 @@ Python module and that you can import it an entrypoint.
 
 .. autoclass:: wishbone.tools.QLogging
     :members:
-
---------

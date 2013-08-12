@@ -6,31 +6,8 @@ Wishbone comes with a CLI tool to easily bootstrap a server using a YAML
 formatted config file.  Following file creates exactly the same environment as
 the above example:
 
-.. code-block:: yaml
-
-    ---
-    modules:
-      input:
-        module: wishbone.builtin.input.testevent
-
-      mixing:
-        module: wishbone.builtin.flow.roundrobin
-
-      output1:
-        module: wishbone.builtin.output.stdout
-        arguments:
-          prefix: "I am number one: "
-
-      output2:
-        module: wishbone.builtin.output.stdout
-        arguments:
-          prefix: "I am number two: "
-
-    routingtable:
-      - input.outbox  -> mixing.inbox
-      - mixing.one    -> output1.inbox
-      - mixing.two    -> output2.inbox
-    ...
+.. literalinclude:: examples/test_setup.yaml
+   :language: yaml
 
 Bootstrapping the environment is just a matter of invoking the **wishbone**
 executable with the --config parameter pointing to the bootstrap file.
