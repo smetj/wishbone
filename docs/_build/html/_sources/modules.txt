@@ -44,8 +44,6 @@ router and submit these events to the outside world. They often have only 1
 destined to go out. They typically act as TCP, AMQP or other network protocol
 clients.
 
-Builtin modules:
-
 --------
 
 Syslog
@@ -74,8 +72,6 @@ fulfill a key roll in building a message flow.  Since you can only have a 1:1
 relationship between queues, you cannot split or merge event streams.  That's
 where flow modules come handy.  Flow modules are not expected to alter events
 when transiting the module.
-
-Builtin modules:
 
 --------
 
@@ -116,12 +112,45 @@ Function modules accept and forward events from and to other modules.  They
 can have a wide range of functionality and change events when transiting the
 module.
 
-Builtin modules:
-
 --------
 
 Header
 ******
 .. autoclass:: wishbone.module.Header
+
+--------
+
+Logging modules
+---------------
+
+The logging modules are a specialized set of modules meant to process the logs
+produced by the modules and collected by the router.
+
+--------
+
+humanlogformatter
+*****************
+.. autoclass:: wishbone.module.HumanLogFormatter
+
+--------
+
+Loglevelfilter
+**************
+.. autoclass:: wishbone.module.LogLevelFilter
+
+--------
+
+
+Metrics modules
+---------------
+
+The metrics modules are a specialized set of modules meant to process the
+metrics produced by the modules and collected by the router.
+
+--------
+
+graphite
+********
+.. autoclass:: wishbone.module.Graphite
 
 --------

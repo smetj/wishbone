@@ -43,9 +43,6 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="bootstrap.html" title="Bootstraping on CLI"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -126,7 +123,6 @@ router and submit these events to the outside world. They often have only 1
 <a class="reference internal" href="actor.html#wishbone.tools.WishboneQueue" title="wishbone.tools.WishboneQueue"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.tools.WishboneQueue</span></tt></a> called <strong>inbox</strong> in which events arrive
 destined to go out. They typically act as TCP, AMQP or other network protocol
 clients.</p>
-<p>Builtin modules:</p>
 <hr class="docutils" />
 <div class="section" id="syslog">
 <h3>Syslog<a class="headerlink" href="#syslog" title="Permalink to this headline">¶</a></h3>
@@ -229,7 +225,6 @@ fulfill a key roll in building a message flow.  Since you can only have a 1:1
 relationship between queues, you cannot split or merge event streams.  That&#8217;s
 where flow modules come handy.  Flow modules are not expected to alter events
 when transiting the module.</p>
-<p>Builtin modules:</p>
 <hr class="docutils" />
 <div class="section" id="roundrobin">
 <h3>RoundRobin<a class="headerlink" href="#roundrobin" title="Permalink to this headline">¶</a></h3>
@@ -404,7 +399,6 @@ modules when it reached its limit.</p>
 <p>Function modules accept and forward events from and to other modules.  They
 can have a wide range of functionality and change events when transiting the
 module.</p>
-<p>Builtin modules:</p>
 <hr class="docutils" />
 <div class="section" id="header">
 <h3>Header<a class="headerlink" href="#header" title="Permalink to this headline">¶</a></h3>
@@ -426,6 +420,72 @@ to the header of each passing event.**</p>
 <li>outbox:     Outgoing modified events.</li>
 </ul>
 </div></blockquote>
+</dd></dl>
+
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="logging-modules">
+<h2>Logging modules<a class="headerlink" href="#logging-modules" title="Permalink to this headline">¶</a></h2>
+<p>The logging modules are a specialized set of modules meant to process the logs
+produced by the modules and collected by the router.</p>
+<hr class="docutils" />
+<div class="section" id="humanlogformatter">
+<h3>humanlogformatter<a class="headerlink" href="#humanlogformatter" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="wishbone.module.HumanLogFormatter">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">HumanLogFormatter</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.module.HumanLogFormatter" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A builtin Wishbone module which formats Wishbone log events.</strong></p>
+<p>Logs are formated from the internal wishbone format into a more
+pleasing human readable format suited for STDOUT or a logfile.</p>
+<p>Internal Wishbone format:</p>
+<p>(6, 1367682301.430527, &#8216;Router&#8217;, &#8216;Received SIGINT. Shutting down.&#8217;)</p>
+<p>Sample output format:</p>
+<p>2013-08-04T19:54:43 pid-3342 informational dictgenerator: Initiated
+2013-08-04T19:54:43 pid-3342 informational metrics_null: Started</p>
+<p>Parameters:</p>
+<blockquote>
+<div>name(str)       :   The name of the module.</div></blockquote>
+</dd></dl>
+
+</div>
+<hr class="docutils" />
+<div class="section" id="loglevelfilter">
+<h3>Loglevelfilter<a class="headerlink" href="#loglevelfilter" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="wishbone.module.LogLevelFilter">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">LogLevelFilter</tt><big>(</big><em>name</em>, <em>max_level=6</em><big>)</big><a class="headerlink" href="#wishbone.module.LogLevelFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A builtin Wishbone module which filters Wishbone log events.</strong></p>
+<p>name(str)       :   The name of the module.</p>
+<dl class="docutils">
+<dt>max_level(bool) <span class="classifier-delimiter">:</span> <span class="classifier">The maximum log level to show.</span></dt>
+<dd>Default: 6</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="metrics-modules">
+<h2>Metrics modules<a class="headerlink" href="#metrics-modules" title="Permalink to this headline">¶</a></h2>
+<p>The metrics modules are a specialized set of modules meant to process the
+metrics produced by the modules and collected by the router.</p>
+<hr class="docutils" />
+<div class="section" id="graphite">
+<h3>graphite<a class="headerlink" href="#graphite" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="wishbone.module.Graphite">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Graphite</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.module.Graphite" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A builtin Wishbone module which formats the internal metric format into Graphite format.</strong></p>
+<p>The module finds out the script name it runs from, strips of the .py part
+and uses that as part of the metric name.  For example:</p>
+<ul class="simple">
+<li>wishbone_test.function.tcpout.consume.hits</li>
+<li>wishbone_test.queue.buffer.inbox.in_rate</li>
+</ul>
+<p>Parameters:</p>
+<blockquote>
+<div>name(str):  The name of the module.</div></blockquote>
 </dd></dl>
 
 <hr class="docutils" />
@@ -464,6 +524,15 @@ to the header of each passing event.**</p>
 <li><a class="reference internal" href="#header">Header</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#logging-modules">Logging modules</a><ul>
+<li><a class="reference internal" href="#humanlogformatter">humanlogformatter</a></li>
+<li><a class="reference internal" href="#loglevelfilter">Loglevelfilter</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#metrics-modules">Metrics modules</a><ul>
+<li><a class="reference internal" href="#graphite">graphite</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -497,9 +566,6 @@ to the header of each passing event.**</p>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
         <li class="right" >
           <a href="bootstrap.html" title="Bootstraping on CLI"
              >next</a> |</li>
