@@ -43,9 +43,6 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="modules.html" title="Modules"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -60,8 +57,56 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-wishbone">
-<span id="router"></span><h1>Router<a class="headerlink" href="#module-wishbone" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="router">
+<h1>Router<a class="headerlink" href="#router" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#wishbone.router.Default" title="wishbone.router.Default"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.router.Default</span></tt></a> router is used to initialize the
+modules and to organize the event stream between them.</p>
+<p>Modules are registered using <a class="reference internal" href="#wishbone.router.Default.register" title="wishbone.router.Default.register"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.register()</span></tt></a>. The
+router takes care of the proper startup
+<a class="reference internal" href="#wishbone.router.Default.start" title="wishbone.router.Default.start"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.start()</span></tt></a> and shutdown
+<a class="reference internal" href="#wishbone.router.Default.start" title="wishbone.router.Default.start"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.start()</span></tt></a> sequence of all the modules.</p>
+<p>Queues are connected to each other using
+<a class="reference internal" href="#wishbone.router.Default.connect" title="wishbone.router.Default.connect"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.connect()</span></tt></a>.  Queues can only have a &#8220;1 to 1&#8221;
+relationship.  If you require a &#8220;1 to N&#8221; or similar scenario you might have to
+use one of the builtin flow modules.</p>
+<p>The router also takes care of the logs and metrics produced by the modules.
+By registering Wishbone modules using
+<a class="reference internal" href="#wishbone.router.Default.registerLogModule" title="wishbone.router.Default.registerLogModule"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.registerLogModule()</span></tt></a> and
+<a class="reference internal" href="#wishbone.router.Default.registerMetricModule" title="wishbone.router.Default.registerMetricModule"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.registerMetricModule()</span></tt></a> we can pretty much do
+what we want with them.</p>
+<div class="section" id="logging">
+<h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
+<p>Modules produce logs using <a class="reference internal" href="actor.html#wishbone.tools.QLogging" title="wishbone.tools.QLogging"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.tools.QLogging</span></tt></a>.  These logs
+are automatically collected by the router and are put into a queue within the
+router instance.  By using <tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.registerLogModule()</span></tt> we can
+connect whatever to process the logstream in whatever way.</p>
+<p>Typically the <a class="reference internal" href="modules.html#wishbone.module.LogLevelFilter" title="wishbone.module.LogLevelFilter"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.module.LogLevelFilter</span></tt></a> is registered with
+<a class="reference internal" href="#wishbone.router.Default.registerLogModule" title="wishbone.router.Default.registerLogModule"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.registerLogModule()</span></tt></a> to filter out the
+interesting loglevels before sending the logstream to any other modules such
+as <a class="reference internal" href="modules.html#wishbone.module.Syslog" title="wishbone.module.Syslog"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.module.Syslog</span></tt></a> or <a class="reference internal" href="modules.html#wishbone.module.STDOUT" title="wishbone.module.STDOUT"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.module.STDOUT</span></tt></a>.</p>
+</div>
+<div class="section" id="metrics">
+<h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
+<p>Modules produce 2 kinds of metrics:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Queue related metrics which are generated by
+<a class="reference internal" href="actor.html#wishbone.tools.WishboneQueue.stats" title="wishbone.tools.WishboneQueue.stats"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.tools.WishboneQueue.stats()</span></tt></a>.</li>
+<li>Function related metrics can optionally be generated by decorating a
+function with <a class="reference internal" href="#wishbone.tools.Measure.runTime" title="wishbone.tools.Measure.runTime"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.tools.Measure.runTime()</span></tt></a></li>
+</ul>
+</div></blockquote>
+<p>The router instance is responsible for grabbing the metrics at the
+<tt class="xref py py-data docutils literal"><span class="pre">wishbone.router.Default.interval</span></tt>.  The gathered metrics are stored
+in the router&#8217;s metrics queue from which they can be consume by the module
+which has been registered using
+<a class="reference internal" href="#wishbone.router.Default.registerMetricModule" title="wishbone.router.Default.registerMetricModule"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.registerMetricModule()</span></tt></a></p>
+<p>Typically the <a class="reference internal" href="modules.html#wishbone.module.Graphite" title="wishbone.module.Graphite"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.module.Graphite</span></tt></a> is registered as
+metricmodule, which formats the metrics into a Graphite format.  That module
+can be connected on its turn to the TCP client module in order to forward the
+metric data to Graphite.</p>
+<img alt="_images/graphite.png" src="_images/graphite.png" />
+<hr class="docutils" />
 <dl class="class">
 <dt id="wishbone.router.Default">
 <em class="property">class </em><tt class="descclassname">wishbone.router.</tt><tt class="descname">Default</tt><big>(</big><em>interval=10</em>, <em>context_switch=100</em>, <em>rescue=False</em>, <em>uuid=False</em><big>)</big><a class="headerlink" href="#wishbone.router.Default" title="Permalink to this definition">¶</a></dt>
@@ -209,11 +254,19 @@ are shutdown in the order they have been registered.</p>
 
 </dd></dl>
 
-<div class="section" id="logging">
-<h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="metrics">
-<h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
+<hr class="docutils" />
+<dl class="class">
+<dt id="wishbone.tools.Measure">
+<em class="property">class </em><tt class="descclassname">wishbone.tools.</tt><tt class="descname">Measure</tt><a class="headerlink" href="#wishbone.tools.Measure" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="classmethod">
+<dt id="wishbone.tools.Measure.runTime">
+<em class="property">classmethod </em><tt class="descname">runTime</tt><big>(</big><em>fn</em><big>)</big><a class="headerlink" href="#wishbone.tools.Measure.runTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator function which keeps track of the number of calls and the
+time it takes to execute the function.</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
@@ -261,9 +314,6 @@ are shutdown in the order they have been registered.</p>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
         <li class="right" >
           <a href="modules.html" title="Modules"
              >next</a> |</li>
