@@ -173,54 +173,54 @@ optional arguments:
 <p>Lists all installed Wishbone modules, given that they have the correct entry-points.</p>
 <div class="highlight-none"><div class="highlight"><pre>[smetj@indigo ~]$ wishbone list
 Available Wishbone modules:
-+---------------------------+-------------------+------------------------------------------------------------------------------------------+
-| Group                     | Module            | Description                                                                              |
-+---------------------------+-------------------+------------------------------------------------------------------------------------------+
-| wishbone.builtin.logging  | loglevelfilter    | A builtin Wishbone module which filters Wishbone log events.                             |
-|                           | humanlogformatter | A builtin Wishbone module which formats Wishbone log events.                             |
-|                           |                   |                                                                                          |
-| wishbone.builtin.metrics  | graphite          | A builtin Wishbone module which formats the internal metric format into Graphite format. |
-|                           |                   |                                                                                          |
-| wishbone.builtin.flow     | roundrobin        | A builtin Wishbone module which round robins incoming events                             |
-|                           |                   |     over all connected queues.                                                           |
-|                           | fanout            | A builtin Wishbone module which duplicates incoming events to all                        |
-|                           |                   |     connected queues.                                                                    |
-|                           | tippingbucket     | A builtin Wishbone module which buffers data.                                            |
-|                           | funnel            | A builtin Wishbone module which merges incoming events from different                    |
-|                           |                   |     queues into 1 queue.                                                                 |
-|                           | lockbuffer        | A builtin Wishbone module with a fixed size inbox queue.                                 |
-|                           |                   |                                                                                          |
-| wishbone.builtin.function | header            |  A builtin Wishbone module which adds the defined dictionary                             |
-|                           |                   |     to the header of each passing event.                                                 |
-|                           |                   |                                                                                          |
-| wishbone.builtin.input    | testevent         | A WishBone input module which generates a test event at the chosen interval.             |
-|                           |                   |                                                                                          |
-| wishbone.builtin.output   | syslog            | Writes Wishbone log events to syslog.                                                    |
-|                           | null              | Accepts events and purges these without any further processing.                          |
-|                           | stdout            | A builtin Wishbone module prints events to STDOUT.                                       |
-|                           |                   |                                                                                          |
-| wishbone.input            | dictgenerator     | A WishBone input module which generates dictionaries build out of words randomly         |
-|                           |                   |     chosen from a provided wordlist.                                                     |
-|                           | amqp              | A Wishbone AMQP input module.                                                            |
-|                           | gearman           | A Wishbone input module which consumes jobs from a Gearmand server.                      |
-|                           | generator         | A WishBone IO module which generates random data for testing purposes.                   |
-|                           | namedpipe         | A Wishbone IO module which accepts external input from a named pipe.                     |
-|                           | tcp               | A Wishbone input module which listens on a TCP socket.                                   |
-|                           | udp               | A Wishbone module which handles UDP input.                                               |
-|                           | uds               | A Wishbone input module which listens on a unix domain socket.                           |
-|                           | mongodb           | A Wishbone output module to write data in MongoDB.                                       |
-|                           |                   |                                                                                          |
-| wishbone.output           | amqp              | A Wishbone AMQP output module.                                                           |
-|                           | tcp               | A Wishbone IO module which writes data to a TCP socket.                                  |
-|                           | uds               | A Wishbone IO module which writes data to a Unix domain socket.                          |
-|                           |                   |                                                                                          |
-| wishbone.function         | skeleton          | A bare minimum Wishbone function module.                                                 |
-|                           | msgpack           | A Wishbone which de/serializes data into or from msgpack format.                         |
-|                           | snappy            | A Wishbone module which compresses or decompresses data using Snappy.                    |
-|                           | json              | A Wishbone module which converts and validates JSON.                                     |
-|                           | waitseconds       | An output module which takes x seconds to finish the &lt;consume&gt; function.                 |
-|                           |                   |                                                                                          |
-+---------------------------+-------------------+------------------------------------------------------------------------------------------+
++---------------------------+-------------------+-----------+------------------------------------------------------------------------------------------+
+| Group                     | Module            | Version   | Description                                                                              |
++---------------------------+-------------------+-----------+------------------------------------------------------------------------------------------+
+| wishbone.builtin.logging  | loglevelfilter    | 0.4.0beta | A builtin Wishbone module which filters Wishbone log events.                             |
+|                           | humanlogformatter | 0.4.0beta | A builtin Wishbone module which formats Wishbone log events.                             |
+|                           |                   |           |                                                                                          |
+| wishbone.builtin.metrics  | graphite          | 0.4.0beta | A builtin Wishbone module which formats the internal metric format into Graphite format. |
+|                           |                   |           |                                                                                          |
+| wishbone.builtin.flow     | roundrobin        | 0.4.0beta | A builtin Wishbone module which round robins incoming events                             |
+|                           |                   |           |     over all connected queues.                                                           |
+|                           | fanout            | 0.4.0beta | A builtin Wishbone module which duplicates incoming events to all                        |
+|                           |                   |           |     connected queues.                                                                    |
+|                           | tippingbucket     | 0.4.0beta | A builtin Wishbone module which buffers data.                                            |
+|                           | funnel            | 0.4.0beta | A builtin Wishbone module which merges incoming events from different                    |
+|                           |                   |           |     queues into 1 queue.                                                                 |
+|                           | lockbuffer        | 0.4.0beta | A builtin Wishbone module with a fixed size inbox queue.                                 |
+|                           |                   |           |                                                                                          |
+| wishbone.builtin.function | header            | 0.4.0beta |  A builtin Wishbone module which adds the defined dictionary                             |
+|                           |                   |           |     to the header of each passing event.                                                 |
+|                           |                   |           |                                                                                          |
+| wishbone.builtin.input    | testevent         | 0.4.0beta | A WishBone input module which generates a test event at the chosen interval.             |
+|                           |                   |           |                                                                                          |
+| wishbone.builtin.output   | syslog            | 0.4.0beta | Writes Wishbone log events to syslog.                                                    |
+|                           | null              | 0.4.0beta | Accepts events and purges these without any further processing.                          |
+|                           | stdout            | 0.4.0beta | A builtin Wishbone module prints events to STDOUT.                                       |
+|                           |                   |           |                                                                                          |
+| wishbone.input            | dictgenerator     | 0.1       | A WishBone input module which generates dictionaries build out of words randomly         |
+|                           |                   |           |     chosen from a provided wordlist.                                                     |
+|                           | amqp              | 0.1       | A Wishbone AMQP input module.                                                            |
+|                           | gearman           | 0.1       | A Wishbone input module which consumes jobs from a Gearmand server.                      |
+|                           | generator         | 0.1       | A WishBone IO module which generates random data for testing purposes.                   |
+|                           | namedpipe         | 0.1       | A Wishbone IO module which accepts external input from a named pipe.                     |
+|                           | tcp               | 0.1       | A Wishbone input module which listens on a TCP socket.                                   |
+|                           | udp               | 0.1       | A Wishbone module which handles UDP input.                                               |
+|                           | uds               | 0.1       | A Wishbone input module which listens on a unix domain socket.                           |
+|                           | mongodb           | 0.1       | A Wishbone output module to write data in MongoDB.                                       |
+|                           |                   |           |                                                                                          |
+| wishbone.output           | amqp              | 0.1       | A Wishbone AMQP output module.                                                           |
+|                           | tcp               | 0.1       | A Wishbone IO module which writes data to a TCP socket.                                  |
+|                           | uds               | 0.1       | A Wishbone IO module which writes data to a Unix domain socket.                          |
+|                           |                   |           |                                                                                          |
+| wishbone.function         | skeleton          | 0.1       | A bare minimum Wishbone function module.                                                 |
+|                           | msgpack           | 0.1       | A Wishbone which de/serializes data into or from msgpack format.                         |
+|                           | snappy            | 0.1       | A Wishbone module which compresses or decompresses data using Snappy.                    |
+|                           | json              | 0.1       | A Wishbone module which converts and validates JSON.                                     |
+|                           | waitseconds       | 0.1       | An output module which takes x seconds to finish the &lt;consume&gt; function.                 |
+|                           |                   |           |                                                                                          |
++---------------------------+-------------------+-----------+------------------------------------------------------------------------------------------+
 </pre></div>
 </div>
 </div>

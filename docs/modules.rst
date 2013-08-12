@@ -152,5 +152,3 @@ metrics produced by the modules and collected by the router.
 graphite
 ********
 .. autoclass:: wishbone.module.Graphite
-
---------
