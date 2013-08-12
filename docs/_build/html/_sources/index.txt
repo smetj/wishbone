@@ -110,7 +110,6 @@ Contents:
     router
     modules
     bootstrap
-    faq
 
 
 Indices and tables
