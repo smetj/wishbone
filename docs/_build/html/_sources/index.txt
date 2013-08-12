@@ -14,6 +14,9 @@ coroutine based event pipeline servers with minimal effort.
 
 Works on python 2.7+ including Python 3 and PyPy
 
+.. image:: intro.png
+    :align: right
+
 .. code-block:: python
 
     >>> from wishbone.router import Default
