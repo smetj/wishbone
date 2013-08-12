@@ -29,6 +29,10 @@ class Measure(object):
 
     @classmethod
     def runTime(cls, fn):
+
+        """Decorator function which keeps track of the number of calls and the
+        time it takes to execute the function."""
+
         def do(self, *args, **kwargs):
             t = time()
             result = fn(self, *args, **kwargs)
