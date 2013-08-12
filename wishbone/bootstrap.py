@@ -24,7 +24,7 @@
 #
 
 from wishbone.router import Default
-from pkg_resources import iter_entry_points
+import pkg_resources
 from multiprocessing import Process
 from prettytable import PrettyTable
 import signal
@@ -72,7 +72,7 @@ class ModuleHandling():
         group=".".join(e)
         module_instance=None
 
-        for module in iter_entry_points(group=group, name=name):
+        for module in pkg_resources.iter_entry_points(group=group, name=name):
             try:
                 module_instance=module.load()
             except Exception as err:
@@ -84,6 +84,14 @@ class ModuleHandling():
         else:
             print "Failed to load module %s  Reason: Not found"%(entrypoint)
             sys.exit(1)
+
+    def getVersion(self, entrypoint):
+        modulename = vars(entrypoint)["module_name"].split('.')[0]
+
+        try:
+            return pkg_resources.get_distribution(modulename).version
+        except Exception as err:
+            return "Unknown"
 
 class Initialize(ModuleHandling):
     def __init__(self, filename):
@@ -235,6 +243,8 @@ class List(ModuleHandling):
 
     def __init__(self, group ):
         self.group=group
+        self.current_version=pkg_resources.get_distribution('wishbone').version
+
 
     def do(self):
         '''Produces an overview of all available Wishbone modules.'''
@@ -244,19 +254,24 @@ class List(ModuleHandling):
         "wishbone.input","wishbone.output","wishbone.function"]
 
         print ("Available Wishbone modules:")
-        table = PrettyTable(["Group","Module","Description"])
+        table = PrettyTable(["Group","Module","Version","Description"])
         table.align["Group"]='l'
         table.align["Module"]='l'
+        table.align["Version"]='l'
         table.align["Description"]='l'
 
         if self.group != None:
             groups = [self.group]
 
         for group in groups:
-            for module in iter_entry_points(group=group, name=None):
-                table.add_row([group, str(module).split()[0], self.extractSummary(module)])
+            g=group
+            for module in pkg_resources.iter_entry_points(group=group, name=None):
+                if g.startswith("wishbone.builtin"):
+                    table.add_row([group, str(module).split()[0], self.current_version, self.extractSummary(module)])
+                else:
+                    table.add_row([group, str(module).split()[0], self.getVersion(module), self.extractSummary(module)])
                 group=""
-            table.add_row(["","",""])
+            table.add_row(["","","",""])
 
         print table
 
