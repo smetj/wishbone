@@ -25,3 +25,6 @@
 
 from wishbone.base import Actor
 from wishbone.base import BaseActor
+from pkg_resources import get_distribution
+
+__version__ = get_distribution('wishbone').version
