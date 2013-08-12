@@ -53,6 +53,7 @@ class PidHandling():
         os.remove(filename)
 
 class ModuleHandling():
+
     def extractSummary(self, entrypoint):
         try:
             doc=entrypoint.load().__doc__
@@ -244,7 +245,6 @@ class List(ModuleHandling):
     def __init__(self, group ):
         self.group=group
         self.current_version=pkg_resources.get_distribution('wishbone').version
-
 
     def do(self):
         '''Produces an overview of all available Wishbone modules.'''
