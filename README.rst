@@ -29,12 +29,10 @@ Documentation
 https://wishbone.readthedocs.org/en/latest/index.html
 
 
-If you don't have any Wishbone modules installed yet please visit
-https://github.com/smetj/wishboneModules
+Modules
+-------
 
-Have a look on
-https://github.com/smetj/experiments/tree/master/python/wishbone for example
-scenarios and bootstrap files.
+https://github.com/smetj/wishboneModules
 
 Support
 -------
