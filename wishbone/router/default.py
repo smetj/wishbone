@@ -29,7 +29,6 @@ from wishbone.tools import LoopContextSwitcher
 from wishbone.errors import QueueMissing, QueueOccupied, SetupError, QueueFull, QueueLocked
 from gevent import spawn, sleep, signal, joinall, kill, Greenlet
 from gevent.event import Event
-from collections import OrderedDict
 from uuid import uuid4
 
 class Default(LoopContextSwitcher):
