@@ -4,8 +4,8 @@ WishBone
 What?
 -----
 
-A Gevent based Python library to write asynchronous event pipeline servers
-with minimal effort.
+Wishbone is a Python library and command line tool to build asynchronous
+coroutine based event pipeline servers with minimal effort.
 
 How?
 ----
@@ -34,7 +34,8 @@ Or the latest development branch from Github:
 
 Documentation
 -------------
-http://smetj.github.com/wishbone/docs/build/html/index.html
+
+https://wishbone.readthedocs.org/en/latest/index.html
 
 
 Examples
