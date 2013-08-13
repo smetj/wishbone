@@ -53,8 +53,9 @@ setup(
                  'Programming Language :: Python :: 2.6',
                  'Programming Language :: Python :: 2.7',
                  'Programming Language :: Python :: 3.3',
-                 'Programming Language :: PyPy   :: 2.0.2',
+                 'Programming Language :: Python :: Implementation :: PyPy',
                  'Intended Audience :: Developers',
+                 'Intended Audience :: System Administrators',
                  ],
 
     platforms=['Linux'],
