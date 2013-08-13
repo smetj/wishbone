@@ -13,7 +13,7 @@ https://github.com/smetj/wishbone
 A Python library to build and CLI tool to manage asynchronous coroutine based
 event pipeline servers with minimal effort.
 
-Works on python 2.7+ including Python 3 and PyPy 2.0.2
+Works on python 2.6+, 2.7+ including Python 3 and PyPy 2.0.2
 
 .. image:: intro.png
     :align: right
