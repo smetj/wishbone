@@ -25,7 +25,7 @@
 from gevent import spawn, sleep, joinall
 from gevent import Greenlet
 from gevent.event import Event
-from gevent.coros import Semaphore
+from gevent.lock import Semaphore
 from wishbone.errors import QueueLocked, SetupError, QueueFull
 from wishbone.tools import LoopContextSwitcher
 
