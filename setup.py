@@ -34,7 +34,7 @@ from fnmatch import fnmatchcase
 import os
 import sys
 
-install_requires=['gevent>=1.0dev','argparse','greenlet>=0.3.2','jsonschema','prettytable']
+install_requires=['gevent>=1.0dev','argparse','greenlet>=0.3.2','jsonschema','prettytable','python-daemon',"pyyaml"]
 
 try:
     import importlib
@@ -50,7 +50,7 @@ setup(
     name=PROJECT,
     version=VERSION,
 
-    description='A Python library to write asynchronous event pipeline servers with minimal effort.',
+    description='A Python library and command line tool to build asynchronous coroutine based event pipeline servers with minimal effort.',
     long_description=long_description,
 
     author='Jelle Smet',
