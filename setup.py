@@ -22,24 +22,11 @@
 #
 #
 
-PROJECT = 'wishbone'
-
-VERSION = '0.4.0beta'
-
-
 from setuptools import setup, find_packages
 
-from distutils.util import convert_path
-from fnmatch import fnmatchcase
-import os
-import sys
-
+PROJECT = 'wishbone'
+VERSION = '0.4.0beta'
 install_requires=['gevent>=1.0dev','argparse','greenlet>=0.3.2','jsonschema','prettytable','python-daemon',"pyyaml"]
-
-try:
-    import importlib
-except ImportError:
-    install_requires.append('importlib')
 
 try:
     long_description = open('README.rst', 'rt').read()
