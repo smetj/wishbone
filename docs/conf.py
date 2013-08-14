@@ -31,7 +31,7 @@ class Mock(object):
         else:
             return Mock()
 
-MOCK_MODULES = ['gevent','argparse','greenlet','jsonschema','prettytable','python-daemon',"pyyaml", "event", "gevent.event" ]
+MOCK_MODULES = ['gevent','argparse','greenlet','jsonschema','prettytable','python-daemon',"pyyaml", "event", "gevent.event", "lock", "gevent.lock" ]
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
