@@ -356,35 +356,41 @@ class Dispatch(PidHandling):
         show=Show(module)
         show.do()
 
+class BootStrap():
+
+    def __init__(self, description="Wishbone bootstrap server."):
+
+        parser = argparse.ArgumentParser(description=description)
+        subparsers = parser.add_subparsers(dest='command')
+
+        start = subparsers.add_parser('start', description="Starts a Wishbone instance and detaches to the background.  Logs are written to syslog.")
+        start.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
+        start.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
+        start.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
+
+        debug = subparsers.add_parser('debug', description="Starts a Wishbone instance in foreground and writes logs to STDOUT.")
+        debug.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
+        debug.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
+
+        stop = subparsers.add_parser('stop', description="Tries to gracefully stop the Wishbone instance.")
+        stop.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
+
+        kill = subparsers.add_parser('kill', description="Kills the Wishbone processes immediately.")
+        kill.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
+
+        llist = subparsers.add_parser('list', description="Lists the available Wishbone modules.")
+        llist.add_argument('--group', type=str, dest='group', default=None, help='List the modules of this group type.')
+
+        show = subparsers.add_parser('show', description="Shows the details of a module.")
+        show.add_argument('module', type=str, help='Shows the documentation of the module. ')
+
+        arguments=vars(parser.parse_args())
+
+        dispatch=Dispatch()
+        getattr(dispatch, arguments["command"])(**arguments)
+
 def main():
-    parser = argparse.ArgumentParser(description='Wishbone bootstrap server.')
-    subparsers = parser.add_subparsers(dest='command')
-
-    start = subparsers.add_parser('start', description="Starts a Wishbone instance and detaches to the background.  Logs are written to syslog.")
-    start.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
-    start.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
-    start.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
-
-    debug = subparsers.add_parser('debug', description="Starts a Wishbone instance in foreground and writes logs to STDOUT.")
-    debug.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
-    debug.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
-
-    stop = subparsers.add_parser('stop', description="Tries to gracefully stop the Wishbone instance.")
-    stop.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
-
-    kill = subparsers.add_parser('kill', description="Kills the Wishbone processes immediately.")
-    kill.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
-
-    llist = subparsers.add_parser('list', description="Lists the available Wishbone modules.")
-    llist.add_argument('--group', type=str, dest='group', default=None, help='List the modules of this group type.')
-
-    show = subparsers.add_parser('show', description="Shows the details of a module.")
-    show.add_argument('module', type=str, help='Shows the documentation of the module. ')
-
-    arguments=vars(parser.parse_args())
-
-    dispatch=Dispatch()
-    getattr(dispatch, arguments["command"])(**arguments)
+    BootStrap()
 
 if __name__ == '__main__':
     main()
