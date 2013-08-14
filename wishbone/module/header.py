@@ -32,7 +32,10 @@ class Header(Actor):
 
     Parameters:
 
-        - name(str):  The name of the module
+        - name(str):    The name of the module
+
+        - header(dict): The dictionary to update the headers.
+                        Default: {}
 
     Queues:
 
