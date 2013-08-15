@@ -40,10 +40,10 @@ class Consumer(LoopContextSwitcher):
             self.__setupBasic()
         self.limit=limit
         if limit == 0:
-            self.logging.info("Limit is 0.  Doing sequential consume.")
+            self.logging.debug("Limit is 0.  Doing sequential consume.")
             self.__doConsume = self.__doSequentialConsume
         else:
-            self.logging.info("Limit is %s.  Doing pooled consume."%(self.limit))
+            self.logging.debug("Limit is %s.  Doing pooled consume."%(self.limit))
             self.__doConsume = self.__doPooledConsume
         self.__greenlet=[]
         self.metrics={}
@@ -134,7 +134,7 @@ class Consumer(LoopContextSwitcher):
                     q.rescue(event)
                     sleep(1)
 
-        self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
+        self.logging.debug('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
 
     def __doPooledConsume(self, fc, q):
         '''Executes <fc> against each element popped from <q>.
