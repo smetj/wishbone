@@ -172,7 +172,7 @@ class Start(Initialize):
             loglevelfilter=self.loadModule("wishbone.builtin.logging.loglevelfilter")
             self.router.registerLogModule(loglevelfilter, "loglevelfilter")
 
-            syslog=self.loadModule("wishbone.builtin.logging.syslog")
+            syslog=self.loadModule("wishbone.builtin.output.syslog")
             self.router.register(syslog, "syslog")
 
             self.router.connect("loglevelfilter.outbox", "syslog.inbox")
