@@ -11,7 +11,7 @@ Example
 -------
 
 .. image:: docs/intro.png
-    :align: right
+    :align: center
 
 .. code-block:: python
 
