@@ -37,7 +37,7 @@ setup(
     name=PROJECT,
     version=VERSION,
 
-    description='A Python library to build and CLI tool to manage asynchronous coroutine based event pipeline servers with minimal effort.',
+    description='A Python application framework and CLI tool build and manage async event pipeline servers with minimal effort.',
     long_description=long_description,
 
     author='Jelle Smet',
