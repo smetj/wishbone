@@ -123,6 +123,8 @@ router and submit these events to the outside world. They often have only 1
 <a class="reference internal" href="actor.html#wishbone.tools.WishboneQueue" title="wishbone.tools.WishboneQueue"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.tools.WishboneQueue</span></tt></a> called <strong>inbox</strong> in which events arrive
 destined to go out. They typically act as TCP, AMQP or other network protocol
 clients.</p>
+<p>Output modules often have a rescue queue to which events which failed to go
+out.</p>
 <hr class="docutils" />
 <div class="section" id="syslog">
 <h3>Syslog<a class="headerlink" href="#syslog" title="Permalink to this headline">¶</a></h3>
@@ -409,8 +411,15 @@ module.</p>
 to the header of each passing event.**</p>
 <p>Parameters:</p>
 <blockquote>
-<div><ul class="simple">
-<li>name(str):  The name of the module</li>
+<div><ul>
+<li><p class="first">name(str):    The name of the module</p>
+</li>
+<li><dl class="first docutils">
+<dt>header(dict): The dictionary to update the headers.</dt>
+<dd><p class="first last">Default: {}</p>
+</dd>
+</dl>
+</li>
 </ul>
 </div></blockquote>
 <p>Queues:</p>
