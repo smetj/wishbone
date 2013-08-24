@@ -10,7 +10,10 @@ pipeline servers with minimal effort.
 Example
 -------
 
-::
+.. image:: docs/intro.png
+    :align: right
+
+.. code-block:: python
 
     >>> from wishbone.router import Default
     >>> from wishbone.module import TestEvent
