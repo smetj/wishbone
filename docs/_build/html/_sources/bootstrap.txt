@@ -29,7 +29,7 @@ When stopping a Wishbone instance make sure you point to the pid file used to
 start the Wishbone instance.
 
 
-.. code-block:: none
+.. code-block:: sh
 
     [smetj@indigo ~]$ wishbone start -h
     usage: wishbone start [-h] [--config CONFIG] [--instances INSTANCES]
@@ -56,7 +56,7 @@ The debug command does pretty much the same as start just that it keeps the
 Wishbone instance in the foreground without detaching it.  Logs are written to
 STDOUT.  The running instance can be stopped gracefully with CTRL+C
 
-.. code-block:: none
+.. code-block:: sh
 
     [smetj@indigo ~]$ wishbone debug -h
     usage: wishbone debug [-h] [--config CONFIG] [--instances INSTANCES]
@@ -78,7 +78,7 @@ stop
 
 Stops the Wishbone instance gracefully by sending SIGINT to all processes.
 
-.. code-block:: none
+.. code-block:: sh
 
     smetj@indigo ~]$ wishbone stop -h
     usage: wishbone stop [-h] [--pid PID]
@@ -97,7 +97,7 @@ kill
 
 ** Use with caution, sends SIGKILL to the pids in the pidfile. **
 
-.. code-block:: none
+.. code-block:: sh
 
     [smetj@indigo ~]$ wishbone kill -h
     usage: wishbone kill [-h] [--pid PID]
@@ -116,7 +116,7 @@ list
 
 Lists all installed Wishbone modules, given that they have the correct entry-points.
 
-.. code-block:: none
+.. code-block:: sh
 
     [smetj@indigo ~]$ wishbone list
     Available Wishbone modules:
@@ -178,7 +178,7 @@ show
 Displays the docstring of the requested module.
 
 
-.. code-block:: none
+.. code-block:: sh
 
     [smetj@indigo ~]$ wishbone show wishbone.builtin.flow.fanout
     **A builtin Wishbone module which duplicates incoming events to all
