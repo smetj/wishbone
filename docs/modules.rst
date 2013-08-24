@@ -44,6 +44,9 @@ router and submit these events to the outside world. They often have only 1
 destined to go out. They typically act as TCP, AMQP or other network protocol
 clients.
 
+Output modules often have a rescue queue to which events which failed to go
+out.
+
 --------
 
 Syslog

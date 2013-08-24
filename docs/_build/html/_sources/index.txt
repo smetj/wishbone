@@ -70,7 +70,7 @@ the above example:
 Bootstrapping the environment is just a matter of invoking the **wishbone**
 executable with the --config parameter pointing to the bootstrap file.
 
-.. code-block:: none
+.. code-block:: sh
 
     [smetj@indigo ~]$ wishbone debug --config test.yaml
     2013-08-09T23:13:39 pid-13797 informational Router: Queue one does not exist in module mixing.  Autocreate queue.
