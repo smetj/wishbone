@@ -66,5 +66,8 @@ class TestEvent(Actor):
         self.logging.info('Started')
 
         while self.loop():
-            self.queuepool.outbox.put({"header":{},"data":"test"})
+            try:
+                self.queuepool.outbox.put({"header":{},"data":"test"})
+            except (QueueFull, QueueLocked):
+                self.queuepool.outbox.waitUntilPutAllowed()
             sleep(self.interval)
