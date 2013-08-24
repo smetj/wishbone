@@ -7,6 +7,40 @@ What?
 A Python application framework and CLI tool build and manage async event
 pipeline servers with minimal effort.
 
+Example
+-------
+
+::
+
+    >>> from wishbone.router import Default
+    >>> from wishbone.module import TestEvent
+    >>> from wishbone.module import RoundRobin
+    >>> from wishbone.module import STDOUT
+    >>>
+    >>> router=Default()
+    >>> router.register(TestEvent, "input")
+    >>> router.register(RoundRobin, "mixing")
+    >>> router.register(STDOUT, "output1", prefix="I am number one: ")
+    >>> router.register(STDOUT, "output2", prefix="I am number two: ")
+    >>>
+    >>> router.connect("input.outbox", "mixing.inbox")
+    >>> router.connect("mixing.one", "output1.inbox")
+    >>> router.connect("mixing.two", "output2.inbox")
+    >>>
+    >>> router.start()
+    >>> router.block()
+    I am number one: test
+    I am number two: test
+    I am number one: test
+    I am number two: test
+    I am number one: test
+    I am number two: test
+    I am number one: test
+    I am number two: test
+    I am number one: test
+    I am number two: test
+
+
 Installing
 ----------
 
