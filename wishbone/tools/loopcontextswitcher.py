@@ -38,7 +38,7 @@ class LoopContextSwitcher():
             def do(self):
                 if self.__counter >= self.iterations:
                     self.__counter=0
-                    sleep()
+                    sleep(0.0001)
                 else:
                     self.__counter+=1
 
