@@ -24,6 +24,7 @@
 #
 
 from gevent import sleep
+from random import uniform
 
 class LoopContextSwitcher():
 
@@ -38,7 +39,7 @@ class LoopContextSwitcher():
             def do(self):
                 if self.__counter >= self.iterations:
                     self.__counter=0
-                    sleep(0.0001)
+                    sleep(uniform(0.0001, 0.00001))
                 else:
                     self.__counter+=1
 
