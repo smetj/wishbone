@@ -59,3 +59,4 @@ class Header(Actor):
             self.queuepool.inbox.putLock()
             self.queuepool.inbox.rescue(event)
             self.queuepool.outbox.waitUntilPutAllowed()
+            self.queuepool.inbox.putUnlock()
