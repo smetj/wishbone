@@ -30,6 +30,7 @@ from wishbone.errors import QueueMissing, QueueOccupied, SetupError, QueueFull, 
 from gevent import spawn, sleep, signal, joinall, kill, Greenlet
 from gevent.event import Event
 from uuid import uuid4
+import pprint
 
 class Default(LoopContextSwitcher):
     '''The default Wishbone router.
@@ -59,9 +60,14 @@ class Default(LoopContextSwitcher):
                             event if not present when forwarded from one queue
                             to the other. (default False)
 
+        - throttle(bool):   If True, scans every second for modules which
+                            overflow child modules with messages and thus have
+                            to be throttled.
+                            default: False
+
     '''
 
-    def __init__(self, interval=10, context_switch=100, rescue=False, uuid=False):
+    def __init__(self, interval=10, context_switch=100, rescue=False, uuid=False, throttle=False):
         self.interval=interval
         self.context_switch=context_switch
         self.rescue=rescue
@@ -75,6 +81,8 @@ class Default(LoopContextSwitcher):
             self.__UUID = self.__doUUID
         else:
             self.__UUID = self.__noUUID
+
+        self.__throttle=throttle
 
         # Forward router's logs to logging queue.
         #########################################
@@ -207,27 +215,10 @@ class Default(LoopContextSwitcher):
             kwargs(dict)            Named arguments to pass to the module.
         '''
 
-        # if len(module) < 3:
-        #     raise Exception("The module tuple requires 3 values.")
-
-        # limit = int(module[2])
-        # name = module[1]
-        # module = module[0]
-
         self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children":[]}
         self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
-        # if limit > 0:
-        #     self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
-        # else:
-        #     self.__modules[name]["instance"]=module(name, *args, **kwargs)
-
-        # Start to forward this module's logs to the registered
-        # logging module.
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
-
-        # Start to forward this module's metrics to the registered
-        # metrics module.
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
 
     def registerLogModule(self, module, name, *args, **kwargs):
@@ -244,22 +235,10 @@ class Default(LoopContextSwitcher):
             kwargs(dict)            Named arguments to pass to the module.
         '''
 
-        # if len(module) < 3:
-        #     raise SetupError("The module tuple requires 3 values.")
-
-        # limit = module[2]
-        # name = module[1]
-        # module = module[0]
-
         self.__logmodule = name
 
         self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": []}
         self.__modules[name]["instance"]=module(name, *args, **kwargs)
-
-        # if limit > 0:
-        #     self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
-        # else:
-        #     self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
@@ -280,22 +259,9 @@ class Default(LoopContextSwitcher):
             kwargs(dict)            Named arguments to pass to the module.
         '''
 
-        # if len(module) < 3:
-        #     raise SetupERror("The module tuple requires 3 values.")
-
-        # limit = module[2]
-        # name = module[1]
-        # module = module[0]
-
         self.__metricmodule = name
         self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": []}
         self.__modules[name]["instance"]=module(name, *args, **kwargs)
-
-        # if limit > 0:
-        #     self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
-        # else:
-        #     self.__modules[name]["instance"]=module(name, *args, **kwargs)
-
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
@@ -310,8 +276,6 @@ class Default(LoopContextSwitcher):
             - Starts the registered metrics module.
             - Calls each registered module's start() function.
         '''
-
-        self.logging.info('Starting.')
 
         if self.__logmodule == None:
             from wishbone.module import Null
@@ -329,6 +293,11 @@ class Default(LoopContextSwitcher):
                 self.logging.debug("Prehook not found for module %s."%(module))
 
             self.__modules[module]["instance"].start()
+
+        if self.__throttle == True:
+            self.logging.info("Throttling enabled.  Starting throttle monitor.")
+            spawn(self.throttleMonitor)
+            spawn(self.statsMonitor)
 
     def stop(self):
         '''Stops the router and all registered modules.
@@ -478,3 +447,27 @@ class Default(LoopContextSwitcher):
     def __noUUID(self, event):
         return event
 
+    def throttleMonitor(self):
+        """Sweeps over all registered modules and tries to detect problematic flow rates and remedy them."""
+
+        while self.loop():
+            if self.__modules["amqp"]["instance"].queuepool.inbox.size() > 5000:
+                try:
+                    self.__modules["testevent"]["instance"].enableThrottling()
+                except:
+                    self.logging.info("The router thinks this module needs throttling but none is implemented.")
+
+            else:
+                try:
+                    self.__modules["testevent"]["instance"].disableThrottling()
+                except:
+                    self.logging.info("The router thinks this module does not need throttling anymore but none is implemented.")
+            sleep(1)
+
+    def statsMonitor(self):
+        while self.loop():
+            for module in self.__modules:
+                for queue in self.__modules[module]["instance"].queuepool.listQueues():
+                    print "%s.%s: %s"%(module, queue, str(getattr(self.__modules[module]["instance"].queuepool, queue).stats()))
+            print
+            sleep(1)
