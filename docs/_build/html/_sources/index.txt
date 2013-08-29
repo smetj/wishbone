@@ -111,7 +111,7 @@ Contents:
     router
     modules
     bootstrap
-
+    patterns
 
 Indices and tables
 ==================
