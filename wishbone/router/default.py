@@ -65,9 +65,14 @@ class Default(LoopContextSwitcher):
                             to be throttled.
                             default: False
 
+        - throttle_threshold(int):  When <throttle> is True, start to throttle
+                                    start to throttle when a module has more
+                                    than <throttle_threshold> messages.
+                                    default: 5000
+
     '''
 
-    def __init__(self, interval=10, context_switch=100, rescue=False, uuid=False, throttle=False):
+    def __init__(self, interval=10, context_switch=100, rescue=False, uuid=False, throttle=False, throttle_threshold=5000):
         self.interval=interval
         self.context_switch=context_switch
         self.rescue=rescue
@@ -83,6 +88,7 @@ class Default(LoopContextSwitcher):
             self.__UUID = self.__noUUID
 
         self.__throttle=throttle
+        self.__throttle_threshold=throttle_threshold
 
         # Forward router's logs to logging queue.
         #########################################
@@ -143,6 +149,7 @@ class Default(LoopContextSwitcher):
             raise Exception("A queue name should have format 'module.queue'. Got '%s' instead"%(consumer))
 
         self.__modules[producer_module]["children"].append(consumer_module)
+        self.__modules[consumer_module]["parents"].append(producer_module)
 
         if not self.__modules.has_key(producer_module):
             raise Exception("There is no Wishbone module registered with name '%s'"%(producer_module))
@@ -189,6 +196,18 @@ class Default(LoopContextSwitcher):
         getChild(instance, children)
         return children
 
+    def getParents(self, instance):
+        parents=[]
+
+        def getParent(instance, parents):
+            if len(self.__modules[instance]["parents"]) > 0:
+                for parent in self.__modules[instance]["parents"]:
+                    getParent(parent, parents)
+                    parents.append(parent)
+
+        getParent(instance, parents)
+        return parents
+
     def doRescue(self):
         '''Runs over each queue to extract any left behind messages.
         '''
@@ -215,7 +234,7 @@ class Default(LoopContextSwitcher):
             kwargs(dict)            Named arguments to pass to the module.
         '''
 
-        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children":[]}
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children":[], "parents":[]}
         self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
@@ -237,7 +256,7 @@ class Default(LoopContextSwitcher):
 
         self.__logmodule = name
 
-        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": []}
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": [], "parents":[]}
         self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
@@ -260,7 +279,7 @@ class Default(LoopContextSwitcher):
         '''
 
         self.__metricmodule = name
-        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": []}
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": [], "parents": []}
         self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
@@ -297,7 +316,7 @@ class Default(LoopContextSwitcher):
         if self.__throttle == True:
             self.logging.info("Throttling enabled.  Starting throttle monitor.")
             spawn(self.throttleMonitor)
-            spawn(self.statsMonitor)
+            #spawn(self.statsMonitor)
 
     def stop(self):
         '''Stops the router and all registered modules.
@@ -451,18 +470,26 @@ class Default(LoopContextSwitcher):
         """Sweeps over all registered modules and tries to detect problematic flow rates and remedy them."""
 
         while self.loop():
-            if self.__modules["amqp"]["instance"].queuepool.inbox.size() > 5000:
-                try:
-                    self.__modules["testevent"]["instance"].enableThrottling()
-                except:
-                    self.logging.info("The router thinks this module needs throttling but none is implemented.")
-
-            else:
-                try:
-                    self.__modules["testevent"]["instance"].disableThrottling()
-                except:
-                    self.logging.info("The router thinks this module does not need throttling anymore but none is implemented.")
+            for module in self.__modules:
+                for queue in self.__modules[module]["instance"].queuepool.listQueues():
+                    if getattr(self.__modules[module]["instance"].queuepool, queue).size() > self.__throttle_threshold:
+                        print "Module %s has problems.  Parents: %s"%(module, self.getParents(module))
             sleep(1)
+
+        # while self.loop():
+        #     if self.__modules["amqp"]["instance"].queuepool.inbox.size() > 5000:
+
+        #         try:
+        #             self.__modules["testevent"]["instance"].enableThrottling()
+        #         except:
+        #             self.logging.info("The router thinks this module needs throttling but none is implemented.")
+
+        #     else:
+        #         try:
+        #             self.__modules["testevent"]["instance"].disableThrottling()
+        #         except:
+        #             self.logging.info("The router thinks this module does not need throttling anymore but none is implemented.")
+        #     sleep(1)
 
     def statsMonitor(self):
         while self.loop():
