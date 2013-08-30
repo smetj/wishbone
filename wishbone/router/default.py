@@ -316,7 +316,6 @@ class Default(LoopContextSwitcher):
         if self.__throttle == True:
             self.logging.info("Throttling enabled.  Starting throttle monitor.")
             spawn(self.throttleMonitor)
-            #spawn(self.statsMonitor)
 
     def stop(self):
         '''Stops the router and all registered modules.
@@ -467,34 +466,55 @@ class Default(LoopContextSwitcher):
         return event
 
     def throttleMonitor(self):
-        """Sweeps over all registered modules and tries to detect problematic flow rates and remedy them."""
+        """Sweeps over all registered modules and tries to detect modules with  problematic flow rates.
+        Once found a moduleMonitor greenthread is spawned which is reponsible for enabling and disabling
+        throttling."""
+
+        active_module_monitors={}
 
         while self.loop():
             for module in self.__modules:
                 for queue in self.__modules[module]["instance"].queuepool.listQueues():
                     if getattr(self.__modules[module]["instance"].queuepool, queue).size() > self.__throttle_threshold:
-                        print "Module %s has problems.  Parents: %s"%(module, self.getParents(module))
+                        parents = self.getParents(module)
+                        if len(parents) == 0:
+                            #simple, the module is flooding itself.
+                            if module in active_module_monitors and active_module_monitors[module].ready():
+                                active_module_monitors[module] = spawn(self.moduleMonitor, module, module, getattr(self.__modules[module]["instance"].queuepool, queue).size)
+                        else:
+                            #We have to find the upstream culprit responsible for flooding.
+                            #A parent module with a queue with the highest out_rate
+                            if parents[0] not in active_module_monitors or parents[0] in active_module_monitors and active_module_monitors[parents[0]].ready():
+                                active_module_monitors[parents[0]] = spawn(self.moduleMonitor, parents[0], module, getattr(self.__modules[module]["instance"].queuepool, queue).size)
             sleep(1)
 
-        # while self.loop():
-        #     if self.__modules["amqp"]["instance"].queuepool.inbox.size() > 5000:
+    def moduleMonitor(self, module, child_name, child_size):
+        """A moduleMonitor is a greenthread which monitors the state of a module and triggers the expected
+        throttling functions.  It exits when no more throttling is required.
+        """
 
-        #         try:
-        #             self.__modules["testevent"]["instance"].enableThrottling()
-        #         except:
-        #             self.logging.info("The router thinks this module needs throttling but none is implemented.")
-
-        #     else:
-        #         try:
-        #             self.__modules["testevent"]["instance"].disableThrottling()
-        #         except:
-        #             self.logging.info("The router thinks this module does not need throttling anymore but none is implemented.")
-        #     sleep(1)
-
-    def statsMonitor(self):
+        self.logging.info("Module %s is identified to overflow module %s. Enable throttling."%(module, child_name))
         while self.loop():
-            for module in self.__modules:
-                for queue in self.__modules[module]["instance"].queuepool.listQueues():
-                    print "%s.%s: %s"%(module, queue, str(getattr(self.__modules[module]["instance"].queuepool, queue).stats()))
-            print
+            if child_size() > self.__throttle_threshold:
+                try:
+                    self.__modules[module]["instance"].enableThrottling()
+                    sleep(1)
+                except:
+                    self.logging.info("Throttling is requested but module has no enableThrottling() function.")
+                    break
+            else:
+                try:
+                    self.__modules[module]["instance"].disableThrottling()
+                    self.logging.info("Throttling on module %s is not required anymore. Exiting."%(module))
+                except:
+                    self.logging.info("Throttling is requested but module has no disableThrottling() function.")
+                break
             sleep(1)
+
+    # def statsMonitor(self):
+    #     while self.loop():
+    #         for module in self.__modules:
+    #             for queue in self.__modules[module]["instance"].queuepool.listQueues():
+    #                 print "%s.%s: %s"%(module, queue, str(getattr(self.__modules[module]["instance"].queuepool, queue).stats()))
+    #         print
+    #         sleep(1)
