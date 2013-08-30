@@ -1,0 +1,446 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Builtin Modules &mdash; Wishbone 0.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Wishbone 0.4 documentation" href="index.html" />
+    <link rel="next" title="Bootstrap" href="bootstrap.html" />
+    <link rel="prev" title="Router" href="router.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bootstrap.html" title="Bootstrap"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="router.html" title="Router"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Wishbone 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="builtin-modules">
+<h1>Builtin Modules<a class="headerlink" href="#builtin-modules" title="Permalink to this headline">¶</a></h1>
+<p>Wishbone comes with a set of builtin modules.  Modules are isolated blocks of
+functionality which are connected to each other within a router instance.</p>
+<p>There are different types of modules:</p>
+<blockquote>
+<div><ul class="simple">
+<li>input modules</li>
+<li>output modules</li>
+<li>flow modules</li>
+<li>function modules</li>
+</ul>
+</div></blockquote>
+<p>Wishbone comes with a set of builtin modules which deliver a minimal functionality.
+Thanks to the <a class="reference internal" href="actor.html#wishbone.Actor" title="wishbone.Actor"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.Actor</span></tt></a> class it is easy to create your own modules from scratch.</p>
+<div class="section" id="input-modules">
+<h2>Input modules<a class="headerlink" href="#input-modules" title="Permalink to this headline">¶</a></h2>
+<p>Input modules take input from the outside world into the Wishbone framework.
+They often have only 1 <a class="reference internal" href="actor.html#wishbone.tools.WishboneQueue" title="wishbone.tools.WishboneQueue"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.tools.WishboneQueue</span></tt></a> called <strong>outbox</strong>
+in which incoming events go. Input modules are also responsible to format any
+incoming data into the expected Wishbone internal event format.</p>
+<p>Builtin modules:</p>
+<dl class="class">
+<dt id="wishbone.module.TestEvent">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">TestEvent</tt><big>(</big><em>name</em>, <em>interval=1</em><big>)</big><a class="headerlink" href="#wishbone.module.TestEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A WishBone input module which generates a test event at the chosen interval.</strong></p>
+<p>This module is only available for testing purposes and has further hardly any use.</p>
+<p>Events have following format:</p>
+<blockquote>
+<div>{ &#8220;header&#8221;:{}, &#8220;data&#8221;:&#8221;test&#8221; }</div></blockquote>
+<p>Parameters:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">name (str):               The instance name when initiated.</p>
+</li>
+<li><dl class="first docutils">
+<dt>interval (float):         The interval in seconds between each generated event.</dt>
+<dd><p class="first last">Should have a value &gt; 0.
+default: 1</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>outbox:    Contains the generated events.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="output-modules">
+<h2>Output modules<a class="headerlink" href="#output-modules" title="Permalink to this headline">¶</a></h2>
+<p>Output modules take input from another module registered in the Wishbone
+router and submit these events to the outside world. They often have only 1
+<a class="reference internal" href="actor.html#wishbone.tools.WishboneQueue" title="wishbone.tools.WishboneQueue"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.tools.WishboneQueue</span></tt></a> called <strong>inbox</strong> in which events arrive
+destined to go out. They typically act as TCP, AMQP or other network protocol
+clients.</p>
+<p>Builtin modules:</p>
+<dl class="class">
+<dt id="wishbone.module.Syslog">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Syslog</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.module.Syslog" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Writes Wishbone internal log formatted events to syslog.</strong></p>
+<p>(6, 1367682301.430527, &#8216;Router&#8217;, &#8216;Received SIGINT. Shutting down.&#8217;)</p>
+<blockquote>
+<div><p>Paramters:</p>
+<blockquote>
+<div>name(str)       :   The name of the module.</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div>inbox: incoming events</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="wishbone.module.Null">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Null</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.module.Null" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Accepts events and purges these without any further processing.</strong></p>
+<p>Useful to discard a stream of events.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>name(str):  The name of the module</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:    incoming events</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="wishbone.module.STDOUT">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">STDOUT</tt><big>(</big><em>name</em>, <em>complete=False</em>, <em>counter=False</em>, <em>prefix=''</em><big>)</big><a class="headerlink" href="#wishbone.module.STDOUT" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A builtin Wishbone module prints events to STDOUT.</strong></p>
+<p>Prints incoming events to STDOUT. When &lt;complete&gt; is True,
+the complete event including headers is printed to STDOUT.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">name (str):       The instance name when initiated.</p>
+</li>
+<li><dl class="first docutils">
+<dt>complete (bool):  When True, print the complete event including headers.</dt>
+<dd><p class="first last">Default: False</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>counter (bool):   Puts an incremental number for each event in front of each event.</dt>
+<dd><p class="first last">Default: False</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>prefix (str):     Puts the prefix in front of each printed event.</dt>
+<dd><p class="first last">Default: &#8220;&#8221;</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:    Incoming events.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="flow-modules">
+<h2>Flow modules<a class="headerlink" href="#flow-modules" title="Permalink to this headline">¶</a></h2>
+<p>Flow modules accept and forward events from and to other modules.  They
+fulfill a key roll in building a message flow.  Since you can only have a 1:1
+relationship between queues, you cannot split or merge event streams.  That&#8217;s
+where flow modules come handy.  Flow modules are not expected to alter events
+when transiting the module.</p>
+<p>Builtin modules:</p>
+<dl class="class">
+<dt id="wishbone.module.RoundRobin">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">RoundRobin</tt><big>(</big><em>name</em>, <em>randomize=False</em><big>)</big><a class="headerlink" href="#wishbone.module.RoundRobin" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A builtin Wishbone module which round robins incoming events
+over all connected queues.</strong></p>
+<p>Create a &#8220;1 to n&#8221; relationship between queues.  Events arriving in inbox
+are then submitted in a roundrobin (or randomized) fashion to the
+connected queues.  The outbox queue is non existent.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><p>name(str):      The name of the module.</p>
+<dl class="docutils">
+<dt>randomize(bool):    Randomizes the queue selection instead of going</dt>
+<dd>round robin over all queues.</dd>
+</dl>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div>inbox:  Incoming events</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="wishbone.module.Fanout">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Fanout</tt><big>(</big><em>name</em>, <em>clone=False</em><big>)</big><a class="headerlink" href="#wishbone.module.Fanout" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A builtin Wishbone module which duplicates incoming events to all
+connected queues.</strong></p>
+<p>Create a &#8220;1 to n&#8221; relationship with queues.  Events arriving in inbox
+are then copied to each queue connected to this module.  Keep in mind
+that the outbox queue is never used.</p>
+<p>When clone is True, each incoming event is duplicated for each outgoing
+queue.  This might be usefull if you require to change the content of the
+events later down the pipeline.  Otherwise references are used which means
+changing the event will change it everywhere in the current Wishbone
+framework.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><p>name(str):      The name of the module.</p>
+<dl class="docutils">
+<dt>clone(bool):    When True actually makes a copy instead of passing</dt>
+<dd>a reference.</dd>
+</dl>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div>inbox:  Incoming events</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="wishbone.module.Funnel">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Funnel</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.module.Funnel" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A builtin Wishbone module which merges incoming events from different
+queues into 1 queue.</strong></p>
+<p>Create a &#8220;n to 1&#8221; relationship with queues.  Events arriving in different
+queues are all merged into the outbox.</p>
+<p>Parameters:</p>
+<blockquote>
+<div>name(str):  The name of the module</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div>outbox:     Outgoing events.</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="wishbone.module.TippingBucket">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">TippingBucket</tt><big>(</big><em>name</em>, <em>age=0</em>, <em>size=0</em>, <em>events=0</em>, <em>predefined_header=None</em><big>)</big><a class="headerlink" href="#wishbone.module.TippingBucket" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A builtin Wishbone module which buffers data.</strong></p>
+<p>This module buffers data and dumps it to the output queue on 3 conditions:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Last data entered in buffer exceeds &lt;age&gt; seconds.</li>
+<li>The length of the data in buffer exceeds &lt;size&gt; size.</li>
+<li>Number of incoming events exceeds &lt;events&gt;.</li>
+</ul>
+</div></blockquote>
+<p>When the buffer is empty, the header of the first incoming message will be
+used as the header for the message going out containing the content of the
+buffer.  If you want to override that header with a predefined one then
+use the &lt;predefined_header&gt; option.</p>
+<p>Keep in mind to set at least one of the parameters otherwise buffering
+will be indefinite until your box runs out of memory</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>age (int):    The time in seconds to buffer before flushing.</dt>
+<dd><p class="first last">0 to disable. (default 0)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>size (int):   The total size in bytes to buffer before flushing.</dt>
+<dd><p class="first last">0 to disable. (default 0)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>events (int): The total number of events to buffer before flushing.</dt>
+<dd><p class="first last">0 to disable. (default 0)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>predefined_header (dict): Assign this header to the buffered event</dt>
+<dd><p class="first last">when submitting to outbox.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:    Incoming events.</li>
+<li>outbox:   Outgoing events.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="wishbone.module.LockBuffer">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">LockBuffer</tt><big>(</big><em>name</em>, <em>size=100</em><big>)</big><a class="headerlink" href="#wishbone.module.LockBuffer" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>A builtin Wishbone module with a fixed size inbox queue.</strong></p>
+<p>This module shovels events from inbox to outbox.  The
+inbox however is fixed in size which locks the downstream
+modules when it reached its limit.</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">name (str):   The instance name when initiated.</p>
+</li>
+<li><dl class="first docutils">
+<dt>size (int):   The maximum size of inbox.</dt>
+<dd><p class="first last">Default: 100</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:    Incoming events.</li>
+<li>outbox:   Outgoing events.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="function-modules">
+<h2>Function modules<a class="headerlink" href="#function-modules" title="Permalink to this headline">¶</a></h2>
+<p>Function modules accept and forward events from and to other modules.  They
+can have a wide range of functionality and change events when transiting the
+module.</p>
+<p>Builtin modules:</p>
+<dl class="class">
+<dt id="wishbone.module.Header">
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Header</tt><big>(</big><em>name</em>, <em>header={}</em><big>)</big><a class="headerlink" href="#wishbone.module.Header" title="Permalink to this definition">¶</a></dt>
+<dd><p>** A builtin Wishbone module which adds the defined dictionary
+to the header of each passing event.**</p>
+<p>Parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li>name(str):  The name of the module</li>
+</ul>
+</div></blockquote>
+<p>Queues:</p>
+<blockquote>
+<div><ul class="simple">
+<li>inbox:      Incoming events.</li>
+<li>outbox:     Outgoing modified events.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Builtin Modules</a><ul>
+<li><a class="reference internal" href="#input-modules">Input modules</a></li>
+<li><a class="reference internal" href="#output-modules">Output modules</a></li>
+<li><a class="reference internal" href="#flow-modules">Flow modules</a></li>
+<li><a class="reference internal" href="#function-modules">Function modules</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="router.html"
+                        title="previous chapter">Router</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bootstrap.html"
+                        title="next chapter">Bootstrap</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bootstrap.html" title="Bootstrap"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="router.html" title="Router"
+             >previous</a> |</li>
+        <li><a href="index.html">Wishbone 0.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Jelle Smet.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
