@@ -1,0 +1,327 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Bootstraping on CLI &mdash; Wishbone 0.4.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Wishbone 0.4.0 documentation" href="index.html" />
+    <link rel="next" title="Patterns and best practices" href="patterns.html" />
+    <link rel="prev" title="Modules" href="modules.html" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="patterns.html" title="Patterns and best practices"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="Modules"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Wishbone 0.4.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="bootstraping-on-cli">
+<h1>Bootstraping on CLI<a class="headerlink" href="#bootstraping-on-cli" title="Permalink to this headline">¶</a></h1>
+<p>Wishbone comes with a CLI tool to easily bootstrap a server using a YAML
+formatted config file.  Following file creates exactly the same environment as
+the above example:</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span class="nn">---</span>
+<span class="l-Scalar-Plain">modules</span><span class="p-Indicator">:</span>
+  <span class="l-Scalar-Plain">input</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">module</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">wishbone.builtin.input.testevent</span>
+
+  <span class="l-Scalar-Plain">mixing</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">module</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">wishbone.builtin.flow.roundrobin</span>
+
+  <span class="l-Scalar-Plain">output1</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">module</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">wishbone.builtin.output.stdout</span>
+    <span class="l-Scalar-Plain">arguments</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">prefix</span><span class="p-Indicator">:</span> <span class="s">&quot;I</span><span class="nv"> </span><span class="s">am</span><span class="nv"> </span><span class="s">number</span><span class="nv"> </span><span class="s">one:</span><span class="nv"> </span><span class="s">&quot;</span>
+
+  <span class="l-Scalar-Plain">output2</span><span class="p-Indicator">:</span>
+    <span class="l-Scalar-Plain">module</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">wishbone.builtin.output.stdout</span>
+    <span class="l-Scalar-Plain">arguments</span><span class="p-Indicator">:</span>
+      <span class="l-Scalar-Plain">prefix</span><span class="p-Indicator">:</span> <span class="s">&quot;I</span><span class="nv"> </span><span class="s">am</span><span class="nv"> </span><span class="s">number</span><span class="nv"> </span><span class="s">two:</span><span class="nv"> </span><span class="s">&quot;</span>
+
+<span class="l-Scalar-Plain">routingtable</span><span class="p-Indicator">:</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">input.outbox  -&gt; mixing.inbox</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">mixing.one    -&gt; output1.inbox</span>
+  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">mixing.two    -&gt; output2.inbox</span>
+<span class="nn">...</span>
+</pre></div>
+</div>
+<p>Bootstrapping the environment is just a matter of invoking the <strong>wishbone</strong>
+executable with the &#8211;config parameter pointing to the bootstrap file.</p>
+<div class="section" id="available-commands">
+<h2>Available commands<a class="headerlink" href="#available-commands" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="start">
+<h3>start<a class="headerlink" href="#start" title="Permalink to this headline">¶</a></h3>
+<p>The start command detaches the Wishbone server from console and runs it in the
+background.  This implies that logs are written to syslog unless specifically
+defined otherwise.  Metrics are written to Null unless specifically defined
+otherwise.</p>
+<p>The pidfile contains the pids of the control process and all child processes.
+When stopping a Wishbone instance make sure you point to the pid file used to
+start the Wishbone instance.</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="o">[</span>smetj@indigo ~<span class="o">]</span><span class="nv">$ </span>wishbone start -h
+usage: wishbone start <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--config CONFIG<span class="o">]</span> <span class="o">[</span>--instances INSTANCES<span class="o">]</span>
+                      <span class="o">[</span>--pid PID<span class="o">]</span>
+
+Starts a Wishbone instance and detaches to the background. Logs are written to
+syslog.
+
+optional arguments:
+  -h, --help            show this <span class="nb">help </span>message and <span class="nb">exit</span>
+  --config CONFIG       The Wishbone bootstrap file to load.
+  --instances INSTANCES
+                        The number of parallel Wishbone instances to
+                        bootstrap.
+  --pid PID             The pidfile to use.
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="debug">
+<h3>debug<a class="headerlink" href="#debug" title="Permalink to this headline">¶</a></h3>
+<p>The debug command does pretty much the same as start just that it keeps the
+Wishbone instance in the foreground without detaching it.  Logs are written to
+STDOUT.  The running instance can be stopped gracefully with CTRL+C</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="o">[</span>smetj@indigo ~<span class="o">]</span><span class="nv">$ </span>wishbone debug -h
+usage: wishbone debug <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--config CONFIG<span class="o">]</span> <span class="o">[</span>--instances INSTANCES<span class="o">]</span>
+
+Starts a Wishbone instance in foreground and writes logs to STDOUT.
+
+optional arguments:
+  -h, --help            show this <span class="nb">help </span>message and <span class="nb">exit</span>
+  --config CONFIG       The Wishbone bootstrap file to load.
+  --instances INSTANCES
+                        The number of parallel Wishbone instances to
+                        bootstrap.
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="stop">
+<h3>stop<a class="headerlink" href="#stop" title="Permalink to this headline">¶</a></h3>
+<p>Stops the Wishbone instance gracefully by sending SIGINT to all processes.</p>
+<div class="highlight-sh"><div class="highlight"><pre>smetj@indigo ~<span class="o">]</span><span class="nv">$ </span>wishbone stop -h
+usage: wishbone stop <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--pid PID<span class="o">]</span>
+
+Tries to gracefully stop the Wishbone instance.
+
+optional arguments:
+  -h, --help  show this <span class="nb">help </span>message and <span class="nb">exit</span>
+  --pid PID   The pidfile to use.
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="kill">
+<h3>kill<a class="headerlink" href="#kill" title="Permalink to this headline">¶</a></h3>
+<p>** Use with caution, sends SIGKILL to the pids in the pidfile. **</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="o">[</span>smetj@indigo ~<span class="o">]</span><span class="nv">$ </span>wishbone <span class="nb">kill</span> -h
+usage: wishbone <span class="nb">kill</span> <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--pid PID<span class="o">]</span>
+
+Kills the Wishbone processes immediately.
+
+optional arguments:
+  -h, --help  show this <span class="nb">help </span>message and <span class="nb">exit</span>
+  --pid PID   The pidfile to use.
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="list">
+<h3>list<a class="headerlink" href="#list" title="Permalink to this headline">¶</a></h3>
+<p>Lists all installed Wishbone modules, given that they have the correct entry-points.</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="o">[</span>smetj@indigo ~<span class="o">]</span><span class="nv">$ </span>wishbone list
+Available Wishbone modules:
++---------------------------+-------------------+-----------+------------------------------------------------------------------------------------------+
+| Group                     | Module            | Version   | Description                                                                              |
++---------------------------+-------------------+-----------+------------------------------------------------------------------------------------------+
+| wishbone.builtin.logging  | loglevelfilter    | 0.4.0beta | A <span class="nb">builtin </span>Wishbone module which filters Wishbone log events.                             |
+|                           | humanlogformatter | 0.4.0beta | A <span class="nb">builtin </span>Wishbone module which formats Wishbone log events.                             |
+|                           |                   |           |                                                                                          |
+| wishbone.builtin.metrics  | graphite          | 0.4.0beta | A <span class="nb">builtin </span>Wishbone module which formats the internal metric format into Graphite format. |
+|                           |                   |           |                                                                                          |
+| wishbone.builtin.flow     | roundrobin        | 0.4.0beta | A <span class="nb">builtin </span>Wishbone module which round robins incoming events                             |
+|                           |                   |           |     over all connected queues.                                                           |
+|                           | fanout            | 0.4.0beta | A <span class="nb">builtin </span>Wishbone module which duplicates incoming events to all                        |
+|                           |                   |           |     connected queues.                                                                    |
+|                           | tippingbucket     | 0.4.0beta | A <span class="nb">builtin </span>Wishbone module which buffers data.                                            |
+|                           | funnel            | 0.4.0beta | A <span class="nb">builtin </span>Wishbone module which merges incoming events from different                    |
+|                           |                   |           |     queues into 1 queue.                                                                 |
+|                           | lockbuffer        | 0.4.0beta | A <span class="nb">builtin </span>Wishbone module with a fixed size inbox queue.                                 |
+|                           |                   |           |                                                                                          |
+| wishbone.builtin.function | header            | 0.4.0beta |  A <span class="nb">builtin </span>Wishbone module which adds the defined dictionary                             |
+|                           |                   |           |     to the header of each passing event.                                                 |
+|                           |                   |           |                                                                                          |
+| wishbone.builtin.input    | testevent         | 0.4.0beta | A WishBone input module which generates a <span class="nb">test </span>event at the chosen interval.             |
+|                           |                   |           |                                                                                          |
+| wishbone.builtin.output   | syslog            | 0.4.0beta | Writes Wishbone log events to syslog.                                                    |
+|                           | null              | 0.4.0beta | Accepts events and purges these without any further processing.                          |
+|                           | stdout            | 0.4.0beta | A <span class="nb">builtin </span>Wishbone module prints events to STDOUT.                                       |
+|                           |                   |           |                                                                                          |
+| wishbone.input            | dictgenerator     | 0.1       | A WishBone input module which generates dictionaries build out of words randomly         |
+|                           |                   |           |     chosen from a provided wordlist.                                                     |
+|                           | amqp              | 0.1       | A Wishbone AMQP input module.                                                            |
+|                           | gearman           | 0.1       | A Wishbone input module which consumes <span class="nb">jobs </span>from a Gearmand server.                      |
+|                           | generator         | 0.1       | A WishBone IO module which generates random data <span class="k">for </span>testing purposes.                   |
+|                           | namedpipe         | 0.1       | A Wishbone IO module which accepts external input from a named pipe.                     |
+|                           | tcp               | 0.1       | A Wishbone input module which listens on a TCP socket.                                   |
+|                           | udp               | 0.1       | A Wishbone module which handles UDP input.                                               |
+|                           | uds               | 0.1       | A Wishbone input module which listens on a unix domain socket.                           |
+|                           | mongodb           | 0.1       | A Wishbone output module to write data in MongoDB.                                       |
+|                           |                   |           |                                                                                          |
+| wishbone.output           | amqp              | 0.1       | A Wishbone AMQP output module.                                                           |
+|                           | tcp               | 0.1       | A Wishbone IO module which writes data to a TCP socket.                                  |
+|                           | uds               | 0.1       | A Wishbone IO module which writes data to a Unix domain socket.                          |
+|                           |                   |           |                                                                                          |
+| wishbone.function         | skeleton          | 0.1       | A bare minimum Wishbone <span class="k">function </span>module.                                                 |
+|                           | msgpack           | 0.1       | A Wishbone which de/serializes data into or from msgpack format.                         |
+|                           | snappy            | 0.1       | A Wishbone module which compresses or decompresses data using Snappy.                    |
+|                           | json              | 0.1       | A Wishbone module which converts and validates JSON.                                     |
+|                           | waitseconds       | 0.1       | An output module which takes x seconds to finish the &lt;consume&gt; <span class="k">function</span>.                 |
+|                           |                   |           |                                                                                          |
++---------------------------+-------------------+-----------+------------------------------------------------------------------------------------------+
+</pre></div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="show">
+<h3>show<a class="headerlink" href="#show" title="Permalink to this headline">¶</a></h3>
+<p>Displays the docstring of the requested module.</p>
+<div class="highlight-sh"><div class="highlight"><pre><span class="o">[</span>smetj@indigo ~<span class="o">]</span><span class="nv">$ </span>wishbone show wishbone.builtin.flow.fanout
+**A <span class="nb">builtin </span>Wishbone module which duplicates incoming events to all
+    connected queues.**
+
+    Create a <span class="s2">&quot;1 to n&quot;</span> relationship with queues.  Events arriving in inbox
+    are <span class="k">then </span>copied to each queue connected to this module.  Keep in mind
+    that the outbox queue is never used.
+
+    When clone is True, each incoming event is duplicated <span class="k">for </span>each outgoing
+    queue.  This might be usefull <span class="k">if </span>you require to change the content of the
+    events later down the pipeline.  Otherwise references are used which means
+    changing the event will change it everywhere in the current Wishbone
+    framework.
+
+
+    Parameters:
+
+        name<span class="o">(</span>str<span class="o">)</span>:      The name of the module.
+
+        clone<span class="o">(</span>bool<span class="o">)</span>:    When True actually makes a copy instead of passing
+                        a reference.
+
+    Queues:
+
+        inbox:  Incoming events
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Bootstraping on CLI</a><ul>
+<li><a class="reference internal" href="#available-commands">Available commands</a><ul>
+<li><a class="reference internal" href="#start">start</a></li>
+<li><a class="reference internal" href="#debug">debug</a></li>
+<li><a class="reference internal" href="#stop">stop</a></li>
+<li><a class="reference internal" href="#kill">kill</a></li>
+<li><a class="reference internal" href="#list">list</a></li>
+<li><a class="reference internal" href="#show">show</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="modules.html"
+                        title="previous chapter">Modules</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="patterns.html"
+                        title="next chapter">Patterns and best practices</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="patterns.html" title="Patterns and best practices"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="Modules"
+             >previous</a> |</li>
+        <li><a href="index.html">Wishbone 0.4.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Jelle Smet.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
