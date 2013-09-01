@@ -30,7 +30,7 @@ except:
     pass
 
 
-class TestWishboneToolsWishboneQueue():
+class TestWishbonequeue():
 
     def test_import(self):
         try:
