@@ -214,6 +214,8 @@ class WishboneQueue():
     def waitUntilFreePlace(self):
         '''Blocks until we have at least 1 slot free in the queue.'''
 
+        if self.size() == self.max_size:
+            self.__free_place.clear()
         self.__free_place.wait()
 
     def __rate(self, name, value):
