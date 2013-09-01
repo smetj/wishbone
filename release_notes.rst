@@ -1,6 +1,15 @@
 Wishbone changelog
 ==================
 
+Version 0.4.1
+~~~~~~~~~~~~~
+
+- Include support for throttling.
+- Included firsts tests
+- Integrate tests in setup.py
+- Fix bug where waitUntilFreePlace did not behave correctly when __putLimit()
+  was never used.
+
 Version 0.4
 ~~~~~~~~~~~
 
