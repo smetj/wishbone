@@ -2,7 +2,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-#  wishbone_actor_tests.py
+#  all.py
 #
 #  Copyright 2013 Jelle Smet <development@smetj.net>
 #
@@ -24,18 +24,6 @@
 #
 
 
-class TestWishboneActor():
-    '''Tests related to the Actor() class'''
-
-    def testImport(self):
-        try:
-            from wishbone.base import BaseActor
-        except:
-            assert BaseActor
-
-        try:
-            from wishbone.base import Actor
-        except:
-            assert Actor
-
-
+from testimport import TestImport
+from testactor import TestActor
+from testwishbonequeue import TestWishbonequeue
