@@ -30,6 +30,7 @@ from wishbone.errors import QueueMissing, QueueOccupied, SetupError, QueueFull, 
 from gevent import spawn, sleep, signal, joinall, kill, Greenlet
 from gevent.event import Event
 from uuid import uuid4
+import pprint
 
 class Default(LoopContextSwitcher):
     '''The default Wishbone router.
@@ -59,9 +60,19 @@ class Default(LoopContextSwitcher):
                             event if not present when forwarded from one queue
                             to the other. (default False)
 
+        - throttle(bool):   If True, scans every second for modules which
+                            overflow child modules with messages and thus have
+                            to be throttled.
+                            default: False
+
+        - throttle_threshold(int):  When <throttle> is True, start to throttle
+                                    start to throttle when a module has more
+                                    than <throttle_threshold> messages.
+                                    default: 5000
+
     '''
 
-    def __init__(self, interval=10, context_switch=100, rescue=False, uuid=False):
+    def __init__(self, interval=10, context_switch=100, rescue=False, uuid=False, throttle=False, throttle_threshold=5000):
         self.interval=interval
         self.context_switch=context_switch
         self.rescue=rescue
@@ -75,6 +86,9 @@ class Default(LoopContextSwitcher):
             self.__UUID = self.__doUUID
         else:
             self.__UUID = self.__noUUID
+
+        self.__throttle=throttle
+        self.__throttle_threshold=throttle_threshold
 
         # Forward router's logs to logging queue.
         #########################################
@@ -135,6 +149,7 @@ class Default(LoopContextSwitcher):
             raise Exception("A queue name should have format 'module.queue'. Got '%s' instead"%(consumer))
 
         self.__modules[producer_module]["children"].append(consumer_module)
+        self.__modules[consumer_module]["parents"].append(producer_module)
 
         if not self.__modules.has_key(producer_module):
             raise Exception("There is no Wishbone module registered with name '%s'"%(producer_module))
@@ -181,6 +196,18 @@ class Default(LoopContextSwitcher):
         getChild(instance, children)
         return children
 
+    def getParents(self, instance):
+        parents=[]
+
+        def getParent(instance, parents):
+            if len(self.__modules[instance]["parents"]) > 0:
+                for parent in self.__modules[instance]["parents"]:
+                    getParent(parent, parents)
+                    parents.append(parent)
+
+        getParent(instance, parents)
+        return parents
+
     def doRescue(self):
         '''Runs over each queue to extract any left behind messages.
         '''
@@ -207,27 +234,10 @@ class Default(LoopContextSwitcher):
             kwargs(dict)            Named arguments to pass to the module.
         '''
 
-        # if len(module) < 3:
-        #     raise Exception("The module tuple requires 3 values.")
-
-        # limit = int(module[2])
-        # name = module[1]
-        # module = module[0]
-
-        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children":[]}
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children":[], "parents":[]}
         self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
-        # if limit > 0:
-        #     self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
-        # else:
-        #     self.__modules[name]["instance"]=module(name, *args, **kwargs)
-
-        # Start to forward this module's logs to the registered
-        # logging module.
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
-
-        # Start to forward this module's metrics to the registered
-        # metrics module.
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
 
     def registerLogModule(self, module, name, *args, **kwargs):
@@ -244,22 +254,10 @@ class Default(LoopContextSwitcher):
             kwargs(dict)            Named arguments to pass to the module.
         '''
 
-        # if len(module) < 3:
-        #     raise SetupError("The module tuple requires 3 values.")
-
-        # limit = module[2]
-        # name = module[1]
-        # module = module[0]
-
         self.__logmodule = name
 
-        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": []}
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": [], "parents":[]}
         self.__modules[name]["instance"]=module(name, *args, **kwargs)
-
-        # if limit > 0:
-        #     self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
-        # else:
-        #     self.__modules[name]["instance"]=module(name, *args, **kwargs)
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
@@ -280,22 +278,9 @@ class Default(LoopContextSwitcher):
             kwargs(dict)            Named arguments to pass to the module.
         '''
 
-        # if len(module) < 3:
-        #     raise SetupERror("The module tuple requires 3 values.")
-
-        # limit = module[2]
-        # name = module[1]
-        # module = module[0]
-
         self.__metricmodule = name
-        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": []}
+        self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": [], "parents": []}
         self.__modules[name]["instance"]=module(name, *args, **kwargs)
-
-        # if limit > 0:
-        #     self.__modules[name]["instance"]=module(name, limit, *args, **kwargs)
-        # else:
-        #     self.__modules[name]["instance"]=module(name, *args, **kwargs)
-
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
@@ -310,8 +295,6 @@ class Default(LoopContextSwitcher):
             - Starts the registered metrics module.
             - Calls each registered module's start() function.
         '''
-
-        self.logging.info('Starting.')
 
         if self.__logmodule == None:
             from wishbone.module import Null
@@ -329,6 +312,10 @@ class Default(LoopContextSwitcher):
                 self.logging.debug("Prehook not found for module %s."%(module))
 
             self.__modules[module]["instance"].start()
+
+        if self.__throttle == True:
+            self.logging.info("Throttling enabled.  Starting throttle monitor.")
+            spawn(self.throttleMonitor)
 
     def stop(self):
         '''Stops the router and all registered modules.
@@ -478,3 +465,56 @@ class Default(LoopContextSwitcher):
     def __noUUID(self, event):
         return event
 
+    def throttleMonitor(self):
+        """Sweeps over all registered modules and tries to detect modules with  problematic flow rates.
+        Once found a moduleMonitor greenthread is spawned which is reponsible for enabling and disabling
+        throttling."""
+
+        active_module_monitors={}
+
+        while self.loop():
+            for module in self.__modules:
+                for queue in self.__modules[module]["instance"].queuepool.listQueues():
+                    if getattr(self.__modules[module]["instance"].queuepool, queue).size() > self.__throttle_threshold:
+                        parents = self.getParents(module)
+                        if len(parents) == 0:
+                            #simple, the module is flooding itself.
+                            if module in active_module_monitors and active_module_monitors[module].ready():
+                                active_module_monitors[module] = spawn(self.moduleMonitor, module, module, getattr(self.__modules[module]["instance"].queuepool, queue).size)
+                        else:
+                            #We have to find the upstream culprit responsible for flooding.
+                            #A parent module with a queue with the highest out_rate
+                            if parents[0] not in active_module_monitors or parents[0] in active_module_monitors and active_module_monitors[parents[0]].ready():
+                                active_module_monitors[parents[0]] = spawn(self.moduleMonitor, parents[0], module, getattr(self.__modules[module]["instance"].queuepool, queue).size)
+            sleep(1)
+
+    def moduleMonitor(self, module, child_name, child_size):
+        """A moduleMonitor is a greenthread which monitors the state of a module and triggers the expected
+        throttling functions.  It exits when no more throttling is required.
+        """
+
+        self.logging.info("Module %s is identified to overflow module %s. Enable throttling."%(module, child_name))
+        while self.loop():
+            if child_size() > self.__throttle_threshold:
+                try:
+                    self.__modules[module]["instance"].enableThrottling()
+                    sleep(1)
+                except:
+                    self.logging.info("Throttling is requested but module has no enableThrottling() function.")
+                    break
+            else:
+                try:
+                    self.__modules[module]["instance"].disableThrottling()
+                    self.logging.info("Throttling on module %s is not required anymore. Exiting."%(module))
+                except:
+                    self.logging.info("Throttling is requested but module has no disableThrottling() function.")
+                break
+            sleep(1)
+
+    # def statsMonitor(self):
+    #     while self.loop():
+    #         for module in self.__modules:
+    #             for queue in self.__modules[module]["instance"].queuepool.listQueues():
+    #                 print "%s.%s: %s"%(module, queue, str(getattr(self.__modules[module]["instance"].queuepool, queue).stats()))
+    #         print
+    #         sleep(1)
