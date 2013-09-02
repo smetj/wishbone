@@ -23,15 +23,28 @@
 #
 
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
+import sys
 
 PROJECT = 'wishbone'
-VERSION = '0.4.0'
+VERSION = '0.4.1'
 install_requires=['gevent>=1.0dev','argparse','greenlet>=0.3.2','jsonschema','prettytable','python-daemon',"pyyaml"]
 
 try:
     long_description = open('README.rst', 'rt').read()
 except IOError:
     long_description = ''
+
+class PyTest(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import pytest
+        errcode = pytest.main(self.test_args)
+        sys.exit(errcode)
 
 setup(
     name=PROJECT,
@@ -57,9 +70,12 @@ setup(
                  'Intended Audience :: Developers',
                  'Intended Audience :: System Administrators',
                  ],
-
+    extras_require={
+        'testing': ['pytest'],
+    },
     platforms=['Linux'],
-
+    test_suite='wishbone.test.test_wishbone',
+    cmdclass={'test': PyTest},
     scripts=[],
 
     provides=[],
