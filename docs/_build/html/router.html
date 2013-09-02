@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Router &mdash; Wishbone 0.4.0 documentation</title>
+    <title>Router &mdash; Wishbone 0.4.1 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.0',
+        VERSION:     '0.4.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Wishbone 0.4.0 documentation" href="index.html" />
+    <link rel="top" title="Wishbone 0.4.1 documentation" href="index.html" />
     <link rel="next" title="Modules" href="modules.html" />
     <link rel="prev" title="Actor" href="actor.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -48,7 +48,7 @@
         <li class="right" >
           <a href="actor.html" title="Actor"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -109,7 +109,7 @@ metric data to Graphite.</p>
 <hr class="docutils" />
 <dl class="class">
 <dt id="wishbone.router.Default">
-<em class="property">class </em><tt class="descclassname">wishbone.router.</tt><tt class="descname">Default</tt><big>(</big><em>interval=10</em>, <em>context_switch=100</em>, <em>rescue=False</em>, <em>uuid=False</em><big>)</big><a class="headerlink" href="#wishbone.router.Default" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.router.</tt><tt class="descname">Default</tt><big>(</big><em>interval=10</em>, <em>context_switch=100</em>, <em>rescue=False</em>, <em>uuid=False</em>, <em>throttle=False</em>, <em>throttle_threshold=5000</em><big>)</big><a class="headerlink" href="#wishbone.router.Default" title="Permalink to this definition">¶</a></dt>
 <dd><p>The default Wishbone router.</p>
 <p>A router is responsible to:</p>
 <blockquote>
@@ -144,6 +144,22 @@ inserted into the same queue again.</p>
 <dt>uuid(bool):       If True, adds a uuid4 value in the header of each</dt>
 <dd><p class="first last">event if not present when forwarded from one queue
 to the other. (default False)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>throttle(bool):   If True, scans every second for modules which</dt>
+<dd><p class="first last">overflow child modules with messages and thus have
+to be throttled.
+default: False</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>throttle_threshold(int):  When &lt;throttle&gt; is True, start to throttle</dt>
+<dd><p class="first last">start to throttle when a module has more
+than &lt;throttle_threshold&gt; messages.
+default: 5000</p>
 </dd>
 </dl>
 </li>
@@ -186,6 +202,13 @@ defined, it is autocreated.</p>
 <dt id="wishbone.router.Default.loop">
 <tt class="descname">loop</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.router.Default.loop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convenience funtion which returns a bool indicating the router is in running or stop state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.router.Default.moduleMonitor">
+<tt class="descname">moduleMonitor</tt><big>(</big><em>module</em>, <em>child_name</em>, <em>child_size</em><big>)</big><a class="headerlink" href="#wishbone.router.Default.moduleMonitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>A moduleMonitor is a greenthread which monitors the state of a module and triggers the expected
+throttling functions.  It exits when no more throttling is required.</p>
 </dd></dl>
 
 <dl class="method">
@@ -250,6 +273,14 @@ kwargs(dict)            Named arguments to pass to the module.</div></blockquote
 to the logs or metrics endpoint to ensure these event
 streams survive untill the end.  All other modules
 are shutdown in the order they have been registered.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.router.Default.throttleMonitor">
+<tt class="descname">throttleMonitor</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.router.Default.throttleMonitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sweeps over all registered modules and tries to detect modules with  problematic flow rates.
+Once found a moduleMonitor greenthread is spawned which is reponsible for enabling and disabling
+throttling.</p>
 </dd></dl>
 
 </dd></dl>
@@ -320,7 +351,7 @@ time it takes to execute the function.</p>
         <li class="right" >
           <a href="actor.html" title="Actor"
              >previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.0 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
