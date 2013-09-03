@@ -56,6 +56,56 @@
   <div class="section" id="patterns-and-best-practices">
 <h1>Patterns and best practices<a class="headerlink" href="#patterns-and-best-practices" title="Permalink to this headline">¶</a></h1>
 <p>This section discusses some common usage patterns and best practices.</p>
+<div class="section" id="modules-and-event-headers">
+<h2>Modules and event headers<a class="headerlink" href="#modules-and-event-headers" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="write-data-in-headers">
+<h3>Write data in headers<a class="headerlink" href="#write-data-in-headers" title="Permalink to this headline">¶</a></h3>
+<p>In its bare minmimum, an event has following layout:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span> <span class="s">&quot;header&quot;</span><span class="p">:{},</span> <span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="nb">object</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>Whenever a module writes data into the header section of the event, it should
+store this under the &lt;self.name&gt; key, which is unique anyway within a router
+instance.</p>
+<p>The &lt;self.name&gt; value of a module is determined when registering the module
+using <a class="reference internal" href="router.html#wishbone.router.Default.register" title="wishbone.router.Default.register"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.register()</span></tt></a>.</p>
+<p>So when registering a module like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">router</span> <span class="o">=</span> <span class="n">Default</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">STDOUT</span><span class="p">,</span> <span class="s">&quot;on_screen&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then any information this module instance wants to write into the header
+should look like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span> <span class="s">&quot;header&quot;</span><span class="p">:{</span><span class="s">&quot;on_screen&quot;</span><span class="p">:{</span><span class="s">&quot;one&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;two&quot;</span><span class="p">:</span><span class="mi">2</span><span class="p">}},</span> <span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="nb">object</span> <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="retrieve-data-from-headers">
+<h3>Retrieve data from headers<a class="headerlink" href="#retrieve-data-from-headers" title="Permalink to this headline">¶</a></h3>
+<p>When a module requires specific information from the header which has been
+stored by another it should be possible to initiate the module using a
+parameter named &#8220;key&#8221;.  You should not hard code the name of the header key
+into the module because if someone registers a module with another name, your
+code will not work anymore.</p>
+<p>Consider following example module:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Output</span><span class="p">(</span><span class="n">Actor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">Actor</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="o">=</span><span class="n">key</span>
+
+    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">print</span> <span class="n">event</span><span class="p">[</span><span class="s">&quot;header&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">][</span><span class="s">&quot;one&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="output-modules">
+<h2>Output modules<a class="headerlink" href="#output-modules" title="Permalink to this headline">¶</a></h2>
+</div>
 </div>
 
 
@@ -64,6 +114,19 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Patterns and best practices</a><ul>
+<li><a class="reference internal" href="#modules-and-event-headers">Modules and event headers</a><ul>
+<li><a class="reference internal" href="#write-data-in-headers">Write data in headers</a></li>
+<li><a class="reference internal" href="#retrieve-data-from-headers">Retrieve data from headers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#output-modules">Output modules</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="bootstrap.html"
                         title="previous chapter">Bootstraping on CLI</a></p>
