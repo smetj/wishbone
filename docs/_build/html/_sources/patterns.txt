@@ -7,7 +7,7 @@ This section discusses some common usage patterns and best practices.
 Modules and event headers
 -------------------------
 
-Write data in headers
+Write data to headers
 ~~~~~~~~~~~~~~~~~~~~~
 
 In its bare minmimum, an event has following layout:
@@ -67,3 +67,27 @@ Consider following example module:
 Output modules
 --------------
 
+Additional queues
+~~~~~~~~~~~~~~~~~
+
+Output modules are responsible to deliver messages to the outside world.
+Preferably we want this to be done trustworthy.  If submitting events fails we
+might need he opportunity for other output modules to take over when desired.
+Maybe an input module needs to know whether the event was submitted
+successfully by the output modules (Think AMQP).
+
+Although not required from a technical perspective, it might be nice to have
+the ability to *optionally* have 2 additional queues to output modules:
+
+    - successful
+    - failed
+
+As you might guess, events which have been submitted successfully to the
+outside world are then submitted to the *successful* queue and the events
+which failed to go out to the *failed* queue.
+
+This behavior can be enabled/disabled during module initialization in order to
+define the best strategy required.
+
+Retrying and monitors
+~~~~~~~~~~~~~~~~~~~~~
