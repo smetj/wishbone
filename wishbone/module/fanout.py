@@ -58,9 +58,9 @@ class Fanout(Actor):
     def __init__(self, name, clone=False):
         Actor.__init__(self, name, limit=0)
         if clone == False:
-            self.consume = self.__consumeNoDeep
+            self.do = self.__consumeNoDeep
         else:
-            self.consume = self.__consumeDeep
+            self.do = self.__consumeDeep
 
     def preHook(self):
         destination_queues = self.queuepool.getQueueInstances()
@@ -69,8 +69,7 @@ class Fanout(Actor):
         self.destination_queues = [destination_queues[queue] for queue in destination_queues.keys()]
 
     def consume(self, event):
-        for queue in self.destination_queues:
-            queue.put(event)
+        self.do(event)
 
     def __consumeNoDeep(self, event):
         for queue in self.destination_queues:
