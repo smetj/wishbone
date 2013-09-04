@@ -58,8 +58,8 @@
 <p>This section discusses some common usage patterns and best practices.</p>
 <div class="section" id="modules-and-event-headers">
 <h2>Modules and event headers<a class="headerlink" href="#modules-and-event-headers" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="write-data-in-headers">
-<h3>Write data in headers<a class="headerlink" href="#write-data-in-headers" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="write-data-to-headers">
+<h3>Write data to headers<a class="headerlink" href="#write-data-to-headers" title="Permalink to this headline">¶</a></h3>
 <p>In its bare minmimum, an event has following layout:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">{</span> <span class="s">&quot;header&quot;</span><span class="p">:{},</span> <span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="nb">object</span> <span class="p">}</span>
 </pre></div>
@@ -105,6 +105,30 @@ code will not work anymore.</p>
 </div>
 <div class="section" id="output-modules">
 <h2>Output modules<a class="headerlink" href="#output-modules" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="additional-queues">
+<h3>Additional queues<a class="headerlink" href="#additional-queues" title="Permalink to this headline">¶</a></h3>
+<p>Output modules are responsible to deliver messages to the outside world.
+Preferably we want this to be done trustworthy.  If submitting events fails we
+might need he opportunity for other output modules to take over when desired.
+Maybe an input module needs to know whether the event was submitted
+successfully by the output modules (Think AMQP).</p>
+<p>Although not required from a technical perspective, it might be nice to have
+the ability to <em>optionally</em> have 2 additional queues to output modules:</p>
+<blockquote>
+<div><ul class="simple">
+<li>successful</li>
+<li>failed</li>
+</ul>
+</div></blockquote>
+<p>As you might guess, events which have been submitted successfully to the
+outside world are then submitted to the <em>successful</em> queue and the events
+which failed to go out to the <em>failed</em> queue.</p>
+<p>This behavior can be enabled/disabled during module initialization in order to
+define the best strategy required.</p>
+</div>
+<div class="section" id="retrying-and-monitors">
+<h3>Retrying and monitors<a class="headerlink" href="#retrying-and-monitors" title="Permalink to this headline">¶</a></h3>
+</div>
 </div>
 </div>
 
@@ -118,11 +142,15 @@ code will not work anymore.</p>
   <ul>
 <li><a class="reference internal" href="#">Patterns and best practices</a><ul>
 <li><a class="reference internal" href="#modules-and-event-headers">Modules and event headers</a><ul>
-<li><a class="reference internal" href="#write-data-in-headers">Write data in headers</a></li>
+<li><a class="reference internal" href="#write-data-to-headers">Write data to headers</a></li>
 <li><a class="reference internal" href="#retrieve-data-from-headers">Retrieve data from headers</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#output-modules">Output modules</a></li>
+<li><a class="reference internal" href="#output-modules">Output modules</a><ul>
+<li><a class="reference internal" href="#additional-queues">Additional queues</a></li>
+<li><a class="reference internal" href="#retrying-and-monitors">Retrying and monitors</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
