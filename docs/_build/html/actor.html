@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Actor &mdash; Wishbone 0.4.1 documentation</title>
+    <title>Actor &mdash; Wishbone 0.4.2 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.1',
+        VERSION:     '0.4.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Wishbone 0.4.1 documentation" href="index.html" />
+    <link rel="top" title="Wishbone 0.4.2 documentation" href="index.html" />
     <link rel="next" title="Router" href="router.html" />
     <link rel="prev" title="Introduction" href="introduction.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -48,7 +48,7 @@
         <li class="right" >
           <a href="introduction.html" title="Introduction"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -238,6 +238,24 @@ Default: 0</p>
 <dt id="wishbone.Actor.deleteQueue">
 <tt class="descname">deleteQueue</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.Actor.deleteQueue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deletes the &lt;name&gt; queue from &lt;self.queuepool&gt;.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.Actor.disableThrottling">
+<tt class="descname">disableThrottling</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.Actor.disableThrottling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should be overridden by the module author when throttling
+functionality is desired.</p>
+<p>This module is executed by the router decides previously enabled
+throttling on this module can be disabled.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="wishbone.Actor.enableThrottling">
+<tt class="descname">enableThrottling</tt><big>(</big><big>)</big><a class="headerlink" href="#wishbone.Actor.enableThrottling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Should be overridden by the module author when throttling
+functionality is desired.</p>
+<p>This module is executed by the router whenever it detects this module
+is overflowing one of its children.</p>
 </dd></dl>
 
 <dl class="method">
@@ -592,7 +610,7 @@ external process the consume this queue.</p>
         <li class="right" >
           <a href="introduction.html" title="Introduction"
              >previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
