@@ -116,7 +116,7 @@ class Initialize(ModuleHandling):
 
         if "metrics" in self.config:
             for instance in self.config["metrics"]:
-                module = self.loadModule(self.config["metrics"]["instance"]["module"])
+                module = self.loadModule(self.config["metrics"][instance]["module"])
                 self.router.registerMetricModule(module, "metrics", **self.config["metrics"][instance].get("arguments",{}))
         else:
             module = self.loadModule("wishbone.builtin.output.null")
