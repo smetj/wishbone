@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Patterns and best practices &mdash; Wishbone 0.4.1 documentation</title>
+    <title>Patterns and best practices &mdash; Wishbone 0.4.2 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.1',
+        VERSION:     '0.4.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Wishbone 0.4.1 documentation" href="index.html" />
+    <link rel="top" title="Wishbone 0.4.2 documentation" href="index.html" />
     <link rel="prev" title="Bootstraping on CLI" href="bootstrap.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="bootstrap.html" title="Bootstraping on CLI"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -55,7 +55,83 @@
             
   <div class="section" id="patterns-and-best-practices">
 <h1>Patterns and best practices<a class="headerlink" href="#patterns-and-best-practices" title="Permalink to this headline">¶</a></h1>
-<p>This section discusses some common usage patterns and best practices.</p>
+<p>This section discusses some common usage patterns and best practices. Although
+most if not all are strictly spoken not required, they might be helpful in
+using Wishbone efficiently.</p>
+<div class="section" id="modules-and-event-headers">
+<h2>Modules and event headers<a class="headerlink" href="#modules-and-event-headers" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="write-data-to-headers">
+<h3>Write data to headers<a class="headerlink" href="#write-data-to-headers" title="Permalink to this headline">¶</a></h3>
+<p>In its bare minimum, an event has following layout:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span> <span class="s">&quot;header&quot;</span><span class="p">:{},</span> <span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="nb">object</span> <span class="p">}</span>
+</pre></div>
+</div>
+<p>Whenever a module writes data into the header section of the event, it should
+store this under the &lt;self.name&gt; key, which is unique anyway within a router
+instance.</p>
+<p>The &lt;self.name&gt; value of a module is determined when registering the module
+using <a class="reference internal" href="router.html#wishbone.router.Default.register" title="wishbone.router.Default.register"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.register()</span></tt></a>.</p>
+<p>So when registering a module like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">router</span> <span class="o">=</span> <span class="n">Default</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">STDOUT</span><span class="p">,</span> <span class="s">&quot;on_screen&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then any information this module instance wants to write into the header
+should look like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span> <span class="s">&quot;header&quot;</span><span class="p">:{</span><span class="s">&quot;on_screen&quot;</span><span class="p">:{</span><span class="s">&quot;one&quot;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;two&quot;</span><span class="p">:</span><span class="mi">2</span><span class="p">}},</span> <span class="s">&quot;data&quot;</span><span class="p">:</span> <span class="nb">object</span> <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="retrieve-data-from-headers">
+<h3>Retrieve data from headers<a class="headerlink" href="#retrieve-data-from-headers" title="Permalink to this headline">¶</a></h3>
+<p>When a module requires specific information from the header which has been
+stored by another it should be possible to initiate the module using a
+parameter named &#8220;key&#8221;.  You should not hard code the name of the header key
+into the module because if someone registers a module with another name, your
+code will not work anymore.</p>
+<p>Consider following example module:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Output</span><span class="p">(</span><span class="n">Actor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">Actor</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="o">=</span><span class="n">key</span>
+
+    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">print</span> <span class="n">event</span><span class="p">[</span><span class="s">&quot;header&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">][</span><span class="s">&quot;one&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="output-modules">
+<h2>Output modules<a class="headerlink" href="#output-modules" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="additional-queues">
+<h3>Additional queues<a class="headerlink" href="#additional-queues" title="Permalink to this headline">¶</a></h3>
+<p>Output modules are responsible to deliver messages to the outside world.
+Preferably we want this to be done trustworthy.  If submitting events fails we
+might need he opportunity for other output modules to take over when desired.
+Maybe an input module needs to know whether the event was submitted
+successfully by the output modules (Think AMQP).</p>
+<p>Although not required from a technical perspective, it might be nice to have
+the ability to <em>optionally</em> have 2 additional queues to output modules:</p>
+<blockquote>
+<div><ul class="simple">
+<li>successful</li>
+<li>failed</li>
+</ul>
+</div></blockquote>
+<p>As you might guess, events which have been submitted successfully to the
+outside world are then submitted to the <em>successful</em> queue and the events
+which failed to go out to the <em>failed</em> queue.</p>
+<p>This behavior can be enabled/disabled during module initialization in order to
+define the best strategy required.</p>
+</div>
+<div class="section" id="retrying-and-monitors">
+<h3>Retrying and monitors<a class="headerlink" href="#retrying-and-monitors" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
 </div>
 
 
@@ -64,6 +140,23 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Patterns and best practices</a><ul>
+<li><a class="reference internal" href="#modules-and-event-headers">Modules and event headers</a><ul>
+<li><a class="reference internal" href="#write-data-to-headers">Write data to headers</a></li>
+<li><a class="reference internal" href="#retrieve-data-from-headers">Retrieve data from headers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#output-modules">Output modules</a><ul>
+<li><a class="reference internal" href="#additional-queues">Additional queues</a></li>
+<li><a class="reference internal" href="#retrying-and-monitors">Retrying and monitors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="bootstrap.html"
                         title="previous chapter">Bootstraping on CLI</a></p>
@@ -93,7 +186,7 @@
         <li class="right" >
           <a href="bootstrap.html" title="Bootstraping on CLI"
              >previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.1 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
