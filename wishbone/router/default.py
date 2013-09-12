@@ -148,7 +148,6 @@ class Default(LoopContextSwitcher):
         except ValueError:
             raise Exception("A queue name should have format 'module.queue'. Got '%s' instead"%(consumer))
 
-        print self.__modules
         self.__modules[producer_module]["children"].append(consumer_module)
         self.__modules[consumer_module]["parents"].append(producer_module)
 
