@@ -75,6 +75,7 @@ Python module and that you can import it an entrypoint.
 --------
 
 .. autoclass:: wishbone.Actor
+    :members:
     :show-inheritance:
     :inherited-members:
 
