@@ -2,7 +2,9 @@
 Patterns and best practices
 ============================
 
-This section discusses some common usage patterns and best practices.
+This section discusses some common usage patterns and best practices. Although
+most if not all are strictly spoken not required, they might be helpful in
+using Wishbone efficiently.
 
 Modules and event headers
 -------------------------
@@ -10,7 +12,7 @@ Modules and event headers
 Write data to headers
 ~~~~~~~~~~~~~~~~~~~~~
 
-In its bare minmimum, an event has following layout:
+In its bare minimum, an event has following layout:
 
 .. code-block:: python
 
