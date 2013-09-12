@@ -1,6 +1,15 @@
 Wishbone changelog
 ==================
 
+Version 0.4.2
+~~~~~~~~~~~~~
+
+- Fix several bugs load bootstrap files
+- Fix bug in fanout module where deepcopy() wasn't used
+- Fix bug for misbehaving waitUntilFreePlace()
+- Expand documentation
+- Added first batch of tests
+
 Version 0.4.1
 ~~~~~~~~~~~~~
 
