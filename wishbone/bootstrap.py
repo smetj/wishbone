@@ -117,7 +117,7 @@ class Initialize(ModuleHandling):
         if "metrics" in self.config:
             for instance in self.config["metrics"]:
                 module = self.loadModule(self.config["metrics"][instance]["module"])
-                self.router.registerMetricModule(module, "metrics", **self.config["metrics"][instance].get("arguments",{}))
+                self.router.registerMetricModule(module, instance, **self.config["metrics"][instance].get("arguments",{}))
         else:
             module = self.loadModule("wishbone.builtin.output.null")
             self.router.registerMetricModule(module, "metrics_null")
@@ -167,7 +167,7 @@ class Start(Initialize):
         if "logs" in self.config:
             for instance in self.config["logs"]:
                 module = self.loadModule(self.config["logs"][instance]["module"])
-                self.router.registerLogModule(module, "logformatfilter", **self.config["logs"][instance].get("arguments",{}))
+                self.router.registerLogModule(module, instance, **self.config["logs"][instance].get("arguments",{}))
         else:
             loglevelfilter=self.loadModule("wishbone.builtin.logging.loglevelfilter")
             self.router.registerLogModule(loglevelfilter, "loglevelfilter")
@@ -188,7 +188,7 @@ class Debug(Initialize):
         if "logs" in self.config:
             for instance in self.config["logs"]:
                 module = self.loadModule(self.config["logs"][instance]["module"])
-                self.router.registerLogModule(module, "logformatfilter", **self.config["logs"][instance].get("arguments",{}))
+                self.router.registerLogModule(module, instance, **self.config["logs"][instance].get("arguments",{}))
         else:
             loglevelfilter=self.loadModule("wishbone.builtin.logging.loglevelfilter")
             self.router.registerLogModule(loglevelfilter, "loglevelfilter")
