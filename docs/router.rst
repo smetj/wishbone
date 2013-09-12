@@ -15,11 +15,29 @@ Queues are connected to each other using
 relationship.  If you require a "1 to N" or similar scenario you might have to
 use one of the builtin flow modules.
 
-The router also takes care of the logs and metrics produced by the modules.
-By registering Wishbone modules using
+The router also takes care of the logs and metrics produced by the modules. By
+registering Wishbone modules using the
 :py:func:`wishbone.router.Default.registerLogModule` and
 :py:func:`wishbone.router.Default.registerMetricModule` we can pretty much do
 what we want with them.
+
+
+Throttling
+==========
+
+The default router contains basic support for throttling.  When throttling is
+enabled by setting the the `throttle` variable to True, a greenthread scans
+periodically  all initialized modules to detect instances which have more
+events queued than defined in the `throttle_threshold` variable.  Once such a
+module is found, all upstream parent modules are identified and verified which
+one is the source of overflowing the children. When the parent module is
+identified, the router calls the
+:py:func:`wishbone.Actor.enableThrottling` and
+:py:func:`wishbone.Actor.disableThrottling` accordingly.
+
+It is up to the author of the module to override these functions and have them
+make correct measurements.
+
 
 Logging
 =======
@@ -70,4 +88,3 @@ metric data to Graphite.
 
 .. autoclass:: wishbone.tools.Measure
     :members: runTime
-
