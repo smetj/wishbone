@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '0.4.1'
+VERSION = '0.4.2'
 install_requires=['gevent>=1.0dev','argparse','greenlet>=0.3.2','jsonschema','prettytable','python-daemon',"pyyaml"]
 
 try:
@@ -50,7 +50,7 @@ setup(
     name=PROJECT,
     version=VERSION,
 
-    description='A Python application framework and CLI tool build and manage async event pipeline servers with minimal effort.',
+    description='A Python application framework and CLI tool to build and manage async event pipeline servers with minimal effort.',
     long_description=long_description,
 
     author='Jelle Smet',
