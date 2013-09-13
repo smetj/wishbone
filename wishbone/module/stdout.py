@@ -24,11 +24,11 @@
 
 from wishbone import Actor
 #from gevent import monkey;monkey.patch_sys()
-from sys import stdout
+from os import getpid
 
 class Format():
 
-    def __init__(self, complete, counter):
+    def __init__(self, complete, counter, pid):
         self.countervalue=-1
         if complete == True:
             self.complete = self.__returnComplete
@@ -38,9 +38,14 @@ class Format():
             self.counter = self.__returnCounter
         else:
             self.counter = self.__returnNoCounter
+        if pid == True:
+            self.pid_value = getpid()
+            self.pid = self.__returnPid
+        else:
+            self.pid = self.__returnNoPid
 
     def do(self, event):
-        return self.counter(self.complete(event))
+        return self.pid(self.counter(self.complete(event)))
 
     def __returnComplete(self, event):
         return event
@@ -54,6 +59,12 @@ class Format():
 
     def __returnNoCounter(self, event):
         return event
+
+    def __returnNoPid(self, event):
+        return event
+
+    def __returnPid(self, event):
+        return "PID-%s: %s"%(self.pid_value, event)
 
 class STDOUT(Actor):
     '''**A builtin Wishbone module prints events to STDOUT.**
@@ -74,18 +85,21 @@ class STDOUT(Actor):
         - prefix (str):     Puts the prefix in front of each printed event.
                             Default: ""
 
+        - pid (bool):       Includes the pid of the process producing the output.
+                            Default: False
+
     Queues:
 
         - inbox:    Incoming events.
     '''
 
-    def __init__(self, name, complete=False, counter=False, prefix=""):
+    def __init__(self, name, complete=False, counter=False, prefix="", pid=False):
         Actor.__init__(self, name, limit=0)
         self.deleteQueue("outbox")
         self.complete=complete
         self.counter=counter
         self.prefix=prefix
-        self.format=Format(complete, counter)
+        self.format=Format(complete, counter, pid)
 
     def consume(self,event):
         #todo(smet) This should work in a gevent context but it doesn't. Bug?
