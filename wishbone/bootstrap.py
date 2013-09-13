@@ -127,7 +127,10 @@ class Initialize(ModuleHandling):
 
         for instance in self.config["modules"]:
             module = self.loadModule(self.config["modules"][instance]["module"])
-            self.router.register(module, instance, **self.config["modules"][instance].get("arguments",{}))
+            try:
+                self.router.register(module, instance, **self.config["modules"][instance].get("arguments",{}))
+            except Exception as err:
+                raise Exception ("Failed to initialize module %s.  Reason: %s"%(instance, err))
 
     def setupConnections(self):
         '''Makes all connections defined in the bootstrap file.'''
@@ -389,6 +392,7 @@ class BootStrap():
         getattr(dispatch, arguments["command"])(**arguments)
 
 def main():
+    #BootStrap()
     try:
         BootStrap()
     except Exception as err:
