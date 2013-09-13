@@ -77,14 +77,13 @@ class ModuleHandling():
             try:
                 module_instance=module.load()
             except Exception as err:
-                print "Problem loading module %s  Reason: %s"%(module, err)
-                sys.exit(1)
+                raise Exception ("Problem loading module %s  Reason: %s"%(module, err))
 
         if module_instance != None:
             return module_instance
         else:
-            print "Failed to load module %s  Reason: Not found"%(entrypoint)
-            sys.exit(1)
+            raise Exception ("Failed to load module %s  Reason: Not found"%(entrypoint))
+
 
     def getVersion(self, entrypoint):
         modulename = vars(entrypoint)["module_name"].split('.')[0]
@@ -393,7 +392,8 @@ def main():
     try:
         BootStrap()
     except Exception as err:
-        sys.stderr.write("Failed to initialize instance.  Reason: %s\n"%(err))
+        sys.stderr.write("Failed to bootstrap instance.  Reason: %s\n"%(err))
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
