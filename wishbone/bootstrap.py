@@ -390,7 +390,10 @@ class BootStrap():
         getattr(dispatch, arguments["command"])(**arguments)
 
 def main():
-    BootStrap()
+    try:
+        BootStrap()
+    except Exception as err:
+        sys.stderr.write("Failed to initialize instance.  Reason: %s\n"%(err))
 
 if __name__ == '__main__':
     main()
