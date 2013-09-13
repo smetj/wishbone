@@ -148,6 +148,16 @@ class Default(LoopContextSwitcher):
         except ValueError:
             raise Exception("A queue name should have format 'module.queue'. Got '%s' instead"%(consumer))
 
+        try:
+            self.__modules[producer_module]
+        except:
+            raise Exception ("There is no module registered with name %s"%(producer_module))
+
+        try:
+            self.__modules[consumer_module]
+        except:
+            raise Exception ("There is no module registered with name %s"%(consumer_module))
+
         self.__modules[producer_module]["children"].append(consumer_module)
         self.__modules[consumer_module]["parents"].append(producer_module)
 
