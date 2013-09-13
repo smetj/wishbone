@@ -4,10 +4,11 @@ Patterns and best practices
 
 This section discusses some common usage patterns and best practices. Although
 most if not all are strictly spoken not required, they might be helpful in
-using Wishbone efficiently.
+using Wishbone efficiently.  I expect this section to change over time when
+more experience is gathered.
 
-Modules and event headers
--------------------------
+Event headers
+-------------
 
 Write data to headers
 ~~~~~~~~~~~~~~~~~~~~~
@@ -40,8 +41,8 @@ should look like:
     { "header":{"on_screen":{"one":1, "two":2}}, "data": object }
 
 
-Retrieve data from headers
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Retrieving data from headers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When a module requires specific information from the header which has been
 stored by another it should be possible to initiate the module using a
@@ -66,20 +67,18 @@ Consider following example module:
             print event["header"][self.key]["one"]
 
 
-Output modules
---------------
+Writing output modules
+----------------------
 
-Additional queues
-~~~~~~~~~~~~~~~~~
+Handle failed and successful events
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Output modules are responsible to deliver messages to the outside world.
-Preferably we want this to be done trustworthy.  If submitting events fails we
-might need he opportunity for other output modules to take over when desired.
-Maybe an input module needs to know whether the event was submitted
-successfully by the output modules (Think AMQP).
+Preferably we want this to be done as reliable as possible.  If submitting
+events fails (or succeeds) we might require a specific strategy to deal with
+these events.
 
-Although not required from a technical perspective, it might be nice to have
-the ability to *optionally* have 2 additional queues to output modules:
+A nice pattern is to optionally have 2 additional queues:
 
     - successful
     - failed
@@ -88,8 +87,33 @@ As you might guess, events which have been submitted successfully to the
 outside world are then submitted to the *successful* queue and the events
 which failed to go out to the *failed* queue.
 
-This behavior can be enabled/disabled during module initialization in order to
-define the best strategy required.
+It is up the user to connect these queues on their turn to another module
+to deal with them accordingly.
+
+Some practical examples:
+
+- After submitting an event successfully over TCP to the outside world is is submitted to the `successful` queue.  This queue is on its turn connected to the AMQP `acknowledge` queue to ascertain it is acknowledged from AMQP.
+- After submitting an event over TCP failed, the event is written to the failed queue from where it is forwarded to another module which writes the event to disk.
+
+When this functionality is not enabled, the expected behavior should be:
+
+- Successfully submitted events are discarded
+- Unsuccessfully submitted events should be send back to the `inbox` queue using :py:func:`wishbone.tools.WishboneQueue.rescue`.
+
+
 
 Retrying and monitors
 ~~~~~~~~~~~~~~~~~~~~~
+
+When possible an output module should have a "monitor" thread running
+endlessly in a separate greenthread trying to create a valid connection object
+to the outside service.
+
+This monitor process should be blocked until :py:func:`wishbone.Actor.consume`
+fails to submit an event via the connection object.
+
+During the time the monitor process is retrying to create a valid connection
+object, it should block the `inbox` queue using
+:py:func:`wishbone.tools.WishboneQueue.putLock` since it makes no sense to
+allow events to come into the module  since they can't be delivered to the
+outside world anyway.
