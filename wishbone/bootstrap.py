@@ -199,10 +199,10 @@ class Debug(Initialize):
             self.router.register(humanlogformatter, "humanlogformatter")
 
             stdout=self.loadModule("wishbone.builtin.output.stdout")
-            self.router.register(stdout, "stdout")
+            self.router.register(stdout, "stdout_logs")
 
             self.router.connect("loglevelfilter.outbox", "humanlogformatter.inbox")
-            self.router.connect("humanlogformatter.outbox", "stdout.inbox")
+            self.router.connect("humanlogformatter.outbox", "stdout_logs.inbox")
 
 class Stop(PidHandling):
 
@@ -397,6 +397,7 @@ def main():
         BootStrap()
     except Exception as err:
         sys.stderr.write("Failed to bootstrap instance.  Reason: %s\n"%(err))
+        sys.stderr.flush()
         sys.exit(1)
 
 if __name__ == '__main__':
