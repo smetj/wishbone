@@ -1,6 +1,19 @@
 Wishbone changelog
 ==================
 
+Version 0.4.3
+~~~~~~~~~~~~~
+
+- STDOUT module, possibility to print PID
+- Improvement: use stdout_logs as instance name when bootstrapping
+- Improve error handling when initializing a module with non existent variables
+- Improved catching errors when modules do not exist
+- Fix bug where modules were not checks if they are registered
+- Make sure bootstrap exits with clean error
+- Fix bug producer queue was referenced instead of consumer when autocreate
+- Add more info to documentation
+
+
 Version 0.4.2
 ~~~~~~~~~~~~~
 
