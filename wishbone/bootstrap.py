@@ -77,14 +77,13 @@ class ModuleHandling():
             try:
                 module_instance=module.load()
             except Exception as err:
-                print "Problem loading module %s  Reason: %s"%(module, err)
-                sys.exit(1)
+                raise Exception ("Problem loading module %s  Reason: %s"%(module, err))
 
         if module_instance != None:
             return module_instance
         else:
-            print "Failed to load module %s  Reason: Not found"%(entrypoint)
-            sys.exit(1)
+            raise Exception ("Failed to load module %s  Reason: Not found"%(entrypoint))
+
 
     def getVersion(self, entrypoint):
         modulename = vars(entrypoint)["module_name"].split('.')[0]
@@ -128,7 +127,10 @@ class Initialize(ModuleHandling):
 
         for instance in self.config["modules"]:
             module = self.loadModule(self.config["modules"][instance]["module"])
-            self.router.register(module, instance, **self.config["modules"][instance].get("arguments",{}))
+            try:
+                self.router.register(module, instance, **self.config["modules"][instance].get("arguments",{}))
+            except Exception as err:
+                raise Exception ("Failed to initialize module %s.  Reason: %s"%(instance, err))
 
     def setupConnections(self):
         '''Makes all connections defined in the bootstrap file.'''
@@ -197,10 +199,10 @@ class Debug(Initialize):
             self.router.register(humanlogformatter, "humanlogformatter")
 
             stdout=self.loadModule("wishbone.builtin.output.stdout")
-            self.router.register(stdout, "stdout")
+            self.router.register(stdout, "stdout_logs")
 
             self.router.connect("loglevelfilter.outbox", "humanlogformatter.inbox")
-            self.router.connect("humanlogformatter.outbox", "stdout.inbox")
+            self.router.connect("humanlogformatter.outbox", "stdout_logs.inbox")
 
 class Stop(PidHandling):
 
@@ -383,8 +385,14 @@ def main():
 
     arguments=vars(parser.parse_args())
 
-    dispatch=Dispatch()
-    getattr(dispatch, arguments["command"])(**arguments)
+def main():
+    #BootStrap()
+    try:
+        BootStrap()
+    except Exception as err:
+        sys.stderr.write("Failed to bootstrap instance.  Reason: %s\n"%(err))
+        sys.stderr.flush()
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
