@@ -169,7 +169,7 @@ class Default(LoopContextSwitcher):
                 consumer_queue_instance = getattr(self.__modules[consumer_module]["instance"].queuepool, consumer_queue)
                 break
             except :
-                self.logging.info("Queue %s does not exist in module %s.  Autocreate queue."%(producer_queue, producer_module))
+                self.logging.info("Queue %s does not exist in module %s.  Autocreate queue."%(consumer_queue, consumer_module))
                 self.__modules[consumer_module]["instance"].createQueue(consumer_queue)
 
         if self.__modules[consumer_module]["connections"].has_key(consumer_queue):
