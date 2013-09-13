@@ -148,6 +148,16 @@ class Default(LoopContextSwitcher):
         except ValueError:
             raise Exception("A queue name should have format 'module.queue'. Got '%s' instead"%(consumer))
 
+        try:
+            self.__modules[producer_module]
+        except:
+            raise Exception ("There is no module registered with name %s"%(producer_module))
+
+        try:
+            self.__modules[consumer_module]
+        except:
+            raise Exception ("There is no module registered with name %s"%(consumer_module))
+
         self.__modules[producer_module]["children"].append(consumer_module)
         self.__modules[consumer_module]["parents"].append(producer_module)
 
@@ -169,7 +179,7 @@ class Default(LoopContextSwitcher):
                 consumer_queue_instance = getattr(self.__modules[consumer_module]["instance"].queuepool, consumer_queue)
                 break
             except :
-                self.logging.info("Queue %s does not exist in module %s.  Autocreate queue."%(producer_queue, producer_module))
+                self.logging.info("Queue %s does not exist in module %s.  Autocreate queue."%(consumer_queue, consumer_module))
                 self.__modules[consumer_module]["instance"].createQueue(consumer_queue)
 
         if self.__modules[consumer_module]["connections"].has_key(consumer_queue):
