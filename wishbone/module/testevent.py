@@ -55,7 +55,6 @@ class TestEvent(Actor, SleepThrottle):
         Actor.__init__(self, name, setupbasic=False)
         SleepThrottle.__init__(self)
         self.createQueue("outbox")
-        self.logging.info ( 'Initiated' )
         self.name = name
         if interval < 0:
             raise SetupError ("Interval should be bigger or equal to 0.")
