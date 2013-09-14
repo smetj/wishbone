@@ -51,7 +51,6 @@ class Graphite(Actor):
         Actor.__init__(self, name)
         self.name=name
         self.script_name = argv[0].replace(".py","")
-        self.logging.info("Initiated")
 
     def consume(self, event):
         for item in [ "queue","function" ]:
