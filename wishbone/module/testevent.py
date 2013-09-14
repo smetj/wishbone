@@ -69,7 +69,6 @@ class TestEvent(Actor, SleepThrottle):
         spawn(self.go)
 
     def go(self):
-        self.logging.info('Started')
         switcher = self.getContextSwitcher(100, self.loop)
         while switcher.do():
             self.throttle()
