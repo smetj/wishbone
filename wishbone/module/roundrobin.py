@@ -54,7 +54,6 @@ class RoundRobin(Actor):
         Actor.__init__(self, name, limit=0)
         self.deleteQueue("outbox")
         self.randomize=randomize
-        self.logging.info("Initiated.")
 
     def preHook(self):
         destination_queues = self.queuepool.getQueueInstances()
