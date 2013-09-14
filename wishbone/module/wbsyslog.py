@@ -51,7 +51,6 @@ class Syslog(Actor):
     def __init__(self, name):
         Actor.__init__(self, name, limit=0)
         self.name=name
-        self.logging.info("Initiated")
 
     def preHook(self):
         syslog.openlog("%s(%s)"%(os.path.basename(sys.argv[0]), os.getpid()))

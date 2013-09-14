@@ -54,7 +54,6 @@ class HumanLogFormatter(Actor):
         Actor.__init__(self, name)
         self.name=name
         self.levels={0:"emergency",1:"alert",2:"critical",3:"error",4:"warning",5:"notice",6:"informational",7:"debug"}
-        self.logging.info("Initiated")
 
     def consume(self, event):
         event["data"] = ("%s %s %s %s: %s"%(
