@@ -1,6 +1,11 @@
 Wishbone changelog
 ==================
 
+Version 0.4.4
+~~~~~~~~~~~~~
+
+- Colorize log output in debug mode.
+
 Version 0.4.3
 ~~~~~~~~~~~~~
 
