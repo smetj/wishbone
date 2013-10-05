@@ -48,6 +48,9 @@ class Consumer(LoopContextSwitcher):
         self.__greenlet=[]
         self.metrics={}
 
+        self.__enable_consuming=Event()
+        self.__enable_consuming.set()
+
     def start(self):
         '''Starts to execute all the modules registered <self.consume> functions.'''
 
@@ -104,6 +107,21 @@ class Consumer(LoopContextSwitcher):
             except QueueFull:
                 destination.waitUntilFreePlace()
 
+    def enableConsuming(self):
+        '''Sets a flag which makes the router start executing consume().
+
+        The module will starts/continues to excete the consume() function.'''
+
+        self.__enable_consuming.set()
+        self.logging.debug("enableConsuming called. Started consuming.")
+
+    def disableConsuming(self):
+        '''Sets a flag which makes the router stop executing consume().
+
+        The module will not process further any events at this point until enableConsuming() is called.'''
+
+        self.__enable_consuming.clear()
+        self.logging.debug("disableConsuming called. Stopped consuming.")
 
     def __doConsume(self):
         '''Just a placeholder.
@@ -121,6 +139,7 @@ class Consumer(LoopContextSwitcher):
         context_switch_loop = self.getContextSwitcher(self.context_switch, self.loop)
 
         while context_switch_loop.do():
+            self.__enable_consuming.wait()
             try:
                 event = q.get()
             except QueueLocked:
