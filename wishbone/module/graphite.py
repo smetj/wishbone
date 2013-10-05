@@ -57,6 +57,6 @@ class Graphite(Actor):
             for one in event["data"][item]:
                 for two in event["data"][item][one]:
                     try:
-                        self.queuepool.outbox.put({"header":{}, "data":"wishbone.%s.%s.%s.%s %s %s\n"%(self.script_name, item, one, two, event["data"][item][one][two], time())})
+                        self.queuepool.outbox.put({"header":{}, "data":"wishbone.%s.%s.%s.%s %s %s"%(self.script_name, item, one, two, event["data"][item][one][two], time())})
                     except:
                         pass
