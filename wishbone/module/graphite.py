@@ -27,17 +27,16 @@ from wishbone import Actor
 from time import time
 from gevent import socket
 from sys import argv
-
+from os.path import basename
 
 class Graphite(Actor):
 
     '''**A builtin Wishbone module which formats the internal metric format into Graphite format.**
 
-    The module finds out the script name it runs from, strips of the .py part
-    and uses that as part of the metric name.  For example:
+    Incoming metrics have following format:
 
-    - wishbone_test.function.tcpout.consume.hits
-    - wishbone_test.queue.buffer.inbox.in_rate
+        (time, type, source, name, value, unit, (tag1, tag2))
+        (1381002603.726132, 'wishbone', 'wishbone', 'queue.outbox.in_rate', 0, '', ())
 
 
 
@@ -50,13 +49,7 @@ class Graphite(Actor):
     def __init__(self, name):
         Actor.__init__(self, name)
         self.name=name
-        self.script_name = argv[0].replace(".py","")
+        self.script_name = basename(argv[0]).replace(".py","")
 
     def consume(self, event):
-        for item in [ "queue","function" ]:
-            for one in event["data"][item]:
-                for two in event["data"][item][one]:
-                    try:
-                        self.queuepool.outbox.put({"header":{}, "data":"wishbone.%s.%s.%s.%s %s %s"%(self.script_name, item, one, two, event["data"][item][one][two], time())})
-                    except:
-                        pass
+        self.queuepool.outbox.put({"header":{}, "data":"%s.%s %s %s"%(event["data"][2], event["data"][3], event["data"][4], event["data"][0])})
