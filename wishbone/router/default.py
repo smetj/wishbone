@@ -30,7 +30,9 @@ from wishbone.errors import QueueMissing, QueueOccupied, SetupError, QueueFull, 
 from gevent import spawn, sleep, signal, joinall, kill, Greenlet
 from gevent.event import Event
 from uuid import uuid4
-import pprint
+from time import time
+from os.path import basename
+from sys import argv
 
 class Default(LoopContextSwitcher):
     '''The default Wishbone router.
@@ -109,6 +111,8 @@ class Default(LoopContextSwitcher):
 
         self.__runLogs=Event()
         self.__runLogs.clear()
+
+        self.script_name = basename(argv[0]).replace(".py","")
 
     def block(self):
         ''' A convenience function which blocks untill all registered
@@ -366,16 +370,27 @@ class Default(LoopContextSwitcher):
 
         '''A background greenlet which periodically gathers the metrics of all
         queues in all registered modules. These metrics are then forwarded to
-        the registered metrics module.'''
+        the registered metrics module.
 
+
+        Metrics have following format:
+
+            (time, type, source, name, value, unit, (tag1, tag2))
+        '''
+        now = time()
         while not self.__runConsumers.isSet():
-            metrics={"queue":{},"function":{}}
             if hasattr(module, "metrics"):
                 for fn in module.metrics:
-                    metrics["function"]["%s.%s"%(module.name, fn)]=module.metrics[fn]
+                    metric=(now, "wishbone", self.script_name, "function.%s.%s.total_time"%(module.name, fn), module.metrics[fn]["total_time"], '',())
+                    self.metrics.put({"header":{}, "data":metric})
+                    metric=(now, "wishbone", self.script_name, "function.%s.%s.hits"%(module.name, fn), module.metrics[fn]["hits"], '',())
+                    self.metrics.put({"header":{}, "data":metric})
+
             for queue in module.queuepool.listQueues():
-                metrics["queue"]["%s.%s"%(module.name, queue)]=getattr(module.queuepool, queue).stats()
-            self.metrics.put({"header":{},"data":metrics})
+                stats = getattr(module.queuepool, queue).stats()
+                for item in stats:
+                    metric=(now, "wishbone", self.script_name, "queue.%s.%s"%(queue, item), stats[item], '', ())
+                    self.metrics.put({"header":{}, "data":metric})
             sleep(self.interval)
 
     def __forwardEvents(self, source, destination):
