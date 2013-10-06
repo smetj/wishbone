@@ -99,7 +99,7 @@ class TippingBucket(Actor):
     def reaper(self):
         '''Check whether our cache is expired and flush the buffer if its the case.'''
 
-        while self.block():
+        while self.loop():
             if self.buff_age != 0:
                 if (float(time()) - float(self.buff_age)) > float(self.age):
                     self.flushBuffer()
