@@ -42,14 +42,17 @@ class Graphite(Actor):
 
     Parameters:
 
-        name(str):  The name of the module.
+        - name(str):    The name of the module.
+
+        - prefix(str):  Some prefix to put in front of the metric name.
 
     '''
 
-    def __init__(self, name):
+    def __init__(self, name, prefix='x'):
         Actor.__init__(self, name)
         self.name=name
+        self.prefix=prefix
         self.script_name = basename(argv[0]).replace(".py","")
 
     def consume(self, event):
-        self.queuepool.outbox.put({"header":{}, "data":"%s.%s %s %s"%(event["data"][2], event["data"][3], event["data"][4], event["data"][0])})
+        self.queuepool.outbox.put({"header":{}, "data":"%s%s.%s %s %s"%(self.prefix, event["data"][2], event["data"][3], event["data"][4], event["data"][0])})
