@@ -68,7 +68,12 @@ class RoundRobin(Actor):
             self.chooseQueue=self.__chooseRandomQueue
 
     def consume(self, event):
-        self.chooseQueue().put(event)
+        while self.loop():
+            try:
+                self.chooseQueue().put(event)
+                break
+            except:
+                pass
 
     def __chooseNextQueue(self):
         return self.cycle.next()
