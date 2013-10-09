@@ -54,6 +54,7 @@ class RoundRobin(Actor):
         Actor.__init__(self, name, limit=0)
         self.deleteQueue("outbox")
         self.randomize=randomize
+        self.context_switch_loop = self.getContextSwitcher(10, self.loop)
 
     def preHook(self):
         destination_queues = self.queuepool.getQueueInstances()
@@ -68,7 +69,7 @@ class RoundRobin(Actor):
             self.chooseQueue=self.__chooseRandomQueue
 
     def consume(self, event):
-        while self.loop():
+        while self.context_switch_loop.do():
             try:
                 self.chooseQueue().put(event)
                 break
