@@ -48,7 +48,7 @@ class Graphite(Actor):
 
     '''
 
-    def __init__(self, name, prefix='x'):
+    def __init__(self, name, prefix=''):
         Actor.__init__(self, name)
         self.name=name
         self.prefix=prefix
