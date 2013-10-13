@@ -379,8 +379,9 @@ class Default(LoopContextSwitcher):
 
             (time, type, source, name, value, unit, (tag1, tag2))
         '''
-        now = time()
+
         while not self.__runConsumers.isSet():
+            now = time()
             if hasattr(module, "metrics"):
                 for fn in module.metrics:
                     metric=(now, "wishbone", self.script_name, "function.%s.%s.total_time"%(module.name, fn), module.metrics[fn]["total_time"], '',())
