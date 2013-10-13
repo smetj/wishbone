@@ -30,7 +30,9 @@ from wishbone.errors import QueueMissing, QueueOccupied, SetupError, QueueFull, 
 from gevent import spawn, sleep, signal, joinall, kill, Greenlet
 from gevent.event import Event
 from uuid import uuid4
-import pprint
+from time import time
+from os.path import basename
+from sys import argv
 
 class Default(LoopContextSwitcher):
     '''The default Wishbone router.
@@ -109,6 +111,8 @@ class Default(LoopContextSwitcher):
 
         self.__runLogs=Event()
         self.__runLogs.clear()
+
+        self.script_name = basename(argv[0]).replace(".py","")
 
     def block(self):
         ''' A convenience function which blocks untill all registered
@@ -190,9 +194,12 @@ class Default(LoopContextSwitcher):
 
         self.__modules[consumer_module]["connections"]={}
 
-        self.__modules[consumer_module]["connections"][consumer_queue]=spawn (self.__forwardEvents, producer_queue_instance, consumer_queue_instance)
-        #store a reference of the greenthread to the other side.
-        self.__modules[producer_module]["connections"][producer_queue]=self.__modules[consumer_module]["connections"][consumer_queue]
+        self.__modules[consumer_module]["connections"][consumer_queue]=producer_queue
+        self.__modules[producer_module]["connections"][producer_queue]=consumer_queue
+
+        #self.__modules[producer_module]["instance"].queuepool.outbox=self.__modules[consumer_module]["instance"].queuepool.inbox
+        setattr(self.__modules[producer_module]["instance"].queuepool, producer_queue, consumer_queue_instance)
+
 
     def getChildren(self, instance):
         children=[]
@@ -362,22 +369,6 @@ class Default(LoopContextSwitcher):
 
         self.__exit.set()
 
-    def __gatherMetrics(self, module):
-
-        '''A background greenlet which periodically gathers the metrics of all
-        queues in all registered modules. These metrics are then forwarded to
-        the registered metrics module.'''
-
-        while not self.__runConsumers.isSet():
-            metrics={"queue":{},"function":{}}
-            if hasattr(module, "metrics"):
-                for fn in module.metrics:
-                    metrics["function"]["%s.%s"%(module.name, fn)]=module.metrics[fn]
-            for queue in module.queuepool.listQueues():
-                metrics["queue"]["%s.%s"%(module.name, queue)]=getattr(module.queuepool, queue).stats()
-            self.metrics.put({"header":{},"data":metrics})
-            sleep(self.interval)
-
     def __forwardEvents(self, source, destination):
 
         '''The background greenthread which continuously consumes the producing
@@ -411,6 +402,35 @@ class Default(LoopContextSwitcher):
                 else:
                     self.logging.warn("Invalid event format.")
                     self.logging.debug("Invalid event format. %s"%(event))
+
+
+    def __gatherMetrics(self, module):
+
+        '''A background greenlet which periodically gathers the metrics of all
+        queues in all registered modules. These metrics are then forwarded to
+        the registered metrics module.
+
+
+        Metrics have following format:
+
+            (time, type, source, name, value, unit, (tag1, tag2))
+        '''
+
+        while not self.__runConsumers.isSet():
+            now = time()
+            if hasattr(module, "metrics"):
+                for fn in module.metrics:
+                    metric=(now, "wishbone", self.script_name, "function.%s.%s.total_time"%(module.name, fn), module.metrics[fn]["total_time"], '',())
+                    self.metrics.put({"header":{}, "data":metric})
+                    metric=(now, "wishbone", self.script_name, "function.%s.%s.hits"%(module.name, fn), module.metrics[fn]["hits"], '',())
+                    self.metrics.put({"header":{}, "data":metric})
+
+            for queue in module.queuepool.listQueues():
+                stats = getattr(module.queuepool, queue).stats()
+                for item in stats:
+                    metric=(now, "wishbone", self.script_name, "queue.%s.%s.%s"%(module.name, queue, item), stats[item], '', ())
+                    self.metrics.put({"header":{}, "data":metric})
+            sleep(self.interval)
 
     def __forwardLogs(self, source, destination):
 
@@ -446,25 +466,6 @@ class Default(LoopContextSwitcher):
         self.logging.info("Received SIGINT. Shutting down.")
         self.stop()
 
-    def __checkIntegrity(self, event):
-        '''Checks the integrity of the messages passed over the different queues.
-
-        The format of the messages should be
-
-        { 'headers': {}, data: {} }
-        '''
-
-        if type(event) is dict:
-            if len(event.keys()) == 2:
-                if "header" in event and "data" in event:
-                    return True
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
-
     def __doUUID(self, event):
         try:
             event["header"]["uuid"]
@@ -474,6 +475,20 @@ class Default(LoopContextSwitcher):
 
     def __noUUID(self, event):
         return event
+
+    def __checkIntegrity(self, event):
+        '''Checks the integrity of the messages passed over the different queues.
+
+        The format of the messages should be
+
+        { 'headers': {}, data: {} }
+        '''
+        try:
+            event["header"]
+            event["data"]
+            return True
+        except:
+            return False
 
     def throttleMonitor(self):
         """Sweeps over all registered modules and tries to detect modules with  problematic flow rates.
@@ -520,11 +535,3 @@ class Default(LoopContextSwitcher):
                     self.logging.info("Throttling is requested but module has no disableThrottling() function.")
                 break
             sleep(1)
-
-    # def statsMonitor(self):
-    #     while self.loop():
-    #         for module in self.__modules:
-    #             for queue in self.__modules[module]["instance"].queuepool.listQueues():
-    #                 print "%s.%s: %s"%(module, queue, str(getattr(self.__modules[module]["instance"].queuepool, queue).stats()))
-    #         print
-    #         sleep(1)

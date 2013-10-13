@@ -48,16 +48,10 @@ class Actor(BaseActor, Consumer):
                                     consumed from a queue.
                                     Default: 100
 
-            - limit(int):           When more than 0 the <consume> function is executed in a
-                                    greenthread allowing parallel execution for each incoming
-                                    event.  A threadpool of size <limit> is used to limit the
-                                    number of parallel greenthreads.
-                                    Default: 0
-
     '''
-    def __init__(self, name,  setupbasic=True, context_switch=100, limit=0):
+    def __init__(self, name,  setupbasic=True, context_switch=100):
         BaseActor.__init__(self, name)
-        Consumer.__init__(self, setupbasic=setupbasic, context_switch=context_switch, limit=limit)
+        Consumer.__init__(self, setupbasic=setupbasic, context_switch=context_switch)
 
     def enableThrottling(self):
         '''Should be overridden by the module author when throttling
