@@ -369,6 +369,41 @@ class Default(LoopContextSwitcher):
 
         self.__exit.set()
 
+    def __forwardEvents(self, source, destination):
+
+        '''The background greenthread which continuously consumes the producing
+        queue and dumps that data into the consuming queue.'''
+
+        #todo(smetj): make this cycler setup more dynamic?  Auto adjust the amount
+        #cycles before context switch to achieve sweetspot?
+
+        context_switch_loop = self.getContextSwitcher(self.context_switch, self.loop)
+
+        while context_switch_loop.do():
+            try:
+                event = source.get()
+            except QueueLocked:
+                source.waitUntilGetAllowed()
+            else:
+                if self.__checkIntegrity(event):
+                    event=self.__UUID(event)
+                    try:
+                        destination.put(event)
+                    except QueueLocked:
+                        source.putLock()
+                        source.rescue(event)
+                        destination.waitUntilPutAllowed()
+                        source.putUnlock()
+                    except QueueFull:
+                        source.putLock()
+                        source.rescue(event)
+                        destination.waitUntilFreePlace()
+                        source.putUnlock()
+                else:
+                    self.logging.warn("Invalid event format.")
+                    self.logging.debug("Invalid event format. %s"%(event))
+
+
     def __gatherMetrics(self, module):
 
         '''A background greenlet which periodically gathers the metrics of all
@@ -441,6 +476,20 @@ class Default(LoopContextSwitcher):
     def __noUUID(self, event):
         return event
 
+    def __checkIntegrity(self, event):
+        '''Checks the integrity of the messages passed over the different queues.
+
+        The format of the messages should be
+
+        { 'headers': {}, data: {} }
+        '''
+        try:
+            event["header"]
+            event["data"]
+            return True
+        except:
+            return False
+
     def throttleMonitor(self):
         """Sweeps over all registered modules and tries to detect modules with  problematic flow rates.
         Once found a moduleMonitor greenthread is spawned which is reponsible for enabling and disabling
@@ -486,11 +535,3 @@ class Default(LoopContextSwitcher):
                     self.logging.info("Throttling is requested but module has no disableThrottling() function.")
                 break
             sleep(1)
-
-    # def statsMonitor(self):
-    #     while self.loop():
-    #         for module in self.__modules:
-    #             for queue in self.__modules[module]["instance"].queuepool.listQueues():
-    #                 print "%s.%s: %s"%(module, queue, str(getattr(self.__modules[module]["instance"].queuepool, queue).stats()))
-    #         print
-    #         sleep(1)
