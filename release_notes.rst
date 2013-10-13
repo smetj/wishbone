@@ -10,6 +10,7 @@ Version 0.4.4
 - Use a more generic internal metric format.
 - Directly use destination queue in the source module.
 - When using context switch, do not actually sleep.
+- Removed unused limit parameter when registering a module.
 
 
 Version 0.4.3
