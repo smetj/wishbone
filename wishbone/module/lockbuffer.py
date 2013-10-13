@@ -45,7 +45,7 @@ class LockBuffer(Actor):
     '''
 
     def __init__(self, name, size=100):
-        Actor.__init__(self, name, limit=0, setupbasic=False)
+        Actor.__init__(self, name, setupbasic=False)
         self.createQueue("inbox", size)
         self.createQueue("outbox")
         self.registerConsumer(self.consume, self.queuepool.inbox)
