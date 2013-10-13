@@ -38,10 +38,9 @@ class LogLevelFilter(Actor):
     '''
 
     def __init__(self, name, max_level=6):
-        Actor.__init__(self, name, limit=0)
+        Actor.__init__(self, name)
         self.name=name
         self.max_level=max_level
-        self.logging.info("Initiated")
 
     def consume(self, event):
 
