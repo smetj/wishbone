@@ -31,22 +31,18 @@ from wishbone.tools import LoopContextSwitcher
 
 class Consumer(LoopContextSwitcher):
 
-    def __init__(self, setupbasic=True, context_switch=100, limit=0):
+    def __init__(self, setupbasic=True, context_switch=100):
         self.__doConsumes=[]
         self.__block=Event()
         self.__block.clear()
         self.context_switch=context_switch
         if setupbasic == True:
             self.__setupBasic()
-        self.limit=limit
-        if limit == 0:
-            self.logging.info("Limit is 0.  Doing sequential consume.")
-            self.__doConsume = self.__doSequentialConsume
-        else:
-            self.logging.info("Limit is %s.  Doing pooled consume."%(self.limit))
-            self.__doConsume = self.__doPooledConsume
         self.__greenlet=[]
         self.metrics={}
+
+        self.__enable_consuming=Event()
+        self.__enable_consuming.set()
 
     def start(self):
         '''Starts to execute all the modules registered <self.consume> functions.'''
@@ -104,27 +100,41 @@ class Consumer(LoopContextSwitcher):
             except QueueFull:
                 destination.waitUntilFreePlace()
 
+    def enableConsuming(self):
+        '''Sets a flag which makes the router start executing consume().
 
-    def __doConsume(self):
-        '''Just a placeholder.
+        The module will starts/continues to excete the consume() function.'''
 
-        Will be replaced by self.__doInfiniteConsume or
-        self.__doPoolConsume depending on init.'''
+        self.__enable_consuming.set()
+        self.logging.debug("enableConsuming called. Started consuming.")
 
-    def __doSequentialConsume(self, fc, q):
+    def disableConsuming(self):
+        '''Sets a flag which makes the router stop executing consume().
+
+        The module will not process further any events at this point until enableConsuming() is called.'''
+
+        self.__enable_consuming.clear()
+        self.logging.debug("disableConsuming called. Stopped consuming.")
+
+
+    def __doConsume(self, fc, q):
         '''Executes <fc> against each element popped from <q>.
-
-        For each popped element <fc> is spawned as a greenlet with the element
-        as a variable.  There is no limit on the number of greenthreads
-        spawned. '''
+        '''
 
         context_switch_loop = self.getContextSwitcher(self.context_switch, self.loop)
 
         while context_switch_loop.do():
+            self.__enable_consuming.wait()
             try:
                 event = q.get()
+                try:
+                    event["header"]
+                    event["data"]
+                except:
+                    self.logging.warn("Invalid event format received from parent. Purged")
+                    continue
             except QueueLocked:
-                self.logging.warn("Queue %s locked."%(str(q)))
+                self.logging.debug("Queue %s locked."%(str(q)))
                 q.waitUntilGetAllowed()
             else:
                 try:
@@ -133,48 +143,6 @@ class Consumer(LoopContextSwitcher):
                     self.logging.warn("Problem executing %s. Sleeping for a second. Reason: %s"%(str(fc),err))
                     q.rescue(event)
                     sleep(1)
-
-        self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
-
-    def __doPooledConsume(self, fc, q):
-        '''Executes <fc> against each element popped from <q>.
-
-        For each popped element <fc> is spawned as a greenlet with the element
-        as a variable.  There is a limit on the number of greenthreads
-        spawned.  This is achieved by enabling a putlock on <q> when total
-        number of running greenthreads <limit> is defined (using a semaphore)
-        and unlocked whenever a slot is free.  Actually this doesn't limit the
-        number of allowed greenthreads but it keeps  incoming data to the
-        queue artificially limited which as a result controls the number of
-        concurrent greenthreads. '''
-
-        concurrent = Semaphore(self.limit)
-
-        def executor(fc, event, q, concurrent):
-            try:
-                fc(event)
-            except Exception as err:
-                self.logging.warn("Problem executing %s. Sleeping for a second. Reason: %s"%(str(fc),err))
-                q.rescue(event)
-                sleep(1)
-            else:
-                q.putUnlock()
-            concurrent.release()
-
-        while self.loop():
-            try:
-                concurrent.acquire()
-            except:
-                q.putLock()
-                concurrent.wait()
-            else:
-                try:
-                    event = q.get()
-                except QueueLocked:
-                    sleep(0.1)
-                else:
-                    spawn(executor,fc, event, q, concurrent)
-            sleep()
 
         self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
 
