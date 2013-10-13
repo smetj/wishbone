@@ -51,7 +51,7 @@ class RoundRobin(Actor):
     '''
 
     def __init__(self, name, randomize=False):
-        Actor.__init__(self, name, limit=0)
+        Actor.__init__(self, name)
         self.deleteQueue("outbox")
         self.randomize=randomize
         self.context_switch_loop = self.getContextSwitcher(10, self.loop)
