@@ -56,7 +56,7 @@ class Fanout(Actor):
     '''
 
     def __init__(self, name, clone=False):
-        Actor.__init__(self, name, limit=0)
+        Actor.__init__(self, name)
         if clone == False:
             self.do = self.__consumeNoDeep
         else:
