@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Modules &mdash; Wishbone 0.4.3 documentation</title>
+    <title>Modules &mdash; Wishbone 0.4.4 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.3',
+        VERSION:     '0.4.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Wishbone 0.4.3 documentation" href="index.html" />
+    <link rel="top" title="Wishbone 0.4.4 documentation" href="index.html" />
     <link rel="next" title="Bootstraping on CLI" href="bootstrap.html" />
     <link rel="prev" title="Router" href="router.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -48,7 +48,7 @@
         <li class="right" >
           <a href="router.html" title="Router"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -180,7 +180,7 @@ out.</p>
 <h3>STDOUT<a class="headerlink" href="#stdout" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="wishbone.module.STDOUT">
-<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">STDOUT</tt><big>(</big><em>name</em>, <em>complete=False</em>, <em>counter=False</em>, <em>prefix=''</em><big>)</big><a class="headerlink" href="#wishbone.module.STDOUT" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">STDOUT</tt><big>(</big><em>name</em>, <em>complete=False</em>, <em>counter=False</em>, <em>prefix=''</em>, <em>pid=False</em><big>)</big><a class="headerlink" href="#wishbone.module.STDOUT" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A builtin Wishbone module prints events to STDOUT.</strong></p>
 <p>Prints incoming events to STDOUT. When &lt;complete&gt; is True,
 the complete event including headers is printed to STDOUT.</p>
@@ -204,6 +204,12 @@ the complete event including headers is printed to STDOUT.</p>
 <li><dl class="first docutils">
 <dt>prefix (str):     Puts the prefix in front of each printed event.</dt>
 <dd><p class="first last">Default: &#8220;&#8221;</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>pid (bool):       Includes the pid of the process producing the output.</dt>
+<dd><p class="first last">Default: False</p>
 </dd>
 </dl>
 </li>
@@ -443,7 +449,7 @@ produced by the modules and collected by the router.</p>
 <h3>humanlogformatter<a class="headerlink" href="#humanlogformatter" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="wishbone.module.HumanLogFormatter">
-<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">HumanLogFormatter</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.module.HumanLogFormatter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">HumanLogFormatter</tt><big>(</big><em>name</em>, <em>colorize=True</em><big>)</big><a class="headerlink" href="#wishbone.module.HumanLogFormatter" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A builtin Wishbone module which formats Wishbone log events.</strong></p>
 <p>Logs are formated from the internal wishbone format into a more
 pleasing human readable format suited for STDOUT or a logfile.</p>
@@ -484,17 +490,19 @@ metrics produced by the modules and collected by the router.</p>
 <h3>graphite<a class="headerlink" href="#graphite" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="wishbone.module.Graphite">
-<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Graphite</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.module.Graphite" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Graphite</tt><big>(</big><em>name</em>, <em>prefix=''</em><big>)</big><a class="headerlink" href="#wishbone.module.Graphite" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A builtin Wishbone module which formats the internal metric format into Graphite format.</strong></p>
-<p>The module finds out the script name it runs from, strips of the .py part
-and uses that as part of the metric name.  For example:</p>
-<ul class="simple">
-<li>wishbone_test.function.tcpout.consume.hits</li>
-<li>wishbone_test.queue.buffer.inbox.in_rate</li>
-</ul>
+<p>Incoming metrics have following format:</p>
+<blockquote>
+<div>(time, type, source, name, value, unit, (tag1, tag2))
+(1381002603.726132, &#8216;wishbone&#8217;, &#8216;wishbone&#8217;, &#8216;queue.outbox.in_rate&#8217;, 0, &#8216;&#8217;, ())</div></blockquote>
 <p>Parameters:</p>
 <blockquote>
-<div>name(str):  The name of the module.</div></blockquote>
+<div><ul class="simple">
+<li>name(str):    The name of the module.</li>
+<li>prefix(str):  Some prefix to put in front of the metric name.</li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 </div>
@@ -580,7 +588,7 @@ and uses that as part of the metric name.  For example:</p>
         <li class="right" >
           <a href="router.html" title="Router"
              >previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.3 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
