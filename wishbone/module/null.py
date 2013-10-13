@@ -42,7 +42,7 @@ class Null(Actor):
     '''
 
     def __init__(self, name):
-        Actor.__init__(self, name, limit=0)
+        Actor.__init__(self, name)
 
     def consume(self, event):
         pass
