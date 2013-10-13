@@ -397,40 +397,6 @@ class Default(LoopContextSwitcher):
                     self.metrics.put({"header":{}, "data":metric})
             sleep(self.interval)
 
-    def __forwardEvents(self, source, destination):
-
-        '''The background greenthread which continuously consumes the producing
-        queue and dumps that data into the consuming queue.'''
-
-        #todo(smetj): make this cycler setup more dynamic?  Auto adjust the amount
-        #cycles before context switch to achieve sweetspot?
-
-        context_switch_loop = self.getContextSwitcher(self.context_switch, self.loop)
-
-        while context_switch_loop.do():
-            try:
-                event = source.get()
-            except QueueLocked:
-                source.waitUntilGetAllowed()
-            else:
-                if self.__checkIntegrity(event):
-                    event=self.__UUID(event)
-                    try:
-                        destination.put(event)
-                    except QueueLocked:
-                        source.putLock()
-                        source.rescue(event)
-                        destination.waitUntilPutAllowed()
-                        source.putUnlock()
-                    except QueueFull:
-                        source.putLock()
-                        source.rescue(event)
-                        destination.waitUntilFreePlace()
-                        source.putUnlock()
-                else:
-                    self.logging.warn("Invalid event format.")
-                    self.logging.debug("Invalid event format. %s"%(event))
-
     def __forwardLogs(self, source, destination):
 
         '''The background greenthread which continuously consumes the producing
@@ -464,25 +430,6 @@ class Default(LoopContextSwitcher):
 
         self.logging.info("Received SIGINT. Shutting down.")
         self.stop()
-
-    def __checkIntegrity(self, event):
-        '''Checks the integrity of the messages passed over the different queues.
-
-        The format of the messages should be
-
-        { 'headers': {}, data: {} }
-        '''
-
-        if type(event) is dict:
-            if len(event.keys()) == 2:
-                if "header" in event and "data" in event:
-                    return True
-                else:
-                    return False
-            else:
-                return False
-        else:
-            return False
 
     def __doUUID(self, event):
         try:
