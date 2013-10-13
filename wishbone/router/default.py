@@ -197,8 +197,9 @@ class Default(LoopContextSwitcher):
         self.__modules[consumer_module]["connections"][consumer_queue]=producer_queue
         self.__modules[producer_module]["connections"][producer_queue]=consumer_queue
 
-        self.__modules[producer_module]["instance"].queuepool.outbox=self.__modules[consumer_module]["instance"].queuepool.inbox
-        #producer_queue_instance = consumer_queue_instance
+        #self.__modules[producer_module]["instance"].queuepool.outbox=self.__modules[consumer_module]["instance"].queuepool.inbox
+        setattr(self.__modules[producer_module]["instance"].queuepool, producer_queue, consumer_queue_instance)
+
 
     def getChildren(self, instance):
         children=[]
