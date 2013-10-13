@@ -44,7 +44,7 @@ class Funnel(Actor):
     '''
 
     def __init__(self, name):
-        Actor.__init__(self, name, limit=0)
+        Actor.__init__(self, name)
 
     def preHook(self):
         source_queues = self.queuepool.getQueueInstances()
@@ -55,4 +55,9 @@ class Funnel(Actor):
             self.registerConsumer(self.consume, queue)
 
     def consume(self, event):
-        self.queuepool.outbox.put(event)
+        try:
+            self.queuepool.outbox.put(event)
+        except:
+            self.queuepool.inbox.putLock()
+            self.queuepool.inbox.rescue(event)
+            self.queuepool.outbox.waitUntilPutAllowed()

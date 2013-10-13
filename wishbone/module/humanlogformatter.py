@@ -50,17 +50,42 @@ class HumanLogFormatter(Actor):
 
     '''
 
-    def __init__(self, name):
+    def __init__(self, name, colorize=True):
         Actor.__init__(self, name)
         self.name=name
         self.levels={0:"emergency",1:"alert",2:"critical",3:"error",4:"warning",5:"notice",6:"informational",7:"debug"}
-        self.logging.info("Initiated")
+        self.colors={
+            0:"\x1B[0;35m",
+            1:"\x1B[1;35m",
+            2:"\x1B[0;31m",
+            3:"\x1B[1;31m",
+            4:"\x1B[1;33m",
+            5:"\x1B[1;30m",
+            6:"\x1B[1;37m",
+            7:"\x1B[1;37m"}
+
+        if colorize == True:
+            self.colorize = self.doColorize
+        else:
+            self.colorize = self.doNoColorize
 
     def consume(self, event):
-        event["data"] = ("%s %s %s %s: %s"%(
+        log = ("%s %s %s %s: %s"%(
                 strftime("%Y-%m-%dT%H:%M:%S", localtime(event["data"][1])),
                 "pid-%s"%(event["data"][2]),
                 self.levels[event["data"][0]],
                 event["data"][3],
                 event["data"][4]))
+        #log = self.colorize(log, event[0])
+        #print log
+        #print self.colorize(log, event["data"][0])
+        #event["data"]=log
+        event["data"]=self.colorize(log, event["data"][0])
         self.queuepool.outbox.put(event)
+
+    def doColorize(self, message, level):
+        return self.colors[level]+message+"\x1B[0m"
+
+
+    def doNoColorize(self, message, level):
+        pass
