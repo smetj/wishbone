@@ -49,7 +49,7 @@ class Syslog(Actor):
     '''
 
     def __init__(self, name):
-        Actor.__init__(self, name, limit=0)
+        Actor.__init__(self, name)
         self.name=name
 
     def preHook(self):
