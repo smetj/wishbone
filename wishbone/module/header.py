@@ -43,7 +43,7 @@ class Header(Actor):
     '''
 
     def __init__(self, name, header={}):
-        Actor.__init__(self, name, limit=0)
+        Actor.__init__(self, name)
         self.header=header
 
     def consume(self, event):
