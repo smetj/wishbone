@@ -194,9 +194,11 @@ class Default(LoopContextSwitcher):
 
         self.__modules[consumer_module]["connections"]={}
 
-        self.__modules[consumer_module]["connections"][consumer_queue]=spawn (self.__forwardEvents, producer_queue_instance, consumer_queue_instance)
-        #store a reference of the greenthread to the other side.
-        self.__modules[producer_module]["connections"][producer_queue]=self.__modules[consumer_module]["connections"][consumer_queue]
+        self.__modules[consumer_module]["connections"][consumer_queue]=producer_queue
+        self.__modules[producer_module]["connections"][producer_queue]=consumer_queue
+
+        self.__modules[producer_module]["instance"].queuepool.outbox=self.__modules[consumer_module]["instance"].queuepool.inbox
+        #producer_queue_instance = consumer_queue_instance
 
     def getChildren(self, instance):
         children=[]
@@ -389,7 +391,7 @@ class Default(LoopContextSwitcher):
             for queue in module.queuepool.listQueues():
                 stats = getattr(module.queuepool, queue).stats()
                 for item in stats:
-                    metric=(now, "wishbone", self.script_name, "queue.%s.%s"%(queue, item), stats[item], '', ())
+                    metric=(now, "wishbone", self.script_name, "queue.%s.%s.%s"%(module.name, queue, item), stats[item], '', ())
                     self.metrics.put({"header":{}, "data":metric})
             sleep(self.interval)
 
