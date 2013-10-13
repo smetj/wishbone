@@ -1,6 +1,18 @@
 Wishbone changelog
 ==================
 
+Version 0.4.4
+~~~~~~~~~~~~~
+
+- Remove excessive logging.
+- Colorize log output in debug mode.
+- Add possibility to pause and resuming consuming inside module.
+- Use a more generic internal metric format.
+- Directly use destination queue in the source module.
+- When using context switch, do not actually sleep.
+- Removed unused limit parameter when registering a module.
+
+
 Version 0.4.3
 ~~~~~~~~~~~~~
 
