@@ -77,16 +77,16 @@ class TippingBucket(Actor):
         self.buff_header={}
         spawn(self.reaper)
 
-    def consume(self,doc):
+    def consume(self,event):
 
         self.buff_events+=1
 
         if self.buff_age==0:
             self.buff_age=time()
-            self.header=doc["header"]
+            self.header=event["header"]
 
-        self.buff.append(doc["data"])
-        self.buff_size+=len((doc["data"]))
+        self.buff.append(event["data"])
+        self.buff_size+=len((event["data"]))
 
         if self.size > 0 and self.buff_size > self.size:
             self.logging.debug("Size of buffer (%s) exceeded. Flushed."%(self.size))
@@ -99,7 +99,7 @@ class TippingBucket(Actor):
     def reaper(self):
         '''Check whether our cache is expired and flush the buffer if its the case.'''
 
-        while self.block():
+        while self.loop():
             if self.buff_age != 0:
                 if (float(time()) - float(self.buff_age)) > float(self.age):
                     self.flushBuffer()
@@ -110,11 +110,18 @@ class TippingBucket(Actor):
         '''Flushes the buffer.'''
 
         if self.predefined_header == None:
-            self.queuepool.outbox.put({"header":self.buff_header, "data":self.buff})
+            try:
+                self.queuepool.outbox.put({"header":self.buff_header, "data":self.buff})
+            except:
+                self.queuepool.outbox.waitUntilPutAllowed()
+                self.queuepool.outbox.put({"header":self.buff_header, "data":self.buff})
         else:
-            self.queuepool.outbox.put({"header":self.predefined_header, "data":self.buff})
+            try:
+                self.queuepool.outbox.put({"header":self.predefined_header, "data":self.buff})
+            except:
+                self.queuepool.outbox.waitUntilPutAllowed()
+                self.queuepool.outbox.put({"header":self.predefined_header, "data":self.buff})
         self.resetBuffer()
-        sleep()
 
     def resetBuffer(self):
         '''Resets the counters.'''

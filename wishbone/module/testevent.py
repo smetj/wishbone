@@ -52,7 +52,6 @@ class TestEvent(Actor):
     def __init__(self, name, interval=1):
         Actor.__init__(self, name, setupbasic=False, limit=0)
         self.createQueue("outbox")
-        self.logging.info ( 'Initiated' )
         self.name = name
         if interval <= 0:
             raise SetupError ("Interval should be bigger than 0.")
@@ -63,8 +62,17 @@ class TestEvent(Actor):
         spawn(self.go)
 
     def go(self):
-        self.logging.info('Started')
+        switcher = self.getContextSwitcher(100, self.loop)
+        while switcher.do():
+            self.throttle()
+            try:
+                self.queuepool.outbox.put({"header":{},"data":"test"})
+            except (QueueFull, QueueLocked):
+                self.queuepool.outbox.waitUntilPutAllowed()
+            self.sleep(self.interval)
 
-        while self.loop():
-            self.queuepool.outbox.put({"header":{},"data":"test"})
-            sleep(self.interval)
+    def doSleep(self, interval):
+        sleep(interval)
+
+    def doNoSleep(self, interval):
+        pass
