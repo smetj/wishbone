@@ -51,7 +51,7 @@ class Consumer(LoopContextSwitcher):
 
         for c in self.__doConsumes:
             self.__greenlet.append(spawn(self.__doConsume, c[0], c[1]))
-            self.logging.debug('Function %s started to consume queue %s.'%(str(c[0]),str(c[1])))
+            self.logging.info('Function %s started to consume queue %s.'%(str(c[0]),str(c[1])))
 
     def shutdown(self):
         '''Stops each module by making <self.loop> return False and which unblocks <self.block>'''
@@ -144,7 +144,7 @@ class Consumer(LoopContextSwitcher):
                     q.rescue(event)
                     sleep(1)
 
-        self.logging.debug('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
+        self.logging.info('Function %s has stopped consuming queue %s'%(str(fc),str(q)))
 
     def __setupBasic(self):
         '''Create in- and outbox and a consumer consuming inbox.'''
