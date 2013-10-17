@@ -1,6 +1,12 @@
 Wishbone changelog
 ==================
 
+Version 0.4.5
+~~~~~~~~~~~~~
+
+- Fix bug with failing bootstrap
+
+
 Version 0.4.4
 ~~~~~~~~~~~~~
 
