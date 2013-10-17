@@ -23,12 +23,10 @@
 #
 
 from wishbone import Actor
-from wishbone.tools import LoopContextSwitcher
 from wishbone.errors import QueueLocked, QueueFull, SetupError
-from wishbone.tools.throttle import SleepThrottle
 from gevent import sleep, spawn
 
-class TestEvent(Actor, SleepThrottle):
+class TestEvent(Actor):
 
     '''**A WishBone input module which generates a test event at the chosen interval.**
 
@@ -43,7 +41,7 @@ class TestEvent(Actor, SleepThrottle):
         - name (str):               The instance name when initiated.
 
         - interval (float):         The interval in seconds between each generated event.
-                                    Should have a value >= 0
+                                    Should have a value > 0.
                                     default: 1
 
     Queues:
@@ -52,16 +50,11 @@ class TestEvent(Actor, SleepThrottle):
     '''
 
     def __init__(self, name, interval=1):
-        Actor.__init__(self, name, setupbasic=False)
-        SleepThrottle.__init__(self)
+        Actor.__init__(self, name, setupbasic=False, limit=0)
         self.createQueue("outbox")
         self.name = name
-        if interval < 0:
-            raise SetupError ("Interval should be bigger or equal to 0.")
-        if interval == 0:
-            self.sleep=self.doNoSleep
-        else:
-            self.sleep=self.doSleep
+        if interval <= 0:
+            raise SetupError ("Interval should be bigger than 0.")
 
         self.interval=interval
 
