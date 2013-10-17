@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -7,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>wishbone &mdash; Wishbone 0.4.4 documentation</title>
+    <title>wishbone &mdash; Wishbone 0.4.5 documentation</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.4.4',
+        VERSION:     '0.4.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="Wishbone 0.4.4 documentation" href="../index.html" />
+    <link rel="top" title="Wishbone 0.4.5 documentation" href="../index.html" />
     <link rel="up" title="Module code" href="index.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -41,7 +40,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="../index.html">Wishbone 0.4.4 documentation</a> &raquo;</li>
+        <li><a href="../index.html">Wishbone 0.4.5 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -62,7 +61,7 @@
 <span class="c">#</span>
 <span class="c">#  This program is free software; you can redistribute it and/or modify</span>
 <span class="c">#  it under the terms of the GNU General Public License as published by</span>
-<span class="c">#  the Free Software Foundation; either version 2 of the License, or</span>
+<span class="c">#  the Free Software Foundation; either version 3 of the License, or</span>
 <span class="c">#  (at your option) any later version.</span>
 <span class="c">#</span>
 <span class="c">#  This program is distributed in the hope that it will be useful,</span>
@@ -79,6 +78,9 @@
 
 <span class="kn">from</span> <span class="nn">wishbone.base</span> <span class="kn">import</span> <span class="n">Actor</span>
 <span class="kn">from</span> <span class="nn">wishbone.base</span> <span class="kn">import</span> <span class="n">BaseActor</span>
+<span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="kn">import</span> <span class="n">get_distribution</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="n">get_distribution</span><span class="p">(</span><span class="s">&#39;wishbone&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">version</span>
 </pre></div>
 
           </div>
@@ -109,13 +111,13 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
-        <li><a href="../index.html">Wishbone 0.4.4 documentation</a> &raquo;</li>
+        <li><a href="../index.html">Wishbone 0.4.5 documentation</a> &raquo;</li>
           <li><a href="index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2013, Jelle Smet.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
     </div>
   </body>
 </html>
