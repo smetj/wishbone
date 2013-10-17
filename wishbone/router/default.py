@@ -207,8 +207,9 @@ class Default(LoopContextSwitcher):
         def getChild(instance, children):
             if len(self.__modules[instance]["children"]) > 0:
                 for child in self.__modules[instance]["children"]:
-                    getChild(child, children)
-                    children.append(child)
+                    if child not in children:
+                        getChild(child, children)
+                        children.append(child)
 
         getChild(instance, children)
         return children
@@ -219,8 +220,9 @@ class Default(LoopContextSwitcher):
         def getParent(instance, parents):
             if len(self.__modules[instance]["parents"]) > 0:
                 for parent in self.__modules[instance]["parents"]:
-                    getParent(parent, parents)
-                    parents.append(parent)
+                    if parent not in parents:
+                        getParent(parent, parents)
+                        parents.append(parent)
 
         getParent(instance, parents)
         return parents
