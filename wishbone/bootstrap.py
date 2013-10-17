@@ -174,7 +174,7 @@ class Start(Initialize):
             loglevelfilter=self.loadModule("wishbone.builtin.logging.loglevelfilter")
             self.router.registerLogModule(loglevelfilter, "loglevelfilter")
 
-            syslog=self.loadModule("wishbone.builtin.output.syslog")
+            syslog=self.loadModule("wishbone.builtin.logging.syslog")
             self.router.register(syslog, "syslog")
 
             self.router.connect("loglevelfilter.outbox", "syslog.inbox")
@@ -361,7 +361,6 @@ class Dispatch(PidHandling):
 class BootStrap():
 
     def __init__(self, description="Wishbone bootstrap server."):
-
         parser = argparse.ArgumentParser(description=description)
         subparsers = parser.add_subparsers(dest='command')
 
@@ -392,7 +391,6 @@ class BootStrap():
         getattr(dispatch, arguments["command"])(**arguments)
 
 def main():
-    #BootStrap()
     try:
         BootStrap()
     except Exception as err:
