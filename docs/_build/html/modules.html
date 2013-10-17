@@ -98,7 +98,11 @@ incoming data into the expected Wishbone internal event format.</p>
 </li>
 <li><dl class="first docutils">
 <dt>interval (float):         The interval in seconds between each generated event.</dt>
+<<<<<<< HEAD
+<dd><p class="first last">Should have a value &gt; 0.
+=======
 <dd><p class="first last">Should have a value &gt;= 0
+>>>>>>> release/0.4.1
 default: 1</p>
 </dd>
 </dl>
@@ -417,15 +421,8 @@ module.</p>
 to the header of each passing event.**</p>
 <p>Parameters:</p>
 <blockquote>
-<div><ul>
-<li><p class="first">name(str):    The name of the module</p>
-</li>
-<li><dl class="first docutils">
-<dt>header(dict): The dictionary to update the headers.</dt>
-<dd><p class="first last">Default: {}</p>
-</dd>
-</dl>
-</li>
+<div><ul class="simple">
+<li>name(str):  The name of the module</li>
 </ul>
 </div></blockquote>
 <p>Queues:</p>
