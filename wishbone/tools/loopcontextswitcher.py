@@ -24,7 +24,6 @@
 #
 
 from gevent import sleep
-from random import uniform
 
 class LoopContextSwitcher():
 
