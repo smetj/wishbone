@@ -74,7 +74,7 @@ class Default(LoopContextSwitcher):
 
     '''
 
-    def __init__(self, interval=10, context_switch=100, rescue=False, uuid=False, throttle=False, throttle_threshold=5000):
+    def __init__(self, interval=1, context_switch=100, rescue=False, uuid=False, throttle=True, throttle_threshold=15000):
         self.interval=interval
         self.context_switch=context_switch
         self.rescue=rescue
@@ -208,8 +208,9 @@ class Default(LoopContextSwitcher):
             if len(self.__modules[instance]["children"]) > 0:
                 for child in self.__modules[instance]["children"]:
                     if child not in children:
-                        getChild(child, children)
                         children.append(child)
+                        getChild(child, children)
+                        
 
         getChild(instance, children)
         return children
@@ -221,9 +222,9 @@ class Default(LoopContextSwitcher):
             if len(self.__modules[instance]["parents"]) > 0:
                 for parent in self.__modules[instance]["parents"]:
                     if parent not in parents:
-                        getParent(parent, parents)
                         parents.append(parent)
-
+                        getParent(parent, parents)
+                        
         getParent(instance, parents)
         return parents
 
