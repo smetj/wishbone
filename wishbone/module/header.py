@@ -24,7 +24,6 @@
 #
 
 from wishbone import Actor
-from wishbone.errors import QueueFull, QueueLocked
 
 
 class Header(Actor):
@@ -33,10 +32,7 @@ class Header(Actor):
 
     Parameters:
 
-        - name(str):    The name of the module
-
-        - header(dict): The dictionary to update the headers.
-                        Default: {}
+        - name(str):  The name of the module
 
     Queues:
 
@@ -52,11 +48,4 @@ class Header(Actor):
 
     def consume(self, event):
         event["header"].update(self.header)
-        try:
-            self.queuepool.outbox.put(event)
-
-        except (QueueFull, QueueLocked):
-            self.queuepool.inbox.putLock()
-            self.queuepool.inbox.rescue(event)
-            self.queuepool.outbox.waitUntilPutAllowed()
-            self.queuepool.inbox.putUnlock()
+        self.queuepool.outbox.put(event)
