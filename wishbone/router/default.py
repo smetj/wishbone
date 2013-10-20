@@ -524,20 +524,19 @@ class Default():
         """
 
         if "enableThrottling" in dir(self.__modules[module]["instance"]) and "disableThrottling" in dir(self.__modules[module]["instance"]):
-            self.logging.info("Module %s is identified to overflow module %s. Enable throttling."%(module, child_name))
+            self.logging.debug("Module %s is identified to overflow module %s. Enable throttling."%(module, child_name))
             while self.loop():
                 if child_size() > self.__throttle_threshold:
                     try:
                         self.__modules[module]["instance"].enableThrottling()
-                        sleep(1)
-                    except:
-                        self.logging.info("Throttling is requested but module has no enableThrottling() function.")
+                    except Exception as err:
+                        self.logging.err("Executing enableThrottling() in module %s generated an error.  Reason: %s."%(module, err))
                         break
                 else:
                     try:
                         self.__modules[module]["instance"].disableThrottling()
                         self.logging.info("Throttling on module %s is not required anymore. Exiting."%(module))
-                    except:
-                        self.logging.info("Throttling is requested but module has no disableThrottling() function.")
-                    break
+                    except Exception as err:
+                        self.logging.err("Executing disableThrottling() in module %s generated an error.  Reason: %s."%(module, err))
+                        break
                 sleep(1)
