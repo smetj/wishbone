@@ -535,7 +535,7 @@ class Default():
                 else:
                     try:
                         self.__modules[module]["instance"].disableThrottling()
-                        self.logging.info("Throttling on module %s is not required anymore. Exiting."%(module))
+                        self.logging.debug("Throttling on module %s is not required anymore. Exiting."%(module))
                     except Exception as err:
                         self.logging.err("Executing disableThrottling() in module %s generated an error.  Reason: %s."%(module, err))
                         break
