@@ -49,24 +49,6 @@ class Actor(BaseActor, Consumer):
                                     Default: 100
 
     '''
-    def __init__(self, name,  setupbasic=True, context_switch=100):
+    def __init__(self, name,  setupbasic=True):
         BaseActor.__init__(self, name)
-        Consumer.__init__(self, setupbasic=setupbasic, context_switch=context_switch)
-
-    def enableThrottling(self):
-        '''Should be overridden by the module author when throttling
-        functionality is desired.
-
-        This module is executed by the router whenever it detects this module
-        is overflowing one of its children. '''
-
-        self.logging.debug("Requested to enable throttling but no function overrides the default one.")
-
-    def disableThrottling(self):
-        '''Should be overridden by the module author when throttling
-        functionality is desired.
-
-        This module is executed by the router decides previously enabled
-        throttling on this module can be disabled.'''
-
-        self.logging.debug("Requested to disiable throttling but no function overrides the default one.")
+        Consumer.__init__(self, setupbasic=setupbasic)

@@ -1,0 +1,50 @@
+============
+Installation
+============
+
+Pypi
+----
+
+You can install the latest stable version of Wishbone from
+https://pypi.python.org/pypi/wishbone/ by using easy_install:
+
+.. code-block:: sh
+
+    $ easy_install wishbone
+
+
+All dependencies should be resolved automatically.
+
+
+From source
+-----------
+
+You can install the latest stable or development version from
+https://github.com/smetj/wishbone
+
+development
+~~~~~~~~~~~
+
+To install the latest development release you have to checkout the develop
+branch and build from there:
+
+.. code-block:: sh
+
+    $ git clone https://github.com/smetj/wishbone.git
+    $ cd wishbone
+    $ git checkout develop
+    $ sudo python setup.py install
+
+
+stable
+~~~~~~
+
+To install the latest stable release you to checkout the master branch and
+build from there:
+
+.. code-block:: sh
+
+    $ git clone https://github.com/smetj/wishbone.git
+    $ cd wishbone
+    $ git checkout master
+    $ sudo python setup.py install
