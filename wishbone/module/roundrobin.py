@@ -26,7 +26,7 @@
 from wishbone import Actor
 from itertools import cycle
 from random import randint
-
+from gevent import sleep
 
 class RoundRobin(Actor):
 
@@ -54,7 +54,6 @@ class RoundRobin(Actor):
         Actor.__init__(self, name)
         self.deleteQueue("outbox")
         self.randomize=randomize
-        self.context_switch_loop = self.getContextSwitcher(10, self.loop)
 
     def preHook(self):
         destination_queues = self.queuepool.getQueueInstances()
@@ -69,12 +68,13 @@ class RoundRobin(Actor):
             self.chooseQueue=self.__chooseRandomQueue
 
     def consume(self, event):
-        while self.context_switch_loop.do():
+        while self.loop():
+            queue = self.chooseQueue()
             try:
-                self.chooseQueue().put(event)
+                queue.put(event)
                 break
             except:
-                pass
+                sleep()
 
     def __chooseNextQueue(self):
         return self.cycle.next()
