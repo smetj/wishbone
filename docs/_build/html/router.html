@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Router &mdash; Wishbone 0.4.5 documentation</title>
+    <title>Router &mdash; Wishbone 0.4.6 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.5',
+        VERSION:     '0.4.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Wishbone 0.4.5 documentation" href="index.html" />
+    <link rel="top" title="Wishbone 0.4.6 documentation" href="index.html" />
     <link rel="next" title="Modules" href="modules.html" />
     <link rel="prev" title="Actor" href="actor.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,7 +47,7 @@
         <li class="right" >
           <a href="actor.html" title="Actor"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.6 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -82,8 +82,8 @@ events queued than defined in the <cite>throttle_threshold</cite> variable.  Onc
 module is found, all upstream parent modules are identified and verified which
 one is the source of overflowing the children. When the parent module is
 identified, the router calls the
-<a class="reference internal" href="actor.html#wishbone.Actor.enableThrottling" title="wishbone.Actor.enableThrottling"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.Actor.enableThrottling()</span></tt></a> and
-<a class="reference internal" href="actor.html#wishbone.Actor.disableThrottling" title="wishbone.Actor.disableThrottling"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.Actor.disableThrottling()</span></tt></a> accordingly.</p>
+<tt class="xref py py-func docutils literal"><span class="pre">wishbone.Actor.enableThrottling()</span></tt> and
+<tt class="xref py py-func docutils literal"><span class="pre">wishbone.Actor.disableThrottling()</span></tt> accordingly.</p>
 <p>It is up to the author of the module to override these functions and have them
 make correct measurements.</p>
 </div>
@@ -122,7 +122,7 @@ metric data to Graphite.</p>
 <hr class="docutils" />
 <dl class="class">
 <dt id="wishbone.router.Default">
-<em class="property">class </em><tt class="descclassname">wishbone.router.</tt><tt class="descname">Default</tt><big>(</big><em>interval=10</em>, <em>context_switch=100</em>, <em>rescue=False</em>, <em>uuid=False</em>, <em>throttle=False</em>, <em>throttle_threshold=5000</em><big>)</big><a class="headerlink" href="#wishbone.router.Default" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.router.</tt><tt class="descname">Default</tt><big>(</big><em>interval=1</em>, <em>context_switch=100</em>, <em>rescue=False</em>, <em>uuid=False</em>, <em>throttle=True</em>, <em>throttle_threshold=15000</em><big>)</big><a class="headerlink" href="#wishbone.router.Default" title="Permalink to this definition">¶</a></dt>
 <dd><p>The default Wishbone router.</p>
 <p>A router is responsible to:</p>
 <blockquote>
@@ -139,8 +139,8 @@ metric data to Graphite.</p>
 <li><p class="first">interval(int):    The interval metrics are polled from each module</p>
 </li>
 <li><dl class="first docutils">
-<dt>context_switch(int):  How many events to shuffle from queue to</dt>
-<dd><p class="first last">queue before issuing a context switch.
+<dt>context_switch(int):  When looping over blocking code a context switch</dt>
+<dd><p class="first last">is done every X iterations.
 Default: 100</p>
 </dd>
 </dl>
@@ -230,10 +230,10 @@ throttling functions.  It exits when no more throttling is required.</p>
 <dd><p>Registers a Wishbone actor into the router.</p>
 <p>Parameters:</p>
 <blockquote>
-<div>module(module)          A wishbone module.
-name(string)            The name to assign to the module insance.
-args(list)              Positional arguments to pass to the module.
-kwargs(dict)            Named arguments to pass to the module.</div></blockquote>
+<div>module(module)              A wishbone module.
+name(string)                The name to assign to the module insance.
+args(list)                  Positional arguments to pass to the module.
+kwargs(dict)                Named arguments to pass to the module.</div></blockquote>
 </dd></dl>
 
 <dl class="method">
@@ -365,7 +365,7 @@ time it takes to execute the function.</p>
         <li class="right" >
           <a href="actor.html" title="Actor"
              >previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.6 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
