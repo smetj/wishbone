@@ -27,7 +27,10 @@ from gevent import sleep
 
 class LoopContextSwitcher():
 
-    def getContextSwitcher(self, iterations, loop_condition):
+    def __init__(self, loop_condition):
+        self.loop_condition=loop_condition
+
+    def get(self, iterations):
 
         class ContextSwitch():
             def __init__(self, iterations, loop_condition):
@@ -45,6 +48,6 @@ class LoopContextSwitcher():
 
                 return self.loop_condition
 
-        return ContextSwitch(iterations, loop_condition)
+        return ContextSwitch(iterations, self.loop_condition).do
 
 
