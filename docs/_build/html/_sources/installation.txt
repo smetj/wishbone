@@ -47,4 +47,4 @@ build from there:
     $ git clone https://github.com/smetj/wishbone.git
     $ cd wishbone
     $ git checkout master
-    $ sudo python setup.py install    
+    $ sudo python setup.py install
