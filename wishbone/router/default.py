@@ -34,7 +34,7 @@ from time import time
 from os.path import basename
 from sys import argv
 
-class Default(LoopContextSwitcher):
+class Default():
     '''The default Wishbone router.
 
     A router is responsible to:
@@ -49,8 +49,8 @@ class Default(LoopContextSwitcher):
 
         - interval(int):    The interval metrics are polled from each module
 
-        - context_switch(int):  How many events to shuffle from queue to
-                                queue before issuing a context switch.
+        - context_switch(int):  When looping over blocking code a context switch
+                                is done every X iterations.
                                 Default: 100
 
         - rescue(bool):     Whether to extract any events stuck in one of
@@ -113,6 +113,11 @@ class Default(LoopContextSwitcher):
         self.__runLogs.clear()
 
         self.script_name = basename(argv[0]).replace(".py","")
+
+        self.loop_context_switcher=LoopContextSwitcher(self.loop)
+
+    def getContextSwitcher(self, cycles):
+        return self.loop_context_switcher.get(cycles)
 
     def block(self):
         ''' A convenience function which blocks untill all registered
@@ -210,7 +215,7 @@ class Default(LoopContextSwitcher):
                     if child not in children:
                         children.append(child)
                         getChild(child, children)
-                        
+
 
         getChild(instance, children)
         return children
@@ -224,7 +229,7 @@ class Default(LoopContextSwitcher):
                     if parent not in parents:
                         parents.append(parent)
                         getParent(parent, parents)
-                        
+
         getParent(instance, parents)
         return parents
 
@@ -248,14 +253,15 @@ class Default(LoopContextSwitcher):
 
         Parameters:
 
-            module(module)          A wishbone module.
-            name(string)            The name to assign to the module insance.
-            args(list)              Positional arguments to pass to the module.
-            kwargs(dict)            Named arguments to pass to the module.
+            module(module)              A wishbone module.
+            name(string)                The name to assign to the module insance.
+            args(list)                  Positional arguments to pass to the module.
+            kwargs(dict)                Named arguments to pass to the module.
         '''
 
         self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children":[], "parents":[]}
         self.__modules[name]["instance"]=module(name, *args, **kwargs)
+        self.__modules[name]["instance"].getContextSwitcher=self.getContextSwitcher
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
@@ -278,6 +284,7 @@ class Default(LoopContextSwitcher):
 
         self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": [], "parents":[]}
         self.__modules[name]["instance"]=module(name, *args, **kwargs)
+        self.__modules[name]["instance"].getContextSwitcher=self.getContextSwitcher
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
@@ -301,6 +308,7 @@ class Default(LoopContextSwitcher):
         self.__metricmodule = name
         self.__modules[name] = {"instance":None, "fwd_logs":None, "fwd_metrics":None, "connections":{}, "children": [], "parents": []}
         self.__modules[name]["instance"]=module(name, *args, **kwargs)
+        self.__modules[name]["instance"].getContextSwitcher=self.getContextSwitcher
 
         self.__modules[name]["fwd_logs"] = spawn (self.__forwardLogs, self.__modules[name]["instance"].logging.logs, self.logs)
         self.__modules[name]["fwd_metrics"] = spawn (self.__gatherMetrics, self.__modules[name]["instance"])
@@ -380,9 +388,8 @@ class Default(LoopContextSwitcher):
         #todo(smetj): make this cycler setup more dynamic?  Auto adjust the amount
         #cycles before context switch to achieve sweetspot?
 
-        context_switch_loop = self.getContextSwitcher(self.context_switch, self.loop)
-
-        while context_switch_loop.do():
+        switcher = self.getContextSwitcher(self.context_switch)
+        while switcher():
             try:
                 event = source.get()
             except QueueLocked:
@@ -440,13 +447,8 @@ class Default(LoopContextSwitcher):
         '''The background greenthread which continuously consumes the producing
         queue and dumps that data into the consuming queue.'''
 
-        #todo(smetj): When not context switching logs are more serialized instead
-        #of interleaved.  Might have to give it some though whether this is an
-        #issue or not.
-
-        context_switch_loop = self.getContextSwitcher(10, self.loop)
-
-        while context_switch_loop.do():
+        switcher = self.getContextSwitcher(10)
+        while switcher():
             try:
                 event = source.get()
             except:
@@ -521,20 +523,21 @@ class Default(LoopContextSwitcher):
         throttling functions.  It exits when no more throttling is required.
         """
 
-        self.logging.info("Module %s is identified to overflow module %s. Enable throttling."%(module, child_name))
-        while self.loop():
-            if child_size() > self.__throttle_threshold:
-                try:
-                    self.__modules[module]["instance"].enableThrottling()
-                    sleep(1)
-                except:
-                    self.logging.info("Throttling is requested but module has no enableThrottling() function.")
+        if "enableThrottling" in dir(self.__modules[module]["instance"]) and "disableThrottling" in dir(self.__modules[module]["instance"]):
+            self.logging.info("Module %s is identified to overflow module %s. Enable throttling."%(module, child_name))
+            while self.loop():
+                if child_size() > self.__throttle_threshold:
+                    try:
+                        self.__modules[module]["instance"].enableThrottling()
+                        sleep(1)
+                    except:
+                        self.logging.info("Throttling is requested but module has no enableThrottling() function.")
+                        break
+                else:
+                    try:
+                        self.__modules[module]["instance"].disableThrottling()
+                        self.logging.info("Throttling on module %s is not required anymore. Exiting."%(module))
+                    except:
+                        self.logging.info("Throttling is requested but module has no disableThrottling() function.")
                     break
-            else:
-                try:
-                    self.__modules[module]["instance"].disableThrottling()
-                    self.logging.info("Throttling on module %s is not required anymore. Exiting."%(module))
-                except:
-                    self.logging.info("Throttling is requested but module has no disableThrottling() function.")
-                break
-            sleep(1)
+                sleep(1)
