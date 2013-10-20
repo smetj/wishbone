@@ -1,6 +1,14 @@
 Wishbone changelog
 ==================
 
+Version 0.4.6
+~~~~~~~~~~~~~
+
+- Cleanup context_switch when looping.
+- Add installation documenation.
+- Cleanup of throttling functionality.
+
+
 Version 0.4.5
 ~~~~~~~~~~~~~
 
