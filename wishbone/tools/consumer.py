@@ -27,15 +27,14 @@ from gevent import Greenlet
 from gevent.event import Event
 from gevent.lock import Semaphore
 from wishbone.errors import QueueLocked, SetupError, QueueFull
-from wishbone.tools import LoopContextSwitcher
 
-class Consumer(LoopContextSwitcher):
+class Consumer():
 
-    def __init__(self, setupbasic=True, context_switch=100):
+    def __init__(self, setupbasic=True):
         self.__doConsumes=[]
         self.__block=Event()
         self.__block.clear()
-        self.context_switch=context_switch
+
         if setupbasic == True:
             self.__setupBasic()
         self.__greenlet=[]
@@ -121,9 +120,8 @@ class Consumer(LoopContextSwitcher):
         '''Executes <fc> against each element popped from <q>.
         '''
 
-        context_switch_loop = self.getContextSwitcher(self.context_switch, self.loop)
 
-        while context_switch_loop.do():
+        while self.loop():
             self.__enable_consuming.wait()
             try:
                 event = q.get()
