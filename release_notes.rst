@@ -1,6 +1,13 @@
 Wishbone changelog
 ==================
 
+Version 0.4.7
+~~~~~~~~~~~~~
+
+- Fix bug which loops disableThrottling().
+- Add extra checks on routing table syntax. 
+
+
 Version 0.4.6
 ~~~~~~~~~~~~~
 
