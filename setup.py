@@ -110,6 +110,7 @@ setup(
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog',
+            'slow = wishbone.module.slow:Slow',
             ],
         'wishbone.input': [
             ],
