@@ -28,6 +28,7 @@ from time import time
 from gevent import socket
 from sys import argv
 from os.path import basename
+from os import getpid
 
 class Graphite(Actor):
 
@@ -46,13 +47,21 @@ class Graphite(Actor):
 
         - prefix(str):  Some prefix to put in front of the metric name.
 
+        - pid(bool):    Include pid value in naming schema.
+                        Default: False
+
     '''
 
-    def __init__(self, name, prefix=''):
+    def __init__(self, name, prefix='', pid=False):
         Actor.__init__(self, name)
         self.name=name
         self.prefix=prefix
         self.script_name = basename(argv[0]).replace(".py","")
+        if pid == True:
+            self.pid="-%s"%(getpid())
+        else:
+            self.pid=''
+
 
     def consume(self, event):
-        self.queuepool.outbox.put({"header":{}, "data":"%s%s.%s %s %s"%(self.prefix, event["data"][2], event["data"][3], event["data"][4], event["data"][0])})
+        self.queuepool.outbox.put({"header":{}, "data":"%s%s%s.%s %s %s"%(self.prefix, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})

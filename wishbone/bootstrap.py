@@ -136,8 +136,13 @@ class Initialize(ModuleHandling):
         '''Makes all connections defined in the bootstrap file.'''
 
         for connection in self.config["routingtable"]:
-            source=connection.split('->')[0].strip()
-            destination=connection.split('->')[1].strip()
+            try:
+                source=connection.split('->')[0].strip()
+                destination=connection.split('->')[1].strip()
+            except Exception as err:
+                sys.stderr.write("There seems to be a routing table format error in this rule: %s\n"%(connection))
+                sys.stderr.flush()
+                sys.exit(1)
             self.router.connect(source, destination)
 
     def loadConfig(self, filename):
@@ -391,6 +396,7 @@ class BootStrap():
         getattr(dispatch, arguments["command"])(**arguments)
 
 def main():
+
     try:
         BootStrap()
     except Exception as err:
