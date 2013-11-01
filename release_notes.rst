@@ -6,6 +6,9 @@ Version 0.4.7
 
 - Fix bug which loops disableThrottling().
 - Add extra checks on routing table syntax. 
+- Added slow output module.
+- Fix bug in roundrobin module.
+- Update patterns and scenarios documentation.
 
 
 Version 0.4.6
