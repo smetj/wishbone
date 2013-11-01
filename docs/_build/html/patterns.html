@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Patterns and best practices &mdash; Wishbone 0.4.6 documentation</title>
+    <title>Patterns and best practices &mdash; Wishbone 0.4.7 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.6',
+        VERSION:     '0.4.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Wishbone 0.4.6 documentation" href="index.html" />
+    <link rel="top" title="Wishbone 0.4.7 documentation" href="index.html" />
     <link rel="prev" title="Bootstraping on CLI" href="bootstrap.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="bootstrap.html" title="Bootstraping on CLI"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.6 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.7 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -56,8 +56,7 @@
 <h1>Patterns and best practices<a class="headerlink" href="#patterns-and-best-practices" title="Permalink to this headline">¶</a></h1>
 <p>This section discusses some common usage patterns and best practices. Although
 most if not all are strictly spoken not required, they might be helpful in
-using Wishbone efficiently.  I expect this section to change over time when
-more experience is gathered.</p>
+building efficient Wishbone solutions.</p>
 <div class="section" id="event-headers">
 <h2>Event headers<a class="headerlink" href="#event-headers" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="write-data-to-headers">
@@ -107,13 +106,21 @@ code will not work anymore.</p>
 </div>
 <div class="section" id="writing-output-modules">
 <h2>Writing output modules<a class="headerlink" href="#writing-output-modules" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="starting-state">
+<h3>Starting state<a class="headerlink" href="#starting-state" title="Permalink to this headline">¶</a></h3>
+<p>An output module should always start with the <strong>inbox</strong> queue in a
+<a class="reference internal" href="actor.html#wishbone.tools.WishboneQueue.putLock" title="wishbone.tools.WishboneQueue.putLock"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.tools.WishboneQueue.putLock()</span></tt></a> state.  The moment the module
+detects it is capable of sending incoming events to the outside world, it
+should unlock the <strong>inbox</strong> queue using
+<a class="reference internal" href="actor.html#wishbone.tools.WishboneQueue.putUnlock" title="wishbone.tools.WishboneQueue.putUnlock"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.tools.WishboneQueue.putUnlock()</span></tt></a>.</p>
+</div>
 <div class="section" id="handle-failed-and-successful-events">
 <h3>Handle failed and successful events<a class="headerlink" href="#handle-failed-and-successful-events" title="Permalink to this headline">¶</a></h3>
 <p>Output modules are responsible to deliver messages to the outside world.
-Preferably we want this to be done as reliable as possible.  If submitting
-events fails (or succeeds) we might require a specific strategy to deal with
-these events.</p>
-<p>A nice pattern is to optionally have 2 additional queues:</p>
+Preferably we want this to be done as reliably.  When submitting events to the
+outside world (aka outside a Wishbone process.) fails or succeeds we might
+require a specific strategy to deal with that specific situation.</p>
+<p>A possible strategy is have 2 additional queues:</p>
 <blockquote>
 <div><ul class="simple">
 <li>successful</li>
@@ -121,19 +128,24 @@ these events.</p>
 </ul>
 </div></blockquote>
 <p>As you might guess, events which have been submitted successfully to the
-outside world are then submitted to the <em>successful</em> queue and the events
+outside world are then submitted to the <em>successful</em> queue while the events
 which failed to go out to the <em>failed</em> queue.</p>
-<p>It is up the user to connect these queues on their turn to another module
-to deal with them accordingly.</p>
+<p>It is up the user to connect these queues on their turn to another destination
+in order come to the desired strategy.</p>
 <p>Some practical examples:</p>
 <ul class="simple">
-<li>After submitting an event successfully over TCP to the outside world is is submitted to the <cite>successful</cite> queue.  This queue is on its turn connected to the AMQP <cite>acknowledge</cite> queue to ascertain it is acknowledged from AMQP.</li>
-<li>After submitting an event over TCP failed, the event is written to the failed queue from where it is forwarded to another module which writes the event to disk.</li>
+<li>After submitting an event successfully over TCP to the outside world is is
+submitted to the <cite>successful</cite> queue.  This queue is on its turn connected to
+the AMQP <cite>acknowledge</cite> queue to ascertain it is acknowledged from AMQP.</li>
+<li>After submitting an event over TCP failed, the event is written to the
+failed queue from where it is forwarded to another module which writes the
+event to disk.</li>
 </ul>
-<p>When this functionality is not enabled, the expected behavior should be:</p>
+<p>Whenever this pattern is <em>not</em> used, the expected behavior should be:</p>
 <ul class="simple">
 <li>Successfully submitted events are discarded</li>
-<li>Unsuccessfully submitted events should be send back to the <cite>inbox</cite> queue using <a class="reference internal" href="actor.html#wishbone.tools.WishboneQueue.rescue" title="wishbone.tools.WishboneQueue.rescue"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.tools.WishboneQueue.rescue()</span></tt></a>.</li>
+<li>Unsuccessfully submitted events should be send back to the <cite>inbox</cite> queue
+using <a class="reference internal" href="actor.html#wishbone.tools.WishboneQueue.rescue" title="wishbone.tools.WishboneQueue.rescue"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.tools.WishboneQueue.rescue()</span></tt></a>.</li>
 </ul>
 </div>
 <div class="section" id="retrying-and-monitors">
@@ -167,6 +179,7 @@ outside world anyway.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#writing-output-modules">Writing output modules</a><ul>
+<li><a class="reference internal" href="#starting-state">Starting state</a></li>
 <li><a class="reference internal" href="#handle-failed-and-successful-events">Handle failed and successful events</a></li>
 <li><a class="reference internal" href="#retrying-and-monitors">Retrying and monitors</a></li>
 </ul>
@@ -204,7 +217,7 @@ outside world anyway.</p>
         <li class="right" >
           <a href="bootstrap.html" title="Bootstraping on CLI"
              >previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.6 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.7 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
