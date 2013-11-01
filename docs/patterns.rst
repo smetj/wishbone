@@ -4,8 +4,7 @@ Patterns and best practices
 
 This section discusses some common usage patterns and best practices. Although
 most if not all are strictly spoken not required, they might be helpful in
-using Wishbone efficiently.  I expect this section to change over time when
-more experience is gathered.
+building efficient Wishbone solutions.
 
 Event headers
 -------------
@@ -74,31 +73,37 @@ Handle failed and successful events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Output modules are responsible to deliver messages to the outside world.
-Preferably we want this to be done as reliable as possible.  If submitting
-events fails (or succeeds) we might require a specific strategy to deal with
-these events.
+Preferably we want this to be done as reliably.  When submitting events to the
+outside world (aka outside a Wishbone process.) fails or succeeds we might
+require a specific strategy to deal with that specific situation.
 
-A nice pattern is to optionally have 2 additional queues:
+A possible strategy is have 2 additional queues:
 
     - successful
     - failed
 
 As you might guess, events which have been submitted successfully to the
-outside world are then submitted to the *successful* queue and the events
+outside world are then submitted to the *successful* queue while the events
 which failed to go out to the *failed* queue.
 
-It is up the user to connect these queues on their turn to another module
-to deal with them accordingly.
+It is up the user to connect these queues on their turn to another destination
+in order come to the desired strategy.
 
 Some practical examples:
 
-- After submitting an event successfully over TCP to the outside world is is submitted to the `successful` queue.  This queue is on its turn connected to the AMQP `acknowledge` queue to ascertain it is acknowledged from AMQP.
-- After submitting an event over TCP failed, the event is written to the failed queue from where it is forwarded to another module which writes the event to disk.
+- After submitting an event successfully over TCP to the outside world is is
+  submitted to the `successful` queue.  This queue is on its turn connected to
+  the AMQP `acknowledge` queue to ascertain it is acknowledged from AMQP.
 
-When this functionality is not enabled, the expected behavior should be:
+- After submitting an event over TCP failed, the event is written to the
+  failed queue from where it is forwarded to another module which writes the
+  event to disk.
+
+Whenever this pattern is *not* used, the expected behavior should be:
 
 - Successfully submitted events are discarded
-- Unsuccessfully submitted events should be send back to the `inbox` queue using :py:func:`wishbone.tools.WishboneQueue.rescue`.
+- Unsuccessfully submitted events should be send back to the `inbox` queue
+  using :py:func:`wishbone.tools.WishboneQueue.rescue`.
 
 
 
