@@ -69,6 +69,15 @@ Consider following example module:
 Writing output modules
 ----------------------
 
+Starting state
+~~~~~~~~~~~~~~
+
+An output module should always start with the **inbox** queue in a
+:py:func:`wishbone.tools.WishboneQueue.putLock` state.  The moment the module
+detects it is capable of sending incoming events to the outside world, it
+should unlock the **inbox** queue using
+:py:func:`wishbone.tools.WishboneQueue.putUnlock`.
+
 Handle failed and successful events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
