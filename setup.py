@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '0.4.6'
+VERSION = '0.4.7'
 install_requires=['gevent>=1.0dev','argparse','greenlet>=0.3.2','jsonschema','prettytable','python-daemon',"pyyaml"]
 
 try:
@@ -110,6 +110,7 @@ setup(
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog',
+            'slow = wishbone.module.slow:Slow',
             ],
         'wishbone.input': [
             ],
