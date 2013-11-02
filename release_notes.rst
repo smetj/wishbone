@@ -1,6 +1,12 @@
 Wishbone changelog
 ==================
 
+Version 0.4.8
+~~~~~~~~~~~~~
+
+- Header module needs a header key.
+- Added hostname to internal metric format.
+
 Version 0.4.7
 ~~~~~~~~~~~~~
 
