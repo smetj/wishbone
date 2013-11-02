@@ -67,7 +67,7 @@ class Graphite(Actor):
             self.pid=''
 
         if hostname == True:
-            self.hostname=gethostname()
+            self.hostname="%s."%(gethostname())
         else:
             self.hostname=''
 
