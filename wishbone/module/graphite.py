@@ -29,6 +29,7 @@ from gevent import socket
 from sys import argv
 from os.path import basename
 from os import getpid
+from gevent.socket import gethostname
 
 class Graphite(Actor):
 
@@ -37,7 +38,7 @@ class Graphite(Actor):
     Incoming metrics have following format:
 
         (time, type, source, name, value, unit, (tag1, tag2))
-        (1381002603.726132, 'wishbone', 'wishbone', 'queue.outbox.in_rate', 0, '', ())
+        (1381002603.726132, 'wishbone', 'hostname', 'queue.outbox.in_rate', 0, '', ())
 
 
 
@@ -50,9 +51,12 @@ class Graphite(Actor):
         - pid(bool):    Include pid value in naming schema.
                         Default: False
 
+        - hostname:     Include the hostname in the naming schema.
+                        Default: True
+
     '''
 
-    def __init__(self, name, prefix='', pid=False):
+    def __init__(self, name, prefix='', pid=False, hostname=True):
         Actor.__init__(self, name)
         self.name=name
         self.prefix=prefix
@@ -62,6 +66,10 @@ class Graphite(Actor):
         else:
             self.pid=''
 
+        if hostname == True:
+            self.hostname=gethostname()
+        else:
+            self.hostname=''
 
     def consume(self, event):
-        self.queuepool.outbox.put({"header":{}, "data":"%s%s%s.%s %s %s"%(self.prefix, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})
+        self.queuepool.outbox.put({"header":{}, "data":"%s%s%s%s.%s %s %s"%(self.prefix, self.hostname, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})
