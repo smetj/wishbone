@@ -32,7 +32,13 @@ class Header(Actor):
 
     Parameters:
 
-        - name(str):  The name of the module
+        - name(str):    The name of the module
+
+        - key (str):    The header key to store the information.
+                        Default: <name>
+
+        - header(dict): The data to store.
+                        Default: {}
 
     Queues:
 
@@ -42,10 +48,15 @@ class Header(Actor):
 
     '''
 
-    def __init__(self, name, header={}):
+    def __init__(self, name, key=None, header={}):
         Actor.__init__(self, name)
+        if key == None:
+            self.key=name
+        else:
+            self.key=key
+
         self.header=header
 
     def consume(self, event):
-        event["header"].update(self.header)
+        event["header"][self.key]=self.header
         self.queuepool.outbox.put(event)
