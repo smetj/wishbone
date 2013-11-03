@@ -47,6 +47,9 @@ class Graphite(Actor):
 
         - prefix(str):  Some prefix to put in front of the metric name.
 
+        - script(bool): Include the script name.
+                        Default: True
+
         - pid(bool):    Include pid value in script name.
                         Default: False
 
@@ -55,11 +58,14 @@ class Graphite(Actor):
 
     '''
 
-    def __init__(self, name, prefix='', pid=False, source=True):
+    def __init__(self, name, prefix='', script=True, pid=False, source=True):
         Actor.__init__(self, name)
         self.name=name
         self.prefix=prefix
-        self.script_name = basename(argv[0]).replace(".py","")
+        if script == True:
+            self.script_name = '.%s'%(basename(argv[0]).replace(".py",""))
+        else:
+            self.script_name = ''
         if pid == True:
             self.pid="-%s"%(getpid())
         else:
@@ -77,7 +83,7 @@ class Graphite(Actor):
         self.doConsume(event)
 
     def __consumeSource(self, event):
-        self.queuepool.outbox.put({"header":{}, "data":"%s%s.%s%s.%s %s %s"%(self.prefix, event["data"][2], self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})
+        self.queuepool.outbox.put({"header":{}, "data":"%s%s%s%s.%s %s %s"%(self.prefix, event["data"][2], self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})
 
     def __consumeNoSource(self, event):
         self.queuepool.outbox.put({"header":{}, "data":"%s%s%s.%s %s %s"%(self.prefix, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})
