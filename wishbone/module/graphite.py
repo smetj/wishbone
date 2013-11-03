@@ -29,7 +29,6 @@ from gevent import socket
 from sys import argv
 from os.path import basename
 from os import getpid
-from gevent.socket import gethostname
 
 class Graphite(Actor):
 
@@ -48,15 +47,15 @@ class Graphite(Actor):
 
         - prefix(str):  Some prefix to put in front of the metric name.
 
-        - pid(bool):    Include pid value in naming schema.
+        - pid(bool):    Include pid value in script name.
                         Default: False
 
-        - hostname:     Include the hostname in the naming schema.
+        - source(bool): Include the source name in the naming schema.
                         Default: True
 
     '''
 
-    def __init__(self, name, prefix='', pid=False, hostname=True):
+    def __init__(self, name, prefix='', pid=False, source=True):
         Actor.__init__(self, name)
         self.name=name
         self.prefix=prefix
@@ -66,10 +65,19 @@ class Graphite(Actor):
         else:
             self.pid=''
 
-        if hostname == True:
-            self.hostname="%s."%(gethostname())
+        self.source=source
+
+    def preHook(self):
+        if self.source == True:
+            self.doConsume=self.__consumeSource
         else:
-            self.hostname=''
+            self.doConsume=self.__consumeNoSource
 
     def consume(self, event):
-        self.queuepool.outbox.put({"header":{}, "data":"%s%s%s%s.%s %s %s"%(self.prefix, self.hostname, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})
+        self.doConsume(event)
+
+    def __consumeSource(self, event):
+        self.queuepool.outbox.put({"header":{}, "data":"%s%s.%s%s.%s %s %s"%(self.prefix, event["data"][2], self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})
+
+    def __consumeNoSource(self, event):
+        self.queuepool.outbox.put({"header":{}, "data":"%s%s%s.%s %s %s"%(self.prefix, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})
