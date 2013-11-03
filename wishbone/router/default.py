@@ -32,7 +32,7 @@ from gevent.event import Event
 from uuid import uuid4
 from time import time
 from os.path import basename
-from sys import argv
+from gevent import socket
 
 class Default():
     '''The default Wishbone router.
@@ -112,7 +112,7 @@ class Default():
         self.__runLogs=Event()
         self.__runLogs.clear()
 
-        self.script_name = basename(argv[0]).replace(".py","")
+        self.hostname=socket.gethostname()
 
         self.loop_context_switcher=LoopContextSwitcher(self.loop)
 
@@ -430,15 +430,15 @@ class Default():
             now = time()
             if hasattr(module, "metrics"):
                 for fn in module.metrics:
-                    metric=(now, "wishbone", self.script_name, "function.%s.%s.total_time"%(module.name, fn), module.metrics[fn]["total_time"], '',())
+                    metric=(now, "wishbone", self.hostname, "function.%s.%s.total_time"%(module.name, fn), module.metrics[fn]["total_time"], '',())
                     self.metrics.put({"header":{}, "data":metric})
-                    metric=(now, "wishbone", self.script_name, "function.%s.%s.hits"%(module.name, fn), module.metrics[fn]["hits"], '',())
+                    metric=(now, "wishbone", self.hostname, "function.%s.%s.hits"%(module.name, fn), module.metrics[fn]["hits"], '',())
                     self.metrics.put({"header":{}, "data":metric})
 
             for queue in module.queuepool.listQueues():
                 stats = getattr(module.queuepool, queue).stats()
                 for item in stats:
-                    metric=(now, "wishbone", self.script_name, "queue.%s.%s.%s"%(module.name, queue, item), stats[item], '', ())
+                    metric=(now, "wishbone", self.hostname, "queue.%s.%s.%s"%(module.name, queue, item), stats[item], '', ())
                     self.metrics.put({"header":{}, "data":metric})
             sleep(self.interval)
 
