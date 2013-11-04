@@ -1,6 +1,11 @@
 Wishbone changelog
 ==================
 
+Version 0.4.9
+~~~~~~~~~~~~~
+
+- Header module supports dynamic header generation.
+
 Version 0.4.8
 ~~~~~~~~~~~~~
 
