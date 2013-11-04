@@ -40,6 +40,11 @@ class Header(Actor):
         - header(dict): The data to store.
                         Default: {}
 
+        - expr(str):    printf-style String Formatting.
+                        Expects event["data"] to be a dictionary.
+                        the dictionary.
+                        Default: None
+
     Queues:
 
         - inbox:      Incoming events.
@@ -48,15 +53,28 @@ class Header(Actor):
 
     '''
 
-    def __init__(self, name, key=None, header={}):
+    def __init__(self, name, key=None, header={}, expr=None):
         Actor.__init__(self, name)
         if key == None:
             self.key=name
         else:
             self.key=key
 
-        self.header=header
+        if expr == None:
+            self.addHeader=self.__doPrintf
+        else:
+            self.addHeader=self.__doHeader
 
     def consume(self, event):
-        event["header"][self.key]=self.header
+        event=self.addHeader(event)
         self.queuepool.outbox.put(event)
+
+    def __doHeader(self, event):
+        return event["header"][self.key]=self.header
+
+    def __doPrintf(self, event):
+        try:
+            return self.expr%event["data"]
+        except Exception as err:
+            self.logging.error("String replace failed.  Reason: %s"%(err))
+            return event
