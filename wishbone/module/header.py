@@ -70,7 +70,8 @@ class Header(Actor):
         self.queuepool.outbox.put(event)
 
     def __doHeader(self, event):
-        return event["header"][self.key]=self.header
+        event["header"][self.key]=self.header
+        return event
 
     def __doPrintf(self, event):
         try:
