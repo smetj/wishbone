@@ -6,12 +6,13 @@ Version 0.4.8
 
 - Header module needs a header key.
 - Added hostname to internal metric format.
+- Fix bug loading syslog, when starting in background.
 
 Version 0.4.7
 ~~~~~~~~~~~~~
 
 - Fix bug which loops disableThrottling().
-- Add extra checks on routing table syntax. 
+- Add extra checks on routing table syntax.
 - Added slow output module.
 - Fix bug in roundrobin module.
 - Update patterns and scenarios documentation.
