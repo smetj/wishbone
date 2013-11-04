@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Modules &mdash; Wishbone 0.4.7 documentation</title>
+    <title>Modules &mdash; Wishbone 0.4.8 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.7',
+        VERSION:     '0.4.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Wishbone 0.4.7 documentation" href="index.html" />
+    <link rel="top" title="Wishbone 0.4.8 documentation" href="index.html" />
     <link rel="next" title="Bootstraping on CLI" href="bootstrap.html" />
     <link rel="prev" title="Router" href="router.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,7 +47,7 @@
         <li class="right" >
           <a href="router.html" title="Router"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.7 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.8 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -411,13 +411,26 @@ module.</p>
 <h3>Header<a class="headerlink" href="#header" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="wishbone.module.Header">
-<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Header</tt><big>(</big><em>name</em>, <em>header={}</em><big>)</big><a class="headerlink" href="#wishbone.module.Header" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Header</tt><big>(</big><em>name</em>, <em>key=None</em>, <em>header={}</em><big>)</big><a class="headerlink" href="#wishbone.module.Header" title="Permalink to this definition">¶</a></dt>
 <dd><p>** A builtin Wishbone module which adds the defined dictionary
 to the header of each passing event.**</p>
 <p>Parameters:</p>
 <blockquote>
-<div><ul class="simple">
-<li>name(str):  The name of the module</li>
+<div><ul>
+<li><p class="first">name(str):    The name of the module</p>
+</li>
+<li><dl class="first docutils">
+<dt>key (str):    The header key to store the information.</dt>
+<dd><p class="first last">Default: &lt;name&gt;</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>header(dict): The data to store.</dt>
+<dd><p class="first last">Default: {}</p>
+</dd>
+</dl>
+</li>
 </ul>
 </div></blockquote>
 <p>Queues:</p>
@@ -482,12 +495,12 @@ metrics produced by the modules and collected by the router.</p>
 <h3>graphite<a class="headerlink" href="#graphite" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="wishbone.module.Graphite">
-<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Graphite</tt><big>(</big><em>name</em>, <em>prefix=''</em>, <em>pid=False</em><big>)</big><a class="headerlink" href="#wishbone.module.Graphite" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Graphite</tt><big>(</big><em>name</em>, <em>prefix=''</em>, <em>script=True</em>, <em>pid=False</em>, <em>source=True</em><big>)</big><a class="headerlink" href="#wishbone.module.Graphite" title="Permalink to this definition">¶</a></dt>
 <dd><p><strong>A builtin Wishbone module which formats the internal metric format into Graphite format.</strong></p>
 <p>Incoming metrics have following format:</p>
 <blockquote>
 <div>(time, type, source, name, value, unit, (tag1, tag2))
-(1381002603.726132, &#8216;wishbone&#8217;, &#8216;wishbone&#8217;, &#8216;queue.outbox.in_rate&#8217;, 0, &#8216;&#8217;, ())</div></blockquote>
+(1381002603.726132, &#8216;wishbone&#8217;, &#8216;hostname&#8217;, &#8216;queue.outbox.in_rate&#8217;, 0, &#8216;&#8217;, ())</div></blockquote>
 <p>Parameters:</p>
 <blockquote>
 <div><ul>
@@ -496,8 +509,20 @@ metrics produced by the modules and collected by the router.</p>
 <li><p class="first">prefix(str):  Some prefix to put in front of the metric name.</p>
 </li>
 <li><dl class="first docutils">
-<dt>pid(bool):    Include pid value in naming schema.</dt>
+<dt>script(bool): Include the script name.</dt>
+<dd><p class="first last">Default: True</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>pid(bool):    Include pid value in script name.</dt>
 <dd><p class="first last">Default: False</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>source(bool): Include the source name in the naming schema.</dt>
+<dd><p class="first last">Default: True</p>
 </dd>
 </dl>
 </li>
@@ -588,7 +613,7 @@ metrics produced by the modules and collected by the router.</p>
         <li class="right" >
           <a href="router.html" title="Router"
              >previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.7 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.8 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
