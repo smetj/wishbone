@@ -60,10 +60,13 @@ class Header(Actor):
         else:
             self.key=key
 
+        self.header=header
+        self.expr=expr
+
         if expr == None:
-            self.addHeader=self.__doPrintf
-        else:
             self.addHeader=self.__doHeader
+        else:
+            self.addHeader=self.__doPrintf
 
     def consume(self, event):
         event=self.addHeader(event)
