@@ -25,6 +25,7 @@
 from wishbone import Actor
 from wishbone.errors import QueueLocked, QueueFull, SetupError
 from gevent import sleep, spawn
+from gevent.event import Event
 
 class TestEvent(Actor):
 
@@ -50,21 +51,25 @@ class TestEvent(Actor):
     '''
 
     def __init__(self, name, interval=1):
-        Actor.__init__(self, name, setupbasic=False, limit=0)
+        Actor.__init__(self, name, setupbasic=False)
         self.createQueue("outbox")
         self.name = name
-        if interval <= 0:
-            raise SetupError ("Interval should be bigger than 0.")
-
         self.interval=interval
+        if interval == 0:
+            self.sleep = self.doNoSleep
+        else:
+            self.sleep = self.doSleep
+
+        self.throttle=Event()
+        self.throttle.set()
 
     def preHook(self):
         spawn(self.go)
 
     def go(self):
-        switcher = self.getContextSwitcher(100, self.loop)
-        while switcher.do():
-            self.throttle()
+        switcher = self.getContextSwitcher(100)
+        while switcher():
+            self.throttle.wait()
             try:
                 self.queuepool.outbox.put({"header":{},"data":"test"})
             except (QueueFull, QueueLocked):
@@ -76,3 +81,9 @@ class TestEvent(Actor):
 
     def doNoSleep(self, interval):
         pass
+
+    def enableThrottling(self):
+        self.throttle.clear()
+
+    def disableThrottling(self):
+        self.throttle.set()
