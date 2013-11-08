@@ -29,7 +29,7 @@ from time import time
 
 
 class HumanLogFormatter(Actor):
-    '''**A builtin Wishbone module which formats Wishbone log events.**
+    '''**Formats Wishbone log events.**
 
     Logs are formated from the internal wishbone format into a more
     pleasing human readable format suited for STDOUT or a logfile.

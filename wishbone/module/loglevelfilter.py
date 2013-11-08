@@ -29,7 +29,7 @@ from time import time
 
 
 class LogLevelFilter(Actor):
-    '''**A builtin Wishbone module which filters Wishbone log events.**
+    '''**Filters Wishbone log events.**
 
         name(str)       :   The name of the module.
 
