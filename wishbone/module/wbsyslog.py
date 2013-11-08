@@ -30,7 +30,7 @@ import sys
 import os
 
 class Syslog(Actor):
-    '''**Writes Wishbone log events to syslog.**
+    '''**Writes log events to syslog.**
 
     Logevents have following format:
 

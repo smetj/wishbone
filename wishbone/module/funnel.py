@@ -27,8 +27,7 @@ from wishbone import Actor
 
 
 class Funnel(Actor):
-    '''**A builtin Wishbone module which merges incoming events from different
-    queues into 1 queue.**
+    '''**Merges incoming events from multiple queues to 1 queue.**
 
     Create a "n to 1" relationship with queues.  Events arriving in different
     queues are all merged into the outbox.
