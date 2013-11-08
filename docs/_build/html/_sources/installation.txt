@@ -10,12 +10,19 @@ Pypi
 '''''
 
 You can install the latest stable version of Wishbone from
-https://pypi.python.org/pypi/wishbone/ by using easy_install:
+https://pypi.python.org/pypi/wishbone/ by using easy_install or pip:
+
+
 
 .. code-block:: sh
 
     $ easy_install wishbone
 
+Or
+
+.. code-block:: sh
+
+    $ pip install wishbone
 
 All dependencies should be resolved automatically.
 
