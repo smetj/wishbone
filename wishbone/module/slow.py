@@ -27,7 +27,7 @@ from wishbone import Actor
 from gevent import sleep, spawn
 
 class Slow(Actor):
-    '''**An output module which only processes an per X seconds.**
+    '''**Processes an incoming event per X seconds.**
 
     This module only exists for testing purposes and does not have
     any further use.

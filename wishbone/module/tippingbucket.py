@@ -28,7 +28,7 @@ from gevent import sleep, spawn
 from gevent.event import Event
 
 class TippingBucket(Actor):
-    '''**A builtin Wishbone module which buffers data.**
+    '''**Event buffer module.**
 
     This module buffers data and dumps it to the output queue on 3 conditions:
 
