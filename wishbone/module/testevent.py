@@ -29,7 +29,7 @@ from gevent.event import Event
 
 class TestEvent(Actor):
 
-    '''**A WishBone input module which generates a test event at the chosen interval.**
+    '''**Generates a test event at the chosen interval.**
 
     This module is only available for testing purposes and has further hardly any use.
 
