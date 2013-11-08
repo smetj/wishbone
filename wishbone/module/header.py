@@ -27,8 +27,7 @@ from wishbone import Actor
 
 
 class Header(Actor):
-    '''** A builtin Wishbone module which adds the defined dictionary
-    to the header of each passing event.**
+    '''**Adds information to event headers.**
 
     Parameters:
 
