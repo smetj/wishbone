@@ -67,7 +67,7 @@ class Format():
         return "PID-%s: %s"%(self.pid_value, event)
 
 class STDOUT(Actor):
-    '''**A builtin Wishbone module prints events to STDOUT.**
+    '''**Prints incoming events to STDOUT.**
 
     Prints incoming events to STDOUT. When <complete> is True,
     the complete event including headers is printed to STDOUT.
