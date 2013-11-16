@@ -27,8 +27,7 @@ from wishbone import Actor
 
 
 class Header(Actor):
-    '''** A builtin Wishbone module which adds the defined dictionary
-    to the header of each passing event.**
+    '''**Adds information to event headers.**
 
     Parameters:
 
@@ -40,6 +39,11 @@ class Header(Actor):
         - header(dict): The data to store.
                         Default: {}
 
+        - expr(str):    printf-style String Formatting.
+                        Expects event["data"] to be a dictionary.
+                        the dictionary.
+                        Default: None
+
     Queues:
 
         - inbox:      Incoming events.
@@ -48,7 +52,7 @@ class Header(Actor):
 
     '''
 
-    def __init__(self, name, key=None, header={}):
+    def __init__(self, name, key=None, header={}, expr=None):
         Actor.__init__(self, name)
         if key == None:
             self.key=name
@@ -56,7 +60,24 @@ class Header(Actor):
             self.key=key
 
         self.header=header
+        self.expr=expr
+
+        if expr == None:
+            self.addHeader=self.__doHeader
+        else:
+            self.addHeader=self.__doPrintf
 
     def consume(self, event):
-        event["header"][self.key]=self.header
+        event=self.addHeader(event)
         self.queuepool.outbox.put(event)
+
+    def __doHeader(self, event):
+        event["header"][self.key]=self.header
+        return event
+
+    def __doPrintf(self, event):
+        try:
+            return self.expr%event["data"]
+        except Exception as err:
+            self.logging.error("String replace failed.  Reason: %s"%(err))
+            return event

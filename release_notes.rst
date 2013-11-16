@@ -1,6 +1,13 @@
 Wishbone changelog
 ==================
 
+Version 0.4.9
+~~~~~~~~~~~~~
+
+- Make descriptions of modules shorter.
+- Header module supports dynamic header generation.
+- Fix context switch bug in testevent module
+
 Version 0.4.8
 ~~~~~~~~~~~~~
 
