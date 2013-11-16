@@ -30,8 +30,7 @@ from gevent import sleep
 
 class RoundRobin(Actor):
 
-    '''**A builtin Wishbone module which round robins incoming events
-    over all connected queues.**
+    '''**Round-robins incoming events to all connected queues.**
 
     Create a "1 to n" relationship between queues.  Events arriving in inbox
     are then submitted in a roundrobin (or randomized) fashion to the
