@@ -29,8 +29,7 @@ from copy import deepcopy
 
 class Fanout(Actor):
 
-    '''**A builtin Wishbone module which duplicates incoming events to all
-    connected queues.**
+    '''**Duplicates incoming events to all connected queues.**
 
     Create a "1 to n" relationship with queues.  Events arriving in inbox
     are then copied to each queue connected to this module.  Keep in mind
