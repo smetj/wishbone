@@ -27,7 +27,7 @@ from wishbone import Actor
 
 
 class Null(Actor):
-    '''**Accepts events and purges these without any further processing.**
+    '''**Purges incoming events..**
 
     Useful to discard a stream of events.
 
