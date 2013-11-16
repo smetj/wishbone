@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Modules &mdash; Wishbone 0.4.8 documentation</title>
+    <title>Modules &mdash; Wishbone 0.4.9 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.8',
+        VERSION:     '0.4.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Wishbone 0.4.8 documentation" href="index.html" />
+    <link rel="top" title="Wishbone 0.4.9 documentation" href="index.html" />
     <link rel="next" title="Bootstraping on CLI" href="bootstrap.html" />
     <link rel="prev" title="Router" href="router.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,7 +47,7 @@
         <li class="right" >
           <a href="router.html" title="Router"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.8 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.9 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -85,7 +85,7 @@ incoming data into the expected Wishbone internal event format.</p>
 <dl class="class">
 <dt id="wishbone.module.TestEvent">
 <em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">TestEvent</tt><big>(</big><em>name</em>, <em>interval=1</em><big>)</big><a class="headerlink" href="#wishbone.module.TestEvent" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A WishBone input module which generates a test event at the chosen interval.</strong></p>
+<dd><p><strong>Generates a test event at the chosen interval.</strong></p>
 <p>This module is only available for testing purposes and has further hardly any use.</p>
 <p>Events have following format:</p>
 <blockquote>
@@ -130,7 +130,7 @@ out.</p>
 <dl class="class">
 <dt id="wishbone.module.Syslog">
 <em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Syslog</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.module.Syslog" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>Writes Wishbone log events to syslog.</strong></p>
+<dd><p><strong>Writes log events to syslog.</strong></p>
 <p>Logevents have following format:</p>
 <p>(6, 1367682301.430527, &#8216;Router&#8217;, &#8216;Received SIGINT. Shutting down.&#8217;)</p>
 <p>The first value corresponds to the syslog severity level.</p>
@@ -157,7 +157,7 @@ out.</p>
 <dl class="class">
 <dt id="wishbone.module.Null">
 <em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Null</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.module.Null" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>Accepts events and purges these without any further processing.</strong></p>
+<dd><p><strong>Purges incoming events..</strong></p>
 <p>Useful to discard a stream of events.</p>
 <p>Parameters:</p>
 <blockquote>
@@ -180,7 +180,7 @@ out.</p>
 <dl class="class">
 <dt id="wishbone.module.STDOUT">
 <em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">STDOUT</tt><big>(</big><em>name</em>, <em>complete=False</em>, <em>counter=False</em>, <em>prefix=''</em>, <em>pid=False</em><big>)</big><a class="headerlink" href="#wishbone.module.STDOUT" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A builtin Wishbone module prints events to STDOUT.</strong></p>
+<dd><p><strong>Prints incoming events to STDOUT.</strong></p>
 <p>Prints incoming events to STDOUT. When &lt;complete&gt; is True,
 the complete event including headers is printed to STDOUT.</p>
 <p>Parameters:</p>
@@ -238,8 +238,7 @@ when transiting the module.</p>
 <dl class="class">
 <dt id="wishbone.module.RoundRobin">
 <em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">RoundRobin</tt><big>(</big><em>name</em>, <em>randomize=False</em><big>)</big><a class="headerlink" href="#wishbone.module.RoundRobin" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A builtin Wishbone module which round robins incoming events
-over all connected queues.</strong></p>
+<dd><p><strong>Round-robins incoming events to all connected queues.</strong></p>
 <p>Create a &#8220;1 to n&#8221; relationship between queues.  Events arriving in inbox
 are then submitted in a roundrobin (or randomized) fashion to the
 connected queues.  The outbox queue is non existent.</p>
@@ -263,8 +262,7 @@ connected queues.  The outbox queue is non existent.</p>
 <dl class="class">
 <dt id="wishbone.module.Fanout">
 <em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Fanout</tt><big>(</big><em>name</em>, <em>clone=False</em><big>)</big><a class="headerlink" href="#wishbone.module.Fanout" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A builtin Wishbone module which duplicates incoming events to all
-connected queues.</strong></p>
+<dd><p><strong>Duplicates incoming events to all connected queues.</strong></p>
 <p>Create a &#8220;1 to n&#8221; relationship with queues.  Events arriving in inbox
 are then copied to each queue connected to this module.  Keep in mind
 that the outbox queue is never used.</p>
@@ -293,8 +291,7 @@ framework.</p>
 <dl class="class">
 <dt id="wishbone.module.Funnel">
 <em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Funnel</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#wishbone.module.Funnel" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A builtin Wishbone module which merges incoming events from different
-queues into 1 queue.</strong></p>
+<dd><p><strong>Merges incoming events from multiple queues to 1 queue.</strong></p>
 <p>Create a &#8220;n to 1&#8221; relationship with queues.  Events arriving in different
 queues are all merged into the outbox.</p>
 <p>Parameters:</p>
@@ -312,7 +309,7 @@ queues are all merged into the outbox.</p>
 <dl class="class">
 <dt id="wishbone.module.TippingBucket">
 <em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">TippingBucket</tt><big>(</big><em>name</em>, <em>age=0</em>, <em>size=0</em>, <em>events=0</em>, <em>predefined_header=None</em><big>)</big><a class="headerlink" href="#wishbone.module.TippingBucket" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A builtin Wishbone module which buffers data.</strong></p>
+<dd><p><strong>Event buffer module.</strong></p>
 <p>This module buffers data and dumps it to the output queue on 3 conditions:</p>
 <blockquote>
 <div><ul class="simple">
@@ -372,7 +369,7 @@ will be indefinite until your box runs out of memory</p>
 <dl class="class">
 <dt id="wishbone.module.LockBuffer">
 <em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">LockBuffer</tt><big>(</big><em>name</em>, <em>size=100</em><big>)</big><a class="headerlink" href="#wishbone.module.LockBuffer" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A builtin Wishbone module with a fixed size inbox queue.</strong></p>
+<dd><p><strong>A module with a fixed size inbox queue.</strong></p>
 <p>This module shovels events from inbox to outbox.  The
 inbox however is fixed in size which locks the downstream
 modules when it reached its limit.</p>
@@ -411,9 +408,8 @@ module.</p>
 <h3>Header<a class="headerlink" href="#header" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="wishbone.module.Header">
-<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Header</tt><big>(</big><em>name</em>, <em>key=None</em>, <em>header={}</em><big>)</big><a class="headerlink" href="#wishbone.module.Header" title="Permalink to this definition">¶</a></dt>
-<dd><p>** A builtin Wishbone module which adds the defined dictionary
-to the header of each passing event.**</p>
+<em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Header</tt><big>(</big><em>name</em>, <em>key=None</em>, <em>header={}</em>, <em>expr=None</em><big>)</big><a class="headerlink" href="#wishbone.module.Header" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Adds information to event headers.</strong></p>
 <p>Parameters:</p>
 <blockquote>
 <div><ul>
@@ -428,6 +424,14 @@ to the header of each passing event.**</p>
 <li><dl class="first docutils">
 <dt>header(dict): The data to store.</dt>
 <dd><p class="first last">Default: {}</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>expr(str):    printf-style String Formatting.</dt>
+<dd><p class="first last">Expects event[&#8220;data&#8221;] to be a dictionary.
+the dictionary.
+Default: None</p>
 </dd>
 </dl>
 </li>
@@ -455,7 +459,7 @@ produced by the modules and collected by the router.</p>
 <dl class="class">
 <dt id="wishbone.module.HumanLogFormatter">
 <em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">HumanLogFormatter</tt><big>(</big><em>name</em>, <em>colorize=True</em><big>)</big><a class="headerlink" href="#wishbone.module.HumanLogFormatter" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A builtin Wishbone module which formats Wishbone log events.</strong></p>
+<dd><p><strong>Formats Wishbone log events.</strong></p>
 <p>Logs are formated from the internal wishbone format into a more
 pleasing human readable format suited for STDOUT or a logfile.</p>
 <p>Internal Wishbone format:</p>
@@ -475,7 +479,7 @@ pleasing human readable format suited for STDOUT or a logfile.</p>
 <dl class="class">
 <dt id="wishbone.module.LogLevelFilter">
 <em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">LogLevelFilter</tt><big>(</big><em>name</em>, <em>max_level=6</em><big>)</big><a class="headerlink" href="#wishbone.module.LogLevelFilter" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A builtin Wishbone module which filters Wishbone log events.</strong></p>
+<dd><p><strong>Filters Wishbone log events.</strong></p>
 <p>name(str)       :   The name of the module.</p>
 <dl class="docutils">
 <dt>max_level(bool) <span class="classifier-delimiter">:</span> <span class="classifier">The maximum log level to show.</span></dt>
@@ -496,7 +500,7 @@ metrics produced by the modules and collected by the router.</p>
 <dl class="class">
 <dt id="wishbone.module.Graphite">
 <em class="property">class </em><tt class="descclassname">wishbone.module.</tt><tt class="descname">Graphite</tt><big>(</big><em>name</em>, <em>prefix=''</em>, <em>script=True</em>, <em>pid=False</em>, <em>source=True</em><big>)</big><a class="headerlink" href="#wishbone.module.Graphite" title="Permalink to this definition">¶</a></dt>
-<dd><p><strong>A builtin Wishbone module which formats the internal metric format into Graphite format.</strong></p>
+<dd><p><strong>Converts the internal metric format to Graphite format.</strong></p>
 <p>Incoming metrics have following format:</p>
 <blockquote>
 <div>(time, type, source, name, value, unit, (tag1, tag2))
@@ -613,7 +617,7 @@ metrics produced by the modules and collected by the router.</p>
         <li class="right" >
           <a href="router.html" title="Router"
              >previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.8 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.4.9 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
