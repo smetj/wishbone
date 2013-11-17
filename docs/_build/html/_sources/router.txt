@@ -78,6 +78,38 @@ metric data to Graphite.
 
 .. image:: graphite.png
 
+Format
+------
+Wishbone represents metrics into a fixed data structure:
+
+    (time, type, source, name, value, unit, (tag1, tag2))
+
+It is a tuple containing a number of fields:
+
+- timestamp
+  A timestamp of the metric in unix time.
+
+- type
+  A free to choose description of the type of the metric
+
+- source
+  The originating source of the metric
+
+- name
+  The name of the metric
+
+- value
+  The metric value
+
+- unit
+  The value units
+
+- tags
+  A tuple of tags
+
+For example:
+
+        (1381002603.726132, 'wishbone', 'hostname', 'queue.outbox.in_rate', 0, '', ("production",monitored))
 
 ---------
 
