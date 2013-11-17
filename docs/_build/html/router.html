@@ -119,6 +119,31 @@ metricmodule, which formats the metrics into a Graphite format.  That module
 can be connected on its turn to the TCP client module in order to forward the
 metric data to Graphite.</p>
 <img alt="_images/graphite.png" src="_images/graphite.png" />
+<div class="section" id="format">
+<h3>Format<a class="headerlink" href="#format" title="Permalink to this headline">¶</a></h3>
+<p>Wishbone represents metrics into a fixed data structure:</p>
+<blockquote>
+<div>(time, type, source, name, value, unit, (tag1, tag2))</div></blockquote>
+<p>It is a tuple containing a number of fields:</p>
+<ul class="simple">
+<li>timestamp
+A timestamp of the metric in unix time.</li>
+<li>type
+A free to choose description of the type of the metric</li>
+<li>source
+The originating source of the metric</li>
+<li>name
+The name of the metric</li>
+<li>value
+The metric value</li>
+<li>unit
+The value units</li>
+<li>tags
+A tuple of tags</li>
+</ul>
+<p>For example:</p>
+<blockquote>
+<div>(1381002603.726132, &#8216;wishbone&#8217;, &#8216;hostname&#8217;, &#8216;queue.outbox.in_rate&#8217;, 0, &#8216;&#8217;, (&#8220;production&#8221;,monitored))</div></blockquote>
 <hr class="docutils" />
 <dl class="class">
 <dt id="wishbone.router.Default">
@@ -313,6 +338,7 @@ time it takes to execute the function.</p>
 
 </div>
 </div>
+</div>
 
 
           </div>
@@ -325,7 +351,10 @@ time it takes to execute the function.</p>
 <li><a class="reference internal" href="#">Router</a><ul>
 <li><a class="reference internal" href="#throttling">Throttling</a></li>
 <li><a class="reference internal" href="#logging">Logging</a></li>
-<li><a class="reference internal" href="#metrics">Metrics</a></li>
+<li><a class="reference internal" href="#metrics">Metrics</a><ul>
+<li><a class="reference internal" href="#format">Format</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
