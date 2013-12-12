@@ -28,7 +28,7 @@ import sys
 
 PROJECT = 'wishbone'
 VERSION = '0.4.9'
-install_requires=['gevent>=1.0dev','argparse','greenlet>=0.3.2','jsonschema','prettytable','python-daemon',"pyyaml"]
+install_requires=['gevent>=1.0','argparse','greenlet>=0.3.2','jsonschema','prettytable','python-daemon',"pyyaml"]
 
 try:
     long_description = open('README.rst', 'rt').read()
@@ -79,7 +79,6 @@ setup(
     scripts=[],
 
     provides=[],
-    dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.0dev'],
     install_requires=install_requires,
     namespace_packages=[],
     packages=find_packages(),
