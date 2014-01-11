@@ -1,5 +1,10 @@
 Wishbone changelog
 ==================
+Version 0.4.10
+~~~~~~~~~~~~~~
+
+- Less verbose logging when creating queues.
+
 
 Version 0.4.9
 ~~~~~~~~~~~~~
