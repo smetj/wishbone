@@ -198,7 +198,7 @@ class Debug(Initialize):
                 self.router.registerLogModule(module, instance, **self.config["logs"][instance].get("arguments",{}))
         else:
             loglevelfilter=self.loadModule("wishbone.builtin.logging.loglevelfilter")
-            self.router.registerLogModule(loglevelfilter, "loglevelfilter")
+            self.router.registerLogModule(loglevelfilter, "loglevelfilter", max_level=7)
 
             humanlogformatter=self.loadModule("wishbone.builtin.logging.humanlogformatter")
             self.router.register(humanlogformatter, "humanlogformatter")
