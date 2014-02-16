@@ -135,6 +135,7 @@ class Consumer():
                 self.logging.debug("Queue %s locked."%(str(q)))
                 q.waitUntilGetAllowed()
             else:
+                #fc(event)
                 try:
                     fc(event)
                 except Exception as err:
