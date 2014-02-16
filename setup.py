@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '0.4.9'
+VERSION = '0.4.10'
 install_requires=['gevent>=1.0','argparse','greenlet>=0.3.2','jsonschema','prettytable','python-daemon',"pyyaml"]
 
 try:
