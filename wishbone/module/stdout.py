@@ -104,4 +104,4 @@ class STDOUT(Actor):
     def consume(self,event):
         #todo(smet) This should work in a gevent context but it doesn't. Bug?
         #sys.stdout.write(self.format.do(event))
-        print("%s%s"%(self.prefix,self.format.do(event)))
+        print unicode(("%s%s"%(self.prefix,self.format.do(event))))
