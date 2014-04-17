@@ -27,8 +27,8 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '0.4.9'
-install_requires=['gevent>=1.0dev','argparse','greenlet>=0.3.2','jsonschema','prettytable','python-daemon',"pyyaml"]
+VERSION = '0.4.10'
+install_requires=['gevent>=1.0','argparse','greenlet>=0.3.2','jsonschema','prettytable','python-daemon', "pyyaml", "gevent_inotifyx", "pyyaml"]
 
 try:
     long_description = open('README.rst', 'rt').read()
@@ -79,7 +79,6 @@ setup(
     scripts=[],
 
     provides=[],
-    dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.0dev'],
     install_requires=install_requires,
     namespace_packages=[],
     packages=find_packages(),
