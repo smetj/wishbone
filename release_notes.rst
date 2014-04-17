@@ -1,5 +1,10 @@
 Wishbone changelog
 ==================
+Version 0.4.10
+~~~~~~~~~~~~~~
+
+- Various log finetuning
+- Smaller bugfixes
 
 Version 0.4.9
 ~~~~~~~~~~~~~
