@@ -45,15 +45,22 @@ class TestEvent(Actor):
                                     Should have a value > 0.
                                     default: 1
 
+        - message (string):         The content of the test message.
+                                    default: "test"
+
+        - numbered (bool):          When true, appends a sequential number to the end.
+                                    default: False
+
     Queues:
 
         - outbox:    Contains the generated events.
     '''
 
-    def __init__(self, name, interval=1):
+    def __init__(self, name, interval=1, message="test", numbered=False):
         Actor.__init__(self, name, setupbasic=False)
         self.createQueue("outbox")
         self.name = name
+        self.message = message
         self.interval=interval
         if interval == 0:
             self.sleep = self.doNoSleep
@@ -62,6 +69,18 @@ class TestEvent(Actor):
 
         self.throttle=Event()
         self.throttle.set()
+        if numbered == True:
+            self.number = self.doNumber
+            self.n=0
+        else:
+            self.number = self.doNoNumber
+
+    def doNumber(self):
+        self.n += 1
+        return "_%s"%(self.n)
+
+    def doNoNumber(self):
+        return ""
 
     def preHook(self):
         spawn(self.go)
@@ -71,7 +90,7 @@ class TestEvent(Actor):
         while switcher():
             self.throttle.wait()
             try:
-                self.queuepool.outbox.put({"header":{},"data":"test"})
+                self.queuepool.outbox.put({"header":{},"data":"%s%s"%(self.message, self.number())})
             except (QueueFull, QueueLocked):
                 self.queuepool.outbox.waitUntilPutAllowed()
             self.sleep(self.interval)
