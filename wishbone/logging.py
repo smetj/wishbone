@@ -2,9 +2,9 @@
 #
 # -*- coding: utf-8 -*-
 #
-#  qlogging.py
+#  logging.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,29 +23,31 @@
 #
 #
 
-
-from wishbone.tools import WishboneQueue
+from wishbone.error import QueueLocked, QueueEmpty, QueueFull
+from gevent import spawn
 from time import time
 from os import getpid
 
-class QLogging():
+class Logging():
 
     '''
     Generates Wishbone formatted log messages following the Syslog priority
     definition.
-
-    Generated logs are stored in a local queue <self.logs>.  It is up to an
-    external process the consume this queue.
-
     '''
 
-    def __init__(self, name):
-        self.logs=WishboneQueue()
+    def __init__(self, name, q):
         self.name=name
+        self.logs=q
         self.pid=getpid()
 
     def __log(self, level, message):
-        self.logs.put({"header":{},"data":(level, time(), self.pid, self.name, message)})
+
+        while True:
+            try:
+                self.logs.put({"header":{},"data":(level, time(), self.pid, self.name, message)})
+                break
+            except QueueFull:
+                self.logs.waitUntilFree()
 
     def emergency(self, message):
         """Generates a log message with priority emergency(0).
