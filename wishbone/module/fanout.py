@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-#
 # -*- coding: utf-8 -*-
 #
 #  fanout.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,57 +23,44 @@
 #
 
 from wishbone import Actor
-from copy import deepcopy
 
 
 class Fanout(Actor):
+    '''**Funnel multiple incoming queues to 1 outgoing queue.**
 
-    '''**Duplicates incoming events to all connected queues.**
-
-    Create a "1 to n" relationship with queues.  Events arriving in inbox
-    are then copied to each queue connected to this module.  Keep in mind
-    that the outbox queue is never used.
-
-    When clone is True, each incoming event is duplicated for each outgoing
-    queue.  This might be usefull if you require to change the content of the
-    events later down the pipeline.  Otherwise references are used which means
-    changing the event will change it everywhere in the current Wishbone
-    framework.
-
+    Funnel multiple incoming queues to 1 outgoing queue.
 
     Parameters:
 
-        name(str):      The name of the module.
+        - name(str):    The name of the module
 
-        clone(bool):    When True actually makes a copy instead of passing
-                        a reference.
+        - size(int):    The size of all module queues.
+
+        - dupe(bool):   Determines whether we send references to the
+                        original event to all destination or an
+                        actual copy.
+                        Default: False
+
 
     Queues:
 
-        inbox:  Incoming events
+        outbox:     Outgoing events.
+
     '''
 
-    def __init__(self, name, clone=False):
-        Actor.__init__(self, name)
-        if clone == False:
-            self.do = self.__consumeNoDeep
-        else:
-            self.do = self.__consumeDeep
+
+    def __init__(self, name, size=100, dupe=False):
+
+        Actor.__init__(self, name, size=size)
+        self.name=name
+        self.pool.createQueue("outbox")
 
     def preHook(self):
-        destination_queues = self.queuepool.getQueueInstances()
-        del(destination_queues["inbox"])
-        del(destination_queues["outbox"])
-        self.destination_queues = [destination_queues[queue] for queue in destination_queues.keys()]
+
+        for queue in self.pool.listQueues(name=True, default=False):
+            if queue != "outbox":
+                self.registerConsumer(self.consume, queue)
 
     def consume(self, event):
-        self.do(event)
 
-    def __consumeNoDeep(self, event):
-        for queue in self.destination_queues:
-            queue.put(event)
-
-    def __consumeDeep(self, event):
-        for queue in self.destination_queues:
-            queue.put(deepcopy(event))
-
+        self.submit(event, self.pool.queue.outbox)
