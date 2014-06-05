@@ -2,13 +2,13 @@
 #
 # -*- coding: utf-8 -*-
 #
-#  all.py
+#  error.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
+#  the Free Software Foundation; either version 3 of the License, or
 #  (at your option) any later version.
 #
 #  This program is distributed in the hope that it will be useful,
@@ -23,7 +23,27 @@
 #
 #
 
+class QueueLocked(Exception):
+    pass
 
-from testimport import TestImport
-from testactor import TestActor
-from testwishbonequeue import TestWishbonequeue
+class QueueEmpty(Exception):
+    pass
+
+class QueueFull(Exception):
+    pass
+
+class QueueMissing(Exception):
+    pass
+
+class QueueOccupied(Exception):
+    pass
+
+class QueueConnected(Exception):
+    pass
+
+class SetupError(Exception):
+    pass
+
+class ReservedName(Exception):
+    pass
+
