@@ -2,7 +2,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-#  logformatter.py
+#  humanlogformat.py
 #
 #  Copyright 2013 Jelle Smet <development@smetj.net>
 #
@@ -23,12 +23,14 @@
 #
 #
 
+
 from wishbone import Actor
+from wishbone.error import QueueFull
 from time import strftime, localtime
 from time import time
 
 
-class HumanLogFormatter(Actor):
+class HumanLogFormat(Actor):
     '''**Formats Wishbone log events.**
 
     Logs are formated from the internal wishbone format into a more
@@ -50,8 +52,8 @@ class HumanLogFormatter(Actor):
 
     '''
 
-    def __init__(self, name, colorize=True):
-        Actor.__init__(self, name)
+    def __init__(self, name, size=100, colorize=True):
+        Actor.__init__(self, name, size)
         self.name=name
         self.levels={0:"emergency",1:"alert",2:"critical",3:"error",4:"warning",5:"notice",6:"informational",7:"debug"}
         self.colors={
@@ -69,6 +71,10 @@ class HumanLogFormatter(Actor):
         else:
             self.colorize = self.doNoColorize
 
+        self.pool.createQueue("inbox")
+        self.pool.createQueue("outbox")
+        self.registerConsumer(self.consume, "inbox")
+
     def consume(self, event):
         log = ("%s %s %s %s: %s"%(
                 strftime("%Y-%m-%dT%H:%M:%S", localtime(event["data"][1])),
@@ -76,16 +82,12 @@ class HumanLogFormatter(Actor):
                 self.levels[event["data"][0]],
                 event["data"][3],
                 event["data"][4]))
-        #log = self.colorize(log, event[0])
-        #print log
-        #print self.colorize(log, event["data"][0])
-        #event["data"]=log
         event["data"]=self.colorize(log, event["data"][0])
-        self.queuepool.outbox.put(event)
+
+        self.submit(event, self.pool.queue.outbox)
 
     def doColorize(self, message, level):
         return self.colors[level]+message+"\x1B[0m"
-
 
     def doNoColorize(self, message, level):
         pass
