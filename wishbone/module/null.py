@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-#
 # -*- coding: utf-8 -*-
 #
 #  null.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,16 +23,20 @@
 #
 
 from wishbone import Actor
+from gevent import spawn, sleep
 
 
 class Null(Actor):
-    '''**Purges incoming events..**
+    '''**Purges incoming events.**
 
-    Useful to discard a stream of events.
+    Purges incoming events.
+
 
     Parameters:
 
-        - name(str):  The name of the module
+        - name(str):    The name of the module.
+
+        - size(int):    The size of all module queues.
 
 
     Queues:
@@ -41,8 +44,13 @@ class Null(Actor):
         - inbox:    incoming events
     '''
 
-    def __init__(self, name):
-        Actor.__init__(self, name)
+
+    def __init__(self, name, size=100):
+
+        Actor.__init__(self, name, size=size)
+        self.name=name
+        self.pool.createQueue("inbox")
+        self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
         pass

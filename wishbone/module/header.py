@@ -4,7 +4,7 @@
 #
 #  header.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -48,12 +48,12 @@ class Header(Actor):
 
         - inbox:      Incoming events.
 
-        - outbox:     Outgoing modified events.
+        - outbox:     Outgoing events.
 
     '''
 
-    def __init__(self, name, key=None, header={}, expr=None):
-        Actor.__init__(self, name)
+    def __init__(self, name, size=100, key=None, header={}, expr=None):
+        Actor.__init__(self, name, size)
         if key == None:
             self.key=name
         else:
@@ -67,9 +67,13 @@ class Header(Actor):
         else:
             self.addHeader=self.__doPrintf
 
+        self.pool.createQueue("inbox")
+        self.pool.createQueue("outbox")
+        self.registerConsumer(self.consume, "inbox")
+
     def consume(self, event):
         event=self.addHeader(event)
-        self.queuepool.outbox.put(event)
+        self.submit(event, self.pool.queue.outbox)
 
     def __doHeader(self, event):
         event["header"][self.key]=self.header

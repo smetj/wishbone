@@ -1,30 +1,33 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#       stdout.py
+#  stdout.py
 #
-#       Copyright 2013 Jelle Smet development@smetj.net
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
-#       This program is free software; you can redistribute it and/or modify
-#       it under the terms of the GNU General Public License as published by
-#       the Free Software Foundation; either version 3 of the License, or
-#       (at your option) any later version.
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 3 of the License, or
+#  (at your option) any later version.
 #
-#       This program is distributed in the hope that it will be useful,
-#       but WITHOUT ANY WARRANTY; without even the implied warranty of
-#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#       GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#       You should have received a copy of the GNU General Public License
-#       along with this program; if not, write to the Free Software
-#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#       MA 02110-1301, USA.
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
 #
 #
 
 from wishbone import Actor
-#from gevent import monkey;monkey.patch_sys()
+from gevent.fileobject import FileObjectThread
+from gevent import sleep, spawn
 from os import getpid
+from sys import stdout
+
 
 class Format():
 
@@ -74,34 +77,48 @@ class STDOUT(Actor):
 
     Parameters:
 
-        - name (str):       The instance name when initiated.
+        - name(str):       The instance name when initiated.
 
-        - complete (bool):  When True, print the complete event including headers.
-                            Default: False
+        - size(int):       The size of all module queues.
 
-        - counter (bool):   Puts an incremental number for each event in front of each event.
-                            Default: False
+        - complete(bool):  When True, print the complete event including headers.
+                           Default: False
 
-        - prefix (str):     Puts the prefix in front of each printed event.
-                            Default: ""
+        - counter(bool):   Puts an incremental number for each event in front of each event.
+                           Default: False
 
-        - pid (bool):       Includes the pid of the process producing the output.
-                            Default: False
+        - prefix(str):     Puts the prefix in front of each printed event.
+                           Default: ""
+
+        - pid(bool):       Includes the pid of the process producing the output.
+                           Default: False
+
+        - flush(int):      The interval at which data needs to be flushed.
 
     Queues:
 
         - inbox:    Incoming events.
     '''
 
-    def __init__(self, name, complete=False, counter=False, prefix="", pid=False):
-        Actor.__init__(self, name)
-        self.deleteQueue("outbox")
+    def __init__(self, name, size=100, complete=False, counter=False, prefix="", pid=False, flush=1):
+        Actor.__init__(self, name, size)
+
         self.complete=complete
         self.counter=counter
         self.prefix=prefix
         self.format=Format(complete, counter, pid)
+        # self.stdout=FileObjectThread(stdout)
+
+        # spawn(self.flusher)
+        self.pool.createQueue("inbox")
+        self.registerConsumer(self.consume, "inbox")
 
     def consume(self,event):
-        #todo(smet) This should work in a gevent context but it doesn't. Bug?
-        #sys.stdout.write(self.format.do(event))
-        print unicode(("%s%s"%(self.prefix,self.format.do(event))))
+        # self.stdout.write("%s%s\n"%(self.prefix,self.format.do(event)))
+        print ("%s%s"%(self.prefix,self.format.do(event)))
+
+    def flusher(self):
+
+        while self.loop():
+            self.stdout.flush()
+            sleep(0.1)

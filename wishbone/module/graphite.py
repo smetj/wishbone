@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-#
 # -*- coding: utf-8 -*-
 #
-#  stdout.py
+#  graphite.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,11 +23,10 @@
 #
 
 from wishbone import Actor
-from time import time
-from gevent import socket
-from sys import argv
+from wishbone.error import QueueFull
 from os.path import basename
-from os import getpid
+from sys import argv
+
 
 class Graphite(Actor):
 
@@ -58,8 +56,8 @@ class Graphite(Actor):
 
     '''
 
-    def __init__(self, name, prefix='', script=True, pid=False, source=True):
-        Actor.__init__(self, name)
+    def __init__(self, name, size=100, prefix='', script=True, pid=False, source=True):
+        Actor.__init__(self, name, size)
         self.name=name
         self.prefix=prefix
         if script == True:
@@ -73,17 +71,25 @@ class Graphite(Actor):
 
         self.source=source
 
-    def preHook(self):
         if self.source == True:
             self.doConsume=self.__consumeSource
         else:
             self.doConsume=self.__consumeNoSource
 
+        self.pool.createQueue("inbox")
+        self.pool.createQueue("outbox")
+        self.registerConsumer(self.consume, "inbox")
+
     def consume(self, event):
+
         self.doConsume(event)
 
     def __consumeSource(self, event):
-        self.queuepool.outbox.put({"header":{}, "data":"%s%s%s%s.%s %s %s"%(self.prefix, event["data"][2], self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})
+
+        event = {"header":{}, "data":"%s%s%s%s.%s %s %s"%(self.prefix, event["data"][2], self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])}
+        self.submit(event, self.pool.queue.outbox)
 
     def __consumeNoSource(self, event):
-        self.queuepool.outbox.put({"header":{}, "data":"%s%s%s.%s %s %s"%(self.prefix, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})
+
+        event = {"header":{}, "data":"%s%s%s.%s %s %s"%(self.prefix, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])}
+        self.submit(event, self.pool.queue.outbox)
