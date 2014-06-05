@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-#
 # -*- coding: utf-8 -*-
 #
-#  funel.py
+#  funnel.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,17 +23,20 @@
 #
 
 from wishbone import Actor
+from wishbone.error import QueueFull
 
 
 class Funnel(Actor):
-    '''**Merges incoming events from multiple queues to 1 queue.**
+    '''**Funnel multiple incoming queues to 1 outgoing queue.**
 
-    Create a "n to 1" relationship with queues.  Events arriving in different
-    queues are all merged into the outbox.
+    Funnel multiple incoming queues to 1 outgoing queue.
 
     Parameters:
 
-        name(str):  The name of the module
+        - name(str):    The name of the module
+
+        - size(int):    The size of all module queues.
+
 
     Queues:
 
@@ -42,21 +44,19 @@ class Funnel(Actor):
 
     '''
 
-    def __init__(self, name):
-        Actor.__init__(self, name)
+
+    def __init__(self, name, size=100):
+
+        Actor.__init__(self, name, size=size)
+        self.name=name
+        self.pool.createQueue("outbox")
 
     def preHook(self):
-        source_queues = self.queuepool.getQueueInstances()
-        del(source_queues["inbox"])
-        del(source_queues["outbox"])
-        self.source_queues = [source_queues[queue] for queue in source_queues.keys()]
-        for queue in self.source_queues:
-            self.registerConsumer(self.consume, queue)
+
+        for queue in self.pool.listQueues(default=False, names=True):
+            if queue != "outbox":
+                self.registerConsumer(self.consume, queue)
 
     def consume(self, event):
-        try:
-            self.queuepool.outbox.put(event)
-        except:
-            self.queuepool.inbox.putLock()
-            self.queuepool.inbox.rescue(event)
-            self.queuepool.outbox.waitUntilPutAllowed()
+
+        self.submit(event, self.pool.queue.outbox)
