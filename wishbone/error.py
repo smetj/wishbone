@@ -47,3 +47,6 @@ class SetupError(Exception):
 class ReservedName(Exception):
     pass
 
+class ModuleInitFailure(Exception):
+    pass
+
