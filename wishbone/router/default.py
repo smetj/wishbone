@@ -23,6 +23,7 @@
 #
 
 from wishbone.module import Funnel
+from wishbone.error import ModuleInitFailure
 from gevent import sleep
 import sys
 
@@ -89,7 +90,10 @@ class Default():
         '''Initializes the mdoule using the provided *args and **kwargs
         arguments.'''
 
-        setattr(self.pool.module, name, module(name, self.size, *args, **kwargs))
+        try:
+            setattr(self.pool.module, name, module(name, self.size, *args, **kwargs))
+        except Exception as err:
+            raise ModuleInitFailure(err)
 
     def setupMetricConnections(self):
         '''Connects all metric queues to a Funnel module'''
@@ -126,9 +130,3 @@ class Default():
                     sleep(0.1)
                 else:
                     break
-        sys.exit(1)
-
-
-
-
-
