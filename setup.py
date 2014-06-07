@@ -89,7 +89,7 @@ setup(
             'funnel = wishbone.module.funnel:Funnel'
         ],
         'wishbone.logging': [
-            'humanlogformatter = wishbone.module.humanlogformat:HumanLogFormat',
+            'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
             'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
         ],
         'wishbone.metrics': [

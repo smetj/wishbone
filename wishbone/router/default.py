@@ -23,7 +23,7 @@
 #
 
 from wishbone.module import Funnel
-from wishbone.error import ModuleInitFailure
+from wishbone.error import ModuleInitFailure, NoSuchModule
 from gevent import sleep
 import sys
 
@@ -45,7 +45,10 @@ class ModulePool():
     def getModule(self, name):
         '''Returns a module instance'''
 
-        return getattr(self.module, name)
+        try:
+            return getattr(self.module, name)
+        except AttributeError:
+            raise NoSuchModule(name)
 
 class Default():
 
