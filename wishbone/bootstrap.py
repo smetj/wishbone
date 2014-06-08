@@ -27,8 +27,8 @@ import pkg_resources
 import sys
 import yaml
 import daemon
-from gevent import signal
-from wishbone.router import Default
+from gevent import signal, sleep
+
 
 class BootStrap():
     '''Bootstraps a Wishbone instance.'''
@@ -94,8 +94,17 @@ class Dispatch():
         config = self.config.load(config)
 
         if instances == 1:
-            self.instances.append(RouterProcess(config, debug=True, daemon=False))
+            self.instances.append(RouterProcess(config, debug=True))
             self.instances[-1].start()
+
+        else:
+            for x in xrange(instances):
+                print "Starting instance in background"
+                # with daemon.DaemonContext(stdout = open("./stdout.log","wb"), stderr = open("./stderr.log","wb"), files_preserve=[x for x in xrange(65535)]):
+                with daemon.DaemonContext(stdout = open("./stdout.log","wb"), stderr = open("./stderr.log","wb")):
+
+                    RouterProcess(config, debug=True).start()
+            print "kaka"
 
     def start(self, command, config, instances):
         '''Handles the Wishbone start command.'''
@@ -103,10 +112,11 @@ class Dispatch():
         self.router.start()
 
     def stop(self):
-        '''Hanles the Wishbone stop command.'''
+        '''Handles the Wishbone stop command.'''
 
         for instance in self.instances:
             instance.stop()
+
         sys.exit(0)
 
 class Module():
@@ -160,10 +170,10 @@ class Module():
 class RouterProcess():
     '''Setup, configure, run and optionally daemonize a router process.'''
 
-    def __init__(self, config, debug=False, daemon=True):
+    def __init__(self, config, debug=False):
+        from wishbone.router import Default
         self.config = config
         self.debug = debug
-        self.daemon = daemon
         self.router = Default()
         self.module = Module()
         self.setupModules(config["modules"])
@@ -199,9 +209,8 @@ class RouterProcess():
         When required daemonizex
         '''
 
-        if self.daemon == False:
-            self.router.start()
-            self.router.block()
+        self.router.start()
+        self.router.block()
 
     def stop(self):
         '''Calls the router's stop() function.'''
