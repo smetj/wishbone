@@ -58,6 +58,12 @@ class Default():
         self.initializeModule(Funnel, "metrics_funnel")
         self.initializeModule(Funnel, "logs_funnel")
 
+    def block(self):
+        '''A convenience function while just blocks.'''
+
+        while True:
+            sleep(1)
+
     def connect(self, source, destination):
         '''Connects one queue to the other.
 
