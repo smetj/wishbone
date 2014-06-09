@@ -124,7 +124,10 @@ class Dispatch():
             #      executed many times.
             self.__stopping = True
             for instance in self.instances:
-                os.kill(instance.pid, 2)
+                if hasattr(instance, "stop"):
+                    instance.stop()
+                else:
+                    os.kill(instance.pid, 2)
 
     def atLeastOnePidAlive(self, pids):
         '''Returns True if at least one of the provided pids is alive.'''
@@ -249,6 +252,9 @@ class RouterBootstrap():
 
         while self.router.isRunning():
             sleep(1)
+
+    def stop(self):
+        self.router.stop()
 
     def __debug(self):
         '''In debug mode we route all logging to SDOUT.'''
