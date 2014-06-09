@@ -116,6 +116,8 @@ class Dispatch():
 
         for instance in self.instances:
             instance.stop()
+            if len(self.instances) > 1:
+                sleep(1)
         sys.exit(0)
 
 class Module():
@@ -174,13 +176,13 @@ class RouterBootstrapProcess(Process):
         self.config = config
         self.debug = debug
         self.daemon = True
-        self.r = RouterBootstrap(self.config, self.debug)
+        self.router = RouterBootstrap(self.config, self.debug)
 
     def run(self):
-        self.r.start()
+        self.router.start()
 
     def stop(self):
-        self.r.stop()
+        self.router.stop()
 
 class RouterBootstrap():
     '''Setup, configure, run and optionally daemonize a router process.'''
@@ -243,7 +245,8 @@ class RouterBootstrap():
         self.router.pool.getModule("log_format").connect("outbox", self.router.pool.getModule("log_stdout"), "inbox")
 
     def __splitRoute(self, definition):
-        '''Splits the route definition into 4 separate parts.'''
+        '''Splits the route definition string into 4 separate string.
+        '''
 
         (source, destination) = definition.split('->')
         (sm, sq) = source.rstrip().lstrip().split('.')
