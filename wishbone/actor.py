@@ -114,7 +114,7 @@ class Actor():
         self.logging.info("Started")
 
     def stop(self):
-        '''Stops all greenthreads except the one handling logs.'''
+        '''Kills all registered Consumers.'''
 
         self.__loop = False
 
@@ -144,21 +144,16 @@ class Actor():
         self.__run.wait()
 
         while self.loop():
-
-            while self.loop():
-
                 try:
                     event = self.pool.queue.__dict__[queue].get()
-                    break
                 except QueueEmpty:
                     self.pool.queue.__dict__[queue].waitUntilContent()
-
-            try:
-                function(event)
-                self.submit(event, self.pool.queue.success)
-
-            except Exception as err:
-                self.submit(event, self.pool.queue.failed)
+                else:
+                    try:
+                        function(event)
+                        self.submit(event, self.pool.queue.success)
+                    except Exception as err:
+                        self.submit(event, self.pool.queue.failed)
 
     def __metricEmitter(self):
 
