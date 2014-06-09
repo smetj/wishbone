@@ -132,9 +132,12 @@ class Default():
             if module.name not in self.getChildren("logs_funnel"):
                 module.stop()
 
-        for queue in self.pool.module.logs_funnel.pool.listQueues(names=True):
-            while True:
-                if self.pool.module.logs_funnel.pool.getQueue(queue).size() > 0:
-                    sleep(0.1)
-                else:
-                    break
+        self.pool.module.logs_funnel.stop()
+        sleep(0.1)
+
+        # for queue in self.pool.module.logs_funnel.pool.listQueues(names=True):
+        #     while True:
+        #         if self.pool.module.logs_funnel.pool.getQueue(queue).size() > 0:
+        #             sleep(0.1)
+        #         else:
+        #             break
