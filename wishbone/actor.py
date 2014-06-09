@@ -76,6 +76,11 @@ class Actor():
         setattr(instance.pool.queue, destination, self.pool.getQueue(source))
         self.pool.getQueue(source).disableFallThrough()
 
+    def flushQueuesToDisk(self):
+        '''Writes whatever event in the queue to disk for later retrieval.'''
+
+        self.logging.debug("Writing queues to disk.")
+
     def getChildren(self, queue=None):
 
         '''Returns the queue name <queue> is connected to.'''
@@ -89,6 +94,11 @@ class Actor():
         '''The global lock for this module'''
 
         return self.__loop
+
+    def readQueuesFromDisk(self):
+        '''Reads events from disk into the queue.'''
+
+        self.logging.debug("Reading queues from disk.")
 
     def registerConsumer(self, function, queue):
         '''Registers <function> to process all events in <queue>
@@ -170,12 +180,6 @@ class Actor():
                             self.pool.queue.metrics.waitUntilFree()
             sleep(self.frequency)
 
-    def flushQueuesToDisk(self):
-        '''Writes whatever event in the queue to disk for later retrieval.'''
 
-        self.logging.debug("Writing queues to disk.")
 
-    def readQueuesFromDisk(self):
-        '''Reads events from disk into the queue.'''
 
-        self.logging.debug("Reading queues from disk.")
