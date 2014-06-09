@@ -24,7 +24,7 @@
 
 from wishbone.module import Funnel
 from wishbone.error import ModuleInitFailure, NoSuchModule
-from gevent import sleep
+from gevent import signal, sleep
 import sys
 
 class Container():
@@ -53,16 +53,12 @@ class ModulePool():
 class Default():
 
     def __init__(self, size=1000):
+        signal(2, self.stop)
         self.pool = ModulePool()
         self.size = size
         self.initializeModule(Funnel, "metrics_funnel")
         self.initializeModule(Funnel, "logs_funnel")
-
-    def block(self):
-        '''A convenience function while just blocks.'''
-
-        while True:
-            sleep(1)
+        self.running=True
 
     def connect(self, source, destination):
         '''Connects one queue to the other.
@@ -104,6 +100,9 @@ class Default():
         except Exception as err:
             raise ModuleInitFailure(err)
 
+    def isRunning(self):
+        return self.__running
+
     def setupMetricConnections(self):
         '''Connects all metric queues to a Funnel module'''
 
@@ -118,7 +117,7 @@ class Default():
 
     def start(self):
         '''Starts all registered modules.'''
-
+        self.__running=True
         self.setupMetricConnections()
         self.setupLogConnections()
 
@@ -133,3 +132,4 @@ class Default():
                 module.stop()
 
         self.pool.module.logs_funnel.stop()
+        self.__running=False
