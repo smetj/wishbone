@@ -25,10 +25,11 @@
 import argparse
 import pkg_resources
 import sys
+import os
 import yaml
 import daemon
-from gevent import signal, sleep
-from multiprocessing import Process
+import multiprocessing
+from gevent import sleep, signal
 from wishbone.router import Default
 
 
@@ -86,9 +87,11 @@ class Dispatch():
     '''Handles the Wishbone instance commands.'''
 
     def __init__(self):
-        signal(2, self.stop)
+
         self.config = Config()
         self.instances = []
+        signal(2, self.stop)
+        self.__stopping = False
 
     def debug(self, command, config, instances):
         '''Handles the Wishbone debug command.'''
@@ -103,8 +106,11 @@ class Dispatch():
             for x in xrange(instances):
                 self.instances.append(RouterBootstrapProcess(config, debug=True))
                 self.instances[-1].start()
-            while True:
+
+            while multiprocessing.active_children():
                 sleep(1)
+
+        sys.exit(0)
 
     def start(self, command, config, instances):
         '''Handles the Wishbone start command.'''
@@ -112,14 +118,29 @@ class Dispatch():
         self.router.start()
 
     def stop(self):
-        '''Handles the Wishbone stop command.'''
 
-        for instance in self.instances:
-            instance.stop()
-            #TODO: instance.stop() should block instead of having to sleep().
-            if len(self.instances) > 1:
-                sleep(1)
-        sys.exit(0)
+        if not self.__stopping:
+            #TODO: Weird hack, otherwise when trapping signal(2) this is execute
+            self.__stopping = True
+            for instance in self.instances:
+                os.kill(instance.pid, 2)
+
+    def atLeastOnePidAlive(self, pids):
+        '''Returns True if at least one of the provided pids is alive.'''
+
+        for pid in pids:
+            if self.pidAlive(pid):
+                return True
+
+    def pidAlive(self, pid):
+        '''Verifies whether pid is still alive.'''
+
+        try:
+            os.kill(pid, 0)
+            print pid
+            return True
+        except:
+            False
 
 class Module():
     '''Handles all Wishbone module interaction.'''
@@ -169,21 +190,18 @@ class Module():
         else:
             raise Exception ("Failed to load module %s  Reason: Not found"%(entrypoint))
 
-class RouterBootstrapProcess(Process):
+class RouterBootstrapProcess(multiprocessing.Process):
     '''Wraps RouterBootstrap into a Process class.'''
 
     def __init__(self, config, debug=False):
-        Process.__init__(self)
+        multiprocessing.Process.__init__(self)
         self.config = config
         self.debug = debug
         self.daemon = True
-        self.router = RouterBootstrap(self.config, self.debug)
 
     def run(self):
-        self.router.start()
-
-    def stop(self):
-        self.router.stop()
+        router = RouterBootstrap(self.config, self.debug)
+        router.start()
 
 class RouterBootstrap():
     '''Setup, configure, run and optionally daemonize a router process.'''
@@ -227,12 +245,9 @@ class RouterBootstrap():
             self.__debug()
 
         self.router.start()
-        self.router.block()
 
-    def stop(self):
-        '''Calls the router's stop() function.'''
-
-        self.router.stop()
+        while self.router.isRunning():
+            sleep(1)
 
     def __debug(self):
         '''In debug mode we route all logging to SDOUT.'''
