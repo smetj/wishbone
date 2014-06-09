@@ -28,6 +28,8 @@ import sys
 import yaml
 import daemon
 from gevent import signal, sleep
+from multiprocessing import Process
+from wishbone.router import Default
 
 
 class BootStrap():
@@ -94,17 +96,15 @@ class Dispatch():
         config = self.config.load(config)
 
         if instances == 1:
-            self.instances.append(RouterProcess(config, debug=True))
+            self.instances.append(RouterBootstrap(config, debug=True))
             self.instances[-1].start()
 
         else:
             for x in xrange(instances):
-                print "Starting instance in background"
-                # with daemon.DaemonContext(stdout = open("./stdout.log","wb"), stderr = open("./stderr.log","wb"), files_preserve=[x for x in xrange(65535)]):
-                with daemon.DaemonContext(stdout = open("./stdout.log","wb"), stderr = open("./stderr.log","wb")):
-
-                    RouterProcess(config, debug=True).start()
-            print "kaka"
+                self.instances.append(RouterBootstrapProcess(config, debug=True))
+                self.instances[-1].start()
+            while True:
+                sleep(1)
 
     def start(self, command, config, instances):
         '''Handles the Wishbone start command.'''
@@ -116,7 +116,6 @@ class Dispatch():
 
         for instance in self.instances:
             instance.stop()
-
         sys.exit(0)
 
 class Module():
@@ -167,20 +166,30 @@ class Module():
         else:
             raise Exception ("Failed to load module %s  Reason: Not found"%(entrypoint))
 
-class RouterProcess():
+class RouterBootstrapProcess(Process):
+    '''Wraps RouterBootstrap into a Process class.'''
+
+    def __init__(self, config, debug=False):
+        Process.__init__(self)
+        self.config = config
+        self.debug = debug
+        self.daemon = True
+        self.r = RouterBootstrap(self.config, self.debug)
+
+    def run(self):
+        self.r.start()
+
+    def stop(self):
+        self.r.stop()
+
+class RouterBootstrap():
     '''Setup, configure, run and optionally daemonize a router process.'''
 
     def __init__(self, config, debug=False):
-        from wishbone.router import Default
         self.config = config
         self.debug = debug
         self.router = Default()
         self.module = Module()
-        self.setupModules(config["modules"])
-        self.setupRoutes(config["routingtable"])
-
-        if debug == True:
-            self.__debug()
 
     def loadModule(self, name):
         '''Loads a module using the entrypoint name.'''
@@ -206,8 +215,13 @@ class RouterProcess():
 
     def start(self):
         '''Calls the router's start() function.
-        When required daemonizex
         '''
+
+        self.setupModules(self.config["modules"])
+        self.setupRoutes(self.config["routingtable"])
+
+        if self.debug == True:
+            self.__debug()
 
         self.router.start()
         self.router.block()

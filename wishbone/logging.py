@@ -38,13 +38,12 @@ class Logging():
     def __init__(self, name, q):
         self.name=name
         self.logs=q
-        self.pid=getpid()
 
     def __log(self, level, message):
 
         while True:
             try:
-                self.logs.put({"header":{},"data":(level, time(), self.pid, self.name, message)})
+                self.logs.put({"header":{},"data":(level, time(), getpid(), self.name, message)})
                 break
             except QueueFull:
                 self.logs.waitUntilFree()
