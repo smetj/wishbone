@@ -129,7 +129,6 @@ class Default():
         '''Stops all input modules.'''
 
         for module in self.pool.list():
-            #if module.name not in [ 'logs_funnel', 'metrics_funnel', 'logs_out', "log_format" ]:
             if module.name not in self.getChildren("logs_funnel"):
                 module.stop()
 
