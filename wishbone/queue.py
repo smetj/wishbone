@@ -46,9 +46,6 @@ class QueuePool():
 
     def listQueues(self, names=False, default=True):
         '''returns the list of queue names from the queuepool.
-
-        :param default: When False excludes default queues.
-
         '''
 
         if default == True:
@@ -84,6 +81,16 @@ class QueuePool():
         '''Convenience funtion which returns the queue instance.'''
 
         return getattr(self.queue, name)
+
+    def join(self):
+        '''Blocks untill all queues in the pool are empty.'''
+        for queue in self.listQueues():
+            while True:
+                if queue.size() > 0:
+                    sleep(0.1)
+                else:
+                    break
+
 
 class Queue():
 
@@ -186,22 +193,34 @@ class Queue():
     def waitUntilEmpty(self):
         '''Blocks until the queue is completely empty.'''
 
-        self.__empty.wait()
+        try:
+            self.__empty.wait(timeout=0.1)
+        except:
+            pass
 
     def waitUntilFull(self):
         '''Blocks until the queue is completely full.'''
 
-        self.__full.wait()
+        try:
+            self.__full.wait(timeout=0.1)
+        except:
+            pass
 
     def waitUntilFree(self):
         '''Blocks until at least 1 slot it free.'''
 
-        self.__free.wait()
+        try:
+            self.__free.wait(timeout=0.1)
+        except:
+            pass
 
     def waitUntilContent(self):
         '''Blocks until at least 1 slot is taken.'''
 
-        self.__content.wait()
+        try:
+            self.__content.wait(timeout=0.1)
+        except:
+            pass
 
     def __fallThrough(self, element):
         '''Accepts an element but discards it'''

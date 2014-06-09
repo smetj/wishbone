@@ -117,9 +117,7 @@ class Actor():
         '''Kills all registered Consumers.'''
 
         self.__loop = False
-
-        for thread in self.threads:
-            thread.kill()
+        self.threads.join()
 
         if hasattr(self, "postHook"):
             self.logging.debug("postHook() found, executing")
