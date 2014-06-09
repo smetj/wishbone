@@ -120,7 +120,8 @@ class Dispatch():
     def stop(self):
 
         if not self.__stopping:
-            #TODO: Weird hack, otherwise when trapping signal(2) this is execute
+            #TODO: Weird hack, otherwise when trapping signal(2) this function is
+            #      executed many times.
             self.__stopping = True
             for instance in self.instances:
                 os.kill(instance.pid, 2)
