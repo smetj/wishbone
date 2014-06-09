@@ -116,6 +116,7 @@ class Dispatch():
 
         for instance in self.instances:
             instance.stop()
+            #TODO: instance.stop() should block instead of having to sleep().
             if len(self.instances) > 1:
                 sleep(1)
         sys.exit(0)
