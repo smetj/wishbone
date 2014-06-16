@@ -25,6 +25,7 @@
 from wishbone import Actor
 from gevent import sleep, spawn, socket
 
+
 class TCPOut(Actor):
 
     '''**A Wishbone ouput module which writes data to a TCP socket.**
@@ -60,11 +61,11 @@ class TCPOut(Actor):
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
-        self.name=name
-        self.host=host
-        self.port=port
-        self.timeout=timeout
-        self.delimiter=delimiter
+        self.name = name
+        self.host = host
+        self.port = port
+        self.timeout = timeout
+        self.delimiter = delimiter
 
     def preHook(self):
         spawn(self.setupConnection)
@@ -81,22 +82,22 @@ class TCPOut(Actor):
                         self.socket = socket.socket()
                         self.socket.settimeout(self.timeout)
                         self.socket.connect((self.host, self.port))
-                        self.logging.info("Connected to %s:%s."%(self.host, self.port))
+                        self.logging.info("Connected to %s:%s." % (self.host, self.port))
                         break
                     except Exception as err:
-                        self.logging.error("Failed to connect to %s:%s. Reason: %s"%(self.host, self.port, err))
+                        self.logging.error("Failed to connect to %s:%s. Reason: %s" % (self.host, self.port, err))
                         sleep(1)
 
     def postHook():
         try:
             self.socket.close()
-            self.logging.info("Connection closed to %s:%s"%(self.host, self.port))
+            self.logging.info("Connection closed to %s:%s" % (self.host, self.port))
         except:
             pass
 
     def consume(self, event):
 
-        if isinstance(event["data"],list):
+        if isinstance(event["data"], list):
             data = self.delimiter.join(event["data"])
         else:
             data = event["data"]
