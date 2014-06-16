@@ -28,6 +28,7 @@ from gevent import spawn
 from time import time
 from os import getpid
 
+
 class Logging():
 
     '''
@@ -36,14 +37,14 @@ class Logging():
     '''
 
     def __init__(self, name, q):
-        self.name=name
-        self.logs=q
+        self.name = name
+        self.logs = q
 
     def __log(self, level, message):
 
         while True:
             try:
-                self.logs.put({"header":{},"data":(level, time(), getpid(), self.name, message)})
+                self.logs.put({"header": {}, "data": (level, time(), getpid(), self.name, message)})
                 break
             except QueueFull:
                 self.logs.waitUntilFree()
@@ -52,7 +53,7 @@ class Logging():
         """Generates a log message with priority emergency(0).
         """
         self.__log(0, message)
-    emerg=emergency
+    emerg = emergency
 
     def alert(self, message):
         """Generates a log message with priority alert(1).
@@ -63,19 +64,19 @@ class Logging():
         """Generates a log message with priority critical(2).
         """
         self.__log(2, message)
-    crit=critical
+    crit = critical
 
     def error(self, message):
         """Generates a log message with priority error(3).
         """
         self.__log(3, message)
-    err=error
+    err = error
 
     def warning(self, message):
         """Generates a log message with priority warning(4).
         """
         self.__log(4, message)
-    warn=warning
+    warn = warning
 
     def notice(self, message):
         """Generates a log message with priority notice(5).
@@ -86,7 +87,7 @@ class Logging():
         """Generates a log message with priority informational(6).
         """
         self.__log(6, message)
-    info=informational
+    info = informational
 
     def debug(self, message):
         """Generates a log message with priority debug(7).
