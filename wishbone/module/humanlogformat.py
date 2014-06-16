@@ -54,19 +54,29 @@ class HumanLogFormat(Actor):
 
     def __init__(self, name, size=100, colorize=True):
         Actor.__init__(self, name, size)
-        self.name=name
-        self.levels={0:"emergency",1:"alert",2:"critical",3:"error",4:"warning",5:"notice",6:"informational",7:"debug"}
-        self.colors={
-            0:"\x1B[0;35m",
-            1:"\x1B[1;35m",
-            2:"\x1B[0;31m",
-            3:"\x1B[1;31m",
-            4:"\x1B[1;33m",
-            5:"\x1B[1;30m",
-            6:"\x1B[1;37m",
-            7:"\x1B[1;37m"}
+        self.name = name
+        self.levels = {
+            0: "emergency",
+            1: "alert",
+            2: "critical",
+            3: "error",
+            4: "warning",
+            5: "notice",
+            6: "informational",
+            7: "debug"
+            }
+        self.colors = {
+            0: "\x1B[0;35m",
+            1: "\x1B[1;35m",
+            2: "\x1B[0;31m",
+            3: "\x1B[1;31m",
+            4: "\x1B[1;33m",
+            5: "\x1B[1;30m",
+            6: "\x1B[1;37m",
+            7: "\x1B[1;37m"
+            }
 
-        if colorize == True:
+        if colorize:
             self.colorize = self.doColorize
         else:
             self.colorize = self.doNoColorize
@@ -76,14 +86,13 @@ class HumanLogFormat(Actor):
         self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
-        log = ("%s %s %s %s: %s"%(
-                strftime("%Y-%m-%dT%H:%M:%S", localtime(event["data"][1])),
-                "pid-%s"%(event["data"][2]),
-                self.levels[event["data"][0]],
-                event["data"][3],
-                event["data"][4]))
-        event["data"]=self.colorize(log, event["data"][0])
-
+        log = ("%s %s %s %s: %s" % (
+            strftime("%Y-%m-%dT%H:%M:%S", localtime(event["data"][1])),
+            "pid-%s" % (event["data"][2]),
+            self.levels[event["data"][0]],
+            event["data"][3],
+            event["data"][4]))
+        event["data"] = self.colorize(log, event["data"][0])
         self.submit(event, self.pool.queue.outbox)
 
     def doColorize(self, message, level):

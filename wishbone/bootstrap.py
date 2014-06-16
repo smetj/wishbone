@@ -27,8 +27,8 @@ import pkg_resources
 import sys
 import os
 import yaml
-import daemon
 import multiprocessing
+from daemon import DaemonContext, pidfile
 from gevent import sleep, signal
 from wishbone.router import Default
 
@@ -44,7 +44,7 @@ class BootStrap():
         start = subparsers.add_parser('start', description="Starts a Wishbone instance and detaches to the background.  Logs are written to syslog.")
         start.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
         start.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
-        start.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
+        start.add_argument('--pid', type=str, dest='pid', default='%s/wishbone.pid' % (os.getcwd()), help='The pidfile to use.')
 
         debug = subparsers.add_parser('debug', description="Starts a Wishbone instance in foreground and writes logs to STDOUT.")
         debug.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
@@ -62,12 +62,13 @@ class BootStrap():
         show = subparsers.add_parser('show', description="Shows the details of a module.")
         show.add_argument('module', type=str, help='Shows the documentation of the module. ')
 
-        arguments=vars(parser.parse_args())
+        arguments = vars(parser.parse_args())
 
-        dispatch=Dispatch()
+        dispatch = Dispatch()
         getattr(dispatch, arguments["command"])(**arguments)
 
-class Config():
+
+class BootstrapFile():
     '''Handles bootstrap file interaction'''
 
     def __init__(self):
@@ -77,20 +78,97 @@ class Config():
         '''Loads and returns the yaml bootstrap file.'''
 
         try:
-            with open (filename, 'r') as f:
-                return yaml.load(f)
+            with open(filename, 'r') as f:
+                config = yaml.load(f)
         except Exception as err:
-            print "Failed to load config file.  Reason: %s"%(err)
+            print "Failed to load config file.  Reason: %s" % (err)
             sys.exit(1)
+
+        try:
+            return self.verify(config)
+        except Exception as err:
+            print "Syntax error in bootstrap file. Reason: %s" % (err)
+            sys.exit(1)
+
+    def verify(self, content):
+        assert "routingtable" in content, "'routingtable' section not found in bootstrap file."
+        assert "modules" in content, "'modules' section not found in bootstrap file."
+
+        return content
+
+
+class PIDFile():
+    '''Handles all PIDfile interactions'''
+
+    def __init__(self, location):
+        self.location = location
+
+    def create(self, pids=[]):
+        '''Creates the pidfile containing the provided list of pids.'''
+
+        if self.exists():
+            if self.valid():
+                raise Exception("Pidfile exists and at least one process running.")
+            else:
+                self.__deletePIDFile()
+
+        self.__writePIDFile(pids)
+
+    def valid(self):
+        '''Returns True at least one PID within pidfile is still alive.'''
+
+        try:
+            for pid in self.__readPIDFile():
+                if self.__isAlive(pid):
+                    return True
+            return False
+        except Exception as err:
+            return False
+
+    def exists(self):
+        '''Returns True if file exists.'''
+
+        return os.path.isfile(self.location)
+
+    def __isAlive(self, pid):
+        '''Verifies whether pid is still alive.'''
+
+        try:
+            os.kill(pid, 0)
+            return True
+        except:
+            False
+
+    def __writePIDFile(self, pids=[]):
+        '''Writes a list pids to the file.'''
+
+        with open(self.location, 'w') as pidfile:
+            for pid in pids:
+                pidfile.write("%s\n" % (pid))
+
+    def __readPIDFile(self):
+        '''Returns a list of pids values the file contains.'''
+
+        with open(self.location, 'r') as pidfile:
+            pids = pidfile.readlines()
+
+        return pids
+
+    def __deletePIDFile(self):
+        '''Unconditionally deletes the pidfile.'''
+
+        if os.path.isfile(self.location):
+            os.remove(self.location)
+
 
 class Dispatch():
     '''Handles the Wishbone instance commands.'''
 
     def __init__(self):
 
-        self.config = Config()
+        self.config = BootstrapFile()
         self.instances = []
-        signal(2, self.stop)
+        signal(2, self.__stopSequence)
         self.__stopping = False
 
     def debug(self, command, config, instances):
@@ -112,15 +190,34 @@ class Dispatch():
 
         sys.exit(0)
 
-    def start(self, command, config, instances):
+    def start(self, command, config, instances, pid):
         '''Handles the Wishbone start command.'''
 
-        self.router.start()
+        config = self.config.load(config)
+        pid = PIDFile(pid)
 
-    def stop(self):
+        if instances == 1:
+            with DaemonContext(
+                    stdout=open('stdout.txt', 'w+'),
+                    stderr=open('stderr.txt', 'w+'),
+                    files_preserve=self.__getCurrentFD(),
+                    detach_process=True,
+                    working_directory=os.getcwd()):
+                        self.instances.append(RouterBootstrap(config, debug=True))
+                        self.instances[-1].start()
+                        self.pid.create([os.getpid()])
+        else:
+            print "not implemented yet"
+
+    def stop(self, command, pid):
+        '''Handles the Wishbone stop command.'''
+
+        pass
+
+    def __stopSequence(self):
 
         if not self.__stopping:
-            #TODO: Weird hack, otherwise when trapping signal(2) this function is
+            # TODO: Weird hack, otherwise when trapping signal(2) this function is
             #      executed many times.
             self.__stopping = True
             for instance in self.instances:
@@ -129,22 +226,15 @@ class Dispatch():
                 else:
                     os.kill(instance.pid, 2)
 
-    def atLeastOnePidAlive(self, pids):
-        '''Returns True if at least one of the provided pids is alive.'''
-
-        for pid in pids:
-            if self.pidAlive(pid):
-                return True
-
-    def pidAlive(self, pid):
-        '''Verifies whether pid is still alive.'''
+    def __getCurrentFD(self):
+        '''returns a list with filedescriptors in use.'''
 
         try:
-            os.kill(pid, 0)
-            print pid
-            return True
-        except:
-            False
+            return [int(x) for x in os.listdir("/proc/self/fd")]
+        except Exception as err:
+            print "Failed to get active filedescriptors.  Reason: %s." % (err)
+            sys.exit(1)
+
 
 class Module():
     '''Handles all Wishbone module interaction.'''
@@ -156,11 +246,11 @@ class Module():
         '''Extracts and returns a module's docstring using the entrypoint'''
 
         try:
-            doc=entrypoint.load().__doc__
+            doc = entrypoint.load().__doc__
         except Exception as err:
-            return "! -> Unable to load.  Reason: %s"%(err)
+            return "! -> Unable to load.  Reason: %s" % (err)
         try:
-            return re.search('.*?\*\*(.*?)\*\*', doc, re.DOTALL ).group(1)
+            return re.search('.*?\*\*(.*?)\*\*', doc, re.DOTALL).group(1)
         except:
             return "No description found."
 
@@ -177,22 +267,23 @@ class Module():
     def load(self, entrypoint):
         '''Loads a module from an entrypoint string and returns it.'''
 
-        e=entrypoint.split('.')
-        name=e[-1]
+        e = entrypoint.split('.')
+        name = e[-1]
         del(e[-1])
-        group=".".join(e)
-        module_instance=None
+        group = ".".join(e)
+        module_instance = None
 
         for module in pkg_resources.iter_entry_points(group=group, name=name):
             try:
-                module_instance=module.load()
+                module_instance = module.load()
             except Exception as err:
-                raise Exception ("Problem loading module %s  Reason: %s"%(module, err))
+                raise Exception("Problem loading module %s  Reason: %s" % (module, err))
 
-        if module_instance != None:
+        if module_instance is not None:
             return module_instance
         else:
-            raise Exception ("Failed to load module %s  Reason: Not found"%(entrypoint))
+            raise Exception("Failed to load module %s  Reason: Not found" % (entrypoint))
+
 
 class RouterBootstrapProcess(multiprocessing.Process):
     '''Wraps RouterBootstrap into a Process class.'''
@@ -206,6 +297,7 @@ class RouterBootstrapProcess(multiprocessing.Process):
     def run(self):
         router = RouterBootstrap(self.config, self.debug)
         router.start()
+
 
 class RouterBootstrap():
     '''Setup, configure, run and optionally daemonize a router process.'''
@@ -226,7 +318,7 @@ class RouterBootstrap():
 
         for module in modules:
             m = self.loadModule(modules[module]["module"])
-            if modules[module].has_key("arguments"):
+            if "arguments" in modules[module]:
                 self.router.initializeModule(m, module, **modules[module]["arguments"])
             else:
                 self.router.initializeModule(m, module)
@@ -245,7 +337,7 @@ class RouterBootstrap():
         self.setupModules(self.config["modules"])
         self.setupRoutes(self.config["routingtable"])
 
-        if self.debug == True:
+        if self.debug:
             self.__debug()
 
         self.router.start()
@@ -259,7 +351,7 @@ class RouterBootstrap():
     def __debug(self):
         '''In debug mode we route all logging to SDOUT.'''
 
-        #In debug mode we write our logs to STDOUT
+        # In debug mode we write our logs to STDOUT
         log_stdout = self.loadModule("wishbone.output.stdout")
         log_human = self.loadModule("wishbone.logging.humanlogformat")
         self.router.initializeModule(log_stdout, "log_stdout")
@@ -276,9 +368,9 @@ class RouterBootstrap():
         (dm, dq) = destination.rstrip().lstrip().split('.')
         return sm, sq, dm, dq
 
+
 def main():
     bootstrap = BootStrap()
 
 if __name__ == '__main__':
     main()
-
