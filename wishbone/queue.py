@@ -31,13 +31,15 @@ from gevent import sleep
 from gevent.pool import Group
 from time import time
 
+
 class Container():
     pass
+
 
 class QueuePool():
 
     def __init__(self, size):
-        self.__size=size
+        self.__size = size
         self.queue = Container()
         self.queue.metrics = Queue(size)
         self.queue.logs = Queue(size)
@@ -48,14 +50,14 @@ class QueuePool():
         '''returns the list of queue names from the queuepool.
         '''
 
-        if default == True:
+        if default:
             blacklist = []
         else:
-            blacklist = [ 'failed', 'success', 'logs', 'metrics' ]
+            blacklist = ['failed', 'success', 'logs', 'metrics']
 
         for m in self.queue.__dict__.keys():
             if m not in blacklist:
-                if names == False:
+                if not names:
                     yield getattr(self.queue, m)
                 else:
                     yield m
@@ -63,7 +65,7 @@ class QueuePool():
     def createQueue(self, name):
         '''Creates a Queue.'''
 
-        if name in [ "metrics", "logs", "success", "failed" ]:
+        if name in ["metrics", "logs", "success", "failed"]:
             raise ReservedName
 
         setattr(self.queue, name, Queue(self.__size))
@@ -113,25 +115,24 @@ class Queue():
     '''
 
     def __init__(self, max_size=1):
-        self.max_size=max_size
+        self.max_size = max_size
         self.id = str(uuid4())
-        self.__q=deque()
-        self.__in=0
-        self.__out=0
-        self.__dropped=0
-        self.__cache={}
+        self.__q = deque()
+        self.__in = 0
+        self.__out = 0
+        self.__dropped = 0
+        self.__cache = {}
 
-        self.__empty=Event()
+        self.__empty = Event()
         self.__empty.set()
 
-        self.__free=Event()
+        self.__free = Event()
         self.__free.set()
 
-
-        self.__full=Event()
+        self.__full = Event()
         self.__full.clear()
 
-        self.__content=Event()
+        self.__content = Event()
         self.__content.clear()
 
         self.put = self.__fallThrough
@@ -164,7 +165,7 @@ class Queue():
             self.__full.clear()
             raise QueueEmpty
 
-        self.__out+=1
+        self.__out += 1
         self.__free.set()
         self.__content.clear()
         return e
@@ -181,14 +182,14 @@ class Queue():
     def stats(self):
         '''Returns statistics of the queue.'''
 
-        return { "size":len(self.__q),
-            "in_total":self.__in,
-            "out_total":self.__out,
-            "in_rate": self.__rate("in_rate", self.__in),
-            "out_rate": self.__rate("out_rate", self.__out),
-            "dropped_total":self.__dropped,
-            "dropped_rate":self.__rate("dropped_rate", self.__dropped)
-            }
+        return {"size": len(self.__q),
+                "in_total": self.__in,
+                "out_total": self.__out,
+                "in_rate": self.__rate("in_rate", self.__in),
+                "out_rate": self.__rate("out_rate", self.__out),
+                "dropped_total": self.__dropped,
+                "dropped_rate": self.__rate("dropped_rate", self.__dropped)
+                }
 
     def waitUntilEmpty(self):
         '''Blocks until the queue is completely empty.'''
@@ -225,7 +226,7 @@ class Queue():
     def __fallThrough(self, element):
         '''Accepts an element but discards it'''
 
-        self.__dropped+=1
+        self.__dropped += 1
 
     def __put(self, element):
         '''Puts element in queue.'''
@@ -236,21 +237,21 @@ class Queue():
             raise QueueFull
 
         self.__q.append(element)
-        self.__in+=1
+        self.__in += 1
         self.__free.clear()
         self.__content.set()
 
     def __rate(self, name, value):
 
-        if not name in self.__cache:
-            self.__cache[name]={"value":(time(), value),"rate":0}
+        if name not in self.__cache:
+            self.__cache[name] = {"value": (time(), value), "rate": 0}
             return 0
 
-        (time_then, amount_then)=self.__cache[name]["value"]
-        (time_now, amount_now)=time(), value
+        (time_then, amount_then) = self.__cache[name]["value"]
+        (time_now, amount_now) = time(), value
 
         if time_now - time_then >= 1:
-            self.__cache[name]["value"]=(time_now, amount_now)
+            self.__cache[name]["value"] = (time_now, amount_now)
             self.__cache[name]["rate"] = (amount_now - amount_then)/(time_now-time_then)
 
         return self.__cache[name]["rate"]

@@ -27,8 +27,10 @@ from wishbone.error import ModuleInitFailure, NoSuchModule
 from gevent import signal, sleep
 import sys
 
+
 class Container():
     pass
+
 
 class ModulePool():
 
@@ -50,6 +52,7 @@ class ModulePool():
         except AttributeError:
             raise NoSuchModule(name)
 
+
 class Default():
 
     def __init__(self, size=1000):
@@ -58,7 +61,7 @@ class Default():
         self.size = size
         self.initializeModule(Funnel, "metrics_funnel")
         self.initializeModule(Funnel, "logs_funnel")
-        self.running=True
+        self.running = True
 
     def connect(self, source, destination):
         '''Connects one queue to the other.
@@ -78,7 +81,7 @@ class Default():
         source.connect(source_queue, destination, destination_queue)
 
     def getChildren(self, module):
-        children=[]
+        children = []
 
         def lookupChildren(module, children):
             for module in self.pool.getModule(module).getChildren():
@@ -117,7 +120,7 @@ class Default():
 
     def start(self):
         '''Starts all registered modules.'''
-        self.__running=True
+        self.__running = True
         self.setupMetricConnections()
         self.setupLogConnections()
 
@@ -132,4 +135,4 @@ class Default():
                 module.stop()
 
         self.pool.module.logs_funnel.stop()
-        self.__running=False
+        self.__running = False

@@ -48,11 +48,10 @@ class Fanout(Actor):
 
     '''
 
-
     def __init__(self, name, size=100, dupe=False):
 
         Actor.__init__(self, name, size=size)
-        self.name=name
+        self.name = name
         self.pool.createQueue("outbox")
 
     def preHook(self):

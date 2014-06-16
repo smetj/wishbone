@@ -32,16 +32,16 @@ from sys import stdout
 class Format():
 
     def __init__(self, complete, counter, pid):
-        self.countervalue=-1
-        if complete == True:
+        self.countervalue = -1
+        if complete:
             self.complete = self.__returnComplete
         else:
             self.complete = self.__returnIncomplete
-        if counter == True:
+        if counter:
             self.counter = self.__returnCounter
         else:
             self.counter = self.__returnNoCounter
-        if pid == True:
+        if pid:
             self.pid_value = getpid()
             self.pid = self.__returnPid
         else:
@@ -58,7 +58,7 @@ class Format():
 
     def __returnCounter(self, event):
         self.countervalue += 1
-        return "%s - %s"%(self.countervalue, event)
+        return "%s - %s" % (self.countervalue, event)
 
     def __returnNoCounter(self, event):
         return event
@@ -67,7 +67,8 @@ class Format():
         return event
 
     def __returnPid(self, event):
-        return "PID-%s: %s"%(self.pid_value, event)
+        return "PID-%s: %s" % (self.pid_value, event)
+
 
 class STDOUT(Actor):
     '''**Prints incoming events to STDOUT.**
@@ -103,19 +104,19 @@ class STDOUT(Actor):
     def __init__(self, name, size=100, complete=False, counter=False, prefix="", pid=False, flush=1):
         Actor.__init__(self, name, size)
 
-        self.complete=complete
-        self.counter=counter
-        self.prefix=prefix
-        self.format=Format(complete, counter, pid)
+        self.complete = complete
+        self.counter = counter
+        self.prefix = prefix
+        self.format = Format(complete, counter, pid)
         # self.stdout=FileObjectThread(stdout)
 
         # spawn(self.flusher)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
-    def consume(self,event):
+    def consume(self, event):
         # self.stdout.write("%s%s\n"%(self.prefix,self.format.do(event)))
-        print ("%s%s"%(self.prefix,self.format.do(event)))
+        print ("%s%s" % (self.prefix, self.format.do(event)))
 
     def flusher(self):
 
