@@ -34,7 +34,9 @@ from wishbone.router import Default
 
 
 class BootStrap():
-    '''Bootstraps a Wishbone instance.'''
+    '''
+    Bootstraps a Wishbone instance.
+    '''
 
     def __init__(self, description="Wishbone bootstrap server. Building async event pipeline servers."):
 
@@ -69,7 +71,9 @@ class BootStrap():
 
 
 class BootstrapFile():
-    '''Handles bootstrap file interaction'''
+    '''
+    Handles bootstrap file interaction.
+    '''
 
     def __init__(self):
         pass
@@ -98,7 +102,9 @@ class BootstrapFile():
 
 
 class PIDFile():
-    '''Handles all PIDfile interactions'''
+    '''
+    Handles all PIDfile interactions.
+    '''
 
     def __init__(self, location):
         self.location = location
@@ -127,17 +133,6 @@ class PIDFile():
         if self.exists():
             self.__deletePIDFile()
 
-    def valid(self):
-        '''Returns True at least one PID within pidfile is still alive.'''
-
-        try:
-            for pid in self.__readPIDFile():
-                if self.__isAlive(pid):
-                    return True
-            return False
-        except Exception as err:
-            return False
-
     def exists(self):
         '''Returns True if file exists.'''
 
@@ -159,6 +154,17 @@ class PIDFile():
         while self.__isAlive(pid):
             print ("Waiting for PID %s to exit." % (pid))
             sleep(1)
+
+    def valid(self):
+        '''Returns True at least one PID within pidfile is still alive.'''
+
+        try:
+            for pid in self.__readPIDFile():
+                if self.__isAlive(pid):
+                    return True
+            return False
+        except Exception as err:
+            return False
 
     def __isAlive(self, pid):
         '''Verifies whether pid is still alive.'''
@@ -192,7 +198,9 @@ class PIDFile():
 
 
 class Dispatch():
-    '''Handles the Wishbone instance commands.'''
+    '''
+    Handles the Wishbone instance commands.
+    '''
 
     def __init__(self):
 
@@ -202,7 +210,9 @@ class Dispatch():
         self.__stopping = False
 
     def debug(self, command, config, instances):
-        '''Handles the Wishbone debug command.'''
+        '''
+        Handles the Wishbone debug command.
+        '''
 
         config = self.config.load(config)
 
@@ -221,7 +231,9 @@ class Dispatch():
         sys.exit(0)
 
     def start(self, command, config, instances, pid):
-        '''Handles the Wishbone start command.'''
+        '''
+        Handles the Wishbone start command.
+        '''
 
         config = self.config.load(config)
         self.pid = PIDFile(pid)
@@ -240,7 +252,9 @@ class Dispatch():
             print "not implemented yet"
 
     def stop(self, command, pid):
-        '''Handles the Wishbone stop command.'''
+        '''
+        Handles the Wishbone stop command.
+        '''
 
         pid = PIDFile(pid)
         for entry in pid.read():
@@ -248,6 +262,9 @@ class Dispatch():
         pid.cleanup()
 
     def __stopSequence(self):
+        '''
+        Calls the stop() function of each instance.
+        '''
 
         if not self.__stopping:
             # TODO: Weird hack, otherwise when trapping signal(2) this function is
@@ -260,7 +277,9 @@ class Dispatch():
                     os.kill(instance.pid, 2)
 
     def __getCurrentFD(self):
-        '''returns a list with filedescriptors in use.'''
+        '''
+        returns a list with filedescriptors in use.
+        '''
 
         try:
             return [int(x) for x in os.listdir("/proc/self/fd")]
@@ -270,13 +289,17 @@ class Dispatch():
 
 
 class Module():
-    '''Handles all Wishbone module interaction.'''
+    '''
+    Handles all Wishbone module interaction.
+    '''
 
     def __init__(self):
         pass
 
     def extractSummary(self, entrypoint):
-        '''Extracts and returns a module's docstring using the entrypoint'''
+        '''
+        Extracts and returns a module's docstring using the entrypoint.
+        '''
 
         try:
             doc = entrypoint.load().__doc__
@@ -288,7 +311,9 @@ class Module():
             return "No description found."
 
     def getVersion(self, entrypoint):
-        '''Extracts and returns a module's version.'''
+        '''
+        Extracts and returns a module's version.
+        '''
 
         modulename = vars(entrypoint)["module_name"].split('.')[0]
 
@@ -298,7 +323,9 @@ class Module():
             return "Unknown"
 
     def load(self, entrypoint):
-        '''Loads a module from an entrypoint string and returns it.'''
+        '''
+        Loads a module from an entrypoint string and returns it.
+        '''
 
         e = entrypoint.split('.')
         name = e[-1]
@@ -319,7 +346,9 @@ class Module():
 
 
 class RouterBootstrapProcess(multiprocessing.Process):
-    '''Wraps RouterBootstrap into a Process class.'''
+    '''
+    Wraps RouterBootstrap into a Process class.
+    '''
 
     def __init__(self, config, debug=False):
         multiprocessing.Process.__init__(self)
@@ -328,12 +357,18 @@ class RouterBootstrapProcess(multiprocessing.Process):
         self.daemon = True
 
     def run(self):
+        '''
+        Executed by Process when started.
+        '''
+
         router = RouterBootstrap(self.config, self.debug)
         router.start()
 
 
 class RouterBootstrap():
-    '''Setup, configure, run and optionally daemonize a router process.'''
+    '''
+    Setup, configure and a router process.
+    '''
 
     def __init__(self, config, debug=False):
         self.config = config
@@ -342,12 +377,16 @@ class RouterBootstrap():
         self.module = Module()
 
     def loadModule(self, name):
-        '''Loads a module using the entrypoint name.'''
+        '''
+        Loads a module using the entrypoint name.
+        '''
 
         return self.module.load(name)
 
     def setupModules(self, modules):
-        '''Loads and initialzes the modules from the bootstrap file.'''
+        '''
+        Loads and initialzes the modules from the bootstrap file.
+        '''
 
         for module in modules:
             m = self.loadModule(modules[module]["module"])
@@ -357,14 +396,17 @@ class RouterBootstrap():
                 self.router.initializeModule(m, module)
 
     def setupRoutes(self, table):
-        '''Connects the modules from the bootstrap file.'''
+        '''
+        Connects the modules from the bootstrap file.
+        '''
 
         for route in table:
             sm, sq, dm, dq = self.__splitRoute(route)
             self.router.pool.getModule(sm).connect(sq, self.router.pool.getModule(dm), dq)
 
     def start(self):
-        '''Calls the router's start() function.
+        '''
+        Calls the router's start() function.
         '''
 
         self.setupModules(self.config["modules"])
@@ -379,10 +421,16 @@ class RouterBootstrap():
             sleep(1)
 
     def stop(self):
+        '''
+        Calls the router's stop() function.
+        '''
+
         self.router.stop()
 
     def __debug(self):
-        '''In debug mode we route all logging to SDOUT.'''
+        '''
+        In debug mode we route all logging to SDOUT.
+        '''
 
         # In debug mode we write our logs to STDOUT
         log_stdout = self.loadModule("wishbone.output.stdout")
@@ -393,7 +441,8 @@ class RouterBootstrap():
         self.router.pool.getModule("log_format").connect("outbox", self.router.pool.getModule("log_stdout"), "inbox")
 
     def __splitRoute(self, definition):
-        '''Splits the route definition string into 4 separate string.
+        '''
+        Splits the route definition string into 4 separate string.
         '''
 
         (source, destination) = definition.split('->')
