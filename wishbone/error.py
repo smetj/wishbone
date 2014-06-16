@@ -23,32 +23,42 @@
 #
 #
 
+
 class QueueLocked(Exception):
     pass
+
 
 class QueueEmpty(Exception):
     pass
 
+
 class QueueFull(Exception):
     pass
+
 
 class QueueMissing(Exception):
     pass
 
+
 class QueueOccupied(Exception):
     pass
+
 
 class QueueConnected(Exception):
     pass
 
+
 class SetupError(Exception):
     pass
+
 
 class ReservedName(Exception):
     pass
 
+
 class ModuleInitFailure(Exception):
     pass
+
 
 class NoSuchModule(Exception):
     pass

@@ -58,23 +58,23 @@ class Graphite(Actor):
 
     def __init__(self, name, size=100, prefix='', script=True, pid=False, source=True):
         Actor.__init__(self, name, size)
-        self.name=name
-        self.prefix=prefix
-        if script == True:
-            self.script_name = '.%s'%(basename(argv[0]).replace(".py",""))
+        self.name = name
+        self.prefix = prefix
+        if script:
+            self.script_name = '.%s' % (basename(argv[0]).replace(".py", ""))
         else:
             self.script_name = ''
-        if pid == True:
-            self.pid="-%s"%(getpid())
+        if pid:
+            self.pid = "-%s" % (getpid())
         else:
-            self.pid=''
+            self.pid = ''
 
-        self.source=source
+        self.source = source
 
-        if self.source == True:
-            self.doConsume=self.__consumeSource
+        if self.source:
+            self.doConsume = self.__consumeSource
         else:
-            self.doConsume=self.__consumeNoSource
+            self.doConsume = self.__consumeNoSource
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
@@ -86,10 +86,10 @@ class Graphite(Actor):
 
     def __consumeSource(self, event):
 
-        event = {"header":{}, "data":"%s%s%s%s.%s %s %s"%(self.prefix, event["data"][2], self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])}
+        event = {"header": {}, "data": "%s%s%s%s.%s %s %s" % (self.prefix, event["data"][2], self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])}
         self.submit(event, self.pool.queue.outbox)
 
     def __consumeNoSource(self, event):
 
-        event = {"header":{}, "data":"%s%s%s.%s %s %s"%(self.prefix, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])}
+        event = {"header": {}, "data": "%s%s%s.%s %s %s" % (self.prefix, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])}
         self.submit(event, self.pool.queue.outbox)
