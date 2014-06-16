@@ -130,6 +130,11 @@ class PIDFile():
 
         return os.path.isfile(self.location)
 
+    def read(self):
+        '''Returns the content of the pidfile'''
+
+        return self.__readPIDFile()
+
     def __isAlive(self, pid):
         '''Verifies whether pid is still alive.'''
 
@@ -194,25 +199,34 @@ class Dispatch():
         '''Handles the Wishbone start command.'''
 
         config = self.config.load(config)
-        pid = PIDFile(pid)
+        self.pid = PIDFile(pid)
 
+        #                    detach_process=True,
         if instances == 1:
             with DaemonContext(
                     stdout=open('stdout.txt', 'w+'),
                     stderr=open('stderr.txt', 'w+'),
                     files_preserve=self.__getCurrentFD(),
-                    detach_process=True,
-                    working_directory=os.getcwd()):
-                        self.instances.append(RouterBootstrap(config, debug=True))
-                        self.instances[-1].start()
-                        self.pid.create([os.getpid()])
+                    detach_process=True):
+                instance = RouterBootstrap(config, debug=True)
+                instance.start()
+                print "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            # with DaemonContext(
+            #         files_preserve=self.__getCurrentFD(),
+            #         detach_process=True):
+                        # self.instances.append(RouterBootstrap(config, debug=True))
+                        # self.instances[-1].start()
+        # self.pid.create([os.getpid()])
+
         else:
             print "not implemented yet"
 
     def stop(self, command, pid):
         '''Handles the Wishbone stop command.'''
 
-        pass
+        pid = PidFile(pid)
+        for pid in pid.read():
+            print pid
 
     def __stopSequence(self):
 
