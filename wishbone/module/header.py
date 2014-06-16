@@ -54,34 +54,34 @@ class Header(Actor):
 
     def __init__(self, name, size=100, key=None, header={}, expr=None):
         Actor.__init__(self, name, size)
-        if key == None:
-            self.key=name
+        if key is None:
+            self.key = name
         else:
-            self.key=key
+            self.key = key
 
-        self.header=header
-        self.expr=expr
+        self.header = header
+        self.expr = expr
 
-        if expr == None:
-            self.addHeader=self.__doHeader
+        if expr is None:
+            self.addHeader = self.__doHeader
         else:
-            self.addHeader=self.__doPrintf
+            self.addHeader = self.__doPrintf
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
-        event=self.addHeader(event)
+        event = self.addHeader(event)
         self.submit(event, self.pool.queue.outbox)
 
     def __doHeader(self, event):
-        event["header"][self.key]=self.header
+        event["header"][self.key] = self.header
         return event
 
     def __doPrintf(self, event):
         try:
-            return self.expr%event["data"]
+            return self.expr % event["data"]
         except Exception as err:
-            self.logging.error("String replace failed.  Reason: %s"%(err))
+            self.logging.error("String replace failed.  Reason: %s" % (err))
             return event

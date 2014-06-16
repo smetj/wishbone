@@ -37,9 +37,9 @@ class Actor():
 
     def __init__(self, name, size, frequency=1):
 
-        self.name=name
-        self.size=size
-        self.frequency=frequency
+        self.name = name
+        self.size = size
+        self.frequency = frequency
 
         self.pool = QueuePool(size)
 
@@ -53,10 +53,10 @@ class Actor():
         self.__run = Event()
         self.__run.clear()
 
-        self.__connections={}
+        self.__connections = {}
 
-        self.__children={}
-        self.__parents={}
+        self.__children = {}
+        self.__parents = {}
 
     def connect(self, source, instance, destination):
 
@@ -64,14 +64,14 @@ class Actor():
         In fact, the source queue overwrites the destination queue.'''
 
         if source in self.__children:
-            raise QueueConnected("Queue %s is already connected to %s."%(source, self.__children[source]))
+            raise QueueConnected("Queue %s is already connected to %s." % (source, self.__children[source]))
         else:
-            self.__children[source]="%s.%s"%(instance.name, destination)
+            self.__children[source] = "%s.%s" % (instance.name, destination)
 
         if destination in instance.__parents:
-            raise QueueConnected("Queue %s.%s is already connected to %s"%(instance.name, destination, instance.__parents[destination]))
+            raise QueueConnected("Queue %s.%s is already connected to %s" % (instance.name, destination, instance.__parents[destination]))
         else:
-            instance.__parents[destination] = "%s.%s"%(self.name, source)
+            instance.__parents[destination] = "%s.%s" % (self.name, source)
 
         setattr(instance.pool.queue, destination, self.pool.getQueue(source))
         self.pool.getQueue(source).disableFallThrough()
@@ -85,8 +85,8 @@ class Actor():
 
         '''Returns the queue name <queue> is connected to.'''
 
-        if queue == None:
-            return [ self.__children[q] for q in self.__children.keys() ]
+        if queue is None:
+            return [self.__children[q] for q in self.__children.keys()]
         else:
             return self.__children[queue]
 
@@ -174,12 +174,8 @@ class Actor():
                 for item in stats:
                     while self.loop():
                         try:
-                            self.pool.queue.metrics.put({"header":{}, "data":(time(), "wishbone", socket.gethostname(), "queue.%s.%s.%s"%(self.name, queue, item), stats[item], '', ())})
+                            self.pool.queue.metrics.put({"header": {}, "data": (time(), "wishbone", socket.gethostname(), "queue.%s.%s.%s" % (self.name, queue, item), stats[item], '', ())})
                             break
                         except QueueFull:
                             self.pool.queue.metrics.waitUntilFree()
             sleep(self.frequency)
-
-
-
-
