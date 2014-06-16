@@ -81,13 +81,13 @@ class BootstrapFile():
             with open(filename, 'r') as f:
                 config = yaml.load(f)
         except Exception as err:
-            print "Failed to load config file.  Reason: %s" % (err)
+            print ("Failed to load config file.  Reason: %s" % (err))
             sys.exit(1)
 
         try:
             return self.verify(config)
         except Exception as err:
-            print "Syntax error in bootstrap file. Reason: %s" % (err)
+            print ("Syntax error in bootstrap file. Reason: %s" % (err))
             sys.exit(1)
 
     def verify(self, content):
@@ -103,6 +103,14 @@ class PIDFile():
     def __init__(self, location):
         self.location = location
 
+    def alive(self):
+        '''Returns True if at least 1 PID in pidfile is alive.'''
+
+        for pid in self.__readPIDFile():
+            if self.__isAlive(pid):
+                return True
+        return False
+
     def create(self, pids=[]):
         '''Creates the pidfile containing the provided list of pids.'''
 
@@ -113,6 +121,11 @@ class PIDFile():
                 self.__deletePIDFile()
 
         self.__writePIDFile(pids)
+
+    def cleanup(self):
+        '''Deleted PID file if possible.'''
+        if self.exists():
+            self.__deletePIDFile()
 
     def valid(self):
         '''Returns True at least one PID within pidfile is still alive.'''
@@ -135,11 +148,23 @@ class PIDFile():
 
         return self.__readPIDFile()
 
+    def sendSigint(self, pid):
+        '''Sends sigint to PID.'''
+
+        try:
+            os.kill(int(pid), 2)
+        except:
+            pass
+
+        while self.__isAlive(pid):
+            print ("Waiting for PID %s to exit." % (pid))
+            sleep(1)
+
     def __isAlive(self, pid):
         '''Verifies whether pid is still alive.'''
 
         try:
-            os.kill(pid, 0)
+            os.kill(int(pid), 0)
             return True
         except:
             False
@@ -157,7 +182,7 @@ class PIDFile():
         with open(self.location, 'r') as pidfile:
             pids = pidfile.readlines()
 
-        return pids
+        return [int(x) for x in pids]
 
     def __deletePIDFile(self):
         '''Unconditionally deletes the pidfile.'''
@@ -201,32 +226,26 @@ class Dispatch():
         config = self.config.load(config)
         self.pid = PIDFile(pid)
 
-        #                    detach_process=True,
         if instances == 1:
+            print ("Starting 1 instance to background with pid %s." % (os.getpid()))
             with DaemonContext(
                     stdout=open('stdout.txt', 'w+'),
                     stderr=open('stderr.txt', 'w+'),
                     files_preserve=self.__getCurrentFD(),
                     detach_process=True):
+                self.pid.create([os.getpid()])
                 instance = RouterBootstrap(config, debug=True)
                 instance.start()
-                print "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-            # with DaemonContext(
-            #         files_preserve=self.__getCurrentFD(),
-            #         detach_process=True):
-                        # self.instances.append(RouterBootstrap(config, debug=True))
-                        # self.instances[-1].start()
-        # self.pid.create([os.getpid()])
-
         else:
             print "not implemented yet"
 
     def stop(self, command, pid):
         '''Handles the Wishbone stop command.'''
 
-        pid = PidFile(pid)
-        for pid in pid.read():
-            print pid
+        pid = PIDFile(pid)
+        for entry in pid.read():
+            pid.sendSigint(entry)
+        pid.cleanup()
 
     def __stopSequence(self):
 
@@ -246,7 +265,7 @@ class Dispatch():
         try:
             return [int(x) for x in os.listdir("/proc/self/fd")]
         except Exception as err:
-            print "Failed to get active filedescriptors.  Reason: %s." % (err)
+            print ("Failed to get active filedescriptors.  Reason: %s." % (err))
             sys.exit(1)
 
 
