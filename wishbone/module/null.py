@@ -44,11 +44,10 @@ class Null(Actor):
         - inbox:    incoming events
     '''
 
-
     def __init__(self, name, size=100):
 
         Actor.__init__(self, name, size=size)
-        self.name=name
+        self.name = name
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 

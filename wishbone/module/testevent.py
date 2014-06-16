@@ -57,13 +57,12 @@ class TestEvent(Actor):
         - outbox:    Contains the generated events.
     '''
 
-
     def __init__(self, name, size=100, interval=1, message="test", numbered=False):
         Actor.__init__(self, name, size=size)
-        self.name=name
-        self.interval=interval
-        self.message=message
-        self.numbered=numbered
+        self.name = name
+        self.interval = interval
+        self.message = message
+        self.numbered = numbered
 
         self.pool.createQueue("outbox")
 
@@ -72,19 +71,19 @@ class TestEvent(Actor):
         else:
             self.sleep = self.__doSleep
 
-        if numbered == True:
+        if numbered:
             self.number = self.__doNumber
-            self.n=0
+            self.n = 0
         else:
             self.number = self.__doNoNumber
 
     def preHook(self):
-        self.threads.spawn (self.produce)
+        self.threads.spawn(self.produce)
 
     def produce(self):
 
         while self.loop():
-            event = {"header":{},"data":"%s%s"%(self.message, self.number())}
+            event = {"header": {}, "data": "%s%s" % (self.message, self.number())}
             self.submit(event, self.pool.queue.outbox)
 
         self.logging.info("Stopped producing events.")
@@ -97,7 +96,7 @@ class TestEvent(Actor):
 
     def __doNumber(self):
         self.n += 1
-        return "_%s"%(self.n)
+        return "_%s" % (self.n)
 
     def __doNoNumber(self):
         return ""
