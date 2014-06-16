@@ -28,7 +28,6 @@ from gevent.pool import Pool
 from gevent import spawn, socket, sleep
 
 
-
 class TCPIn(Actor):
     '''**A Wishbone input module which listens on a TCP socket.**
 
@@ -88,13 +87,13 @@ class TCPIn(Actor):
         Actor.__init__(self, name, size)
         self.pool.createQueue("outbox")
 
-        self.name=name
-        self.port=port
-        self.address=address
-        self.delimiter=delimiter
-        self.max_connections=max_connections
-        self.reuse_port=reuse_port
-        if self.delimiter == None:
+        self.name = name
+        self.port = port
+        self.address = address
+        self.delimiter = delimiter
+        self.max_connections = max_connections
+        self.reuse_port = reuse_port
+        if self.delimiter is None:
             self.handle = self.__handleNoDelimiter
         elif self.delimiter == "\n":
             self.handle = self.__handleNextLine
@@ -102,12 +101,12 @@ class TCPIn(Actor):
             self.handle = self.__handleDelimiter
 
     def preHook(self):
-        self.sock=self.__setupSocket(self.address, self.port)
-        self.logging.info("TCP server initialized on address %s and port %s."%(self.address, self.port))
+        self.sock = self.__setupSocket(self.address, self.port)
+        self.logging.info("TCP server initialized on address %s and port %s." % (self.address, self.port))
         spawn(self.serve)
 
     def __setupSocket(self, address, port):
-        sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         if self.reuse_port:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -123,47 +122,47 @@ class TCPIn(Actor):
     def __handleNoDelimiter(self, sock, address):
         sfile = sock.makefile()
         chunk = sfile.readlines()
-        self.pool.queue.outbox.put({'header':{},'data':''.join(chunk)})
+        self.pool.queue.outbox.put({'header': {}, 'data': ''.join(chunk)})
         sfile.close()
         sock.close()
 
     def __handleNextLine(self, sock, address):
-        self.logging.debug("Connection from %s."%(str(address[0])))
+        self.logging.debug("Connection from %s." % (str(address[0])))
         sfile = sock.makefile()
 
         while self.loop():
             try:
                 chunk = sfile.readline()
             except:
-                self.logging.debug("Client %s disconnected."%(str(address[0])))
+                self.logging.debug("Client %s disconnected." % (str(address[0])))
                 break
 
             if not chunk:
-                self.logging.debug("Client %s disconnected."%(str(address[0])))
+                self.logging.debug("Client %s disconnected." % (str(address[0])))
                 break
             else:
-                self.submit({'header':{},'data':chunk.rstrip('\r\n')}, self.pool.queue.outbox)
+                self.submit({'header': {}, 'data': chunk.rstrip('\r\n')}, self.pool.queue.outbox)
 
     def __handleDelimiter(self, sock, address):
-        self.logging.debug("Connection from %s."%(str(address[0])))
+        self.logging.debug("Connection from %s." % (str(address[0])))
         sfile = sock.makefile()
-        data=[]
+        data = []
 
         while self.loop():
             chunk = sfile.readline()
 
             if not chunk:
                 if len(data) > 0:
-                    self.pool.queue.outbox.put({'header':{},'data':''.join(data)})
-                self.logging.debug("Client %s disconnected."%(str(address[0])))
+                    self.pool.queue.outbox.put({'header': {}, 'data': ''.join(data)})
+                self.logging.debug("Client %s disconnected." % (str(address[0])))
                 break
 
             elif chunk.endswith(self.delimiter):
-                chunk=chunk.rstrip(self.delimiter)
+                chunk = chunk.rstrip(self.delimiter)
                 if chunk != '':
                     data.append(chunk)
-                    self.submit({'header':{},'data':''.join(data)}, self.pool.queue.outbox)
-                    data=[]
+                    self.submit({'header': {}, 'data': ''.join(data)}, self.pool.queue.outbox)
+                    data = []
             else:
                 data.append(chunk)
 
@@ -173,7 +172,7 @@ class TCPIn(Actor):
     def serve(self):
         if self.max_connections > 0:
             pool = Pool(self.max_connections)
-            self.logging.debug("Setting up a connection pool of %s connections."%(self.max_connections))
+            self.logging.debug("Setting up a connection pool of %s connections." % (self.max_connections))
             self.stream_server = StreamServer(self.sock, self.handle, spawn=pool)
             self.stream_server.start()
         else:
