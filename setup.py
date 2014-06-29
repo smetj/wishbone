@@ -107,6 +107,7 @@ setup(
             'tcpout = wishbone.module.tcpout:TCPOut',
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
+            'syslog = wishbone.module.syslog:Syslog'
         ],
         'wishbone.contrib.input': [
         ],
