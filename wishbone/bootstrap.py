@@ -22,20 +22,21 @@
 #
 #
 
+from wishbone.router import Default
+from wishbone.error import QueueConnected
+from wishbone.utils import BootstrapFile, Module, PIDFile
+
 import argparse
-import pkg_resources
-import sys
-import os
-import yaml
 import multiprocessing
+import os
+import sys
 from daemon import DaemonContext, pidfile
 from gevent import sleep, signal
-from wishbone.router import Default
 
 
 class BootStrap():
     '''
-    Bootstraps a Wishbone instance.
+    Parses command line arguments and bootstraps the Wishbone instance.
     '''
 
     def __init__(self, description="Wishbone bootstrap server. Building async event pipeline servers."):
@@ -68,133 +69,6 @@ class BootStrap():
 
         dispatch = Dispatch()
         getattr(dispatch, arguments["command"])(**arguments)
-
-
-class BootstrapFile():
-    '''
-    Handles bootstrap file interaction.
-    '''
-
-    def __init__(self):
-        pass
-
-    def load(self, filename):
-        '''Loads and returns the yaml bootstrap file.'''
-
-        try:
-            with open(filename, 'r') as f:
-                config = yaml.load(f)
-        except Exception as err:
-            print ("Failed to load config file.  Reason: %s" % (err))
-            sys.exit(1)
-
-        try:
-            return self.verify(config)
-        except Exception as err:
-            print ("Syntax error in bootstrap file. Reason: %s" % (err))
-            sys.exit(1)
-
-    def verify(self, content):
-        assert "routingtable" in content, "'routingtable' section not found in bootstrap file."
-        assert "modules" in content, "'modules' section not found in bootstrap file."
-
-        return content
-
-
-class PIDFile():
-    '''
-    Handles all PIDfile interactions.
-    '''
-
-    def __init__(self, location):
-        self.location = location
-
-    def alive(self):
-        '''Returns True if at least 1 PID in pidfile is alive.'''
-
-        for pid in self.__readPIDFile():
-            if self.__isAlive(pid):
-                return True
-        return False
-
-    def create(self, pids=[]):
-        '''Creates the pidfile containing the provided list of pids.'''
-
-        if self.exists():
-            if self.valid():
-                raise Exception("Pidfile exists and at least one process running.")
-            else:
-                self.__deletePIDFile()
-
-        self.__writePIDFile(pids)
-
-    def cleanup(self):
-        '''Deleted PID file if possible.'''
-        if self.exists():
-            self.__deletePIDFile()
-
-    def exists(self):
-        '''Returns True if file exists.'''
-
-        return os.path.isfile(self.location)
-
-    def read(self):
-        '''Returns the content of the pidfile'''
-
-        return self.__readPIDFile()
-
-    def sendSigint(self, pid):
-        '''Sends sigint to PID.'''
-
-        try:
-            os.kill(int(pid), 2)
-        except:
-            pass
-
-        while self.__isAlive(pid):
-            print ("Waiting for PID %s to exit." % (pid))
-            sleep(1)
-
-    def valid(self):
-        '''Returns True at least one PID within pidfile is still alive.'''
-
-        try:
-            for pid in self.__readPIDFile():
-                if self.__isAlive(pid):
-                    return True
-            return False
-        except Exception as err:
-            return False
-
-    def __isAlive(self, pid):
-        '''Verifies whether pid is still alive.'''
-
-        try:
-            os.kill(int(pid), 0)
-            return True
-        except:
-            False
-
-    def __writePIDFile(self, pids=[]):
-        '''Writes a list pids to the file.'''
-
-        with open(self.location, 'w') as pidfile:
-            for pid in pids:
-                pidfile.write("%s\n" % (pid))
-
-    def __readPIDFile(self):
-        '''Returns a list of pids values the file contains.'''
-
-        with open(self.location, 'r') as pidfile:
-            pids = pidfile.readlines()
-
-        return [int(x) for x in pids]
-
-    def __deletePIDFile(self):
-        '''Unconditionally deletes the pidfile.'''
-
-        if os.path.isfile(self.location):
-            os.remove(self.location)
 
 
 class Dispatch():
@@ -240,26 +114,53 @@ class Dispatch():
 
         if instances == 1:
             print ("Starting 1 instance to background with pid %s." % (os.getpid()))
-            with DaemonContext(
-                    stdout=open('stdout.txt', 'w+'),
-                    stderr=open('stderr.txt', 'w+'),
-                    files_preserve=self.__getCurrentFD(),
-                    detach_process=True):
-                self.pid.create([os.getpid()])
-                instance = RouterBootstrap(config, debug=True)
-                instance.start()
+            try:
+                with DaemonContext(
+                        stdout=open('stdout.txt', 'w+'),
+                        stderr=open('stderr.txt', 'w+'),
+                        files_preserve=self.__getCurrentFD(),
+                        detach_process=True):
+                    self.pid.create([os.getpid()])
+                    instance = RouterBootstrap(config, debug=True)
+                    instance.start()
+            except Exception as err:
+                sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
         else:
-            print "not implemented yet"
+            try:
+                pids = []
+                for x in xrange(instances):
+                    self.instances.append(RouterBootstrapProcess(config, debug=True))
+                    self.instances[-1].start()
+                    pids.append(self.instances[-1].pid)
+                self.pid.create(pids)
+                with DaemonContext(
+                        stdout=open('stdout.txt', 'w+'),
+                        stderr=open('stderr.txt', 'w+'),
+                        files_preserve=self.__getCurrentFD(),
+                        detach_process=True):
+                    while any([self.__alive(x) for x in pids]):
+                        sleep(0.5)
+            except Exception as err:
+                sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
 
     def stop(self, command, pid):
         '''
         Handles the Wishbone stop command.
         '''
 
-        pid = PIDFile(pid)
-        for entry in pid.read():
-            pid.sendSigint(entry)
-        pid.cleanup()
+        try:
+            pid = PIDFile(pid)
+            sys.stdout.write("Stopping instance with PID ")
+            sys.stdout.flush()
+            for entry in pid.read():
+                sys.stdout.write(" %s " % (entry))
+                sys.stdout.flush()
+                pid.sendSigint(entry)
+            pid.cleanup()
+            print("")
+        except Exception as err:
+            print ("")
+            print ("Failed to stop instances.  Reason: %s" % (err))
 
     def __stopSequence(self):
         '''
@@ -273,8 +174,11 @@ class Dispatch():
             for instance in self.instances:
                 if hasattr(instance, "stop"):
                     instance.stop()
-                else:
-                    os.kill(instance.pid, 2)
+                # else:
+                #     try:
+                #         os.kill(instance.pid, 2)
+                #     except:
+                #         pass
 
     def __getCurrentFD(self):
         '''
@@ -287,62 +191,12 @@ class Dispatch():
             print ("Failed to get active filedescriptors.  Reason: %s." % (err))
             sys.exit(1)
 
-
-class Module():
-    '''
-    Handles all Wishbone module interaction.
-    '''
-
-    def __init__(self):
-        pass
-
-    def extractSummary(self, entrypoint):
-        '''
-        Extracts and returns a module's docstring using the entrypoint.
-        '''
-
+    def __alive(self, pid):
         try:
-            doc = entrypoint.load().__doc__
-        except Exception as err:
-            return "! -> Unable to load.  Reason: %s" % (err)
-        try:
-            return re.search('.*?\*\*(.*?)\*\*', doc, re.DOTALL).group(1)
+            os.kill(pid, 0)
+            return True
         except:
-            return "No description found."
-
-    def getVersion(self, entrypoint):
-        '''
-        Extracts and returns a module's version.
-        '''
-
-        modulename = vars(entrypoint)["module_name"].split('.')[0]
-
-        try:
-            return pkg_resources.get_distribution(modulename).version
-        except Exception as err:
-            return "Unknown"
-
-    def load(self, entrypoint):
-        '''
-        Loads a module from an entrypoint string and returns it.
-        '''
-
-        e = entrypoint.split('.')
-        name = e[-1]
-        del(e[-1])
-        group = ".".join(e)
-        module_instance = None
-
-        for module in pkg_resources.iter_entry_points(group=group, name=name):
-            try:
-                module_instance = module.load()
-            except Exception as err:
-                raise Exception("Problem loading module %s  Reason: %s" % (module, err))
-
-        if module_instance is not None:
-            return module_instance
-        else:
-            raise Exception("Failed to load module %s  Reason: Not found" % (entrypoint))
+            False
 
 
 class RouterBootstrapProcess(multiprocessing.Process):
@@ -415,8 +269,15 @@ class RouterBootstrap():
         if self.debug:
             self.__debug()
 
-        self.router.start()
+        # try:
+        #     syslog = self.loadModule("wishbone.output.syslog")
+        #     self.router.initializeModule(syslog, "syslog")
+        #     self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("syslog"), "inbox")
+        # except QueueConnected:
+        #     print "Queue already connected."
+        #     sys.exit(1)
 
+        self.router.start()
         while self.router.isRunning():
             sleep(1)
 
