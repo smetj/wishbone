@@ -121,7 +121,7 @@ class Dispatch():
                         files_preserve=self.__getCurrentFD(),
                         detach_process=True):
                     self.pid.create([os.getpid()])
-                    instance = RouterBootstrap(config, debug=True)
+                    instance = RouterBootstrap(config, debug=False)
                     instance.start()
             except Exception as err:
                 sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
@@ -129,7 +129,7 @@ class Dispatch():
             try:
                 pids = []
                 for x in xrange(instances):
-                    self.instances.append(RouterBootstrapProcess(config, debug=True))
+                    self.instances.append(RouterBootstrapProcess(config, debug=False))
                     self.instances[-1].start()
                     pids.append(self.instances[-1].pid)
                 self.pid.create(pids)
@@ -140,6 +140,8 @@ class Dispatch():
                         detach_process=True):
                     while any([self.__alive(x) for x in pids]):
                         sleep(0.5)
+                    for instance in self.instances:
+                        instance.terminate()
             except Exception as err:
                 sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
 
@@ -269,13 +271,12 @@ class RouterBootstrap():
         if self.debug:
             self.__debug()
 
-        # try:
-        #     syslog = self.loadModule("wishbone.output.syslog")
-        #     self.router.initializeModule(syslog, "syslog")
-        #     self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("syslog"), "inbox")
-        # except QueueConnected:
-        #     print "Queue already connected."
-        #     sys.exit(1)
+        try:
+            syslog = self.loadModule("wishbone.output.syslog")
+            self.router.initializeModule(syslog, "syslog")
+            self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("syslog"), "inbox")
+        except QueueConnected:
+            pass
 
         self.router.start()
         while self.router.isRunning():
