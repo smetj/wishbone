@@ -127,10 +127,10 @@ class Dispatch():
                 sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
         else:
             try:
-
+                print "Starting %s instances in background." % (instances)
                 with DaemonContext(
-                        stdout=open('stdout.txt', 'w+'),
-                        stderr=open('stderr.txt', 'w+'),
+                        stdout=sys.stdout,
+                        stderr=sys.stderr,
                         files_preserve=self.__getCurrentFD(),
                         detach_process=True):
                     pids = []
@@ -138,6 +138,7 @@ class Dispatch():
                         self.instances.append(RouterBootstrapProcess(config, debug=False))
                         self.instances[-1].start()
                         pids.append(self.instances[-1].pid)
+                        sys.stdout.flush()
                     self.pid.create(pids)
                     for instance in self.instances:
                         instance.join()
