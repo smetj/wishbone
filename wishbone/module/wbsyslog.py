@@ -29,6 +29,7 @@ import os
 
 
 class Syslog(Actor):
+
     '''**Writes log events to syslog.**
 
     Logevents have following format:

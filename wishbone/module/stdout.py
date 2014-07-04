@@ -71,6 +71,7 @@ class Format():
 
 
 class STDOUT(Actor):
+
     '''**Prints incoming events to STDOUT.**
 
     Prints incoming events to STDOUT. When <complete> is True,
