@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  syslog.py
+#  wbsyslog.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -22,7 +22,6 @@
 #
 #
 
-from __future__ import absolute_import
 from wishbone import Actor
 import syslog
 import sys
@@ -51,12 +50,13 @@ class Syslog(Actor):
     def __init__(self, name, size):
         Actor.__init__(self, name, size)
         self.name = name
+        self.pool.createQueue("inbox")
+        self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
         syslog.openlog("%s(%s)" % (os.path.basename(sys.argv[0]), os.getpid()))
 
     def consume(self, event):
-        print event
         syslog.syslog(event["data"][0], "%s: %s" % (event["data"][3], event["data"][4]))
 
     def postHook(self):

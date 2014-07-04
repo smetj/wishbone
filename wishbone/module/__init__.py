@@ -32,3 +32,4 @@ from tcpin import TCPIn
 from diskout import DiskOut
 from humanlogformat import HumanLogFormat
 from header import Header
+from wbsyslog import Syslog
