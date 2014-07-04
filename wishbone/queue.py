@@ -252,6 +252,6 @@ class Queue():
 
         if time_now - time_then >= 1:
             self.__cache[name]["value"] = (time_now, amount_now)
-            self.__cache[name]["rate"] = (amount_now - amount_then)/(time_now-time_then)
+            self.__cache[name]["rate"] = (amount_now - amount_then) / (time_now - time_then)
 
         return self.__cache[name]["rate"]
