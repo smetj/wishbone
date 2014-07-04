@@ -30,6 +30,7 @@ from gevent import sleep
 
 
 class BootstrapFile():
+
     '''
     Handles bootstrap file interaction.
     '''
@@ -61,6 +62,7 @@ class BootstrapFile():
 
 
 class Module():
+
     '''
     Handles all Wishbone module interaction.
     '''
@@ -118,6 +120,7 @@ class Module():
 
 
 class PIDFile():
+
     '''
     Handles all PIDfile interactions.
     '''

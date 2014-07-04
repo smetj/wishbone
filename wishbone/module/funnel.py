@@ -27,6 +27,7 @@ from wishbone.error import QueueFull
 
 
 class Funnel(Actor):
+
     '''**Funnel multiple incoming queues to 1 outgoing queue.**
 
     Funnel multiple incoming queues to 1 outgoing queue.
