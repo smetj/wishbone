@@ -27,6 +27,7 @@ from gevent import spawn, sleep
 
 
 class Null(Actor):
+
     '''**Purges incoming events.**
 
     Purges incoming events.
