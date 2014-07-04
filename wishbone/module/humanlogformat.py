@@ -31,6 +31,7 @@ from time import time
 
 
 class HumanLogFormat(Actor):
+
     '''**Formats Wishbone log events.**
 
     Logs are formated from the internal wishbone format into a more
@@ -64,7 +65,7 @@ class HumanLogFormat(Actor):
             5: "notice",
             6: "informational",
             7: "debug"
-            }
+        }
         self.colors = {
             0: "\x1B[0;35m",
             1: "\x1B[1;35m",
@@ -74,7 +75,7 @@ class HumanLogFormat(Actor):
             5: "\x1B[1;30m",
             6: "\x1B[1;37m",
             7: "\x1B[1;37m"
-            }
+        }
 
         if colorize:
             self.colorize = self.doColorize
@@ -96,7 +97,7 @@ class HumanLogFormat(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def doColorize(self, message, level):
-        return self.colors[level]+message+"\x1B[0m"
+        return self.colors[level] + message + "\x1B[0m"
 
     def doNoColorize(self, message, level):
         pass

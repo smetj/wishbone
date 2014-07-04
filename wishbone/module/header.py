@@ -27,6 +27,7 @@ from wishbone import Actor
 
 
 class Header(Actor):
+
     '''**Adds information to event headers.**
 
     Parameters:

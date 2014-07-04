@@ -31,6 +31,7 @@ from os import rename
 
 
 class DiskOut(Actor):
+
     '''**Writes incoming messges to disk.**
 
     Persists incoming messages to disk.
