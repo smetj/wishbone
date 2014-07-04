@@ -177,11 +177,6 @@ class Dispatch():
             for instance in self.instances:
                 if hasattr(instance, "stop"):
                     instance.stop()
-                # else:
-                #     try:
-                #         os.kill(instance.pid, 2)
-                #     except:
-                #         pass
 
     def __getCurrentFD(self):
         '''
