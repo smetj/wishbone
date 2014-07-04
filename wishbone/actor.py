@@ -59,7 +59,6 @@ class Actor():
         self.__parents = {}
 
     def connect(self, source, instance, destination):
-
         '''Connects the <source> queue to the <destination> queue.
         In fact, the source queue overwrites the destination queue.'''
 
@@ -82,7 +81,6 @@ class Actor():
         self.logging.debug("Writing queues to disk.")
 
     def getChildren(self, queue=None):
-
         '''Returns the queue name <queue> is connected to.'''
 
         if queue is None:
@@ -152,19 +150,18 @@ class Actor():
         self.__run.wait()
 
         while self.loop():
+            try:
+                event = self.pool.queue.__dict__[queue].get()
+            except QueueEmpty:
+                self.pool.queue.__dict__[queue].waitUntilContent()
+            else:
                 try:
-                    event = self.pool.queue.__dict__[queue].get()
-                except QueueEmpty:
-                    self.pool.queue.__dict__[queue].waitUntilContent()
-                else:
-                    try:
-                        function(event)
-                        self.submit(event, self.pool.queue.success)
-                    except Exception as err:
-                        self.submit(event, self.pool.queue.failed)
+                    function(event)
+                    self.submit(event, self.pool.queue.success)
+                except Exception as err:
+                    self.submit(event, self.pool.queue.failed)
 
     def __metricEmitter(self):
-
         '''A greenthread which collects the queue metrics at the defined interval.'''
 
         self.__run.wait()

@@ -94,7 +94,6 @@ class Default():
         return children
 
     def initializeModule(self, module, name, *args, **kwargs):
-
         '''Initializes the mdoule using the provided *args and **kwargs
         arguments.'''
 

@@ -35,6 +35,7 @@ from gevent import sleep, signal
 
 
 class BootStrap():
+
     '''
     Parses command line arguments and bootstraps the Wishbone instance.
     '''
@@ -72,6 +73,7 @@ class BootStrap():
 
 
 class Dispatch():
+
     '''
     Handles the Wishbone instance commands.
     '''
@@ -115,11 +117,7 @@ class Dispatch():
         if instances == 1:
             print ("Starting 1 instance to background with pid %s." % (os.getpid()))
             try:
-                with DaemonContext(
-                        stdout=open('stdout.txt', 'w+'),
-                        stderr=open('stderr.txt', 'w+'),
-                        files_preserve=self.__getCurrentFD(),
-                        detach_process=True):
+                with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
                     self.pid.create([os.getpid()])
                     instance = RouterBootstrap(config, debug=False)
                     instance.start()
@@ -128,20 +126,16 @@ class Dispatch():
         else:
             try:
                 print "Starting %s instances in background." % (instances)
-                with DaemonContext(
-                        stdout=sys.stdout,
-                        stderr=sys.stderr,
-                        files_preserve=self.__getCurrentFD(),
-                        detach_process=True):
+                with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
                     pids = []
-                    for x in xrange(instances):
-                        self.instances.append(RouterBootstrapProcess(config, debug=False))
-                        self.instances[-1].start()
-                        pids.append(self.instances[-1].pid)
-                        sys.stdout.flush()
+                    processes = []
+                    for counter in xrange(instances):
+                        processes.append(RouterBootstrapProcess(config, debug=False))
+                        processes[-1].start()
+                        pids.append(processes[-1].pid)
                     self.pid.create(pids)
-                    for instance in self.instances:
-                        instance.join()
+                    for process in processes:
+                        process.join()
 
             except Exception as err:
                 sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
@@ -198,6 +192,7 @@ class Dispatch():
 
 
 class RouterBootstrapProcess(multiprocessing.Process):
+
     '''
     Wraps RouterBootstrap into a Process class.
     '''
@@ -218,6 +213,7 @@ class RouterBootstrapProcess(multiprocessing.Process):
 
 
 class RouterBootstrap():
+
     '''
     Setup, configure and a router process.
     '''

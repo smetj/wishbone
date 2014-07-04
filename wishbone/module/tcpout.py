@@ -101,4 +101,4 @@ class TCPOut(Actor):
             data = self.delimiter.join(event["data"])
         else:
             data = event["data"]
-        self.socket.sendall(str(data)+self.delimiter)
+        self.socket.sendall(str(data) + self.delimiter)
