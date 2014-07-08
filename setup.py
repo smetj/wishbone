@@ -100,14 +100,15 @@ setup(
             'header = wishbone.module.header:Header',
         ],
         'wishbone.input': [
-            'tcpin = wishbone.module.tcpin:TCPIn',
+            'tcp = wishbone.module.tcpin:TCPIn',
             'testevent = wishbone.module.testevent:TestEvent'
         ],
         'wishbone.output': [
-            'tcpout = wishbone.module.tcpout:TCPOut',
+            'tcp = wishbone.module.tcpout:TCPOut',
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
-            'syslog = wishbone.module.wbsyslog:Syslog'
+            'syslog = wishbone.module.wbsyslog:Syslog',
+            'disk = wishbone.module.diskout:DiskOut'
         ],
         'wishbone.contrib.input': [
         ],
