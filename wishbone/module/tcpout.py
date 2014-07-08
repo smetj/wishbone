@@ -88,7 +88,7 @@ class TCPOut(Actor):
                         self.logging.error("Failed to connect to %s:%s. Reason: %s" % (self.host, self.port, err))
                         sleep(1)
 
-    def postHook():
+    def postHook(self):
         try:
             self.socket.close()
             self.logging.info("Connection closed to %s:%s" % (self.host, self.port))
@@ -96,7 +96,6 @@ class TCPOut(Actor):
             pass
 
     def consume(self, event):
-
         if isinstance(event["data"], list):
             data = self.delimiter.join(event["data"])
         else:
