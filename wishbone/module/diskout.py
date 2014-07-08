@@ -52,9 +52,12 @@ class DiskOut(Actor):
         Actor.__init__(self, name, size)
         self.name = name
         self.directory = directory
+
+        self.pool.createQueue("inbox")
+        self.registerConsumer(self.consume, "inbox")
         self.pool.createQueue("disk")
         self.pool.queue.disk.disableFallThrough()
-        self.registerConsumer(self.consume, "inbox")
+
         self.counter = 0
 
     def consume(self, event):
@@ -68,13 +71,15 @@ class DiskOut(Actor):
 
     def flushDisk(self):
 
-        with open(r"%s/%s.%s.tmp" % (self.directory, self.name, self.counter), "wb") as output_file:
+        with open(r"%s/%s.%s.writing" % (self.directory, self.name, self.counter), "wb") as output_file:
             f = FileObjectThread(output_file)
             self.logging.debug("Flushing to disk.")
             while True:
                 try:
                     pickle.dump(self.pool.queue.disk.get(), f)
                 except QueueEmpty:
-                    f.close()
                     break
-        rename("%s/%s.%s.tmp" % (self.directory, self.name, self.counter), "%s/%s.%s" % (self.directory, self.name, self.counter))
+        rename("%s/%s.%s.writing" % (self.directory, self.name, self.counter), "%s/%s.%s.ready" % (self.directory, self.name, self.counter))
+
+
+
