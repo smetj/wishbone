@@ -57,6 +57,7 @@ class BootstrapFile():
     def verify(self, content):
         assert "routingtable" in content, "'routingtable' section not found in bootstrap file."
         assert "modules" in content, "'modules' section not found in bootstrap file."
+        # assert any([False for m in content.keys() if m not in ["routingtable","modules"]]), "Unknown content in bootstrap file."
 
         return content
 
