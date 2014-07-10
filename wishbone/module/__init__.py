@@ -30,6 +30,7 @@ from tcpout import TCPOut
 from graphite import Graphite
 from tcpin import TCPIn
 from diskout import DiskOut
+from diskin import DiskIn
 from humanlogformat import HumanLogFormat
 from header import Header
 from wbsyslog import Syslog

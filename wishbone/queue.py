@@ -137,15 +137,21 @@ class Queue():
 
         self.put = self.__fallThrough
 
+    def clean(self):
+        '''Deletes the content of the queue.
+        '''
+        self.__q = deque()
+
     def disableFallThrough(self):
         self.put = self.__put
 
     def dump(self):
-        '''Dumps and returns the queue in tuple format.
+        '''Dumps the queue as a generator and cleans it when done.
         '''
 
         for event in self.__q:
             yield event
+        self.clean()
 
     def empty(self):
         '''Returns True when queue and unacknowledged is empty otherwise False.'''
