@@ -101,7 +101,8 @@ setup(
         ],
         'wishbone.input': [
             'tcp = wishbone.module.tcpin:TCPIn',
-            'testevent = wishbone.module.testevent:TestEvent'
+            'testevent = wishbone.module.testevent:TestEvent',
+            'disk = wishbone.module.diskin:DiskIn'
         ],
         'wishbone.output': [
             'tcp = wishbone.module.tcpout:TCPOut',
