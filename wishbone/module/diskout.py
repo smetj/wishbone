@@ -23,16 +23,17 @@
 #
 
 from wishbone import Actor
-from gevent.fileobject import FileObjectThread
 from wishbone.error import QueueFull, QueueEmpty
-from gevent.fileobject import FileObjectThread
+
 import pickle
+from gevent.fileobject import FileObjectThread
+from gevent import spawn, sleep
 from os import rename
 
 
 class DiskOut(Actor):
 
-    '''**Writes incoming messges to disk.**
+    '''**Writes messages to a disk buffer.**
 
     Persists incoming messages to disk.
 
@@ -43,15 +44,19 @@ class DiskOut(Actor):
         - size(int):       The size of all module queues.
 
         - directory(str):   The directory to write data to.
+
+        - interval(int): The time in seconds to flush the queue to disk.
+
     Queues:
 
         - inbox:    Incoming events.
     '''
 
-    def __init__(self, name, size, directory="./"):
+    def __init__(self, name, size, directory="./", interval=10):
         Actor.__init__(self, name, size)
         self.name = name
         self.directory = directory
+        self.interval = interval
 
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
@@ -59,6 +64,9 @@ class DiskOut(Actor):
         self.pool.queue.disk.disableFallThrough()
 
         self.counter = 0
+
+    def preHook(self):
+        spawn(self.__flushTimer)
 
     def consume(self, event):
 
@@ -74,12 +82,14 @@ class DiskOut(Actor):
         with open(r"%s/%s.%s.writing" % (self.directory, self.name, self.counter), "wb") as output_file:
             f = FileObjectThread(output_file)
             self.logging.debug("Flushing to disk.")
-            while True:
-                try:
-                    pickle.dump(self.pool.queue.disk.get(), f)
-                except QueueEmpty:
-                    break
+            pickle.dump([x for x in self.pool.queue.disk.dump()], f)
+
         rename("%s/%s.%s.writing" % (self.directory, self.name, self.counter), "%s/%s.%s.ready" % (self.directory, self.name, self.counter))
 
+    def __flushTimer(self):
 
-
+        while self.loop():
+            sleep(self.interval)
+            if self.pool.queue.disk.size() > 0:
+                self.logging.debug("Flusing %s messages to disk due to timer." % (self.pool.queue.disk.size()))
+                self.flushDisk()
