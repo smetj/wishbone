@@ -25,11 +25,10 @@
 from wishbone import Actor
 from wishbone.error import QueueFull, QueueEmpty
 
-import pickle
+import cPickle as pickle
 from gevent.fileobject import FileObjectThread
 from gevent import spawn, sleep
 from os import remove
-import gevent_inotifyx as inotify
 import glob
 
 
@@ -57,22 +56,19 @@ class DiskIn(Actor):
         self.pool.createQueue("outbox")
 
     def preHook(self):
-        self.processDirectory()
-        fd = inotify.init()
-        wd = inotify.add_watch(fd, self.directory, inotify.IN_CLOSE_WRITE)
-        spawn(self.watcher, fd)
+        spawn(self.monitorDirectory)
 
-    def watcher(self, fd):
-        while self.loop():
-            events = inotify.get_events(fd)
+    def monitorDirectory(self):
+        while self.loop:
             self.processDirectory()
+            sleep(0.5)
 
     def processDirectory(self):
         for filename in glob.glob("%s/*.ready" % (self.directory)):
             self.readFile(filename)
 
     def readFile(self, filename):
-        if filename.endswith("ready"):
+        if filename.endswith("ready") and self.loop():
             with open(filename, "r") as output_file:
                 self.logging.debug("Reading file %s" % filename)
                 f = FileObjectThread(output_file)
