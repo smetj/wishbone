@@ -55,7 +55,6 @@ class DiskIn(Actor):
         self.directory = directory
 
         self.pool.createQueue("outbox")
-        self.pool.queue.outbox.disableFallThrough()
 
     def preHook(self):
         self.processDirectory()
@@ -75,9 +74,18 @@ class DiskIn(Actor):
     def readFile(self, filename):
         if filename.endswith("ready"):
             with open(filename, "r") as output_file:
+                self.logging.debug("Reading file %s" % filename)
                 f = FileObjectThread(output_file)
-                for event in pickle.load(f):
-                    self.pool.queue.outbox.put(event)
+                while self.loop():
+                    try:
+                        event = pickle.load(f)
+                        while self.loop():
+                            try:
+                                self.pool.queue.outbox.put(event)
+                                break
+                            except QueueFull:
+                                self.pool.queue.outbox.waitUntilFree()
+                    except EOFError:
+                        break
+
             remove(filename)
-
-
