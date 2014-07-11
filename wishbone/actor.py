@@ -78,6 +78,10 @@ class Actor():
     def flushQueuesToDisk(self):
         '''Writes whatever event in the queue to disk for later retrieval.'''
 
+        # for queue in self.pool.listQueues(names=True):
+        #     size = self.pool.getQueue(queue).size()
+        #     print "%s %s %s" % (self.name, queue, size)
+
         self.logging.debug("Writing queues to disk.")
 
     def getChildren(self, queue=None):
