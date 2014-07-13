@@ -22,10 +22,11 @@
 #
 #
 
+from gevent import monkey;monkey.patch_socket()
 from wishbone import Actor
 from wishbone.error import QueueFull, QueueEmpty
-from haigha.connection import Connection as amqp_connection
-from gevent import sleep, spawn
+from amqp.connection import Connection as amqp_connection
+from gevent import sleep, spawn, event
 
 
 class AMQPIn(Actor):
@@ -84,17 +85,22 @@ class AMQPIn(Actor):
             When the exchange is type "direct" the routing key is always equal
             to the <queue> value.
 
-        -
+        -   prefetch_count(int)(1)
+            Prefetch count value to consume messages from queue.
+
+        -   no_ack(bool)(false)
+            Override acknowledgement requirement.
 
     Queues:
 
-        - outbox:    Messages coming from the defined broker.
+        - outbox:   Messages coming from the defined broker.
+        - ack:      Messages to acknowledge (requires the delivery_tag)
     '''
 
     def __init__(self, name, size, host="localhost", port=5672, vhost="/", user="guest", password="guest",
                  exchange="", exchange_type="direct", exchange_durable=False,
                  queue="wishbone", queue_durable=False, queue_exclusive=False, queue_auto_delete=True,
-                 routing_key=""):
+                 routing_key="", prefetch_count=1, no_ack=False):
         Actor.__init__(self, name, size)
         self.name = name
         self.size = size
@@ -111,42 +117,76 @@ class AMQPIn(Actor):
         self.queue_exclusive = queue_exclusive
         self.queue_auto_delete = queue_auto_delete
         self.routing_key = routing_key
+        self.prefetch_count = prefetch_count
+        self.no_ack = no_ack
 
         self.pool.createQueue("outbox")
         self.pool.createQueue("ack")
+        self.pool.queue.ack.disableFallThrough()
+
+        self.connected = False
 
     def preHook(self):
-
         spawn(self.setupConnectivity)
-        spawn(self.messagePump)
+        spawn(self.handleAcknowledgements)
 
     def consume(self, message):
-        print message
+        msg = {"header": {self.name: {"delivery_tag": message.delivery_info["delivery_tag"]}}, "data": str(message.body)}
+        self.pool.queue.outbox.put(msg)
+        self.pool.queue.ack.put(msg)
+
 
     def setupConnectivity(self):
 
         while self.loop():
             try:
-                self.connection = amqp_connection(host=self.host, port=self.port, vhost=self.vhost, user=self.user, password=self.password, transport="gevent", debug=True)
+                self.connection = amqp_connection(host=self.host, port=self.port, virtual_host=self.vhost, userid=self.user, password=self.password)
                 self.channel = self.connection.channel()
                 if self.exchange != "":
-                    self.channel.exchange.declare(self.exchange, self.exchange_type, durable=self.exchange_durable)
-                self.channel.queue.declare(self.queue, durable=self.queue_durable, exclusive=self.queue_exclusive, auto_delete=self.queue_auto_delete)
+                    self.channel.exchange_declare(self.exchange, self.exchange_type, durable=self.exchange_durable)
+                    self.logging.debug("Declared exchange %s." % (self.exchange))
+                self.channel.queue_declare(self.queue, durable=self.queue_durable, exclusive=self.queue_exclusive, auto_delete=self.queue_auto_delete)
+                self.logging.debug("Declared queue %s." % (self.queue))
                 if self.exchange != "":
                     self.channel.queue.bind(self.queue, self.exchange, routing_key=self.routing_key)
-                self.channel.basic.consume(self.queue, self.consume)
-                self.logging.info("Connected to broker on %s " % (self.host))
+                    self.logging.debug("Bound queue %s to exchange %s." % (self.queue, self.exchange))
+                self.channel.basic_qos(prefetch_size=0, prefetch_count=self.prefetch_count, a_global=True)
+                self.channel.basic_consume(self.queue, callback=self.consume, no_ack=self.no_ack)
+                self.logging.info("Connected to broker.")
                 break
             except Exception as err:
                 self.logging.error("Failed to connect to broker.  Reason %s " % (err))
                 sleep(1)
+            finally:
+                spawn(self.drain)
 
-    def messagePump(self):
+    def drain(self):
         while self.loop():
             try:
-                self.connection.read_frames()
-            except:
-                sleep(0.1)
+                self.connection.drain_events()
+            except Exception as err:
+                self.logging.error("Problem connecting to broker.  Reason: %s" % (err))
+                spawn(self.setupConnectivity)
+                break
+            sleep(0.1)
+
+    def handleAcknowledgements(self):
+        while self.loop():
+            try:
+                 event = self.pool.queue.ack.get()
+            except QueueEmpty:
+                self.pool.queue.ack.waitUntilContent()
+            else:
+                try:
+                    self.channel.basic_ack(event["header"][self.name]["delivery_tag"])
+                except Exception as err:
+                    self.pool.queue.ack.rescue(event)
+                    self.logging.error("Failed to acknowledge message.  Reason: %s." % (err))
+                    sleep(0.5)
+
 
     def postHook(self):
-        self.connection.close()
+        try:
+            self.connection.close()
+        except:
+            pass
