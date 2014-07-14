@@ -124,8 +124,6 @@ class AMQPIn(Actor):
         self.pool.createQueue("ack")
         self.pool.queue.ack.disableFallThrough()
 
-        self.connected = False
-
     def preHook(self):
         spawn(self.setupConnectivity)
         spawn(self.handleAcknowledgements)
