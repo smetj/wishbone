@@ -110,7 +110,8 @@ setup(
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog',
-            'disk = wishbone.module.diskout:DiskOut'
+            'disk = wishbone.module.diskout:DiskOut',
+            'amqp = wishbone.module.amqpout:AMQPOut'
         ],
         'wishbone.contrib.input': [
         ],
