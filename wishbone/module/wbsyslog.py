@@ -40,7 +40,14 @@ class Syslog(Actor):
 
         Parameters
 
-            - name(str) :   The name of the module.
+            -   name(str)
+                The name of the module.
+
+            -   size(int)
+                The default max length of each queue.
+
+            -   frequency(int)
+                The frequency in seconds to generate metrics.
 
 
         Queues:
@@ -48,8 +55,8 @@ class Syslog(Actor):
             - inbox: incoming events
     '''
 
-    def __init__(self, name, size):
-        Actor.__init__(self, name, size)
+    def __init__(self, name, size=100, frequency=1):
+        Actor.__init__(self, name, size, frequency)
         self.name = name
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")

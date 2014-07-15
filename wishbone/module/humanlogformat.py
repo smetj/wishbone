@@ -49,12 +49,19 @@ class HumanLogFormat(Actor):
 
     Parameters:
 
-        name(str)       :   The name of the module.
+        -   name(str)
+            The name of the module.
+
+        -   size(int)
+            The default max length of each queue.
+
+        -   frequency(int)
+            The frequency in seconds to generate metrics.
 
     '''
 
-    def __init__(self, name, size=100, colorize=True):
-        Actor.__init__(self, name, size)
+    def __init__(self, name, size=100, frequency=1, colorize=True):
+        Actor.__init__(self, name, size, frequency)
         self.name = name
         self.levels = {
             0: "emergency",

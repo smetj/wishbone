@@ -39,10 +39,13 @@ class AMQPIn(Actor):
     Parameters:
 
         -   name(str)
-            The instance name when initiated.
+            The name of the module.
 
         -   size(int)
-            The size of all module queues.
+            The default max length of each queue.
+
+        -   frequency(int)
+            The frequency in seconds to generate metrics.
 
         -   host(str) "localhost"
             The host broker to connect to.
@@ -97,11 +100,11 @@ class AMQPIn(Actor):
         - ack:      Messages to acknowledge (requires the delivery_tag)
     '''
 
-    def __init__(self, name, size, host="localhost", port=5672, vhost="/", user="guest", password="guest",
+    def __init__(self, name, size=1, frequency=1, host="localhost", port=5672, vhost="/", user="guest", password="guest",
                  exchange="", exchange_type="direct", exchange_durable=False,
                  queue="wishbone", queue_durable=False, queue_exclusive=False, queue_auto_delete=True,
                  routing_key="", prefetch_count=1, no_ack=False):
-        Actor.__init__(self, name, size)
+        Actor.__init__(self, name, size, frequency)
         self.name = name
         self.size = size
         self.host = host
