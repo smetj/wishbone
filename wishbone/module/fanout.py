@@ -33,9 +33,14 @@ class Fanout(Actor):
 
     Parameters:
 
-        - name(str):    The name of the module
+        -   name(str)
+            The name of the module.
 
-        - size(int):    The size of all module queues.
+        -   size(int)
+            The default max length of each queue.
+
+        -   frequency(int)
+            The frequency in seconds to generate metrics.
 
         - dupe(bool):   Determines whether we send references to the
                         original event to all destination or an
@@ -49,9 +54,9 @@ class Fanout(Actor):
 
     '''
 
-    def __init__(self, name, size=100, dupe=False):
+    def __init__(self, name, size=100, frequency=1, dupe=False):
 
-        Actor.__init__(self, name, size=size)
+        Actor.__init__(self, name, size, frequency)
         self.name = name
         self.pool.createQueue("outbox")
 
