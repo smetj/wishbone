@@ -39,7 +39,14 @@ class DiskIn(Actor):
 
     Parameters:
 
-        - name(str):       The instance name when initiated.
+        -   name(str)
+            The name of the module.
+
+        -   size(int)
+            The default max length of each queue.
+
+        -   frequency(int)
+            The frequency in seconds to generate metrics.
 
         - directory(str):   The directory to write data to.
 
@@ -48,8 +55,8 @@ class DiskIn(Actor):
         - outbox:    Incoming events.
     '''
 
-    def __init__(self, name, size, directory="./"):
-        Actor.__init__(self, name, size)
+    def __init__(self, name, size=100, frequency=1, directory="./"):
+        Actor.__init__(self, name, size, frequency)
         self.name = name
         self.directory = directory
 

@@ -38,9 +38,14 @@ class TestEvent(Actor):
 
     Parameters:
 
-        - name (str):           The instance name when initiated.
+        -   name(str)
+            The name of the module.
 
-        - size (int):           The size of all module queues.
+        -   size(int)
+            The default max length of each queue.
+
+        -   frequency(int)
+            The frequency in seconds to generate metrics.
 
         - interval (float):     The interval in seconds between each generated event.
                                 A value of 0 means as fast as possible.
@@ -57,8 +62,8 @@ class TestEvent(Actor):
         - outbox:    Contains the generated events.
     '''
 
-    def __init__(self, name, size=100, interval=1, message="test", numbered=False):
-        Actor.__init__(self, name, size=size)
+    def __init__(self, name, size=100, frequency=1, interval=1, message="test", numbered=False):
+        Actor.__init__(self, name, size, frequency)
         self.name = name
         self.interval = interval
         self.message = message

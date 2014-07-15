@@ -36,9 +36,14 @@ class TCPIn(Actor):
 
     Parameters:
 
-        - name (str):           The instance name when initiated.
+        -   name(str)
+            The name of the module.
 
-        - size (int):           The size of all module queues.
+        -   size(int)
+            The default max length of each queue.
+
+        -   frequency(int)
+            The frequency in seconds to generate metrics.
 
         - address (str):        The address to bind to.
                                 Default: "0.0.0.0"
@@ -84,8 +89,8 @@ class TCPIn(Actor):
 
     '''
 
-    def __init__(self, name, size=100, port=19283, address='0.0.0.0', delimiter="\n", max_connections=0, reuse_port=False):
-        Actor.__init__(self, name, size)
+    def __init__(self, name, size=100, frequency=1, port=19283, address='0.0.0.0', delimiter="\n", max_connections=0, reuse_port=False):
+        Actor.__init__(self, name, size, frequency)
         self.pool.createQueue("outbox")
 
         self.name = name
