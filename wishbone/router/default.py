@@ -55,10 +55,11 @@ class ModulePool():
 
 class Default():
 
-    def __init__(self, size=1000):
+    def __init__(self, size=1000, frequency=1):
         signal(2, self.stop)
         self.pool = ModulePool()
         self.size = size
+        self.frequency = frequency
         self.initializeModule(Funnel, "metrics_funnel")
         self.initializeModule(Funnel, "logs_funnel")
         self.running = True
@@ -98,7 +99,7 @@ class Default():
         arguments.'''
 
         try:
-            setattr(self.pool.module, name, module(name, self.size, *args, **kwargs))
+            setattr(self.pool.module, name, module(name, self.size, self.frequency, *args, **kwargs))
         except Exception as err:
             raise ModuleInitFailure(err)
 
