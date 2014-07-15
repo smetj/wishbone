@@ -35,7 +35,7 @@ from time import time
 
 class Actor():
 
-    def __init__(self, name, size, frequency=1):
+    def __init__(self, name, size=1000, frequency=1):
 
         self.name = name
         self.size = size
@@ -123,7 +123,7 @@ class Actor():
             self.preHook()
 
         self.__run.set()
-        self.logging.info("Started")
+        self.logging.info("Started with queues of size: %s" % (self.size))
 
     def stop(self):
         '''Kills all registered Consumers.'''

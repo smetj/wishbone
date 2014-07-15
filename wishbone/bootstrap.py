@@ -49,10 +49,15 @@ class BootStrap():
         start.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
         start.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
         start.add_argument('--pid', type=str, dest='pid', default='%s/wishbone.pid' % (os.getcwd()), help='The pidfile to use.')
+        start.add_argument('--queue-size', type=int, dest='queue_size', default=100, help='The queue size to use.')
+        start.add_argument('--frequency', type=int, dest='frequency', default=1, help='The metric frequency.')
+
 
         debug = subparsers.add_parser('debug', description="Starts a Wishbone instance in foreground and writes logs to STDOUT.")
         debug.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
         debug.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
+        debug.add_argument('--queue-size', type=int, dest='queue_size', default=100, help='The queue size to use.')
+        debug.add_argument('--frequency', type=int, dest='frequency', default=1, help='The metric frequency.')
 
         stop = subparsers.add_parser('stop', description="Tries to gracefully stop the Wishbone instance.")
         stop.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
@@ -81,11 +86,11 @@ class Dispatch():
     def __init__(self):
 
         self.config = BootstrapFile()
-        self.instances = []
+        self.routers = []
         signal(2, self.__stopSequence)
         self.__stopping = False
 
-    def debug(self, command, config, instances):
+    def debug(self, command, config, instances, queue_size, frequency):
         '''
         Handles the Wishbone debug command.
         '''
@@ -93,20 +98,20 @@ class Dispatch():
         config = self.config.load(config)
 
         if instances == 1:
-            self.instances.append(RouterBootstrap(config, debug=True))
-            self.instances[-1].start()
+            self.routers.append(RouterBootstrap(config, debug=True, queue_size=queue_size, frequency=frequency))
+            self.routers[-1].start()
 
         else:
             for x in xrange(instances):
-                self.instances.append(RouterBootstrapProcess(config, debug=True))
-                self.instances[-1].start()
+                self.routers.append(RouterBootstrapProcess(config, debug=True, queue_size=queue_size, frequency=frequency))
+                self.routers[-1].start()
 
             while multiprocessing.active_children():
                 sleep(1)
 
         sys.exit(0)
 
-    def start(self, command, config, instances, pid):
+    def start(self, command, config, instances, pid, queue_size, frequency):
         '''
         Handles the Wishbone start command.
         '''
@@ -119,7 +124,7 @@ class Dispatch():
             try:
                 with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
                     self.pid.create([os.getpid()])
-                    instance = RouterBootstrap(config, debug=False)
+                    instance = RouterBootstrap(config, debug=False, queue_size=queue_size, frequency=frequency)
                     instance.start()
             except Exception as err:
                 sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
@@ -130,7 +135,7 @@ class Dispatch():
                     pids = []
                     processes = []
                     for counter in xrange(instances):
-                        processes.append(RouterBootstrapProcess(config, debug=False))
+                        processes.append(RouterBootstrapProcess(config, debug=False, queue_size=queue_size, frequency=frequency))
                         processes[-1].start()
                         pids.append(processes[-1].pid)
                     self.pid.create(pids)
@@ -168,7 +173,7 @@ class Dispatch():
             # TODO: Weird hack, otherwise when trapping signal(2) this function is
             #      executed many times.
             self.__stopping = True
-            for instance in self.instances:
+            for instance in self.routers:
                 if hasattr(instance, "stop"):
                     instance.stop()
 
@@ -197,10 +202,11 @@ class RouterBootstrapProcess(multiprocessing.Process):
     Wraps RouterBootstrap into a Process class.
     '''
 
-    def __init__(self, config, debug=False):
+    def __init__(self, config, debug=False, queue_size=1000, frequency=1):
         multiprocessing.Process.__init__(self)
         self.config = config
         self.debug = debug
+        self.queue_size = queue_size
         self.daemon = True
 
     def run(self):
@@ -208,7 +214,7 @@ class RouterBootstrapProcess(multiprocessing.Process):
         Executed by Process when started.
         '''
 
-        router = RouterBootstrap(self.config, self.debug)
+        router = RouterBootstrap(self.config, self.debug, self.queue_size, frequency)
         router.start()
 
 
@@ -218,10 +224,10 @@ class RouterBootstrap():
     Setup, configure and a router process.
     '''
 
-    def __init__(self, config, debug=False):
+    def __init__(self, config, debug=False, queue_size=1000, frequency=1):
         self.config = config
         self.debug = debug
-        self.router = Default()
+        self.router = Default(size=queue_size, frequency=frequency)
         self.module = Module()
 
     def loadModule(self, name):
