@@ -41,9 +41,14 @@ class DiskOut(Actor):
 
     Parameters:
 
-        - name(str):       The instance name when initiated.
+        -   name(str)
+            The name of the module.
 
-        - size(int):       The size of all module queues.
+        -   size(int)
+            The default max length of each queue.
+
+        -   frequency(int)
+            The frequency in seconds to generate metrics.
 
         - directory(str):   The directory to write data to.
 
@@ -54,7 +59,7 @@ class DiskOut(Actor):
         - inbox:    Incoming events.
     '''
 
-    def __init__(self, name, size, directory="./", interval=10):
+    def __init__(self, name, size=100, frequency=1, directory="./", interval=10):
         Actor.__init__(self, name, size)
         self.name = name
         self.directory = directory

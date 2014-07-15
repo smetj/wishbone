@@ -202,7 +202,7 @@ class RouterBootstrapProcess(multiprocessing.Process):
     Wraps RouterBootstrap into a Process class.
     '''
 
-    def __init__(self, config, debug=False, queue_size=1000, frequency=1):
+    def __init__(self, config, debug=False, queue_size=100, frequency=1):
         multiprocessing.Process.__init__(self)
         self.config = config
         self.debug = debug
@@ -224,7 +224,7 @@ class RouterBootstrap():
     Setup, configure and a router process.
     '''
 
-    def __init__(self, config, debug=False, queue_size=1000, frequency=1):
+    def __init__(self, config, debug=False, queue_size=100, frequency=1):
         self.config = config
         self.debug = debug
         self.router = Default(size=queue_size, frequency=frequency)
