@@ -79,9 +79,14 @@ class STDOUT(Actor):
 
     Parameters:
 
-        - name(str):       The instance name when initiated.
+        -   name(str)
+            The name of the module.
 
-        - size(int):       The size of all module queues.
+        -   size(int)
+            The default max length of each queue.
+
+        -   frequency(int)
+            The frequency in seconds to generate metrics.
 
         - complete(bool):  When True, print the complete event including headers.
                            Default: False
@@ -102,8 +107,8 @@ class STDOUT(Actor):
         - inbox:    Incoming events.
     '''
 
-    def __init__(self, name, size=100, complete=False, counter=False, prefix="", pid=False, flush=1):
-        Actor.__init__(self, name, size)
+    def __init__(self, name, size=100, frequency=1, complete=False, counter=False, prefix="", pid=False, flush=1):
+        Actor.__init__(self, name, size, frequency)
 
         self.complete = complete
         self.counter = counter

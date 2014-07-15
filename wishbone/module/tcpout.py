@@ -34,7 +34,14 @@ class TCPOut(Actor):
 
     Parameters:
 
-        - name (str):       The instance name when initiated.
+        -   name(str)
+            The name of the module.
+
+        -   size(int)
+            The default max length of each queue.
+
+        -   frequency(int)
+            The frequency in seconds to generate metrics.
 
         - host (string):    The host to submit to.
                             Default: "localhost"
@@ -55,8 +62,8 @@ class TCPOut(Actor):
 
     '''
 
-    def __init__(self, name, size=100, host="127.0.0.1", port=19283, timeout=10, delimiter="\n"):
-        Actor.__init__(self, name, size)
+    def __init__(self, name, size=100, frequency=1, host="127.0.0.1", port=19283, timeout=10, delimiter="\n"):
+        Actor.__init__(self, name, size, frequency)
 
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
