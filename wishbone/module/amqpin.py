@@ -83,6 +83,9 @@ class AMQPIn(Actor):
         -   queue_auto_delete(bool)(true)
             Whether to autodelete the queue.
 
+        -   queue_declare(bool)(true)
+            Whether to actually declare the queue.
+
         -   routing_key(str)("")
             The routing key to use in case of a "topic" exchange.
             When the exchange is type "direct" the routing key is always equal
@@ -102,7 +105,7 @@ class AMQPIn(Actor):
 
     def __init__(self, name, size=1, frequency=1, host="localhost", port=5672, vhost="/", user="guest", password="guest",
                  exchange="", exchange_type="direct", exchange_durable=False,
-                 queue="wishbone", queue_durable=False, queue_exclusive=False, queue_auto_delete=True,
+                 queue="wishbone", queue_durable=False, queue_exclusive=False, queue_auto_delete=True, queue_declare=True,
                  routing_key="", prefetch_count=1, no_ack=False):
         Actor.__init__(self, name, size, frequency)
         self.name = name
@@ -119,6 +122,7 @@ class AMQPIn(Actor):
         self.queue_durable = queue_durable
         self.queue_exclusive = queue_exclusive
         self.queue_auto_delete = queue_auto_delete
+        self.queue_declare = queue_declare
         self.routing_key = routing_key
         self.prefetch_count = prefetch_count
         self.no_ack = no_ack
@@ -144,12 +148,14 @@ class AMQPIn(Actor):
                 if self.exchange != "":
                     self.channel.exchange_declare(self.exchange, self.exchange_type, durable=self.exchange_durable)
                     self.logging.debug("Declared exchange %s." % (self.exchange))
-                self.channel.queue_declare(self.queue, durable=self.queue_durable, exclusive=self.queue_exclusive, auto_delete=self.queue_auto_delete)
-                self.logging.debug("Declared queue %s." % (self.queue))
+
+                if self.queue_declare:
+                    self.channel.queue_declare(self.queue, durable=self.queue_durable, exclusive=self.queue_exclusive, auto_delete=self.queue_auto_delete)
+                    self.logging.debug("Declared queue %s." % (self.queue))
                 if self.exchange != "":
                     self.channel.queue.bind(self.queue, self.exchange, routing_key=self.routing_key)
                     self.logging.debug("Bound queue %s to exchange %s." % (self.queue, self.exchange))
-                self.channel.basic_qos(prefetch_size=0, prefetch_count=self.prefetch_count, a_global=True)
+                self.channel.basic_qos(prefetch_size=0, prefetch_count=self.prefetch_count, a_global=False)
                 self.channel.basic_consume(self.queue, callback=self.consume, no_ack=self.no_ack)
                 self.logging.info("Connected to broker.")
                 break
@@ -172,7 +178,7 @@ class AMQPIn(Actor):
     def handleAcknowledgements(self):
         while self.loop():
             try:
-                 event = self.pool.queue.ack.get()
+                event = self.pool.queue.ack.get()
             except QueueEmpty:
                 self.pool.queue.ack.waitUntilContent()
             else:
@@ -182,7 +188,6 @@ class AMQPIn(Actor):
                     self.pool.queue.ack.rescue(event)
                     self.logging.error("Failed to acknowledge message.  Reason: %s." % (err))
                     sleep(0.5)
-
 
     def postHook(self):
         try:
