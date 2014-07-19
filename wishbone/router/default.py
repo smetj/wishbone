@@ -24,7 +24,7 @@
 
 from wishbone.module import Funnel
 from wishbone.error import ModuleInitFailure, NoSuchModule
-from gevent import signal, sleep
+from gevent import signal, sleep, event
 import sys
 
 
@@ -62,7 +62,13 @@ class Default():
         self.frequency = frequency
         self.initializeModule(Funnel, "metrics_funnel")
         self.initializeModule(Funnel, "logs_funnel")
-        self.running = True
+        self.__running = False
+        self.__block = event.Event()
+        self.__block.clear()
+
+    def block(self):
+        '''Blocks until stop() is called.'''
+        self.__block.wait()
 
     def connect(self, source, destination):
         '''Connects one queue to the other.
@@ -136,3 +142,4 @@ class Default():
 
         self.pool.module.logs_funnel.stop()
         self.__running = False
+        self.__block.set()

@@ -28,7 +28,6 @@ from collections import deque
 from wishbone.error import QueueLocked, QueueEmpty, QueueFull
 from gevent.event import Event
 from gevent import sleep
-from gevent.pool import Group
 from time import time
 
 
@@ -45,6 +44,8 @@ class QueuePool():
         self.queue.logs = Queue(size)
         self.queue.success = Queue(size)
         self.queue.failed = Queue(size)
+        self.queue.admin_in = Queue(size)
+        self.queue.admin_out = Queue(size)
 
     def listQueues(self, names=False, default=True):
         '''returns the list of queue names from the queuepool.
