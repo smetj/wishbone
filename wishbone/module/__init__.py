@@ -36,3 +36,5 @@ from header import Header
 from wbsyslog import Syslog
 from amqpin import AMQPIn
 from amqpout import AMQPOut
+from roundrobin import RoundRobin
+from fanout import Fanout
