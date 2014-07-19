@@ -87,7 +87,8 @@ setup(
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
         'wishbone.flow': [
             'fanout = wishbone.module.fanout:Fanout',
-            'funnel = wishbone.module.funnel:Funnel'
+            'funnel = wishbone.module.funnel:Funnel',
+            'roundrobin = wishbone.module.roundrobin:RoundRobin'
         ],
         'wishbone.logging': [
             'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
