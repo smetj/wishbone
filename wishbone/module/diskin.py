@@ -59,7 +59,6 @@ class DiskIn(Actor):
         Actor.__init__(self, name, size, frequency)
         self.name = name
         self.directory = directory
-
         self.pool.createQueue("outbox")
 
     def preHook(self):
