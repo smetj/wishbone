@@ -1,18 +1,18 @@
 ---
 modules:
   input:
-    module: wishbone.builtin.input.testevent
+    module: wishbone.input.testevent
 
   mixing:
-    module: wishbone.builtin.flow.roundrobin
+    module: wishbone.flow.roundrobin
 
   output1:
-    module: wishbone.builtin.output.stdout
+    module: wishbone.output.stdout
     arguments:
       prefix: "I am number one: "
 
   output2:
-    module: wishbone.builtin.output.stdout
+    module: wishbone.output.stdout
     arguments:
       prefix: "I am number two: "
 

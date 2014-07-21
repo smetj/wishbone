@@ -10,9 +10,10 @@ functionality. They are created by simply inheriting
 :py:class:`wishbone.Actor` as a baseclass. Modules cannot directly invoke each
 others functionality. Their only means of interaction is by passing messages
 or events to each other's :py:class:`wishbone.tools.WishboneQueue` queues.
-Modules typically have, but are not limited to, an inbox and outbox queue.
+Modules typically have, but are not limited to, an inbox, outbox, successful
+and failed queue.
 
-Queues always live inside a :py:class:`wishbone.tools.QueuePool` which,
+Queues always live inside a :py:class:`Wishbone.queue.QueuePool` which,
 besides offering some convenience functions, is nothing more than a container
 to centralize all the queues of the module. Typically, modules consume each
 event entering the inbox queue using the :py:func:`wishbone.Actor.consume`
