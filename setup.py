@@ -90,15 +90,16 @@ setup(
             'funnel = wishbone.module.funnel:Funnel',
             'roundrobin = wishbone.module.roundrobin:RoundRobin'
         ],
-        'wishbone.logging': [
+        'wishbone.encode': [
             'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
-            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
-        ],
-        'wishbone.metrics': [
             'graphite = wishbone.module.graphite:Graphite',
+        ],
+        'wishbone.decode': [
+
         ],
         'wishbone.function': [
             'header = wishbone.module.header:Header',
+            # 'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
         ],
         'wishbone.input': [
             'tcp = wishbone.module.tcpin:TCPIn',
@@ -114,11 +115,17 @@ setup(
             'disk = wishbone.module.diskout:DiskOut',
             'amqp = wishbone.module.amqpout:AMQPOut'
         ],
+        'wishbone.contrib.flow': [
+        ],
+        'wishbone.contrib.encode': [
+        ],
+        'wishbone.contrib.decode': [
+        ],
+        'wishbone.contrib.function': [
+        ],
         'wishbone.contrib.input': [
         ],
         'wishbone.contrib.output': [
-        ],
-        'wishbone.contrib.function': [
         ]
     }
 )
