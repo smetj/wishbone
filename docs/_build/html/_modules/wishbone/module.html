@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>wishbone.module &mdash; Wishbone 0.4.9 documentation</title>
+    <title>wishbone.module &mdash; Wishbone 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="../../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.4.9',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="Wishbone 0.4.9 documentation" href="../../index.html" />
+    <link rel="top" title="Wishbone 0.5.0 documentation" href="../../index.html" />
     <link rel="up" title="wishbone" href="../wishbone.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -40,7 +40,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="../../index.html">Wishbone 0.4.9 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">Wishbone 0.5.0 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../wishbone.html" accesskey="U">wishbone</a> &raquo;</li> 
       </ul>
@@ -53,12 +53,11 @@
             
   <h1>Source code for wishbone.module</h1><div class="highlight"><pre>
 <span class="c">#!/usr/bin/env python</span>
-<span class="c">#</span>
 <span class="c"># -*- coding: utf-8 -*-</span>
 <span class="c">#</span>
 <span class="c">#  __init__.py</span>
 <span class="c">#</span>
-<span class="c">#  Copyright 2013 Jelle Smet &lt;development@smetj.net&gt;</span>
+<span class="c">#  Copyright 2014 Jelle Smet &lt;development@smetj.net&gt;</span>
 <span class="c">#</span>
 <span class="c">#  This program is free software; you can redistribute it and/or modify</span>
 <span class="c">#  it under the terms of the GNU General Public License as published by</span>
@@ -77,19 +76,22 @@
 <span class="c">#</span>
 <span class="c">#</span>
 
-<span class="kn">from</span> <span class="nn">wishbone.module.null</span> <span class="kn">import</span> <span class="n">Null</span>
-<span class="kn">from</span> <span class="nn">wishbone.module.graphite</span> <span class="kn">import</span> <span class="n">Graphite</span>
-<span class="kn">from</span> <span class="nn">wishbone.module.stdout</span> <span class="kn">import</span> <span class="n">STDOUT</span>
-<span class="kn">from</span> <span class="nn">wishbone.module.loglevelfilter</span> <span class="kn">import</span> <span class="n">LogLevelFilter</span>
-<span class="kn">from</span> <span class="nn">wishbone.module.fanout</span> <span class="kn">import</span> <span class="n">Fanout</span>
-<span class="kn">from</span> <span class="nn">wishbone.module.funnel</span> <span class="kn">import</span> <span class="n">Funnel</span>
-<span class="kn">from</span> <span class="nn">wishbone.module.header</span> <span class="kn">import</span> <span class="n">Header</span>
-<span class="kn">from</span> <span class="nn">wishbone.module.tippingbucket</span> <span class="kn">import</span> <span class="n">TippingBucket</span>
-<span class="kn">from</span> <span class="nn">wishbone.module.lockbuffer</span> <span class="kn">import</span> <span class="n">LockBuffer</span>
-<span class="kn">from</span> <span class="nn">wishbone.module.humanlogformatter</span> <span class="kn">import</span> <span class="n">HumanLogFormatter</span>
-<span class="kn">from</span> <span class="nn">wishbone.module.wbsyslog</span> <span class="kn">import</span> <span class="n">Syslog</span>
-<span class="kn">from</span> <span class="nn">wishbone.module.testevent</span> <span class="kn">import</span> <span class="n">TestEvent</span>
-<span class="kn">from</span> <span class="nn">wishbone.module.roundrobin</span> <span class="kn">import</span> <span class="n">RoundRobin</span>
+<span class="kn">from</span> <span class="nn">testevent</span> <span class="kn">import</span> <span class="n">TestEvent</span>
+<span class="kn">from</span> <span class="nn">null</span> <span class="kn">import</span> <span class="n">Null</span>
+<span class="kn">from</span> <span class="nn">stdout</span> <span class="kn">import</span> <span class="n">STDOUT</span>
+<span class="kn">from</span> <span class="nn">funnel</span> <span class="kn">import</span> <span class="n">Funnel</span>
+<span class="kn">from</span> <span class="nn">tcpout</span> <span class="kn">import</span> <span class="n">TCPOut</span>
+<span class="kn">from</span> <span class="nn">graphite</span> <span class="kn">import</span> <span class="n">Graphite</span>
+<span class="kn">from</span> <span class="nn">tcpin</span> <span class="kn">import</span> <span class="n">TCPIn</span>
+<span class="kn">from</span> <span class="nn">diskout</span> <span class="kn">import</span> <span class="n">DiskOut</span>
+<span class="kn">from</span> <span class="nn">diskin</span> <span class="kn">import</span> <span class="n">DiskIn</span>
+<span class="kn">from</span> <span class="nn">humanlogformat</span> <span class="kn">import</span> <span class="n">HumanLogFormat</span>
+<span class="kn">from</span> <span class="nn">header</span> <span class="kn">import</span> <span class="n">Header</span>
+<span class="kn">from</span> <span class="nn">wbsyslog</span> <span class="kn">import</span> <span class="n">Syslog</span>
+<span class="kn">from</span> <span class="nn">amqpin</span> <span class="kn">import</span> <span class="n">AMQPIn</span>
+<span class="kn">from</span> <span class="nn">amqpout</span> <span class="kn">import</span> <span class="n">AMQPOut</span>
+<span class="kn">from</span> <span class="nn">roundrobin</span> <span class="kn">import</span> <span class="n">RoundRobin</span>
+<span class="kn">from</span> <span class="nn">fanout</span> <span class="kn">import</span> <span class="n">Fanout</span>
 </pre></div>
 
           </div>
@@ -120,14 +122,14 @@
         <li class="right" style="margin-right: 10px">
           <a href="../../genindex.html" title="General Index"
              >index</a></li>
-        <li><a href="../../index.html">Wishbone 0.4.9 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">Wishbone 0.5.0 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li>
           <li><a href="../wishbone.html" >wishbone</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2013, Jelle Smet.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+        &copy; Copyright 2014, Jelle Smet.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>
