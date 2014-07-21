@@ -59,7 +59,7 @@ TODO(smetj): more info
 
 Verify installation
 '''''''''''''''''''
-
+x
 Once installed you should have the `wishbone` executable available in your search
 path:
 
@@ -89,41 +89,44 @@ default modules by using the *list* command:
 .. code-block:: sh
 
     $ wishbone list
-    Available Wishbone modules:
-    +---------------------------+-------------------+---------+----------------------------------------------------------------------+
-    | Group                     | Module            | Version | Description                                                          |
-    +---------------------------+-------------------+---------+----------------------------------------------------------------------+
-    | wishbone.builtin.logging  | loglevelfilter    | 0.4.8   | Filters Wishbone log events.                                         |
-    |                           | humanlogformatter | 0.4.8   | Formats Wishbone log events.                                         |
-    |                           |                   |         |                                                                      |
-    | wishbone.builtin.metrics  | graphite          | 0.4.8   | Converts the internal metric format to Graphite format.              |
-    |                           |                   |         |                                                                      |
-    | wishbone.builtin.flow     | roundrobin        | 0.4.8   | Round-robins incoming events to all connected queues.                |
-    |                           | fanout            | 0.4.8   | Duplicates incoming events to all connected queues.                  |
-    |                           | tippingbucket     | 0.4.8   | Event buffer module.                                                 |
-    |                           | funnel            | 0.4.8   | Merges incoming events from multiple queues to 1 queue.              |
-    |                           | lockbuffer        | 0.4.8   | A module with a fixed size inbox queue.                              |
-    |                           |                   |         |                                                                      |
-    | wishbone.builtin.function | header            | 0.4.8   | Adds information to event headers.                                   |
-    |                           |                   |         |                                                                      |
-    | wishbone.builtin.input    | testevent         | 0.4.8   | Generates a test event at the chosen interval.                       |
-    |                           |                   |         |                                                                      |
-    | wishbone.builtin.output   | syslog            | 0.4.8   | Writes log events to syslog.                                         |
-    |                           | null              | 0.4.8   | Purges incoming events..                                             |
-    |                           | stdout            | 0.4.8   | Prints incoming events to STDOUT.                                    |
-    |                           | slow              | 0.4.8   | Processes an incoming event per X seconds.                           |
-    |                           |                   |         |                                                                      |
-    +---------------------------+-------------------+---------+----------------------------------------------------------------------+
+    +----------+----------+------------+---------+------------------------------------------------------------+
+    | Category | Group    | Module     | Version | Description                                                |
+    +----------+----------+------------+---------+------------------------------------------------------------+
+    |          |          |            |         |                                                            |
+    | wishbone | flow     | funnel     |   0.5.0 | Funnel multiple incoming queues to 1 outgoing queue.       |
+    |          |          | fanout     |   0.5.0 | Funnel multiple incoming queues to 1 outgoing queue.       |
+    |          |          | roundrobin |   0.5.0 | Round-robins incoming events to all connected queues.      |
+    |          |          |            |         |                                                            |
+    |          | function | header     |   0.5.0 | Adds information to event headers.                         |
+    |          |          |            |         |                                                            |
+    |          | input    | disk       |   0.5.0 | Reads messages from a disk buffer.                         |
+    |          |          | testevent  |   0.5.0 | Generates a test event at the chosen interval.             |
+    |          |          | tcp        |   0.5.0 | A Wishbone input module which listens on a TCP socket.     |
+    |          |          | amqp       |   0.5.0 | Consumes messages from AMQP.                               |
+    |          |          |            |         |                                                            |
+    |          | output   | disk       |   0.5.0 | Writes messages to a disk buffer.                          |
+    |          |          | amqp       |   0.5.0 | Produces messages to AMQP.                                 |
+    |          |          | stdout     |   0.5.0 | Prints incoming events to STDOUT.                          |
+    |          |          | tcp        |   0.5.0 | A Wishbone ouput module which writes data to a TCP socket. |
+    |          |          | syslog     |   0.5.0 | Writes log events to syslog.                               |
+    |          |          | null       |   0.5.0 | Purges incoming events.                                    |
+    |          |          |            |         |                                                            |
+    +----------+----------+------------+---------+------------------------------------------------------------+
+
 
 Modules are stored into a hierarchic name space.  The complete name of a
-module consists out of the group name + the module name.  You can read the details of a module by executing the *show* command:
+module consists out of the category name + group name + module name.  You can read the details of a module by executing the *show* command:
 
 .. code-block:: sh
 
-    $ wishbone show wishbone.builtin.input.testevent
-    **Generates a test event at the chosen interval.**
+    $ wishbone show --module wishbone.input.testevent
+    Module "wishbone.input.testevent" version 0.5.0
+    ===============================================
 
-        This module is only available for testing purposes and has further hardly any use.
+    Generates a test event at the chosen interval.
+    ----------------------------------------------
+
+
 
         Events have following format:
 
@@ -131,27 +134,43 @@ module consists out of the group name + the module name.  You can read the detai
 
         Parameters:
 
-            - name (str):               The instance name when initiated.
+            -   name(str)
+                The name of the module.
 
-            - interval (float):         The interval in seconds between each generated event.
-                                        Should have a value > 0.
-                                        default: 1
+            -   size(int)
+                The default max length of each queue.
+
+            -   frequency(int)
+                The frequency in seconds to generate metrics.
+
+            - interval (float):     The interval in seconds between each generated event.
+                                    A value of 0 means as fast as possible.
+                                    default: 1
+
+            - message (string):     The content of the test message.
+                                    default: "test"
+
+            - numbered (bool):      When true, appends a sequential number to the end.
+                                    default: False
 
         Queues:
 
             - outbox:    Contains the generated events.
+
+    $
+
 
 
 External modules
 ''''''''''''''''
 
 Not all modules are builtin modules.  There is a collection of modules which
-can be downloaded from https://github.com/smetj/wishboneModules.  The reason
-they are not builtin modules is to limit the number of dependencies for
-Wishbone itself.  All modules are also in 1 repository.  Within time they will
-be available as separate projects and added to Pypi.
+can be downloaded from https://github.com/smetj/wishboneModules. Any Wishbone
+modules which are not an inherent part of the project itself will be installed
+in the *wishbone.contrib* category.
 
-To install an *external* module follow these steps:
+Installing a "contrib" module typically involves installing the provided
+packages through **pypi** or by installing the Python package manually.
 
 .. code-block:: sh
 

@@ -44,7 +44,15 @@ class ModuleManager():
 
     def getModule(self, category, group, name):
 
-        return pkg_resources.load_entry_point(category, "%s.%s" % (category, group), name)
+        for module in pkg_resources.iter_entry_points("%s.%s" % (category, group)):
+            if module.name == name:
+                return module.load()
+    # print dir(blah)
+    # print blah.module_name
+    # print blah.dist
+
+    #     print category, group, name
+    #     return pkg_resources.load_entry_point(category, "%s.%s" % (category, group), name)
 
     def getModuleDoc(self, category, group, name):
 
@@ -78,12 +86,15 @@ class ModuleManager():
                 group_header = group
             table.add_row([category, group, module, version, title])
 
+        table.add_row(["", "", "", "", ""])
         return table.get_string()
 
     def getModuleVersion(self, category, group, name):
 
         try:
-            return pkg_resources.get_entry_info(category, "%s.%s" % (category, group), name).dist.version
+            for module in pkg_resources.iter_entry_points("%s.%s" % (category, group)):
+                if module.name == name:
+                    return module.dist.version
         except:
             return "?"
 
