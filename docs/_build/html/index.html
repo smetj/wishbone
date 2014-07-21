@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Wishbone &mdash; Wishbone 0.4.9 documentation</title>
+    <title>Wishbone &mdash; Wishbone 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.9',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Wishbone 0.4.9 documentation" href="#" />
+    <link rel="top" title="Wishbone 0.5.0 documentation" href="#" />
     <link rel="next" title="Installation" href="installation.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="installation.html" title="Installation"
              accesskey="N">next</a> |</li>
-        <li><a href="#">Wishbone 0.4.9 documentation</a> &raquo;</li> 
+        <li><a href="#">Wishbone 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -57,23 +57,23 @@
 <p><a class="reference external" href="https://github.com/smetj/wishbone">https://github.com/smetj/wishbone</a></p>
 <p>A Python library to build and CLI tool to manage asynchronous coroutine based
 event pipeline servers with minimal effort.</p>
-<p>Works on python 2.6+, 2.7+ including Python 3 and PyPy 2.0.2</p>
+<p>Works on python 2.7+ and PyPy 2.3.1+</p>
 <img alt="_images/intro.png" class="align-right" src="_images/intro.png" />
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">wishbone.router</span> <span class="kn">import</span> <span class="n">Default</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">wishbone.module</span> <span class="kn">import</span> <span class="n">TestEvent</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">wishbone.module</span> <span class="kn">import</span> <span class="n">RoundRobin</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">wishbone.module</span> <span class="kn">import</span> <span class="n">STDOUT</span>
-<span class="go">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">=</span><span class="n">Default</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">TestEvent</span><span class="p">,</span> <span class="s">&quot;input&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">RoundRobin</span><span class="p">,</span> <span class="s">&quot;mixing&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">STDOUT</span><span class="p">,</span> <span class="s">&quot;output1&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&quot;I am number one: &quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">STDOUT</span><span class="p">,</span> <span class="s">&quot;output2&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&quot;I am number two: &quot;</span><span class="p">)</span>
-<span class="go">&gt;&gt;&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span> <span class="o">=</span> <span class="n">Default</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">initializeModule</span><span class="p">(</span><span class="n">TestEvent</span><span class="p">,</span> <span class="s">&quot;input&quot;</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">initializeModule</span><span class="p">(</span><span class="n">RoundRobin</span><span class="p">,</span> <span class="s">&quot;mixing&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">initializeModule</span><span class="p">(</span><span class="n">STDOUT</span><span class="p">,</span> <span class="s">&quot;output1&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&quot;I am number one: &quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">initializeModule</span><span class="p">(</span><span class="n">STDOUT</span><span class="p">,</span> <span class="s">&quot;output2&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&quot;I am number two: &quot;</span><span class="p">)</span>
+
 <span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&quot;input.outbox&quot;</span><span class="p">,</span> <span class="s">&quot;mixing.inbox&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&quot;mixing.one&quot;</span><span class="p">,</span> <span class="s">&quot;output1.inbox&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s">&quot;mixing.two&quot;</span><span class="p">,</span> <span class="s">&quot;output2.inbox&quot;</span><span class="p">)</span>
-<span class="go">&gt;&gt;&gt;</span>
+
 <span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">block</span><span class="p">()</span>
 <span class="go">I am number one: test</span>
@@ -92,7 +92,7 @@ event pipeline servers with minimal effort.</p>
 create a simple setup in which we connect the <a class="reference internal" href="modules.html#wishbone.module.TestEvent" title="wishbone.module.TestEvent"><tt class="xref py py-class docutils literal"><span class="pre">TestEvent</span></tt></a> input
 module, which does nothing more than generating the word &#8220;test&#8221; every second,
 to the <a class="reference internal" href="modules.html#wishbone.module.RoundRobin" title="wishbone.module.RoundRobin"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.module.RoundRobin</span></tt></a> module which on its turn
-roundrobins the incoming events to 2 <a class="reference internal" href="modules.html#wishbone.module.STDOUT" title="wishbone.module.STDOUT"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.module.STDOUT</span></tt></a> module
+&#8220;roundrobins&#8221; the incoming events to 2 <a class="reference internal" href="modules.html#wishbone.module.STDOUT" title="wishbone.module.STDOUT"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.module.STDOUT</span></tt></a> module
 instances which print all incoming events to STDOUT.</p>
 <div class="section" id="bootstrapping">
 <h2>Bootstrapping<a class="headerlink" href="#bootstrapping" title="Permalink to this headline">¶</a></h2>
@@ -102,18 +102,18 @@ the above example:</p>
 <div class="highlight-yaml"><div class="highlight"><pre><span class="nn">---</span>
 <span class="l-Scalar-Plain">modules</span><span class="p-Indicator">:</span>
   <span class="l-Scalar-Plain">input</span><span class="p-Indicator">:</span>
-    <span class="l-Scalar-Plain">module</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">wishbone.builtin.input.testevent</span>
+    <span class="l-Scalar-Plain">module</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">wishbone.input.testevent</span>
 
   <span class="l-Scalar-Plain">mixing</span><span class="p-Indicator">:</span>
-    <span class="l-Scalar-Plain">module</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">wishbone.builtin.flow.roundrobin</span>
+    <span class="l-Scalar-Plain">module</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">wishbone.flow.roundrobin</span>
 
   <span class="l-Scalar-Plain">output1</span><span class="p-Indicator">:</span>
-    <span class="l-Scalar-Plain">module</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">wishbone.builtin.output.stdout</span>
+    <span class="l-Scalar-Plain">module</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">wishbone.output.stdout</span>
     <span class="l-Scalar-Plain">arguments</span><span class="p-Indicator">:</span>
       <span class="l-Scalar-Plain">prefix</span><span class="p-Indicator">:</span> <span class="s">&quot;I</span><span class="nv"> </span><span class="s">am</span><span class="nv"> </span><span class="s">number</span><span class="nv"> </span><span class="s">one:</span><span class="nv"> </span><span class="s">&quot;</span>
 
   <span class="l-Scalar-Plain">output2</span><span class="p-Indicator">:</span>
-    <span class="l-Scalar-Plain">module</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">wishbone.builtin.output.stdout</span>
+    <span class="l-Scalar-Plain">module</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">wishbone.output.stdout</span>
     <span class="l-Scalar-Plain">arguments</span><span class="p-Indicator">:</span>
       <span class="l-Scalar-Plain">prefix</span><span class="p-Indicator">:</span> <span class="s">&quot;I</span><span class="nv"> </span><span class="s">am</span><span class="nv"> </span><span class="s">number</span><span class="nv"> </span><span class="s">two:</span><span class="nv"> </span><span class="s">&quot;</span>
 
@@ -125,16 +125,22 @@ the above example:</p>
 </pre></div>
 </div>
 <p>Bootstrapping the environment is just a matter of invoking the <strong>wishbone</strong>
-executable with the &#8211;config parameter pointing to the bootstrap file.</p>
-<div class="highlight-sh"><pre>[smetj@indigo ~]$ wishbone debug --config test.yaml
-2013-08-09T23:13:39 pid-13797 informational Router: Queue one does not exist in module mixing.  Autocreate queue.
-2013-08-09T23:13:39 pid-13797 informational Router: Queue two does not exist in module mixing.  Autocreate queue.
-2013-08-09T23:13:39 pid-13797 informational Router: Starting.
-2013-08-09T23:13:39 pid-13797 informational loglevelfilter: Initiated
-2013-08-09T23:13:39 pid-13797 informational loglevelfilter: Created module queue named inbox with max_size 0.
-2013-08-09T23:13:39 pid-13797 informational loglevelfilter: Created module queue named outbox with max_size 0.
-... snip ...
-2013-08-09T23:13:39 pid-13797 informational input: Started
+executable using the &#8211;config parameter pointing to the bootstrap file.</p>
+<div class="highlight-sh"><div class="highlight"><pre>[smetj@indigo ~]$ wishbone debug --config test.yaml
+2014-07-19T23:56:53 pid-8154 debug metrics_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
+2014-07-19T23:56:53 pid-8154 debug metrics_funnel: preHook() found, executing
+2014-07-19T23:56:53 pid-8154 debug logs_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
+2014-07-19T23:56:53 pid-8154 debug logs_funnel: preHook() found, executing
+2014-07-19T23:56:53 pid-8154 debug mixing: Started with max queue size of 100 events and metrics interval of 1 seconds.
+2014-07-19T23:56:53 pid-8154 debug mixing: preHook() found, executing
+2014-07-19T23:56:53 pid-8154 debug input: Started with max queue size of 100 events and metrics interval of 1 seconds.
+2014-07-19T23:56:53 pid-8154 debug input: preHook() found, executing
+2014-07-19T23:56:53 pid-8154 debug output1: Started with max queue size of 100 events and metrics interval of 1 seconds.
+2014-07-19T23:56:53 pid-8154 debug output2: Started with max queue size of 100 events and metrics interval of 1 seconds.
+2014-07-19T23:56:53 pid-8154 debug log_stdout: Started with max queue size of 100 events and metrics interval of 1 seconds.
+2014-07-19T23:56:53 pid-8154 debug log_format: Started with max queue size of 100 events and metrics interval of 1 seconds.
+2014-07-19T23:56:53 pid-8154 debug syslog: Started with max queue size of 100 events and metrics interval of 1 seconds.
+2014-07-19T23:56:53 pid-8154 debug syslog: preHook() found, executing
 I am number two: test
 I am number one: test
 I am number two: test
@@ -143,16 +149,11 @@ I am number two: test
 I am number one: test
 I am number two: test
 I am number one: test
-^C2013-08-09T23:13:47 pid-13797 informational Router: Received SIGINT. Shutting down.
-2013-08-09T23:13:47 pid-13797 informational Router: Stopping.
-2013-08-09T23:13:47 pid-13797 informational output2: Shutdown
-2013-08-09T23:13:48 pid-13797 warning output2: Queue &lt;wishbone.tools.wishbonequeue.WishboneQueue instance at 0x2101a28&gt; locked.
-2013-08-09T23:13:48 pid-13797 informational output1: Shutdown
-2013-08-09T23:13:48 pid-13797 warning output1: Queue &lt;wishbone.tools.wishbonequeue.WishboneQueue instance at 0x2101680&gt; locked.
-2013-08-09T23:13:48 pid-13797 informational mixing: Shutdown
-2013-08-09T23:13:48 pid-13797 warning mixing: Queue &lt;wishbone.tools.wishbonequeue.WishboneQueue instance at 0x2101098&gt; locked.
-2013-08-09T23:13:49 pid-13797 informational input: Shutdown
-[smetj@indigo ~]$</pre>
+^C2014-07-19T23:56:56 pid-8154 debug syslog: postHook() found, executing
+2014-07-19T23:56:56 pid-8154 debug syslog: postHook() found, executing
+2014-07-19T23:56:57 pid-8154 informational input: Stopped producing events.
+[smetj@indigo ~]$
+</pre></div>
 </div>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
@@ -219,9 +220,7 @@ I am number one: test
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Wishbone</a><ul>
-<li><a class="reference internal" href="#bootstrapping">Bootstrapping</a><ul>
-</ul>
-</li>
+<li><a class="reference internal" href="#bootstrapping">Bootstrapping</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </li>
@@ -256,12 +255,12 @@ I am number one: test
         <li class="right" >
           <a href="installation.html" title="Installation"
              >next</a> |</li>
-        <li><a href="#">Wishbone 0.4.9 documentation</a> &raquo;</li> 
+        <li><a href="#">Wishbone 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2013, Jelle Smet.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+        &copy; Copyright 2014, Jelle Smet.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

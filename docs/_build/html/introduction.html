@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Introduction &mdash; Wishbone 0.4.9 documentation</title>
+    <title>Introduction &mdash; Wishbone 0.5.0 documentation</title>
     
     <link rel="stylesheet" href="_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.4.9',
+        VERSION:     '0.5.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Wishbone 0.4.9 documentation" href="index.html" />
+    <link rel="top" title="Wishbone 0.5.0 documentation" href="index.html" />
     <link rel="next" title="Actor" href="actor.html" />
     <link rel="prev" title="Installation" href="installation.html" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -47,7 +47,7 @@
         <li class="right" >
           <a href="installation.html" title="Installation"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.9 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -67,14 +67,14 @@ setups from CLI and have them running as permanent solutions.</p>
 <h2>Modules and Queues<a class="headerlink" href="#modules-and-queues" title="Permalink to this headline">¶</a></h2>
 <p>Modules are isolated blocks of code (greenlets) each with their own specific
 functionality. They are created by simply inheriting
-<a class="reference internal" href="actor.html#wishbone.Actor" title="wishbone.Actor"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.Actor</span></tt></a> as a baseclass. Modules cannot directly invoke each
+<tt class="xref py py-class docutils literal"><span class="pre">wishbone.Actor</span></tt> as a baseclass. Modules cannot directly invoke each
 others functionality. Their only means of interaction is by passing messages
-or events to each other&#8217;s <a class="reference internal" href="actor.html#wishbone.tools.WishboneQueue" title="wishbone.tools.WishboneQueue"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.tools.WishboneQueue</span></tt></a> queues.
+or events to each other&#8217;s <tt class="xref py py-class docutils literal"><span class="pre">wishbone.tools.WishboneQueue</span></tt> queues.
 Modules typically have, but are not limited to, an inbox and outbox queue.</p>
-<p>Queues always live inside a <a class="reference internal" href="actor.html#wishbone.tools.QueuePool" title="wishbone.tools.QueuePool"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.tools.QueuePool</span></tt></a> which,
+<p>Queues always live inside a <tt class="xref py py-class docutils literal"><span class="pre">wishbone.tools.QueuePool</span></tt> which,
 besides offering some convenience functions, is nothing more than a container
 to centralize all the queues of the module. Typically, modules consume each
-event entering the inbox queue using the <a class="reference internal" href="actor.html#wishbone.Actor.consume" title="wishbone.Actor.consume"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.Actor.consume()</span></tt></a>
+event entering the inbox queue using the <tt class="xref py py-func docutils literal"><span class="pre">wishbone.Actor.consume()</span></tt>
 function where the event can be processed and after which it is submitted to
 the module&#8217;s outbox queue from where it can be forwarded again to another
 module&#8217;s queue.</p>
@@ -85,20 +85,20 @@ separate project. The modules can be found on
 </div>
 <div class="section" id="router">
 <h2>Router<a class="headerlink" href="#router" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference internal" href="router.html#wishbone.router.Default" title="wishbone.router.Default"><tt class="xref py py-class docutils literal"><span class="pre">wishbone.router.Default</span></tt></a> router is used to initialize the
+<p>The <tt class="xref py py-class docutils literal"><span class="pre">wishbone.router.Default</span></tt> router is used to initialize the
 modules and to organize the event stream between them.</p>
-<p>Modules are registered using <a class="reference internal" href="router.html#wishbone.router.Default.register" title="wishbone.router.Default.register"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.register()</span></tt></a>. The
+<p>Modules are registered using <tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.register()</span></tt>. The
 router takes care of the proper startup
-<a class="reference internal" href="router.html#wishbone.router.Default.start" title="wishbone.router.Default.start"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.start()</span></tt></a> and shutdown
-<a class="reference internal" href="router.html#wishbone.router.Default.start" title="wishbone.router.Default.start"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.start()</span></tt></a> sequence of all the modules.</p>
+<tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.start()</span></tt> and shutdown
+<tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.start()</span></tt> sequence of all the modules.</p>
 <p>Queues are connected to each other using
-<a class="reference internal" href="router.html#wishbone.router.Default.connect" title="wishbone.router.Default.connect"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.connect()</span></tt></a>.  Queues can only have a &#8220;1 to 1&#8221;
+<tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.connect()</span></tt>.  Queues can only have a &#8220;1 to 1&#8221;
 relationship.  If you require a &#8220;1 to N&#8221; or similar scenario you might have to
 use one of the builtin flow modules.</p>
 <p>The router also takes care of the logs and metrics produced by the modules.
 By registering Wishbone modules using
-<a class="reference internal" href="router.html#wishbone.router.Default.registerLogModule" title="wishbone.router.Default.registerLogModule"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.registerLogModule()</span></tt></a> and
-<a class="reference internal" href="router.html#wishbone.router.Default.registerMetricModule" title="wishbone.router.Default.registerMetricModule"><tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.registerMetricModule()</span></tt></a> we can pretty much do
+<tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.registerLogModule()</span></tt> and
+<tt class="xref py py-func docutils literal"><span class="pre">wishbone.router.Default.registerMetricModule()</span></tt> we can pretty much do
 what we want with them.</p>
 </div>
 <div class="section" id="events">
@@ -170,12 +170,12 @@ for network IO.</p>
         <li class="right" >
           <a href="installation.html" title="Installation"
              >previous</a> |</li>
-        <li><a href="index.html">Wishbone 0.4.9 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Wishbone 0.5.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2013, Jelle Smet.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+        &copy; Copyright 2014, Jelle Smet.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>
