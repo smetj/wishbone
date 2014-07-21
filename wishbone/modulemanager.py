@@ -82,12 +82,9 @@ class ModuleManager():
 
     def getModuleVersion(self, category, group, name):
 
-
-
         try:
             return pkg_resources.get_entry_info(category, "%s.%s" % (category, group), name).dist.version
         except:
-            print "%s %s.%s %s" % (category, category, group, name)
             return "?"
 
     def __getTable(self):
