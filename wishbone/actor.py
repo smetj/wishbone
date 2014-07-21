@@ -125,13 +125,10 @@ class Actor():
         if not self.__adminConsumer_active:
             spawn(self.__adminConsumer)
 
-
-
-
     def start(self):
         '''Starts the module.'''
 
-        self.readQueuesFromDisk()
+        # self.readQueuesFromDisk()
 
         if hasattr(self, "preHook"):
             self.logging.debug("preHook() found, executing")
@@ -150,7 +147,7 @@ class Actor():
             self.logging.debug("postHook() found, executing")
             self.postHook()
 
-        self.flushQueuesToDisk()
+        # self.flushQueuesToDisk()
 
     def submit(self, event, queue):
         '''A convenience function which submits <event> to <queue>
