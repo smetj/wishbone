@@ -70,7 +70,7 @@ class BootStrap():
         llist.add_argument('--group', type=str, dest='group', default=None, help='List the modules of this group type.')
 
         show = subparsers.add_parser('show', description="Shows the details of a module.")
-        show.add_argument('--module', type=str, default=None, help='Shows the documentation of the module. ')
+        show.add_argument('--module', type=str, help='Shows the documentation of the module. ')
 
         arguments = vars(parser.parse_args())
 
@@ -117,21 +117,30 @@ class Dispatch():
 
         print self.module_manager.getModuleTable(category, group)
 
-
-    def show(self, command, module=None):
+    def show(self, command, module):
         '''
         Shows the help message of a module.
         '''
 
-        category = ["flow", "logging", "metrics", "function", "input", "output"]
+        try:
+            (category, group, module) = module.split('.')
+        except ValueError:
+            (category, sub, group, module) = module.split('.')
+            category = "%s.%s" % (category, sub)
 
-        if module is None:
-            for group in category:
-                for m in pkg_resources.iter_entry_points(group="wishbone.%s" % (group)):
-                    print m.load().__doc__
-                    # print m.name
-                    # print "".join(pkg_resources.load_entry_point("wishbone","wishbone.%s" % (group), m.name).__doc__)
+        try:
+            title = self.module_manager.getModuleTitle(category, group, module)
+            version = self.module_manager.getModuleVersion(category, group, module)
+            header = 'Module "%s.%s.%s" version %s' % (category, group, module, version)
 
+            print header
+            print "="*len(header)
+            print
+            print title
+            print "-"*len(title)
+            print self.module_manager.getModuleDoc(category, group, module)
+        except Exception as err:
+            print "Failed to load module %s.%s.%s. Reason: %s" % (category, group, module, err)
 
     def start(self, command, config, instances, pid, queue_size, frequency):
         '''
