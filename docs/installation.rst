@@ -10,15 +10,7 @@ Pypi
 '''''
 
 You can install the latest stable version of Wishbone from
-https://pypi.python.org/pypi/wishbone/ by using easy_install or pip:
-
-
-
-.. code-block:: sh
-
-    $ easy_install wishbone
-
-Or
+https://pypi.python.org/pypi/wishbone/ by using pip:
 
 .. code-block:: sh
 
@@ -56,6 +48,13 @@ branch and build from there:
     $ cd wishbone
     $ git checkout develop
     $ sudo python setup.py install
+
+
+Docker
+''''''
+
+As of version 0.5 a Docker container of Wishbone is available.
+TODO(smetj): more info
 
 
 Verify installation

@@ -13,7 +13,7 @@ https://github.com/smetj/wishbone
 A Python library to build and CLI tool to manage asynchronous coroutine based
 event pipeline servers with minimal effort.
 
-Works on python 2.6+, 2.7+ including Python 3 and PyPy 2.0.2
+Works on python 2.7+ and PyPy 2.3.1+
 
 .. image:: intro.png
     :align: right
@@ -24,17 +24,17 @@ Works on python 2.6+, 2.7+ including Python 3 and PyPy 2.0.2
     >>> from wishbone.module import TestEvent
     >>> from wishbone.module import RoundRobin
     >>> from wishbone.module import STDOUT
-    >>>
-    >>> router=Default()
-    >>> router.register(TestEvent, "input")
-    >>> router.register(RoundRobin, "mixing")
-    >>> router.register(STDOUT, "output1", prefix="I am number one: ")
-    >>> router.register(STDOUT, "output2", prefix="I am number two: ")
-    >>>
+
+    >>> router = Default()
+    >>> router.initializeModule(TestEvent, "input", interval=1)
+    >>> router.initializeModule(RoundRobin, "mixing")
+    >>> router.initializeModule(STDOUT, "output1", prefix="I am number one: ")
+    >>> router.initializeModule(STDOUT, "output2", prefix="I am number two: ")
+
     >>> router.connect("input.outbox", "mixing.inbox")
     >>> router.connect("mixing.one", "output1.inbox")
     >>> router.connect("mixing.two", "output2.inbox")
-    >>>
+
     >>> router.start()
     >>> router.block()
     I am number one: test
@@ -53,7 +53,7 @@ This example we initialize the :class:`wishbone.router.Default` router to
 create a simple setup in which we connect the :py:class:`TestEvent` input
 module, which does nothing more than generating the word "test" every second,
 to the :class:`wishbone.module.RoundRobin` module which on its turn
-roundrobins the incoming events to 2 :class:`wishbone.module.STDOUT` module
+"roundrobins" the incoming events to 2 :class:`wishbone.module.STDOUT` module
 instances which print all incoming events to STDOUT.
 
 
@@ -68,19 +68,25 @@ the above example:
    :language: yaml
 
 Bootstrapping the environment is just a matter of invoking the **wishbone**
-executable with the --config parameter pointing to the bootstrap file.
+executable using the --config parameter pointing to the bootstrap file.
 
 .. code-block:: sh
 
     [smetj@indigo ~]$ wishbone debug --config test.yaml
-    2013-08-09T23:13:39 pid-13797 informational Router: Queue one does not exist in module mixing.  Autocreate queue.
-    2013-08-09T23:13:39 pid-13797 informational Router: Queue two does not exist in module mixing.  Autocreate queue.
-    2013-08-09T23:13:39 pid-13797 informational Router: Starting.
-    2013-08-09T23:13:39 pid-13797 informational loglevelfilter: Initiated
-    2013-08-09T23:13:39 pid-13797 informational loglevelfilter: Created module queue named inbox with max_size 0.
-    2013-08-09T23:13:39 pid-13797 informational loglevelfilter: Created module queue named outbox with max_size 0.
-    ... snip ...
-    2013-08-09T23:13:39 pid-13797 informational input: Started
+    2014-07-19T23:56:53 pid-8154 debug metrics_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-07-19T23:56:53 pid-8154 debug metrics_funnel: preHook() found, executing
+    2014-07-19T23:56:53 pid-8154 debug logs_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-07-19T23:56:53 pid-8154 debug logs_funnel: preHook() found, executing
+    2014-07-19T23:56:53 pid-8154 debug mixing: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-07-19T23:56:53 pid-8154 debug mixing: preHook() found, executing
+    2014-07-19T23:56:53 pid-8154 debug input: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-07-19T23:56:53 pid-8154 debug input: preHook() found, executing
+    2014-07-19T23:56:53 pid-8154 debug output1: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-07-19T23:56:53 pid-8154 debug output2: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-07-19T23:56:53 pid-8154 debug log_stdout: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-07-19T23:56:53 pid-8154 debug log_format: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-07-19T23:56:53 pid-8154 debug syslog: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-07-19T23:56:53 pid-8154 debug syslog: preHook() found, executing
     I am number two: test
     I am number one: test
     I am number two: test
@@ -89,15 +95,9 @@ executable with the --config parameter pointing to the bootstrap file.
     I am number one: test
     I am number two: test
     I am number one: test
-    ^C2013-08-09T23:13:47 pid-13797 informational Router: Received SIGINT. Shutting down.
-    2013-08-09T23:13:47 pid-13797 informational Router: Stopping.
-    2013-08-09T23:13:47 pid-13797 informational output2: Shutdown
-    2013-08-09T23:13:48 pid-13797 warning output2: Queue <wishbone.tools.wishbonequeue.WishboneQueue instance at 0x2101a28> locked.
-    2013-08-09T23:13:48 pid-13797 informational output1: Shutdown
-    2013-08-09T23:13:48 pid-13797 warning output1: Queue <wishbone.tools.wishbonequeue.WishboneQueue instance at 0x2101680> locked.
-    2013-08-09T23:13:48 pid-13797 informational mixing: Shutdown
-    2013-08-09T23:13:48 pid-13797 warning mixing: Queue <wishbone.tools.wishbonequeue.WishboneQueue instance at 0x2101098> locked.
-    2013-08-09T23:13:49 pid-13797 informational input: Shutdown
+    ^C2014-07-19T23:56:56 pid-8154 debug syslog: postHook() found, executing
+    2014-07-19T23:56:56 pid-8154 debug syslog: postHook() found, executing
+    2014-07-19T23:56:57 pid-8154 informational input: Stopped producing events.
     [smetj@indigo ~]$
 
 
