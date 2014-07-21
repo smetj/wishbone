@@ -44,12 +44,12 @@ class ModuleManager():
 
     def getModule(self, category, group, name):
 
-        return pkg_resources.load_entry_point("wishbone", "%s.%s" % (category, group), name)
+        return pkg_resources.load_entry_point(category, "%s.%s" % (category, group), name)
 
     def getModuleDoc(self, category, group, name):
 
         doc = self.getModule(category, group, name).__doc__
-        doc = re.search('(\*\*.*?\*\*)(.*)', doc).group(2)
+        doc = re.search('(\*\*.*?\*\*)(.*)', doc, re.DOTALL).group(2)
         return doc
 
     def getModuleTitle(self, category, group, name):

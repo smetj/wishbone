@@ -15,13 +15,23 @@ class ReverseData(Actor):
     Queues:
 
         - inbox:    Incoming events.
+
         - outbox:   Outgoing events.
     '''
 
-    def __init__(self, name, capitalize=False):
-        Actor.__init__(self, name, setupbasic=True)
-        self.capitalize=capitalize
-        self.logging.info("Initialized")
+    def __init__(self, name, size=100, frequency=1, capitalize=False):
+        Actor.__init__(self, name, size, frequency)
+        self.pool.createQueue("inbox")
+        self.pool.createQueue("outbox")
+        self.registerConsumer(self.consume, "inbox")
+
+        self.capitalize = capitalize
+
+    def preHook(self):
+        self.logging.info("Hello from preHook")
+
+    def postHook(self):
+        self.logging.info("Goodbye from postHook")
 
     def consume(self, event):
 
@@ -29,8 +39,8 @@ class ReverseData(Actor):
 
         data = [::-1]
 
-        if self.capitalize == True:
+        if self.capitalize:
             data = data.title()
-        event["data"]=data
+        event["data"] = data
 
         self.queuepool.outbox.put(event)
