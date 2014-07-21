@@ -25,11 +25,13 @@
 from wishbone.router import Default
 from wishbone.error import QueueConnected
 from wishbone.utils import BootstrapFile, Module, PIDFile
+from wishbone import ModuleManager
 
 import argparse
 import multiprocessing
 import os
 import sys
+import pkg_resources
 from daemon import DaemonContext, pidfile
 from gevent import sleep, signal
 
@@ -52,7 +54,6 @@ class BootStrap():
         start.add_argument('--queue-size', type=int, dest='queue_size', default=100, help='The queue size to use.')
         start.add_argument('--frequency', type=int, dest='frequency', default=1, help='The metric frequency.')
 
-
         debug = subparsers.add_parser('debug', description="Starts a Wishbone instance in foreground and writes logs to STDOUT.")
         debug.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
         debug.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
@@ -69,7 +70,7 @@ class BootStrap():
         llist.add_argument('--group', type=str, dest='group', default=None, help='List the modules of this group type.')
 
         show = subparsers.add_parser('show', description="Shows the details of a module.")
-        show.add_argument('module', type=str, help='Shows the documentation of the module. ')
+        show.add_argument('--module', type=str, default=None, help='Shows the documentation of the module. ')
 
         arguments = vars(parser.parse_args())
 
@@ -89,6 +90,7 @@ class Dispatch():
         self.routers = []
         signal(2, self.__stopSequence)
         self.__stopping = False
+        self.module_manager = ModuleManager()
 
     def debug(self, command, config, instances, queue_size, frequency):
         '''
@@ -110,6 +112,26 @@ class Dispatch():
                 sleep(1)
 
         sys.exit(0)
+
+    def list(self, command, group, category=None):
+
+        print self.module_manager.getModuleTable(category, group)
+
+
+    def show(self, command, module=None):
+        '''
+        Shows the help message of a module.
+        '''
+
+        category = ["flow", "logging", "metrics", "function", "input", "output"]
+
+        if module is None:
+            for group in category:
+                for m in pkg_resources.iter_entry_points(group="wishbone.%s" % (group)):
+                    print m.load().__doc__
+                    # print m.name
+                    # print "".join(pkg_resources.load_entry_point("wishbone","wishbone.%s" % (group), m.name).__doc__)
+
 
     def start(self, command, config, instances, pid, queue_size, frequency):
         '''
