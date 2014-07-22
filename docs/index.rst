@@ -1,8 +1,3 @@
-.. Wishbone documentation master file, created by
-   sphinx-quickstart on Wed Aug  7 21:08:21 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 ========
 Wishbone
 ========
@@ -10,13 +5,15 @@ https://github.com/smetj/wishbone
 
 .. currentmodule:: wishbone.module
 
-A Python library to build and CLI tool to manage asynchronous coroutine based
+A Python library and CLI tool to build and manage asynchronous coroutine based
 event pipeline servers with minimal effort.
 
 Works on python 2.7+ and PyPy 2.3.1+
 
 .. image:: intro.png
     :align: right
+
+In Python code
 
 .. code-block:: python
 
@@ -50,15 +47,16 @@ Works on python 2.7+ and PyPy 2.3.1+
 
 
 This example we initialize the :class:`wishbone.router.Default` router to
-create a simple setup in which we connect the :py:class:`TestEvent` input
-module, which does nothing more than generating the word "test" every second,
-to the :class:`wishbone.module.RoundRobin` module which on its turn
-"roundrobins" the incoming events to 2 :class:`wishbone.module.STDOUT` module
-instances which print all incoming events to STDOUT.
+create a simple setup in which we connect the
+:py:class:`wishbone.module.TestEvent` input module, which does nothing more
+than generating the word "test" every second, to the
+:class:`wishbone.module.RoundRobin` module which on its turn "roundrobins" the
+incoming events to 2 :class:`wishbone.module.STDOUT` module instances which
+print all incoming events to STDOUT.
 
 
-Bootstrapping
-=============
+Bootstrapping server from CLI
+=============================
 
 Wishbone comes with a CLI tool to easily bootstrap a server using a YAML
 formatted config file.  Following file creates exactly the same environment as
@@ -108,11 +106,12 @@ Contents:
 
     installation
     introduction
-    actor
+    wishbone module
     router
-    modules
+    builtin modules
     bootstrap
     patterns
+    components
 
 Indices and tables
 ==================
