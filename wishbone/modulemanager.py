@@ -31,7 +31,7 @@ class ModuleManager():
 
     def __init__(self):
         self.categories = ["wishbone", "wishbone.contrib"]
-        self.groups = ["flow", "logging", "metrics", "function", "input", "output"]
+        self.groups = ["flow", "encode", "decode", "function", "input", "output"]
 
     def listNames(self, category=None):
 
@@ -47,12 +47,6 @@ class ModuleManager():
         for module in pkg_resources.iter_entry_points("%s.%s" % (category, group)):
             if module.name == name:
                 return module.load()
-    # print dir(blah)
-    # print blah.module_name
-    # print blah.dist
-
-    #     print category, group, name
-    #     return pkg_resources.load_entry_point(category, "%s.%s" % (category, group), name)
 
     def getModuleDoc(self, category, group, name):
 
