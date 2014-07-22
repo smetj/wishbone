@@ -162,7 +162,7 @@ class AMQPIn(Actor):
             except Exception as err:
                 self.logging.error("Failed to connect to broker.  Reason %s " % (err))
                 sleep(1)
-            finally:
+            else:
                 spawn(self.drain)
 
     def drain(self):
