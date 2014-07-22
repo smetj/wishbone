@@ -131,16 +131,19 @@ class Dispatch():
         try:
             title = self.module_manager.getModuleTitle(category, group, module)
             version = self.module_manager.getModuleVersion(category, group, module)
-            header = 'Module "%s.%s.%s" version %s' % (category, group, module, version)
-
+            header = "%s.%s.%s" % (category, group, module)
+            print
+            print "="*len(header)
             print header
             print "="*len(header)
+            print
+            print "Version: %s" % (version)
             print
             print title
             print "-"*len(title)
             print self.module_manager.getModuleDoc(category, group, module)
         except Exception as err:
-            print "Failed to load module %s.%s.%s. Reason: %s" % (category, group, module, err)
+            print "Failed to load module %s.%s.%s." % (category, group, module)
 
     def start(self, command, config, instances, pid, queue_size, frequency):
         '''
@@ -325,7 +328,7 @@ class RouterBootstrap():
 
         # In debug mode we write our logs to STDOUT
         log_stdout = self.loadModule("wishbone.output.stdout")
-        log_human = self.loadModule("wishbone.logging.humanlogformat")
+        log_human = self.loadModule("wishbone.encode.humanlogformat")
         self.router.initializeModule(log_stdout, "log_stdout")
         self.router.initializeModule(log_human, "log_format")
         self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("log_format"), "inbox")
