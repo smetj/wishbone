@@ -236,8 +236,8 @@ events and optionally converts the first letter into a capital.
 
 --------
 
-- The ReverseData class inherits the :py:class:`wishbone.Actor` base class
-- [4]. The :py:class:`wishbone.Actor` base class is initialized with name,
+- The ReverseData class inherits the :py:class:`wishbone.Actor` base class[4].
+- The :py:class:`wishbone.Actor` base class is initialized with name,
   size and frequency parameter [23].
 - Two queues, inbox and outbox are created [24][25].
 - The *consume* method [36] is registered to consume each event from the
