@@ -53,7 +53,7 @@ class TCPIn(Actor):
 
         - delimiter (str):      The delimiter which separates multiple
                                 messages in a stream of data.
-                                Default: "\n"
+                                Default: "\\n"
 
         - max_connections(int): The maximum number of simultaneous
                                 connections.  0 means "unlimited".
@@ -73,7 +73,7 @@ class TCPIn(Actor):
 
 
     delimiter
-    ~~~~~~~~~
+    ---------
 
     When no delimiter is defined, all incoming data between connect and
     disconnect is considered to be 1 event. When a delimiter is defined,
@@ -85,7 +85,7 @@ class TCPIn(Actor):
     Wishbone message/event.  The advantage is that a client can stay connected
     and stream data.
 
-    Choosing "\n" as a delimiter, which is the default, each new line is a new event.
+    Choosing "\\n" as a delimiter, which is the default, each new line is a new event.
 
     '''
 
