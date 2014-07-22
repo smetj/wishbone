@@ -5,56 +5,39 @@ Router
 The :py:class:`wishbone.router.Default` router is used to initialize the
 modules and to organize the event stream between them.
 
-Modules are registered using :py:func:`wishbone.router.Default.register`. The
-router takes care of the proper startup
-:py:func:`wishbone.router.Default.start` and shutdown
-:py:func:`wishbone.router.Default.start` sequence of all the modules.
+Modules are registered using
+:py:func:`wishbone.router.Default.initializeModule`. The router takes care of
+the proper startup :py:func:`wishbone.router.Default.start` and shutdown
+:py:func:`wishbone.router.Default.stop` sequence of all the modules.
 
 Queues are connected to each other using
 :py:func:`wishbone.router.Default.connect`.  Queues can only have a "1 to 1"
 relationship.  If you require a "1 to N" or similar scenario you might have to
 use one of the builtin flow modules.
 
-The router also takes care of the logs and metrics produced by the modules. By
-registering Wishbone modules using the
-:py:func:`wishbone.router.Default.registerLogModule` and
-:py:func:`wishbone.router.Default.registerMetricModule` we can pretty much do
-what we want with them.
-
-
-Throttling
-==========
-
-The default router contains basic support for throttling.  When throttling is
-enabled by setting the the `throttle` variable to True, a greenthread scans
-periodically  all initialized modules to detect instances which have more
-events queued than defined in the `throttle_threshold` variable.  Once such a
-module is found, all upstream parent modules are identified and verified which
-one is the source of overflowing the children. When the parent module is
-identified, the router calls the
-:py:func:`wishbone.Actor.enableThrottling` and
-:py:func:`wishbone.Actor.disableThrottling` accordingly.
-
-It is up to the author of the module to override these functions and have them
-make correct measurements.
+The router also takes care of the logs and metrics produced by the modules.
+The :py:class:`wishbone.router.Default` router automatically connects the
+*metrics* and *logs* queues of each module to a
+:py:class:`wishbone.module.Funnel` module which can optionally be connected to
+another module for further handling.
 
 
 Logging
 =======
 
-Modules produce logs using :py:class:`wishbone.tools.QLogging`.  These logs
-are automatically collected by the router and are put into a queue within the
-router instance.  By using :py:func:`wishbone.router.registerLogModule` we can
-connect whatever to process the logstream in whatever way.
-
-Typically the :py:class:`wishbone.module.LogLevelFilter` is registered with
-:py:func:`wishbone.router.Default.registerLogModule` to filter out the
-interesting loglevels before sending the logstream to any other modules such
-as :py:class:`wishbone.module.Syslog` or :py:class:`wishbone.module.STDOUT`.
+Modules produce logs using :py:class:`wishbone.logging` which submits to the
+**logs**. The router automatically initializes a
+:py:`wishbone.module.Funnel` (called **metrics_funnel**) module to which the
+log queue of each registered module is connected to.  It is up to the  user to
+decide which other module(s) to connect to the *outbox* of the
+*metrics_funnel* module instance.
 
 
 Metrics
 =======
+
+Modules producs metrics which are submitted into its **metrics** queue.
+The
 
 Modules produce 2 kinds of metrics:
 
@@ -118,5 +101,5 @@ For example:
 
 ---------
 
-.. autoclass:: wishbone.tools.Measure
-    :members: runTime
+.. .. autoclass:: wishbone.tools.Measure
+..     :members: runTime
