@@ -26,5 +26,4 @@ from actor import Actor
 from queue import Queue
 from queue import QueuePool
 from logging import Logging
-from event import Event
 from modulemanager import ModuleManager
