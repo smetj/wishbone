@@ -38,24 +38,25 @@ class TestEvent(Actor):
 
     Parameters:
 
-        -   name(str)
-            The name of the module.
+        - name(str)
+           |  The name of the module.
 
-        -   size(int)
-            The default max length of each queue.
+        - size(int)
+           |  The default max length of each queue.
 
-        -   frequency(int)
-            The frequency in seconds to generate metrics.
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
-        - interval (float):     The interval in seconds between each generated event.
-                                A value of 0 means as fast as possible.
-                                default: 1
+        - interval(float)(1)
+           |  The interval in seconds between each generated event.
+           |  A value of 0 means as fast as possible.
 
-        - message (string):     The content of the test message.
-                                default: "test"
+        - message(string)("test")
+           |  The content of the test message.
 
-        - numbered (bool):      When true, appends a sequential number to the end.
-                                default: False
+        - numbered(bool)
+           |  When true, appends a sequential number to the end.
+
 
     Queues:
 
