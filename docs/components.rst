@@ -2,6 +2,9 @@
 Components
 ==========
 
+.. autoclass:: wishbone.router.Default
+    :members:
+
 .. autoclass:: wishbone.Actor
     :members:
     :show-inheritance:
