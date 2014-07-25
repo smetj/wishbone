@@ -2,6 +2,7 @@
 Installation
 ============
 
+Wishbone works on python 2.7+ and PyPy 2.3.1+
 
 Wishbone
 --------
@@ -9,24 +10,25 @@ Wishbone
 Pypi
 '''''
 
-You can install the latest stable version of Wishbone from
-https://pypi.python.org/pypi/wishbone/ by using pip:
+To install the latest stable release from
+https://pypi.python.org/pypi/wishbone use *pip*.
 
 .. code-block:: sh
 
     $ pip install wishbone
 
-All dependencies should be resolved automatically.
+
 
 
 From source
 '''''''''''
+Wishbone' source can be downloaded from http://github.com/smetj/wishbone
 
-You can install the latest stable or development version from
-https://github.com/smetj/wishbone
 
 Stable
 ~~~~~~
+
+Install the latest *stable* release from the **master** branch.
 
 .. code-block:: sh
 
@@ -39,8 +41,7 @@ Stable
 Development
 ~~~~~~~~~~~
 
-To install the latest development release you have to checkout the develop
-branch and build from there:
+Install the latest *development* release from the **development** branch.
 
 .. code-block:: sh
 
