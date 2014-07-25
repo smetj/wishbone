@@ -62,7 +62,7 @@ class Syslog(Actor):
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        syslog.openlog("%s(%s)" % (os.path.basename(sys.argv[0]), os.getpid()))
+        syslog.openlog("%s[%s]" % (os.path.basename(sys.argv[0]), os.getpid()))
 
     def consume(self, event):
         syslog.syslog(event["data"][0], "%s: %s" % (event["data"][3], event["data"][4]))
