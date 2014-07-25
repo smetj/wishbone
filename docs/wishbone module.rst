@@ -6,19 +6,18 @@ Introduction
 ------------
 
 Modules are isolated blocks of code (greenlets) each with their own specific
-functionality. They are created by having a class inherit
-:py:class:`wishbone.Actor` as a baseclass. Modules cannot (and are not
-supposed to) directly invoke each others functionality. Their only means of
-interaction is by passing events to each other's
-:py:class:`wishbone.Queue` queues. Modules typically have, but are not limited
-to, an inbox, outbox, successful and failed queue.
+functionality. They are created by inheriting :py:class:`wishbone.Actor` as a
+baseclass. Modules cannot (and are not supposed to) directly invoke each
+others functionality. Their only means of interaction is by passing events to
+each other's :py:class:`wishbone.Queue` queues. Modules typically have, but
+are not limited to, an **inbox, outbox, successful** and **failed** queue.
 
-A module's queues always live inside a :py:class:`wishbone.QueuePool` which,
+A module's queues always live inside :py:class:`wishbone.QueuePool` which,
 besides offering some convenience functions, is nothing more than a container
 to centralize all the module's queues. Typically, modules consume the events
-entering the *inbox* queue and apply to them to some method.  Registering some
-module's method to consume all events of a queue is done using
-:py:class:`wishbone.Actor.registerConsumer`.  This registered method is then
+entering the *inbox* queue and apply to them to some pre-registered method.
+Registering a method to consume all events of a queue is done using
+:py:class:`wishbone.Actor.registerConsumer`.  The registered method is then
 responsible to submit the event to another queue of choice, typically but not
 necessarily *outbox*.
 
@@ -27,7 +26,9 @@ Module categories
 -----------------
 
 Modules are stored into a hierarchical name space.  The name of a module
-consists out of the *category name + group name + module name*.
+consists out of:
+
+*<category name> . <group name> . <module name>*
 
 Wishbone comes with a set of builtin modules which are an integral part of the
 Wishbone framework.
@@ -39,7 +40,7 @@ https://github.com/smetj/wishboneModules is a repository containing additional
 modules.
 
 
-You  can list all available modules using the *list* command:
+You can list all available modules using the *list* command:
 
 .. code-block:: sh
 
@@ -74,7 +75,7 @@ You  can list all available modules using the *list* command:
     +------------------+----------+----------------+---------+------------------------------------------------------------+
 
 
-To read the help and module instruction use the **show** command:
+To read the help and module instructions use the **show** command:
 
 .. code-block:: sh
 
@@ -136,24 +137,27 @@ output modules
 ~~~~~~~~~~~~~~
 
 Output modules are responsible for submitting Wishbone event data to the
-outside world.
+outside world.  Output modules typically have a :py:class:`wishbone.Queue`
+named *input*.
 
 flow modules
 ~~~~~~~~~~~~
 
-Flow modules do not change data but they manipulate the flow of events in the
+Flow modules do not change data but they decide on the flow of events in the
 pipeline.
 
 function modules
 ~~~~~~~~~~~~~~~~
 
-Function modules change event data.
+Function modules can have a wide range of functionalities but they take events
+in, change them and send events out.  Function modules have at least 1
+incoming and 1 outgoing queue.
 
 encode modules
 ~~~~~~~~~~~~~~
 
-Encode modules are responsible for converting the internal metric or log
-events into another format.
+Encode modules are responsible for converting internal metric or log events
+into some other format.
 
 decode modules
 ~~~~~~~~~~~~~~
@@ -168,11 +172,12 @@ successful and failed queues
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Each module has a *successful* and *failed* queue.  Whenever a registered
-method (using :py:class:`wishbone.Actor.registerConsumer`) fails to process an
-event, the framework will submit the event into the failed queue.  Therefor it
-is important not to trap exceptions in the *registered consumer methods* but
-rather rely on another module to process the events from the module's failed
-queue in order to achieve an error coping strategy when desired.
+method (see :py:class:`wishbone.Actor.registerConsumer`) fails to process an
+event, the framework will submit the event into the *failed* queue.  Therefor
+it is important not to trap exceptions in the *registered consumer methods*
+but rather rely on another module to process the events from the module's
+*failed* queue in order to achieve a strategy which copes with this.
+
 An example which takes advantage of this behavior might be connecting the
 *failed* queue of the :py:class:`wishbone.module.TCPOut` module to the *inbox*
 queue of the :py:class:`wishbone.module.DiskOut` module.
@@ -180,6 +185,7 @@ queue of the :py:class:`wishbone.module.DiskOut` module.
 On the other side, each time a *registered consumer method* successfully
 processes an event, it will automatically be submitted to the *successful*
 queue, from where it can be further processed by another module when desired.
+
 An example which takes advantage of this behavior might be connecting the
 *successful* queue of the :py:class:`wishbone.module.TCPOut` module to the
 *acknowledgment* queue of the :py:class:`wishbone.module.AMQPOut` module.
@@ -191,19 +197,20 @@ processing.
 metrics and logs queues
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Each module also has a *metrics* and *logs* queue which hold metric events and
-log events respectively, ready to be consumed by another module.
+Each module has a *metrics* and *logs* queue which hold metric events and log
+events respectively, ready to be consumed by another module.  If these queues
+aren't connected to other queues then that data will be dropped.
 
 
 Queues drop data by default
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When a queue is not connected then all messages submitted to it will be
-dropped.  The moment a queue is connected to another queue, messages are
-buffered.
+When a queue is not connected it will drop all messages submitted to it.  The
+moment a queue is connected to another queue, messages are kept and
+transported.
 
-A module's default parameters
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Module default parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The :py:class:`wishbone.Actor` baseclass can be initialized with 2 parameters:
 
