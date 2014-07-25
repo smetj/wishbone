@@ -36,36 +36,35 @@ class TCPIn(Actor):
 
     Parameters:
 
-        -   name(str)
-            The name of the module.
+        - name(str)
+           |  The name of the module.
 
-        -   size(int)
-            The default max length of each queue.
+        - size(int)
+           |  The default max length of each queue.
 
-        -   frequency(int)
-            The frequency in seconds to generate metrics.
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
-        - address (str):        The address to bind to.
-                                Default: "0.0.0.0"
+        - address(str)("0.0.0.0")
+           |  The address to bind to.
 
-        - port (int):           The port to bind to.
-                                Default: 19283
+        - port(int)(19283)
+           |  The port to bind to.
 
-        - delimiter (str):      The delimiter which separates multiple
-                                messages in a stream of data.
-                                Default: "\\n"
+        - delimiter(str)("\\n")
+           |  The delimiter which separates multiple
+           |  messages in a stream of data.
 
-        - max_connections(int): The maximum number of simultaneous
-                                connections.  0 means "unlimited".
-                                Default: 0
+        - max_connections(int)(0)
+           |  The maximum number of simultaneous
+           |  connections.  0 means "unlimited".
 
-        - reuse_port(bool):     Whether or not to set the SO_REUSEPORT
-                                socket option.  Interesting when starting
-                                multiple instances and allow them to bind
-                                to the same port.
-                                Requires Linux kernel >= 3.9
-                                Default: False
-
+        - reuse_port(bool)(False)
+           |  Whether or not to set the SO_REUSEPORT
+           |  socket option.  Interesting when starting
+           |  multiple instances and allow them to bind
+           |  to the same port.
+           |  Requires Linux kernel >= 3.9
 
     Queues:
 
