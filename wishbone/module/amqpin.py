@@ -158,12 +158,12 @@ class AMQPIn(Actor):
                 self.channel.basic_qos(prefetch_size=0, prefetch_count=self.prefetch_count, a_global=False)
                 self.channel.basic_consume(self.queue, callback=self.consume, no_ack=self.no_ack)
                 self.logging.info("Connected to broker.")
-                break
             except Exception as err:
                 self.logging.error("Failed to connect to broker.  Reason %s " % (err))
                 sleep(1)
             else:
                 spawn(self.drain)
+                break
 
     def drain(self):
         while self.loop():
