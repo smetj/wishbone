@@ -48,54 +48,56 @@ class AMQPOut(Actor):
 
     Parameters:
 
-        -   name(str)
-            The name of the module.
+        - name(str)
+           |  The name of the module.
 
-        -   size(int)
-            The default max length of each queue.
+        - size(int)
+           |  The default max length of each queue.
 
-        -   frequency(int)
-            The frequency in seconds to generate metrics.
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
-        -   host(str) "localhost"
-            The host broker to connect to.
+        - host(str) "localhost"
+           |  The host broker to connect to.
 
-        -   port(int)(5672)
-            The port to connect to.
+        - port(int)(5672)
+           |  The port to connect to.
 
-        -   vhost(str)("/")
-            The virtual host to connect to.
+        - vhost(str)("/")
+           |  The virtual host to connect to.
 
-        -   user(str)("guest")
-            The username to authenticate.
+        - user(str)("guest")
+           |  The username to authenticate.
 
-        -   password(str)("guest")
-            The password to authenticate.
+        - password(str)("guest")
+           |  The password to authenticate.
 
-        -   exchange(str)("")
-            The exchange to declare.
+        - exchange(str)("")
+           |  The exchange to declare.
 
-        -   exchange_type(str)("direct")
-            The exchange type to create. (direct, topic, fanout)
+        - exchange_type(str)("direct")
+           |  The exchange type to create. (direct, topic, fanout)
 
-        -   exchange_durable(bool)(false)
-            Declare a durable exchange.
+        - exchange_durable(bool)(false)
+           |  Declare a durable exchange.
 
-        -   queue(str)("")
-            The queue to declare and ultimately sumit messages to.
+        - queue(str)("")
+           |  The queue to declare and ultimately sumit messages to.
 
-        -   queue_durable(bool)(false)
-            Declare a durable queue.
+        - queue_durable(bool)(false)
+           |  Declare a durable queue.
 
-        -   queue_exclusive(bool)(false)
-            Declare an exclusive queue.
+        - queue_exclusive(bool)(false)
+           |  Declare an exclusive queue.
 
-        -   queue_auto_delete(bool)(true)
-            Whether to autodelete the queue.
+        - queue_auto_delete(bool)(true)
+           |  Whether to autodelete the queue.
+
 
     Queues:
 
-        - inbox:   Messages going to the defined broker.
+        - inbox
+           | Messages going to the defined broker.
     '''
 
     def __init__(self, name, size=100, frequency=1, host="localhost", port=5672, vhost="/", user="guest", password="guest",
