@@ -33,21 +33,22 @@ class Null(Actor):
     Purges incoming events.
 
 
-    Parameters:
+        Parameters:
 
-        -   name(str)
-            The name of the module.
+        - name(str)
+           |  The name of the module.
 
-        -   size(int)
-            The default max length of each queue.
+        - size(int)
+           |  The default max length of each queue.
 
-        -   frequency(int)
-            The frequency in seconds to generate metrics.
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
 
     Queues:
 
-        - inbox:    incoming events
+        - inbox
+           |  incoming events
     '''
 
     def __init__(self, name, size=100, frequency=1):
