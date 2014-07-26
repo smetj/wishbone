@@ -39,23 +39,24 @@ class RoundRobin(Actor):
 
     Parameters:
 
-        -   name(str)
-            The name of the module.
+        - name(str)
+           |  The name of the module.
 
-        -   size(int)
-            The default max length of each queue.
+        - size(int)
+           |  The default max length of each queue.
 
-        -   frequency(int)
-            The frequency in seconds to generate metrics.
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
-        -   randomize(bool):
+        - randomize(bool)
+            |  Randomizes the queue selection instead of going round-robin
+            |  over all queues.
 
-            Randomizes the queue selection instead of going round robin over
-            all queues.
 
     Queues:
 
-        inbox:  Incoming events
+        - inbox
+           |  Incoming events
     '''
 
     def __init__(self, name, size=100, frequency=1, randomize=False):
