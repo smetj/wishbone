@@ -30,34 +30,39 @@ class Header(Actor):
 
     '''**Adds information to event headers.**
 
+
     Parameters:
 
-        -   name(str)
-            The name of the module.
+        - name(str)
+           |  The name of the module.
 
-        -   size(int)
-            The default max length of each queue.
+        - size(int)
+           |  The default max length of each queue.
 
-        -   frequency(int)
-            The frequency in seconds to generate metrics.
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
-        - key (str):    The header key to store the information.
-                        Default: <name>
+        - prefix(str)
+           |  Some prefix to put in front of the metric name.
 
-        - header(dict): The data to store.
-                        Default: {}
+        - key(str)(self.name)
+           |  The header key to store the information.
 
-        - expr(str):    printf-style String Formatting.
-                        Expects event["data"] to be a dictionary.
-                        the dictionary.
-                        Default: None
+        - header(dict)({})
+           |  The data to store.
+
+        - expr(str)(None)
+           |  printf-style String Formatting.
+           |  Expects event["data"] to be a dictionary.
+
 
     Queues:
 
-        - inbox:      Incoming events.
+        - inbox
+           |  Incoming events.
 
-        - outbox:     Outgoing events.
-
+        - outbox
+           |  Outgoing events.
     '''
 
     def __init__(self, name, size=100, frequency=1, key=None, header={}, expr=None):
