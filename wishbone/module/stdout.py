@@ -79,32 +79,36 @@ class STDOUT(Actor):
 
     Parameters:
 
-        -   name(str)
-            The name of the module.
+        - name(str)
+           |  The name of the module.
 
-        -   size(int)
-            The default max length of each queue.
+        - size(int)
+           |  The default max length of each queue.
 
-        -   frequency(int)
-            The frequency in seconds to generate metrics.
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
-        - complete(bool):  When True, print the complete event including headers.
-                           Default: False
+        - complete(bool)(False)
+           |  When True, print the complete event including headers.
 
-        - counter(bool):   Puts an incremental number for each event in front of each event.
-                           Default: False
+        - counter(bool)(False)
+           |  Puts an incremental number for each event in front
+           |  of each event.
 
-        - prefix(str):     Puts the prefix in front of each printed event.
-                           Default: ""
+        - prefix(str)("")
+           |  Puts the prefix in front of each printed event.
 
-        - pid(bool):       Includes the pid of the process producing the output.
-                           Default: False
+        - pid(bool)(False)
+           |  Includes the pid of the process producing the output.
 
-        - flush(int):      The interval at which data needs to be flushed.
+        - flush(int)(1)
+           |  The interval at which data needs to be flushed.
+
 
     Queues:
 
-        - inbox:    Incoming events.
+        - inbox
+           |  Incoming events.
     '''
 
     def __init__(self, name, size=100, frequency=1, complete=False, counter=False, prefix="", pid=False, flush=1):

@@ -41,26 +41,35 @@ class Graphite(Actor):
 
     Parameters:
 
-        -   name(str)
-            The name of the module.
+        - name(str)
+           |  The name of the module.
 
-        -   size(int)
-            The default max length of each queue.
+        - size(int)
+           |  The default max length of each queue.
 
-        -   frequency(int)
-            The frequency in seconds to generate metrics.
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
-        - prefix(str):  Some prefix to put in front of the metric name.
+        - prefix(str)
+           |  Some prefix to put in front of the metric name.
 
-        - script(bool): Include the script name.
-                        Default: True
+        - script(bool)(True)
+           |  Include the script name.
 
-        - pid(bool):    Include pid value in script name.
-                        Default: False
+        - pid(bool)(False)
+           |  Include pid value in script name.
 
-        - source(bool): Include the source name in the naming schema.
-                        Default: True
+        - source(bool)(True):
+           |  Include the source name in the naming schema.
 
+
+    Queues:
+
+        - inbox
+           |  Incoming messages
+
+        - outbox
+           |  Outgoing messges
     '''
 
     def __init__(self, name, size=100, frequency=1, prefix='', script=True, pid=False, source=True):

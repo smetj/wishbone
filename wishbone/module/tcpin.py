@@ -68,7 +68,8 @@ class TCPIn(Actor):
 
     Queues:
 
-        - outbox:       Data coming from the outside world.
+        - outbox
+           |  Data coming from the outside world.
 
 
     delimiter

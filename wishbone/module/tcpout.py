@@ -34,31 +34,32 @@ class TCPOut(Actor):
 
     Parameters:
 
-        -   name(str)
-            The name of the module.
+        - name(str)
+           |  The name of the module.
 
-        -   size(int)
-            The default max length of each queue.
+        - size(int)
+           |  The default max length of each queue.
 
-        -   frequency(int)
-            The frequency in seconds to generate metrics.
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
-        - host (string):    The host to submit to.
-                            Default: "localhost"
+        - host(string)("localhost")
+           |  The host to submit to.
 
-        - port (int):       The port to submit to.
-                            Default: 19283
+        - port(int)(19283)
+           |  The port to submit to.
 
-        - timeout(int):     The time in seconds to timeout when
-                            connecting
-                            Default: 1
+        - timeout(int)(1)
+           |  The time in seconds to timeout when connecting
 
-        - delimiter(str):   A delimiter to add to each event.
-                            Default: "\\n"
+        - delimiter(str)("\\n")
+           |  A delimiter to add to each event.
+
 
     Queues:
 
-        - inbox:    Incoming events submitted to the outside.
+        - inbox
+           |  Incoming events submitted to the outside.
 
     '''
 
