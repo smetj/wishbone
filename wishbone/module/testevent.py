@@ -60,7 +60,8 @@ class TestEvent(Actor):
 
     Queues:
 
-        - outbox:    Contains the generated events.
+        - outbox
+           |  Contains the generated events.
     '''
 
     def __init__(self, name, size=100, frequency=1, interval=1, message="test", numbered=False):
