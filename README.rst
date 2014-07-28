@@ -4,8 +4,8 @@ WishBone
 What?
 -----
 
-A Python application framework and CLI tool build and manage async event
-pipeline servers with minimal effort.
+A Python library and CLI tool to build and manage event pipeline servers with
+minimal effort.
 
 Example
 -------
@@ -19,17 +19,17 @@ Example
     >>> from wishbone.module import TestEvent
     >>> from wishbone.module import RoundRobin
     >>> from wishbone.module import STDOUT
-    >>>
-    >>> router=Default()
-    >>> router.register(TestEvent, "input")
-    >>> router.register(RoundRobin, "mixing")
-    >>> router.register(STDOUT, "output1", prefix="I am number one: ")
-    >>> router.register(STDOUT, "output2", prefix="I am number two: ")
-    >>>
+
+    >>> router = Default()
+    >>> router.registerModule(TestEvent, "input", interval=1)
+    >>> router.registerModule(RoundRobin, "mixing")
+    >>> router.registerModule(STDOUT, "output1", prefix="I am number one: ")
+    >>> router.registerModule(STDOUT, "output2", prefix="I am number two: ")
+
     >>> router.connect("input.outbox", "mixing.inbox")
     >>> router.connect("mixing.one", "output1.inbox")
     >>> router.connect("mixing.two", "output2.inbox")
-    >>>
+
     >>> router.start()
     >>> router.block()
     I am number one: test
