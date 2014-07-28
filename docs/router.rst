@@ -6,7 +6,7 @@ The :py:class:`wishbone.router.Default` router is used to initialize the
 modules and to organize the event stream between them.
 
 Modules are registered using
-:py:func:`wishbone.router.Default.initializeModule`. The router takes care of
+:py:func:`wishbone.router.Default.registerModule`. The router takes care of
 the proper startup :py:func:`wishbone.router.Default.start` and shutdown
 :py:func:`wishbone.router.Default.stop` sequence of all the modules.
 
