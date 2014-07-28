@@ -83,7 +83,6 @@ class RoundRobin(Actor):
         queue = self.chooseQueue()
         queue.put(event)
 
-
     def __chooseNextQueue(self):
         return self.cycle.next()
 
