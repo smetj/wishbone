@@ -60,8 +60,8 @@ class Default():
         self.pool = ModulePool()
         self.size = size
         self.frequency = frequency
-        self.initializeModule(Funnel, "metrics_funnel")
-        self.initializeModule(Funnel, "logs_funnel")
+        self.registerModule(Funnel, "metrics_funnel")
+        self.registerModule(Funnel, "logs_funnel")
         self.__running = False
         self.__block = event.Event()
         self.__block.clear()
@@ -100,7 +100,7 @@ class Default():
         lookupChildren(module, children)
         return children
 
-    def initializeModule(self, module, name, *args, **kwargs):
+    def registerModule(self, module, name, *args, **kwargs):
         '''Initializes the mdoule using the provided <args> and <kwargs>
         arguments.'''
 
