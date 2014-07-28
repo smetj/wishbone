@@ -19,10 +19,10 @@ Creating a server in Python
     >>> from wishbone.module import STDOUT
 
     >>> router = Default()
-    >>> router.initializeModule(TestEvent, "input", interval=1)
-    >>> router.initializeModule(RoundRobin, "mixing")
-    >>> router.initializeModule(STDOUT, "output1", prefix="I am number one: ")
-    >>> router.initializeModule(STDOUT, "output2", prefix="I am number two: ")
+    >>> router.registerModule(TestEvent, "input", interval=1)
+    >>> router.registerModule(RoundRobin, "mixing")
+    >>> router.registerModule(STDOUT, "output1", prefix="I am number one: ")
+    >>> router.registerModule(STDOUT, "output2", prefix="I am number two: ")
 
     >>> router.connect("input.outbox", "mixing.inbox")
     >>> router.connect("mixing.one", "output1.inbox")
