@@ -28,6 +28,11 @@ wishbone.input.amqp
 .. autoclass:: wishbone.module.AMQPIn
 
 
+wishbone.input.dictgenerator
+----------------------------
+.. autoclass:: wishbone.module.DictGenerator
+
+
 Output modules
 **************
 
@@ -99,7 +104,25 @@ wishbone.function.header
 
 Encode modules
 **************
+
+wishbone.encode.graphite
+------------------------
 .. autoclass:: wishbone.module.Graphite
+
+
+wishbone.encode.humanlogformat
+------------------------
+.. autoclass:: wishbone.module.HumanLogFormat
+
+
+wishbone.encode.msgpack
+------------------------
+.. autoclass:: wishbone.module.MSGPackEncode
+
 
 Decode modules
 **************
+
+wishbone.decode.msgpack
+------------------------
+.. autoclass:: wishbone.module.MSGPackDecode
