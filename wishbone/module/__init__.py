@@ -38,3 +38,6 @@ from amqpin import AMQPIn
 from amqpout import AMQPOut
 from roundrobin import RoundRobin
 from fanout import Fanout
+from msgpackdecode import MSGPackDecode
+from msgpackencode import MSGPackEncode
+from brit_a_z import brit_a_z
