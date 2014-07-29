@@ -32,7 +32,7 @@ class Mock(object):
             return Mock()
 
 MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable', 'python-daemon', "pyyaml", "event", "gevent.event", "lock", "gevent.lock", "gevent.pool", "wishbone.tools", "gevent.fileobject",
-  "gevent.server"]
+  "gevent.server", "amqp", "amqp.connection"]
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
