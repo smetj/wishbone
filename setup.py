@@ -28,7 +28,7 @@ import sys
 
 PROJECT = 'wishbone'
 VERSION = '0.5.0'
-install_requires = ['gevent>=1.0', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', "pyyaml"]
+install_requires = ['gevent>=1.0', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', "pyyaml", "msgpack-python"]
 
 try:
     long_description = open('README.rst', 'rt').read()
@@ -93,9 +93,10 @@ setup(
         'wishbone.encode': [
             'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
             'graphite = wishbone.module.graphite:Graphite',
+            'msgpack = wishbone.module.msgpackencode:MSGPackEncode'
         ],
         'wishbone.decode': [
-
+            'msgpack = wishbone.module.msgpackdecode:MSGPackDecode'
         ],
         'wishbone.function': [
             'header = wishbone.module.header:Header',
@@ -105,7 +106,8 @@ setup(
             'tcp = wishbone.module.tcpin:TCPIn',
             'testevent = wishbone.module.testevent:TestEvent',
             'disk = wishbone.module.diskin:DiskIn',
-            'amqp = wishbone.module.amqpin:AMQPIn'
+            'amqp = wishbone.module.amqpin:AMQPIn',
+            'dictgenerator = wishbone.module.dictgenerator:DictGenerator'
         ],
         'wishbone.output': [
             'tcp = wishbone.module.tcpout:TCPOut',
