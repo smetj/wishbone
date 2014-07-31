@@ -31,8 +31,7 @@ import argparse
 import multiprocessing
 import os
 import sys
-import pkg_resources
-from daemon import DaemonContext, pidfile
+from daemon import DaemonContext
 from gevent import sleep, signal
 
 
@@ -248,7 +247,7 @@ class RouterBootstrapProcess(multiprocessing.Process):
         Executed by Process when started.
         '''
 
-        router = RouterBootstrap(self.config, self.debug, self.queue_size, frequency)
+        router = RouterBootstrap(self.config, self.debug, self.queue_size, self.frequency)
         router.start()
 
 
