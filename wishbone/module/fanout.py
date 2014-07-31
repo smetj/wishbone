@@ -69,4 +69,4 @@ class Fanout(Actor):
 
     def consume(self, event):
 
-        self.submit(event, self.pool.queue.outbox)
+        self.pool.queue.outbox.put(event)
