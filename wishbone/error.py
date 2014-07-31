@@ -29,11 +29,17 @@ class QueueLocked(Exception):
 
 
 class QueueEmpty(Exception):
-    pass
+    def __init__(self, message, waitUntilFull, waitUntilContent):
+        Exception.__init__(self, message)
+        self.waitUntilFull = waitUntilFull
+        self.waitUntilContent = waitUntilContent
 
 
 class QueueFull(Exception):
-    pass
+    def __init__(self, message, waitUntilEmpty, waitUntilFree):
+        Exception.__init__(self, message)
+        self.waitUntilEmpty = waitUntilEmpty
+        self.waitUntilFree = waitUntilFree
 
 
 class QueueMissing(Exception):

@@ -109,7 +109,7 @@ class HumanLogFormat(Actor):
             event["data"][3],
             event["data"][4]))
         event["data"] = self.colorize(log, event["data"][0])
-        self.submit(event, self.pool.queue.outbox)
+        self.pool.queue.outbox.put(event)
 
     def doColorize(self, message, level):
         return self.colors[level] + message + "\x1B[0m"

@@ -22,10 +22,9 @@
 #
 #
 
-from wishbone.queue import Queue
 from wishbone.queue import QueuePool
 from wishbone.logging import Logging
-from wishbone.error import QueueEmpty, QueueFull, ReservedName, QueueConnected
+from wishbone.error import QueueEmpty, QueueFull, QueueConnected
 from gevent.pool import Group
 from gevent import spawn
 from gevent import sleep, socket
@@ -138,7 +137,7 @@ class Actor():
         self.logging.debug("Started with max queue size of %s events and metrics interval of %s seconds." % (self.size, self.frequency))
 
     def stop(self):
-        '''Kills all registered Consumers.'''
+        '''Stops the loop lock and waits until all registered consumers have exit.'''
 
         self.__loop = False
         self.threads.join()
@@ -146,8 +145,6 @@ class Actor():
         if hasattr(self, "postHook"):
             self.logging.debug("postHook() found, executing")
             self.postHook()
-
-        # self.flushQueuesToDisk()
 
     def submit(self, event, queue):
         '''A convenience function which submits <event> to <queue>
@@ -169,27 +166,34 @@ class Actor():
         while self.loop():
             try:
                 command = self.pool.queue.admin.get()
-            except QueueEmpty:
-                self.pool.queue.admin.waitUntilContent()
+            except QueueEmpty as err:
+                err.waitUntilContent()
             else:
                 print command
 
     def __consumer(self, function, queue):
         '''Greenthread which applies <function> to each element from <queue>'''
 
+        # def rollBack():
+        #     self.pool.queue.__dict__[queue].rescue(event)
+
         self.__run.wait()
 
         while self.loop():
             try:
                 event = self.pool.queue.__dict__[queue].get()
-            except QueueEmpty:
-                self.pool.queue.__dict__[queue].waitUntilContent()
+            except QueueEmpty as err:
+                err.waitUntilContent()
             else:
                 try:
                     function(event)
-                    self.submit(event, self.pool.queue.success)
+                except QueueFull as err:
+                    queue.rescue(event)  # this should be unmodified version
+                    err.waitUntilFree()
                 except Exception as err:
                     self.submit(event, self.pool.queue.failed)
+                else:
+                    self.submit(event, self.pool.queue.success)
 
     def __metricEmitter(self):
         '''A greenthread which collects the queue metrics at the defined interval.'''
