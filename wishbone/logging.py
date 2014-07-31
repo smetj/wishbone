@@ -23,8 +23,7 @@
 #
 #
 
-from wishbone.error import QueueLocked, QueueEmpty, QueueFull
-from gevent import spawn
+from wishbone.error import QueueFull
 from time import time
 from os import getpid
 
