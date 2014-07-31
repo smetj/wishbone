@@ -183,8 +183,8 @@ class AMQPIn(Actor):
         while self.loop():
             try:
                 event = self.pool.queue.ack.get()
-            except QueueEmpty:
-                self.pool.queue.ack.waitUntilContent()
+            except QueueEmpty as err:
+                err.waitUntilContent()
             else:
                 try:
                     self.channel.basic_ack(event["header"][self.name]["delivery_tag"])
