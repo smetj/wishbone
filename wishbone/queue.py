@@ -25,7 +25,7 @@
 
 from uuid import uuid4
 from collections import deque
-from wishbone.error import QueueLocked, QueueEmpty, QueueFull
+from wishbone.error import QueueEmpty, QueueFull, ReservedName
 from gevent import sleep
 from gevent.event import Event
 from time import time
@@ -170,7 +170,7 @@ class Queue():
         except IndexError:
             self.__empty.set()
             self.__full.clear()
-            raise QueueEmpty
+            raise QueueEmpty("No more elements left to consume.", self.waitUntilFull, self.waitUntilContent)
 
         self.__out += 1
         self.__free.set()
@@ -241,7 +241,7 @@ class Queue():
         if len(self.__q) == self.max_size:
             self.__empty.clear()
             self.__full.set()
-            raise QueueFull
+            raise QueueFull("Queue has reached capacity of %s elements" % (self.max_size), self.waitUntilEmpty, self.waitUntilFree)
 
         self.__q.append(element)
         self.__in += 1
