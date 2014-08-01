@@ -141,7 +141,7 @@ class AMQPIn(Actor):
 
     def consume(self, message):
         msg = {"header": {self.name: {"delivery_tag": message.delivery_info["delivery_tag"]}}, "data": str(message.body)}
-        self.pool.queue.outbox.put(msg)
+        self.submit(msg, self.pool.queue.outbox)
 
     def setupConnectivity(self):
 
