@@ -91,7 +91,12 @@ class TestEvent(Actor):
 
         while self.loop():
             event = {"header": {}, "data": "%s%s" % (self.message, self.number())}
-            self.pool.queue.outbox.put(event)
+            while self.loop():
+                try:
+                    self.pool.queue.outbox.put(event)
+                    break
+                except QueueFull as err:
+                    err.waitUntilFree()
             self.sleep()
 
         self.logging.info("Stopped producing events.")
