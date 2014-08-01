@@ -30,6 +30,7 @@ from gevent import spawn
 from gevent import sleep, socket
 from gevent.event import Event
 from time import time
+from copy import copy
 
 
 class Actor():
@@ -174,22 +175,20 @@ class Actor():
     def __consumer(self, function, queue):
         '''Greenthread which applies <function> to each element from <queue>'''
 
-        # def rollBack():
-        #     self.pool.queue.__dict__[queue].rescue(event)
-
         self.__run.wait()
 
         while self.loop():
             try:
                 event = self.pool.queue.__dict__[queue].get()
+                original_data = copy(event["data"])
             except QueueEmpty as err:
                 err.waitUntilContent()
             else:
                 try:
                     function(event)
                 except QueueFull as err:
-                    # print "Yikes (%s) %s" % (self.name, event)
-                    # self.pool.queue.__dict__[queue].rescue(event)  # this should be unmodified version
+                    event["data"] = original_data
+                    self.pool.queue.__dict__[queue].rescue(event)
                     err.waitUntilFree()
                 except Exception as err:
                     self.submit(event, self.pool.queue.failed)
