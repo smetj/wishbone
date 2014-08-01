@@ -83,12 +83,7 @@ class DiskIn(Actor):
                 while self.loop():
                     try:
                         event = pickle.load(f)
-                        while self.loop():
-                            try:
-                                self.pool.queue.outbox.put(event)
-                                break
-                            except QueueFull:
-                                self.pool.queue.outbox.waitUntilFree()
+                        self.submit(event, self.pool.queue.outbox)
                     except EOFError:
                         break
 

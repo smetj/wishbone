@@ -155,8 +155,8 @@ class Actor():
             try:
                 queue.put(event)
                 break
-            except QueueFull:
-                queue.waitUntilFree()
+            except QueueFull as err:
+                err.waitUntilEmpty()
 
     def __adminConsumer(self):
         '''Greenthread which consumes the admin queue.'''
@@ -173,7 +173,8 @@ class Actor():
                 print command
 
     def __consumer(self, function, queue):
-        '''Greenthread which applies <function> to each element from <queue>'''
+        '''Greenthread which applies <function> to each element from <queue>
+        '''
 
         self.__run.wait()
 
@@ -208,5 +209,5 @@ class Actor():
                             self.pool.queue.metrics.put({"header": {}, "data": (time(), "wishbone", socket.gethostname(), "queue.%s.%s.%s" % (self.name, queue, item), stats[item], '', ())})
                             break
                         except QueueFull:
-                            self.pool.queue.metrics.waitUntilFree()
+                            self.pool.queue.metrics.waitUntilEmpty()
             sleep(self.frequency)

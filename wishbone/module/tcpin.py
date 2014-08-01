@@ -128,7 +128,7 @@ class TCPIn(Actor):
     def __handleNoDelimiter(self, sock, address):
         sfile = sock.makefile()
         chunk = sfile.readlines()
-        self.pool.queue.outbox.put({'header': {}, 'data': ''.join(chunk)})
+        self.submit({'header': {}, 'data': ''.join(chunk)}, self.pool.queue.outbox)
         sfile.close()
         sock.close()
 
@@ -159,7 +159,7 @@ class TCPIn(Actor):
 
             if not chunk:
                 if len(data) > 0:
-                    self.pool.queue.outbox.put({'header': {}, 'data': ''.join(data)})
+                    self.submit({'header': {}, 'data': ''.join(data)}, self.pool.queue.outbox)
                 self.logging.debug("Client %s disconnected." % (str(address[0])))
                 break
 
