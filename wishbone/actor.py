@@ -188,7 +188,8 @@ class Actor():
                 try:
                     function(event)
                 except QueueFull as err:
-                    queue.rescue(event)  # this should be unmodified version
+                    # print "Yikes (%s) %s" % (self.name, event)
+                    # self.pool.queue.__dict__[queue].rescue(event)  # this should be unmodified version
                     err.waitUntilFree()
                 except Exception as err:
                     self.submit(event, self.pool.queue.failed)
