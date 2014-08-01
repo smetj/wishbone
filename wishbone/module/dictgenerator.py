@@ -25,6 +25,7 @@
 from random import choice, uniform, randint
 from gevent import sleep, spawn
 from wishbone import Actor
+from wishbone.error import QueueFull
 from wishbone.module import brit_a_z
 
 
@@ -91,7 +92,7 @@ class DictGenerator(Actor):
         else:
             self.generateKey = self.generateKeyNumber
 
-        if self.num_values == True:
+        if self.num_values:
             self.generateValue = self.generateValueNumber
         else:
             self.generateValue = self.pickWord
@@ -103,7 +104,7 @@ class DictGenerator(Actor):
         else:
             self.sleep = self.__doNoSleep
 
-        spawn (self.generateDicts)
+        spawn(self.generateDicts)
 
     def generateDicts(self):
 
