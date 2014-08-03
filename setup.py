@@ -28,7 +28,7 @@ import sys
 
 PROJECT = 'wishbone'
 VERSION = '0.5.0'
-install_requires = ['gevent>=1.0', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', "pyyaml", "msgpack-python"]
+install_requires = ['gevent>=1.0', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', "pyyaml", "msgpack-python", "pyzmq"]
 
 try:
     long_description = open('README.rst', 'rt').read()
@@ -107,7 +107,8 @@ setup(
             'testevent = wishbone.module.testevent:TestEvent',
             'disk = wishbone.module.diskin:DiskIn',
             'amqp = wishbone.module.amqpin:AMQPIn',
-            'dictgenerator = wishbone.module.dictgenerator:DictGenerator'
+            'dictgenerator = wishbone.module.dictgenerator:DictGenerator',
+            'subscriber = wishbone.module.zmqsubscriber:ZMQSubscriber'
         ],
         'wishbone.output': [
             'tcp = wishbone.module.tcpout:TCPOut',
@@ -115,7 +116,8 @@ setup(
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog',
             'disk = wishbone.module.diskout:DiskOut',
-            'amqp = wishbone.module.amqpout:AMQPOut'
+            'amqp = wishbone.module.amqpout:AMQPOut',
+            'publisher = wishbone.module.zmqpublisher:ZMQPublisher'
         ],
         'wishbone.contrib.flow': [
         ],
