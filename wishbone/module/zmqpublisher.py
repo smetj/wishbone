@@ -53,18 +53,25 @@ class ZMQPublisher(Actor):
         - timeout(int)(1)
            |  The time in seconds to timeout when connecting
 
+        - topic(str)("")
+           |  The default topic to use when none is set in the header.
+
 
     Queues:
 
         - inbox
            |  Incoming events submitted to the outside.
 
+    Expects the "topic" to use in event["header"][self.name]["topic"].
+    If that's doesn't exist, the value of <topic> is used.
+
     '''
 
-    def __init__(self, name, size=100, frequency=1, port=19283, timeout=10):
+    def __init__(self, name, size=100, frequency=1, port=19283, timeout=10, topic=""):
         Actor.__init__(self, name, size, frequency)
         self.port = port
         self.timeout = timeout
+        self.topic = topic
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
@@ -74,4 +81,12 @@ class ZMQPublisher(Actor):
         self.socket.bind("tcp://*:%s" % self.port)
 
     def consume(self, event):
-        self.socket.send("%s %s" % ("test", event["data"]))
+
+        if self.name in event["header"] and "topic" in event["header"][self.name]:
+            topic = event["header"][self.name]["topic"]
+        else:
+            topic = self.topic
+        try:
+            self.socket.send("%s %s" % (topic, event["data"]))
+        except Exception as err:
+            self.loggin.error("Failed to submit message.  Reason %s" % (err))
