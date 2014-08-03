@@ -84,6 +84,6 @@ class ZMQSubscriber(Actor):
 
         while self.loop():
             string = self.socket.recv()
-            messagedata = string.split()[1:]
+            messagedata = string.split(" ")[1:]
             messagedata = " ".join(messagedata)
             self.submit({"header": {}, "data": messagedata}, self.pool.queue.outbox)
