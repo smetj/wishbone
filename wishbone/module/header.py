@@ -42,9 +42,6 @@ class Header(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
-        - prefix(str)
-           |  Some prefix to put in front of the metric name.
-
         - key(str)(self.name)
            |  The header key to store the information.
 
