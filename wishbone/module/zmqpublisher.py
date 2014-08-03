@@ -82,11 +82,13 @@ class ZMQPublisher(Actor):
 
     def consume(self, event):
 
-        if self.name in event["header"] and "topic" in event["header"][self.name]:
+        try:
             topic = event["header"][self.name]["topic"]
-        else:
+        except KeyError:
             topic = self.topic
+
         try:
             self.socket.send("%s %s" % (topic, event["data"]))
         except Exception as err:
-            self.loggin.error("Failed to submit message.  Reason %s" % (err))
+            self.logging.error("Failed to submit message.  Reason %s" % (err))
+            raise  # reraise the exception.
