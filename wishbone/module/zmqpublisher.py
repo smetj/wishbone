@@ -53,6 +53,11 @@ class ZMQPublisher(Actor):
         - timeout(int)(1)
            |  The time in seconds to timeout when connecting
 
+        - type(str)("topic")
+           |  The type of publisher. Possible values are:
+           |  topic: Subscribers receive messages based on the topic.
+           |  fanout: All subscribers
+
         - topic(str)("")
            |  The default topic to use when none is set in the header.
 
