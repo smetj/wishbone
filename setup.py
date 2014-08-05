@@ -28,7 +28,7 @@ import sys
 
 PROJECT = 'wishbone'
 VERSION = '0.5.0'
-install_requires = ['gevent>=1.0', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', "pyyaml", "msgpack-python", "pyzmq"]
+install_requires = ['gevent>=1.0', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', "pyyaml", "msgpack-python", "pyzmq", "amqp"]
 
 try:
     long_description = open('README.rst', 'rt').read()
