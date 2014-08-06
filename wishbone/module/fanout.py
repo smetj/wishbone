@@ -27,9 +27,9 @@ from wishbone import Actor
 
 class Fanout(Actor):
 
-    '''**Funnel multiple incoming queues to 1 outgoing queue.**
+    '''**Forward each incoming message to all connected queues.**
 
-    Funnel multiple incoming queues to 1 outgoing queue.
+    Forward each incoming message to all connected queues.
 
     Parameters:
 
@@ -42,11 +42,6 @@ class Fanout(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
-        - dupe(bool)(False)
-           |  Determines whether we send references to the
-              original event to all destination or an
-              actual copy.
-
 
     Queues:
 
@@ -55,7 +50,7 @@ class Fanout(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, dupe=False):
+    def __init__(self, name, size=100, frequency=1):
 
         Actor.__init__(self, name, size, frequency)
         self.name = name
