@@ -91,8 +91,8 @@ setup(
             'roundrobin = wishbone.module.roundrobin:RoundRobin'
         ],
         'wishbone.encode': [
-            'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
             'graphite = wishbone.module.graphite:Graphite',
+            'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
             'msgpack = wishbone.module.msgpackencode:MSGPackEncode'
         ],
         'wishbone.decode': [
@@ -103,21 +103,21 @@ setup(
             # 'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
         ],
         'wishbone.input': [
-            'tcp = wishbone.module.tcpin:TCPIn',
-            'testevent = wishbone.module.testevent:TestEvent',
-            'disk = wishbone.module.diskin:DiskIn',
             'amqp = wishbone.module.amqpin:AMQPIn',
             'dictgenerator = wishbone.module.dictgenerator:DictGenerator',
-            'subscriber = wishbone.module.zmqsubscriber:ZMQSubscriber'
+            'disk = wishbone.module.diskin:DiskIn',
+            'subscriber = wishbone.module.zmqsubscriber:ZMQSubscriber',
+            'tcp = wishbone.module.tcpin:TCPIn',
+            'testevent = wishbone.module.testevent:TestEvent'
         ],
         'wishbone.output': [
-            'tcp = wishbone.module.tcpout:TCPOut',
+            'amqp = wishbone.module.amqpout:AMQPOut',
+            'disk = wishbone.module.diskout:DiskOut',
             'null = wishbone.module.null:Null',
+            'publisher = wishbone.module.zmqpublisher:ZMQPublisher',
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog',
-            'disk = wishbone.module.diskout:DiskOut',
-            'amqp = wishbone.module.amqpout:AMQPOut',
-            'publisher = wishbone.module.zmqpublisher:ZMQPublisher'
+            'tcp = wishbone.module.tcpout:TCPOut'
         ],
         'wishbone.contrib.flow': [
         ],
