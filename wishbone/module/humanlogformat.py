@@ -28,7 +28,8 @@ from wishbone import Actor
 from wishbone.error import QueueFull
 from time import strftime, localtime
 from time import time
-
+import os
+import sys
 
 class HumanLogFormat(Actor):
 
@@ -68,7 +69,7 @@ class HumanLogFormat(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size=100, frequency=1, colorize=True):
+    def __init__(self, name, size=100, frequency=1, colorize=True, ident=None):
         Actor.__init__(self, name, size, frequency)
         self.name = name
         self.levels = {
@@ -101,10 +102,15 @@ class HumanLogFormat(Actor):
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
 
+        if ident is None:
+            self.ident = os.path.basename(sys.argv[0])
+        else:
+            self.ident = ident
+
     def consume(self, event):
         log = ("%s %s %s %s: %s" % (
             strftime("%Y-%m-%dT%H:%M:%S", localtime(event["data"][1])),
-            "pid-%s" % (event["data"][2]),
+            "%s[%s]:" % (self.ident, event["data"][2]),
             self.levels[event["data"][0]],
             event["data"][3],
             event["data"][4]))
