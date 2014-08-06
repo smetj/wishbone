@@ -57,6 +57,7 @@ class Default():
 
     def __init__(self, size=100, frequency=1):
         signal(2, self.stop)
+        signal(15, self.stop)
         self.pool = ModulePool()
         self.size = size
         self.frequency = frequency
