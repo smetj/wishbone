@@ -53,12 +53,14 @@ class BootStrap():
         start.add_argument('--pid', type=str, dest='pid', default='%s/wishbone.pid' % (os.getcwd()), help='The pidfile to use.')
         start.add_argument('--queue-size', type=int, dest='queue_size', default=100, help='The queue size to use.')
         start.add_argument('--frequency', type=int, dest='frequency', default=1, help='The metric frequency.')
+        start.add_argument('--id', type=str, dest='ident', default=None, help='An identification string.')
 
         debug = subparsers.add_parser('debug', description="Starts a Wishbone instance in foreground and writes logs to STDOUT.")
         debug.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
         debug.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
         debug.add_argument('--queue-size', type=int, dest='queue_size', default=100, help='The queue size to use.')
         debug.add_argument('--frequency', type=int, dest='frequency', default=1, help='The metric frequency.')
+        debug.add_argument('--id', type=str, dest='ident', default=None, help='An identification string.')
 
         stop = subparsers.add_parser('stop', description="Tries to gracefully stop the Wishbone instance.")
         stop.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
@@ -107,7 +109,7 @@ Build event pipeline servers with minimal effort.
 
 """ % (get_distribution('wishbone').version)
 
-    def debug(self, command, config, instances, queue_size, frequency):
+    def debug(self, command, config, instances, queue_size, frequency, ident):
         '''
         Handles the Wishbone debug command.
         '''
@@ -115,12 +117,12 @@ Build event pipeline servers with minimal effort.
         config = self.config.load(config)
 
         if instances == 1:
-            self.routers.append(RouterBootstrap(config, debug=True, queue_size=queue_size, frequency=frequency))
+            self.routers.append(RouterBootstrap(config, debug=True, queue_size=queue_size, frequency=frequency, ident=ident))
             self.routers[-1].start()
 
         else:
             for x in xrange(instances):
-                self.routers.append(RouterBootstrapProcess(config, debug=True, queue_size=queue_size, frequency=frequency))
+                self.routers.append(RouterBootstrapProcess(config, debug=True, queue_size=queue_size, frequency=frequency, ident=ident))
                 self.routers[-1].start()
 
             while multiprocessing.active_children():
@@ -163,7 +165,7 @@ Build event pipeline servers with minimal effort.
         except Exception as err:
             print "Failed to load module %s.%s.%s." % (category, group, module)
 
-    def start(self, command, config, instances, pid, queue_size, frequency):
+    def start(self, command, config, instances, pid, queue_size, frequency, ident):
         '''
         Handles the Wishbone start command.
         '''
@@ -176,7 +178,7 @@ Build event pipeline servers with minimal effort.
             try:
                 with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
                     self.pid.create([os.getpid()])
-                    instance = RouterBootstrap(config, debug=False, queue_size=queue_size, frequency=frequency)
+                    instance = RouterBootstrap(config, debug=False, queue_size=queue_size, frequency=frequency, ident=ident)
                     instance.start()
             except Exception as err:
                 sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
@@ -187,7 +189,7 @@ Build event pipeline servers with minimal effort.
                     pids = []
                     processes = []
                     for counter in xrange(instances):
-                        processes.append(RouterBootstrapProcess(config, debug=False, queue_size=queue_size, frequency=frequency))
+                        processes.append(RouterBootstrapProcess(config, debug=False, queue_size=queue_size, frequency=frequency, ident=ident))
                         processes[-1].start()
                         pids.append(processes[-1].pid)
                     self.pid.create(pids)
@@ -254,9 +256,10 @@ class RouterBootstrapProcess(multiprocessing.Process):
     Wraps RouterBootstrap into a Process class.
     '''
 
-    def __init__(self, config, debug=False, queue_size=100, frequency=1):
+    def __init__(self, config, debug=False, queue_size=100, frequency=1, ident=None):
         multiprocessing.Process.__init__(self)
         self.config = config
+        self.ident = indent
         self.debug = debug
         self.queue_size = queue_size
         self.daemon = True
@@ -266,7 +269,7 @@ class RouterBootstrapProcess(multiprocessing.Process):
         Executed by Process when started.
         '''
 
-        router = RouterBootstrap(self.config, self.debug, self.queue_size, self.frequency)
+        router = RouterBootstrap(self.config, self.debug, self.queue_size, self.frequency, self.ident)
         router.start()
 
 
@@ -276,8 +279,9 @@ class RouterBootstrap():
     Setup, configure and a router process.
     '''
 
-    def __init__(self, config, debug=False, queue_size=100, frequency=1):
+    def __init__(self, config, debug=False, queue_size=100, frequency=1, ident=None):
         self.config = config
+        self.ident = ident
         self.debug = debug
         self.router = Default(size=queue_size, frequency=frequency)
         self.module = Module()
@@ -323,7 +327,7 @@ class RouterBootstrap():
 
         try:
             syslog = self.loadModule("wishbone.output.syslog")
-            self.router.registerModule(syslog, "syslog")
+            self.router.registerModule(syslog, "syslog", ident=self.ident)
             self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("syslog"), "inbox")
         except QueueConnected:
             pass
@@ -348,7 +352,7 @@ class RouterBootstrap():
         log_stdout = self.loadModule("wishbone.output.stdout")
         log_human = self.loadModule("wishbone.encode.humanlogformat")
         self.router.registerModule(log_stdout, "log_stdout")
-        self.router.registerModule(log_human, "log_format")
+        self.router.registerModule(log_human, "log_format", ident=self.ident)
         self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("log_format"), "inbox")
         self.router.pool.getModule("log_format").connect("outbox", self.router.pool.getModule("log_stdout"), "inbox")
 
