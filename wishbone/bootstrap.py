@@ -42,7 +42,7 @@ class BootStrap():
     Parses command line arguments and bootstraps the Wishbone instance.
     '''
 
-    def __init__(self, description="Wishbone bootstrap server. Building async event pipeline servers."):
+    def __init__(self, description="Wishbone bootstrap server. Build event pipeline servers with minimal effort."):
 
         parser = argparse.ArgumentParser(description=description)
         subparsers = parser.add_subparsers(dest='command')
