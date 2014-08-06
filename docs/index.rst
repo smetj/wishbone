@@ -75,22 +75,21 @@ executable using the *--config* parameter pointing to the bootstrap file.
 
 .. code-block:: sh
 
-    [smetj@indigo ~]$ wishbone debug --config test.yaml
-    2014-07-19T23:56:53 pid-8154 debug metrics_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-07-19T23:56:53 pid-8154 debug metrics_funnel: preHook() found, executing
-    2014-07-19T23:56:53 pid-8154 debug logs_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-07-19T23:56:53 pid-8154 debug logs_funnel: preHook() found, executing
-    2014-07-19T23:56:53 pid-8154 debug mixing: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-07-19T23:56:53 pid-8154 debug mixing: preHook() found, executing
-    2014-07-19T23:56:53 pid-8154 debug input: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-07-19T23:56:53 pid-8154 debug input: preHook() found, executing
-    2014-07-19T23:56:53 pid-8154 debug output1: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-07-19T23:56:53 pid-8154 debug output2: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-07-19T23:56:53 pid-8154 debug log_stdout: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-07-19T23:56:53 pid-8154 debug log_format: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-07-19T23:56:53 pid-8154 debug syslog: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-07-19T23:56:53 pid-8154 debug syslog: preHook() found, executing
-    I am number two: test
+    [smetj@indigo ~]$ wishbone debug --config simple.yaml --id docker
+    2014-08-06T23:17:41 wishbone[6609]: debug metrics_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug metrics_funnel: preHook() found, executing
+    2014-08-06T23:17:41 wishbone[6609]: debug logs_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug logs_funnel: preHook() found, executing
+    2014-08-06T23:17:41 wishbone[6609]: debug mixing: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug mixing: preHook() found, executing
+    2014-08-06T23:17:41 wishbone[6609]: debug input: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug input: preHook() found, executing
+    2014-08-06T23:17:41 wishbone[6609]: debug output1: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug output2: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug log_stdout: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug log_format: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug syslog: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug syslog: preHook() found, executing
     I am number one: test
     I am number two: test
     I am number one: test
@@ -98,9 +97,9 @@ executable using the *--config* parameter pointing to the bootstrap file.
     I am number one: test
     I am number two: test
     I am number one: test
-    ^C2014-07-19T23:56:56 pid-8154 debug syslog: postHook() found, executing
-    2014-07-19T23:56:56 pid-8154 debug syslog: postHook() found, executing
-    2014-07-19T23:56:57 pid-8154 informational input: Stopped producing events.
+    ^C2014-08-06T23:18:09 wishbone[6609]: debug syslog: postHook() found, executing
+    2014-08-06T23:18:09 wishbone[6609]: debug syslog: postHook() found, executing
+    2014-08-06T23:18:09 wishbone[6609]: informational input: Stopped producing events.
     [smetj@indigo ~]$
 
 
