@@ -33,6 +33,11 @@ wishbone.input.dictgenerator
 .. autoclass:: wishbone.module.DictGenerator
 
 
+wishbone.input.subscriber
+----------------------------
+.. autoclass:: wishbone.module.ZMQSubscriber
+
+
 Output modules
 **************
 
@@ -71,6 +76,11 @@ wishbone.output.null
 --------------------
 .. autoclass:: wishbone.module.Null
 
+--------
+
+wishbone.output.publisher
+-------------------------
+.. autoclass:: wishbone.module.ZMQPublisher
 
 
 Flow modules
@@ -111,12 +121,12 @@ wishbone.encode.graphite
 
 
 wishbone.encode.humanlogformat
-------------------------
+------------------------------
 .. autoclass:: wishbone.module.HumanLogFormat
 
 
 wishbone.encode.msgpack
-------------------------
+-----------------------
 .. autoclass:: wishbone.module.MSGPackEncode
 
 
@@ -124,5 +134,5 @@ Decode modules
 **************
 
 wishbone.decode.msgpack
-------------------------
+-----------------------
 .. autoclass:: wishbone.module.MSGPackDecode
