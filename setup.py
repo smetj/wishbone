@@ -106,7 +106,7 @@ setup(
             'amqp = wishbone.module.amqpin:AMQPIn',
             'dictgenerator = wishbone.module.dictgenerator:DictGenerator',
             'disk = wishbone.module.diskin:DiskIn',
-            'subscriber = wishbone.module.zmqsubscriber:ZMQSubscriber',
+            'topic = wishbone.module.zmqtopicin:ZMQTopicIn',
             'tcp = wishbone.module.tcpin:TCPIn',
             'testevent = wishbone.module.testevent:TestEvent'
         ],
@@ -114,7 +114,7 @@ setup(
             'amqp = wishbone.module.amqpout:AMQPOut',
             'disk = wishbone.module.diskout:DiskOut',
             'null = wishbone.module.null:Null',
-            'publisher = wishbone.module.zmqpublisher:ZMQPublisher',
+            'topic = wishbone.module.zmqtopicout:ZMQTopicOut',
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog',
             'tcp = wishbone.module.tcpout:TCPOut'
