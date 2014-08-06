@@ -45,34 +45,49 @@ You can list all available modules using the *list* command:
 .. code-block:: sh
 
     $ wishbone list
-    +------------------+----------+----------------+---------+------------------------------------------------------------+
-    | Category         | Group    | Module         | Version | Description                                                |
-    +------------------+----------+----------------+---------+------------------------------------------------------------+
-    |                  |          |                |         |                                                            |
-    | wishbone         | flow     | funnel         |   0.5.0 | Funnel multiple incoming queues to 1 outgoing queue.       |
-    |                  |          | fanout         |   0.5.0 | Funnel multiple incoming queues to 1 outgoing queue.       |
-    |                  |          | roundrobin     |   0.5.0 | Round-robins incoming events to all connected queues.      |
-    |                  |          |                |         |                                                            |
-    |                  | encode   | humanlogformat |   0.5.0 | Formats Wishbone log events.                               |
-    |                  |          | graphite       |   0.5.0 | Converts the internal metric format to Graphite format.    |
-    |                  |          |                |         |                                                            |
-    |                  | function | header         |   0.5.0 | Adds information to event headers.                         |
-    |                  |          |                |         |                                                            |
-    |                  | input    | disk           |   0.5.0 | Reads messages from a disk buffer.                         |
-    |                  |          | testevent      |   0.5.0 | Generates a test event at the chosen interval.             |
-    |                  |          | tcp            |   0.5.0 | A Wishbone input module which listens on a TCP socket.     |
-    |                  |          | amqp           |   0.5.0 | Consumes messages from AMQP.                               |
-    |                  |          |                |         |                                                            |
-    |                  | output   | disk           |   0.5.0 | Writes messages to a disk buffer.                          |
-    |                  |          | amqp           |   0.5.0 | Produces messages to AMQP.                                 |
-    |                  |          | stdout         |   0.5.0 | Prints incoming events to STDOUT.                          |
-    |                  |          | tcp            |   0.5.0 | A Wishbone ouput module which writes data to a TCP socket. |
-    |                  |          | syslog         |   0.5.0 | Writes log events to syslog.                               |
-    |                  |          | null           |   0.5.0 | Purges incoming events.                                    |
-    |                  |          |                |         |                                                            |
-    | wishbone.contrib | function | skeleton       |     0.1 | A bare minimum Wishbone function module.                   |
-    |                  |          |                |         |                                                            |
-    +------------------+----------+----------------+---------+------------------------------------------------------------+
+              __       __    __
+    .--.--.--|__.-----|  |--|  |--.-----.-----.-----.
+    |  |  |  |  |__ --|     |  _  |  _  |     |  -__|
+    |________|__|_____|__|__|_____|_____|__|__|_____|
+                                       version 0.5.0
+
+    Build event pipeline servers with minimal effort.
+
+
+    Available modules:
+    +----------+----------+----------------+---------+------------------------------------------------------------+
+    | Category | Group    | Module         | Version | Description                                                |
+    +----------+----------+----------------+---------+------------------------------------------------------------+
+    |          |          |                |         |                                                            |
+    | wishbone | flow     | funnel         |   0.5.0 | Funnel multiple incoming queues to 1 outgoing queue.       |
+    |          |          | fanout         |   0.5.0 | Funnel multiple incoming queues to 1 outgoing queue.       |
+    |          |          | roundrobin     |   0.5.0 | Round-robins incoming events to all connected queues.      |
+    |          |          |                |         |                                                            |
+    |          | encode   | humanlogformat |   0.5.0 | Formats Wishbone log events.                               |
+    |          |          | msgpack        |   0.5.0 | Encodes events to MSGPack format.                          |
+    |          |          | graphite       |   0.5.0 | Converts the internal metric format to Graphite format.    |
+    |          |          |                |         |                                                            |
+    |          | decode   | msgpack        |   0.5.0 | Decodes events from MSGPack format.                        |
+    |          |          |                |         |                                                            |
+    |          | function | header         |   0.5.0 | Adds information to event headers.                         |
+    |          |          |                |         |                                                            |
+    |          | input    | amqp           |   0.5.0 | Consumes messages from AMQP.                               |
+    |          |          | testevent      |   0.5.0 | Generates a test event at the chosen interval.             |
+    |          |          | tcp            |   0.5.0 | A Wishbone input module which listens on a TCP socket.     |
+    |          |          | subscriber     |   0.5.0 | Subscribes to one or more ZeroMQ publishers.               |
+    |          |          | dictgenerator  |   0.5.0 | Generates random dictionaries.                             |
+    |          |          | disk           |   0.5.0 | Reads messages from a disk buffer.                         |
+    |          |          |                |         |                                                            |
+    |          | output   | publisher      |   0.5.0 | Publishes data to one or more ZeroMQ receivers.            |
+    |          |          | null           |   0.5.0 | Purges incoming events.                                    |
+    |          |          | amqp           |   0.5.0 | Produces messages to AMQP.                                 |
+    |          |          | stdout         |   0.5.0 | Prints incoming events to STDOUT.                          |
+    |          |          | tcp            |   0.5.0 | A Wishbone ouput module which writes data to a TCP socket. |
+    |          |          | syslog         |   0.5.0 | Writes log events to syslog.                               |
+    |          |          | disk           |   0.5.0 | Writes messages to a disk buffer.                          |
+    |          |          |                |         |                                                            |
+    +----------+----------+----------------+---------+------------------------------------------------------------+
+
 
 
 To read the help and module instructions use the **show** command:
@@ -80,8 +95,21 @@ To read the help and module instructions use the **show** command:
 .. code-block:: sh
 
     $ wishbone show --module wishbone.input.testevent
-    Module "wishbone.input.testevent" version 0.5.0
-    ===============================================
+              __       __    __
+    .--.--.--|__.-----|  |--|  |--.-----.-----.-----.
+    |  |  |  |  |__ --|     |  _  |  _  |     |  -__|
+    |________|__|_____|__|__|_____|_____|__|__|_____|
+                                       version 0.5.0
+
+    Build event pipeline servers with minimal effort.
+
+
+
+    ========================
+    wishbone.input.testevent
+    ========================
+
+    Version: 0.5.0
 
     Generates a test event at the chosen interval.
     ----------------------------------------------
@@ -94,28 +122,31 @@ To read the help and module instructions use the **show** command:
 
         Parameters:
 
-            -   name(str)
-                The name of the module.
+            - name(str)
+               |  The name of the module.
 
-            -   size(int)
-                The default max length of each queue.
+            - size(int)
+               |  The default max length of each queue.
 
-            -   frequency(int)
-                The frequency in seconds to generate metrics.
+            - frequency(int)
+               |  The frequency in seconds to generate metrics.
 
-            - interval (float):     The interval in seconds between each generated event.
-                                    A value of 0 means as fast as possible.
-                                    default: 1
+            - interval(float)(1)
+               |  The interval in seconds between each generated event.
+               |  A value of 0 means as fast as possible.
 
-            - message (string):     The content of the test message.
-                                    default: "test"
+            - message(string)("test")
+               |  The content of the test message.
 
-            - numbered (bool):      When true, appends a sequential number to the end.
-                                    default: False
+            - numbered(bool)
+               |  When true, appends a sequential number to the end.
+
 
         Queues:
 
-            - outbox:    Contains the generated events.
+            - outbox
+               |  Contains the generated events.
+
 
 
 
