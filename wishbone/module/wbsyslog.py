@@ -56,14 +56,18 @@ class Syslog(Actor):
            |  incoming events
     '''
 
-    def __init__(self, name, size=100, frequency=1):
+    def __init__(self, name, size=100, frequency=1, ident=None):
         Actor.__init__(self, name, size, frequency)
         self.name = name
+        if ident is None:
+            self.ident = os.path.basename(sys.argv[0])
+        else:
+            self.ident = ident
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        syslog.openlog("%s[%s]" % (os.path.basename(sys.argv[0]), os.getpid()))
+        syslog.openlog("%s[%s]" % (self.ident, os.getpid()))
 
     def consume(self, event):
         syslog.syslog(event["data"][0], "%s: %s" % (event["data"][3], event["data"][4]))
