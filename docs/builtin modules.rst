@@ -33,9 +33,9 @@ wishbone.input.dictgenerator
 .. autoclass:: wishbone.module.DictGenerator
 
 
-wishbone.input.subscriber
+wishbone.input.topic
 ----------------------------
-.. autoclass:: wishbone.module.ZMQSubscriber
+.. autoclass:: wishbone.module.ZMQTopicIn
 
 
 Output modules
@@ -78,9 +78,9 @@ wishbone.output.null
 
 --------
 
-wishbone.output.publisher
+wishbone.output.topic
 -------------------------
-.. autoclass:: wishbone.module.ZMQPublisher
+.. autoclass:: wishbone.module.ZMQTopicOut
 
 
 Flow modules
