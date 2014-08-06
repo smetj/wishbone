@@ -33,6 +33,7 @@ import os
 import sys
 from daemon import DaemonContext
 from gevent import sleep, signal
+from pkg_resources import get_distribution
 
 
 class BootStrap():
@@ -91,6 +92,21 @@ class Dispatch():
         self.__stopping = False
         self.module_manager = ModuleManager()
 
+    def generateHeader(self):
+        '''
+        Prints a header.
+        '''
+
+        return """          __       __    __
+.--.--.--|__.-----|  |--|  |--.-----.-----.-----.
+|  |  |  |  |__ --|     |  _  |  _  |     |  -__|
+|________|__|_____|__|__|_____|_____|__|__|_____|
+                                   version %s
+
+Build event pipeline servers with minimal effort.
+
+""" % (get_distribution('wishbone').version)
+
     def debug(self, command, config, instances, queue_size, frequency):
         '''
         Handles the Wishbone debug command.
@@ -114,6 +130,8 @@ class Dispatch():
 
     def list(self, command, group, category=None):
 
+        print self.generateHeader()
+        print "Available modules:"
         print self.module_manager.getModuleTable(category, group)
 
     def show(self, command, module):
@@ -121,6 +139,7 @@ class Dispatch():
         Shows the help message of a module.
         '''
 
+        print self.generateHeader()
         try:
             (category, group, module) = module.split('.')
         except ValueError:
