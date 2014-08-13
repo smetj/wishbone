@@ -368,7 +368,10 @@ class RouterBootstrap():
 
 
 def main():
-    bootstrap = BootStrap()
+    try:
+        bootstrap = BootStrap()
+    except Exception as err:
+        print "Failed to bootstrap instance.  Reason: %s" % (err)
 
 if __name__ == '__main__':
     main()
