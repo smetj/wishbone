@@ -30,7 +30,7 @@ from gevent import spawn, sleep
 
 class ZMQTopicIn(Actor):
 
-    '''**Subscribes to one or more ZeroMQ Topic out modules.**
+    '''**Subscribes to one or more ZeroMQ Topic publish modules.**
 
     Consumes data from one or more ZeroMQ publishers.
 

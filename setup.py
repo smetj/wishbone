@@ -108,7 +108,8 @@ setup(
             'disk = wishbone.module.diskin:DiskIn',
             'topic = wishbone.module.zmqtopicin:ZMQTopicIn',
             'tcp = wishbone.module.tcpin:TCPIn',
-            'testevent = wishbone.module.testevent:TestEvent'
+            'testevent = wishbone.module.testevent:TestEvent',
+            'pull = wishbone.module.zmqpullin:ZMQPullIn'
         ],
         'wishbone.output': [
             'amqp = wishbone.module.amqpout:AMQPOut',
@@ -117,7 +118,8 @@ setup(
             'topic = wishbone.module.zmqtopicout:ZMQTopicOut',
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog',
-            'tcp = wishbone.module.tcpout:TCPOut'
+            'tcp = wishbone.module.tcpout:TCPOut',
+            'push = wishbone.module.zmqpushout:ZMQPushOut'
         ],
         'wishbone.contrib.flow': [
         ],
