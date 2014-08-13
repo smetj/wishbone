@@ -50,7 +50,7 @@ class ModulePool():
         try:
             return getattr(self.module, name)
         except AttributeError:
-            raise NoSuchModule(name)
+            raise NoSuchModule("Could not find module %s" % name)
 
 
 class Default():
