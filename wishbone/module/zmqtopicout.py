@@ -29,7 +29,7 @@ import zmq.green as zmq
 
 class ZMQTopicOut(Actor):
 
-    '''**Publishes data to one or more ZeroMQ Topic in modules.**
+    '''**Publishes data to one or more ZeroMQ Topic subscribe modules.**
 
     Expects wishbone.input.topic modules to take the initiative and connect to
     this module.  The clients subscribe to a topic of interest.  When multiple
