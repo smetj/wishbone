@@ -110,7 +110,8 @@ setup(
             'topic = wishbone.module.zmqtopicin:ZMQTopicIn',
             'tcp = wishbone.module.tcpin:TCPIn',
             'testevent = wishbone.module.testevent:TestEvent',
-            'pull = wishbone.module.zmqpullin:ZMQPullIn'
+            'pull = wishbone.module.zmqpullin:ZMQPullIn',
+            'udp = wishbone.module.udpin:UDPIn'
         ],
         'wishbone.output': [
             'amqp = wishbone.module.amqpout:AMQPOut',
