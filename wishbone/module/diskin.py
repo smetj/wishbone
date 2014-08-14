@@ -23,8 +23,6 @@
 #
 
 from wishbone import Actor
-from wishbone.error import QueueFull, QueueEmpty
-
 import cPickle as pickle
 from gevent.fileobject import FileObjectThread
 from gevent import spawn, sleep
