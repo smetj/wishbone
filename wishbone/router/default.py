@@ -24,8 +24,7 @@
 
 from wishbone.module import Funnel
 from wishbone.error import ModuleInitFailure, NoSuchModule
-from gevent import signal, sleep, event
-import sys
+from gevent import signal, event
 
 
 class Container():

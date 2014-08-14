@@ -162,7 +162,7 @@ Build event pipeline servers with minimal effort.
             print title
             print "-"*len(title)
             print self.module_manager.getModuleDoc(category, group, module)
-        except Exception as err:
+        except Exception:
             print "Failed to load module %s.%s.%s." % (category, group, module)
 
     def start(self, command, config, instances, pid, queue_size, frequency, ident):
@@ -259,7 +259,7 @@ class RouterBootstrapProcess(multiprocessing.Process):
     def __init__(self, config, debug=False, queue_size=100, frequency=1, ident=None):
         multiprocessing.Process.__init__(self)
         self.config = config
-        self.ident = indent
+        self.ident = ident
         self.debug = debug
         self.queue_size = queue_size
         self.daemon = True
@@ -369,7 +369,7 @@ class RouterBootstrap():
 
 def main():
     try:
-        bootstrap = BootStrap()
+        BootStrap()
     except Exception as err:
         print "Failed to bootstrap instance.  Reason: %s" % (err)
 

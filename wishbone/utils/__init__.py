@@ -71,20 +71,6 @@ class Module():
     def __init__(self):
         pass
 
-    def extractSummary(self, entrypoint):
-        '''
-        Extracts and returns a module's docstring using the entrypoint.
-        '''
-
-        try:
-            doc = entrypoint.load().__doc__
-        except Exception as err:
-            return "! -> Unable to load.  Reason: %s" % (err)
-        try:
-            return re.search('.*?\*\*(.*?)\*\*', doc, re.DOTALL).group(1)
-        except:
-            return "No description found."
-
     def getVersion(self, entrypoint):
         '''
         Extracts and returns a module's version.
@@ -94,7 +80,7 @@ class Module():
 
         try:
             return pkg_resources.get_distribution(modulename).version
-        except Exception as err:
+        except Exception:
             return "Unknown"
 
     def load(self, entrypoint):
@@ -182,7 +168,7 @@ class PIDFile():
                 if self.__isAlive(pid):
                     return True
             return False
-        except Exception as err:
+        except Exception:
             return False
 
     def __isAlive(self, pid):
