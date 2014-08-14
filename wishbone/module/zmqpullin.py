@@ -24,7 +24,6 @@
 
 
 from wishbone import Actor
-from wishbone.error import QueueFull
 from gevent import spawn
 import zmq.green as zmq
 

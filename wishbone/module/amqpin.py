@@ -24,9 +24,9 @@
 
 from gevent import monkey;monkey.patch_socket()
 from wishbone import Actor
-from wishbone.error import QueueFull, QueueEmpty
+from wishbone.error import QueueEmpty
 from amqp.connection import Connection as amqp_connection
-from gevent import sleep, spawn, event
+from gevent import sleep, spawn
 
 
 class AMQPIn(Actor):
