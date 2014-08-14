@@ -26,7 +26,8 @@ from random import choice, uniform, randint
 from gevent import sleep, spawn
 from wishbone import Actor
 from wishbone.error import QueueFull
-from wishbone.module import brit_a_z
+import os
+
 
 
 class DictGenerator(Actor):
@@ -81,7 +82,7 @@ class DictGenerator(Actor):
         self.num_values_max = num_values_max
         self.min_elements = min_elements
         self.max_elements = max_elements
-        self.wordlist = brit_a_z.wordlist
+        self.wordlist = self.readWordlist()
         self.interval = interval
         self._total = 0
 
@@ -96,6 +97,10 @@ class DictGenerator(Actor):
             self.generateValue = self.generateValueNumber
         else:
             self.generateValue = self.pickWord
+
+    def readWordlist(self):
+        with open("%s/../data/wordlist.txt" % (os.path.dirname(__file__))) as f:
+            return f.readlines()
 
     def preHook(self):
 

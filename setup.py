@@ -82,6 +82,7 @@ setup(
     install_requires=install_requires,
     namespace_packages=[],
     packages=find_packages(),
+    package_data={'': ['data/wordlist.txt']},
     zip_safe=False,
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
