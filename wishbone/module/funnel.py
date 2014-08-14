@@ -23,7 +23,6 @@
 #
 
 from wishbone import Actor
-from wishbone.error import QueueFull
 
 
 class Funnel(Actor):
