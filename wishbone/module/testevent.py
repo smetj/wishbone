@@ -23,8 +23,7 @@
 #
 
 from wishbone import Actor
-from wishbone.error import QueueFull
-from gevent import spawn, sleep
+from gevent import sleep
 
 
 class TestEvent(Actor):

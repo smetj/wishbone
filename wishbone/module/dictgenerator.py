@@ -22,10 +22,9 @@
 #
 #
 
-from random import choice, uniform, randint
+from random import choice, randint
 from gevent import sleep, spawn
 from wishbone import Actor
-from wishbone.error import QueueFull
 import os
 
 
