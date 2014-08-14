@@ -25,8 +25,7 @@
 
 from wishbone import Actor
 import zmq.green as zmq
-from gevent import spawn, sleep
-
+from gevent import spawn
 
 class ZMQTopicIn(Actor):
 

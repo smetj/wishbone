@@ -23,9 +23,9 @@
 #
 
 from wishbone import Actor
-from wishbone.error import QueueFull
 from os.path import basename
 from sys import argv
+from os import getpid
 
 
 class Graphite(Actor):

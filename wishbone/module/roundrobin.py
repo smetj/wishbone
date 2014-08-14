@@ -26,7 +26,6 @@
 from wishbone import Actor
 from itertools import cycle
 from random import randint
-from gevent import sleep
 
 
 class RoundRobin(Actor):

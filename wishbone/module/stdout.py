@@ -23,10 +23,8 @@
 #
 
 from wishbone import Actor
-from gevent.fileobject import FileObjectThread
-from gevent import sleep, spawn
+from gevent import sleep
 from os import getpid
-from sys import stdout
 
 
 class Format():

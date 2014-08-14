@@ -25,9 +25,7 @@
 
 
 from wishbone import Actor
-from wishbone.error import QueueFull
 from time import strftime, localtime
-from time import time
 import os
 import sys
 
