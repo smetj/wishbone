@@ -45,3 +45,4 @@ from zmqtopicin import ZMQTopicIn
 from zmqtopicout import ZMQTopicOut
 from zmqpushout import ZMQPushOut
 from zmqpullin import ZMQPullIn
+from udpout import UDPOut
