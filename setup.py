@@ -123,6 +123,7 @@ setup(
             'tcp = wishbone.module.tcpout:TCPOut',
             'push = wishbone.module.zmqpushout:ZMQPushOut',
             'udp = wishbone.module.udpout:UDPOut',
+            'uds = wishbone.module.udsout:UDSOut'
         ],
         'wishbone.contrib.flow': [
         ],
