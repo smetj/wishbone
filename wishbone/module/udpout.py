@@ -28,7 +28,7 @@ from gevent import sleep, spawn, socket
 
 class UDPOut(Actor):
 
-    '''**A Wishbone ouput module which writes data to an UDP socket.**
+    '''**A UDP client which writes data to an UDP socket.**
 
     Writes data to an UDP socket.
 

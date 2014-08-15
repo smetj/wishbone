@@ -28,7 +28,7 @@ from gevent import sleep, spawn, socket
 
 class TCPOut(Actor):
 
-    '''**A Wishbone ouput module which writes data to a TCP socket.**
+    '''**A TCP client which writes data to a TCP socket.**
 
     Writes data to a tcp socket.
 
