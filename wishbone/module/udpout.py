@@ -26,11 +26,11 @@ from wishbone import Actor
 from gevent import sleep, spawn, socket
 
 
-class TCPOut(Actor):
+class UDPOut(Actor):
 
-    '''**A Wishbone ouput module which writes data to a TCP socket.**
+    '''**A Wishbone ouput module which writes data to an UDP socket.**
 
-    Writes data to a tcp socket.
+    Writes data to an UDP socket.
 
     When <data> is of type list, all elements
     will be joined using <delimiter> and submitted together.
@@ -52,9 +52,6 @@ class TCPOut(Actor):
         - port(int)(19283)
            |  The port to submit to.
 
-        - timeout(int)(1)
-           |  The time in seconds to timeout when connecting
-
         - delimiter(str)("\\n")
            |  A delimiter to add to each event.
 
@@ -66,49 +63,20 @@ class TCPOut(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, host="127.0.0.1", port=19283, timeout=10, delimiter="\n"):
+    def __init__(self, name, size=100, frequency=1, host="127.0.0.1", port=19283, delimiter="\n"):
         Actor.__init__(self, name, size, frequency)
 
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
-        self.name = name
-        self.host = host
-        self.port = port
-        self.timeout = timeout
-        self.delimiter = delimiter
-
-    def preHook(self):
-        spawn(self.setupConnection)
-
-    def setupConnection(self):
-
-        while self.loop():
-            try:
-                self.socket.sendall('')
-                sleep(1)
-            except Exception as err:
-                while self.loop():
-                    try:
-                        self.socket = socket.socket()
-                        self.socket.settimeout(self.timeout)
-                        self.socket.connect((self.host, self.port))
-                        self.logging.info("Connected to %s:%s." % (self.host, self.port))
-                        break
-                    except Exception as err:
-                        self.logging.error("Failed to connect to %s:%s. Reason: %s" % (self.host, self.port, err))
-                        sleep(1)
-
-    def postHook(self):
-        try:
-            self.socket.close()
-            self.logging.info("Connection closed to %s:%s" % (self.host, self.port))
-        except:
-            pass
+        self.name=name
+        self.host=host
+        self.port=port
+        self.socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def consume(self, event):
-        if isinstance(event["data"], list):
-            data = self.delimiter.join(event["data"])
+        if isinstance(event["data"],list):
+            data = ''.join(event["data"])
         else:
             data = event["data"]
-        self.socket.sendall(str(data) + self.delimiter)
+        self.socket.sendto(str(data), (self.host, self.port))

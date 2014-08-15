@@ -121,7 +121,8 @@ setup(
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog',
             'tcp = wishbone.module.tcpout:TCPOut',
-            'push = wishbone.module.zmqpushout:ZMQPushOut'
+            'push = wishbone.module.zmqpushout:ZMQPushOut',
+            'udp = wishbone.module.udpout:UDPOut',
         ],
         'wishbone.contrib.flow': [
         ],
