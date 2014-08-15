@@ -30,7 +30,7 @@ from gevent import spawn, socket, sleep
 
 class TCPIn(Actor):
 
-    '''**A Wishbone input module which listens on a TCP socket.**
+    '''**A TCP server.**
 
     Creates a TCP socket to which data can be submitted.
 
