@@ -30,7 +30,7 @@ import zmq.green as zmq
 
 class ZMQPullIn(Actor):
 
-    '''**Pulls in events from one or more ZeroMQ push modules.**
+    '''**Pulls events from one or more ZeroMQ push modules.**
 
     Expects to connect with one or more wishbone.input.push modules.  This
     module can be started in client or server mode.  In server mode, it waits
