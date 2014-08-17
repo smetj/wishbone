@@ -28,7 +28,7 @@ import sys
 
 PROJECT = 'wishbone'
 VERSION = '1.0.0'
-install_requires = ['gevent>=1.1', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', "pyyaml", "msgpack-python", "pyzmq", "amqp"]
+install_requires = ['gevent>=1.1', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', "pyyaml", "msgpack-python", "pyzmq", "amqp", "grequests"]
 
 try:
     long_description = open('README.rst', 'rt').read()
@@ -51,7 +51,7 @@ setup(
     name=PROJECT,
     version=VERSION,
 
-    description='A Python application framework and CLI tool to build and manage async event pipeline servers with minimal effort.',
+    description='Build event pipeline servers with minimal effort.',
     long_description=long_description,
 
     author='Jelle Smet',
