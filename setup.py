@@ -112,7 +112,8 @@ setup(
             'testevent = wishbone.module.testevent:TestEvent',
             'pull = wishbone.module.zmqpullin:ZMQPullIn',
             'udp = wishbone.module.udpin:UDPIn',
-            'namedpipe = wishbone.module.namedpipein:NamedPipeIn'
+            'namedpipe = wishbone.module.namedpipein:NamedPipeIn',
+            'http = wishbone.module.httpin:HTTPIn'
         ],
         'wishbone.output': [
             'amqp = wishbone.module.amqpout:AMQPOut',
