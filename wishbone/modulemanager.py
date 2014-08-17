@@ -25,6 +25,7 @@
 import pkg_resources
 import re
 from prettytable import PrettyTable
+from operator import itemgetter
 
 
 class ModuleManager():
@@ -35,12 +36,15 @@ class ModuleManager():
 
     def listNames(self, category=None):
 
+        modules = []
+
         if category is None:
             for category in self.categories:
                 for group in self.groups:
                     group_name = "%s.%s" % (category, group)
-                    for m in pkg_resources.iter_entry_points(group=group_name):
-                        yield (category, group, m.name)
+                    groups = [m.name for m in pkg_resources.iter_entry_points(group=group_name)]
+                    for m in sorted(groups):
+                        yield (category, group, m)
 
     def getModule(self, category, group, name):
 
