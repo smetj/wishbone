@@ -50,3 +50,5 @@ from udsout import UDSOut
 from namedpipein import NamedPipeIn
 from httpinserver import HTTPInServer
 from httpinclient import HTTPInClient
+from template import Template
+from jsondecode import JSONDecode
