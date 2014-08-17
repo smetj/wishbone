@@ -1,5 +1,12 @@
 Wishbone changelog
 ==================
+
+Version 1.0.0
+~~~~~~~~~~~~~
+
+- Complete overhaul of codebase
+- Inclusion of external modules
+
 Version 0.4.10
 ~~~~~~~~~~~~~~
 
