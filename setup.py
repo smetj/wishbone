@@ -114,7 +114,8 @@ setup(
             'pull = wishbone.module.zmqpullin:ZMQPullIn',
             'udp = wishbone.module.udpin:UDPIn',
             'namedpipe = wishbone.module.namedpipein:NamedPipeIn',
-            'http = wishbone.module.httpin:HTTPIn'
+            'httpserver = wishbone.module.httpinserver:HTTPInServer',
+            'httpclient = wishbone.module.httpinclient:HTTPInClient'
         ],
         'wishbone.output': [
             'amqp = wishbone.module.amqpout:AMQPOut',
