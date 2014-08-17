@@ -48,3 +48,4 @@ from zmqpullin import ZMQPullIn
 from udpout import UDPOut
 from udsout import UDSOut
 from namedpipein import NamedPipeIn
+from httpin import HTTPIn
