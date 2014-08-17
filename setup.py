@@ -27,8 +27,8 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '0.5.0'
-install_requires = ['gevent>=1.0', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', "pyyaml", "msgpack-python", "pyzmq", "amqp"]
+VERSION = '1.0.0'
+install_requires = ['gevent>=1.1', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', "pyyaml", "msgpack-python", "pyzmq", "amqp"]
 
 try:
     long_description = open('README.rst', 'rt').read()
@@ -84,6 +84,7 @@ setup(
     packages=find_packages(),
     package_data={'': ['data/wordlist.txt']},
     zip_safe=False,
+    dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.1'],
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
         'wishbone.flow': [
