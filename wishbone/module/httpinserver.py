@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#       httpin.py
+#       httpinserver.py
 #
 #       Copyright 2014 Jelle Smet development@smetj.net
 #
@@ -26,7 +26,7 @@ from wishbone import Actor
 from gevent import pywsgi, spawn
 
 
-class HTTPIn(Actor):
+class HTTPInServer(Actor):
 
     '''**Receive events over HTTP.**
 
