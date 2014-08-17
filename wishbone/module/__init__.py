@@ -49,3 +49,4 @@ from udpout import UDPOut
 from udsout import UDSOut
 from namedpipein import NamedPipeIn
 from httpinserver import HTTPInServer
+from httpinclient import HTTPInClient
