@@ -28,7 +28,7 @@ import sys
 
 PROJECT = 'wishbone'
 VERSION = '1.0.0'
-install_requires = ['gevent>=1.1', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', "pyyaml", "msgpack-python", "pyzmq", "amqp", "grequests"]
+install_requires = ['gevent>=1.1', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', 'pyyaml', 'msgpack-python', 'pyzmq', 'amqp', 'grequests', 'jinja2', 'jsonschema']
 
 try:
     long_description = open('README.rst', 'rt').read()
@@ -98,10 +98,12 @@ setup(
             'msgpack = wishbone.module.msgpackencode:MSGPackEncode'
         ],
         'wishbone.decode': [
-            'msgpack = wishbone.module.msgpackdecode:MSGPackDecode'
+            'msgpack = wishbone.module.msgpackdecode:MSGPackDecode',
+            'json = wishbone.module.jsondecode:JSONDecode'
         ],
         'wishbone.function': [
             'header = wishbone.module.header:Header',
+            'template = wishbone.module.template:Template'
             # 'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
         ],
         'wishbone.input': [
