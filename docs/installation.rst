@@ -4,6 +4,16 @@ Installation
 
 Wishbone works on python 2.7+ and PyPy 2.3.1+
 
+Versioning
+----------
+
+- Wishbone uses `Semantic Versioning`_.
+- Each release is tagged in `Github`_ with the release number.
+- The master branch contains the latest stable release.
+- The development branch is where all development is done.  There is no
+  the code works.
+- Other branches are special test cases or experiments.
+
 Wishbone
 --------
 
@@ -109,3 +119,6 @@ path:
 
     optional arguments:
       -h, --help            show this help message and exit
+
+.. _semantic versioning: http://semver.org/
+.. _Github: https://github.com/smetj/wishbone/releases
