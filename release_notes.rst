@@ -6,6 +6,7 @@ Version 1.0.0
 
 - Complete overhaul of codebase
 - Inclusion of external modules
+- pep8 all code
 
 Version 0.4.10
 ~~~~~~~~~~~~~~
