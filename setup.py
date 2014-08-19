@@ -96,7 +96,7 @@ setup(
             'graphite = wishbone.module.graphite:Graphite',
             'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
             'msgpack = wishbone.module.msgpackencode:MSGPackEncode',
-            'jsonencode = wishbone.module.jsonencode:JSONEncode'
+            'json = wishbone.module.jsonencode:JSONEncode'
         ],
         'wishbone.decode': [
             'msgpack = wishbone.module.msgpackdecode:MSGPackDecode',
