@@ -84,16 +84,15 @@ class JSONDecode(Actor):
         try:
             event["data"] = self.convert(event["data"])
         except Exception as err:
-            self.logging.warn(
-                "Unable to convert incoming data. Purged.  Reason: %s" % (err))
-            return
+            self.logging.warn("Unable to convert incoming data.  Reason: %s" % (err))
+            raise
 
         try:
             self.validate(event["data"])
         except ValidationError as err:
             self.logging.warn("JSON data does not pass the validation schema.  Purged.  Reason: %s" % (
                 str(err).replace("\n", " > ")))
-            return
+            raise
 
         self.submit(event, self.pool.queue.outbox)
 
