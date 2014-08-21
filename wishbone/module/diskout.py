@@ -80,17 +80,18 @@ class DiskOut(Actor):
 
     def preHook(self):
         spawn(self.__flushTimer)
-        pass
 
     def consume(self, event):
 
-        try:
-            self.pool.queue.disk.put(event)
-        except QueueFull:
-            self.pool.queue.inbox.put(event)
-            self.__flush_lock.wait()
-            self.flushDisk()
-            self.counter += 1
+        while self.loop():
+            try:
+                self.pool.queue.disk.put(event)
+                break
+            except QueueFull as err:
+                self.__flush_lock.wait()
+                spawn(self.flushDisk)
+                self.counter += 1
+                err.waitUntilEmpty()
 
     def flushDisk(self):
 
@@ -106,7 +107,8 @@ class DiskOut(Actor):
                     f = FileObjectThread(output_file)
                     for event in self.pool.queue.disk.dump():
                         pickle.dump(event, f)
-            except:
+            except Exception as err:
+                print err
                 rename("%s/%s.%s.%s.writing" % (self.directory, self.name, self.counter, i), "%s/%s.%s.%s.failed" % (self.directory, self.name, self.counter, i))
             else:
                 rename("%s/%s.%s.%s.writing" % (self.directory, self.name, self.counter, i), "%s/%s.%s.%s.ready" % (self.directory, self.name, self.counter, i))
