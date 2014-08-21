@@ -33,8 +33,8 @@ consists out of:
 Wishbone comes with a set of builtin modules which are an integral part of the
 Wishbone framework.
 
-External modules are regular Python modules which create an entrypoint in the
-*wishbone.contrib* namespace.
+External modules are installed as regular Python modules and should create an
+entrypoint in the *wishbone.contrib* namespace.
 
 https://github.com/smetj/wishboneModules is a repository containing additional
 modules.
@@ -187,13 +187,12 @@ incoming and 1 outgoing queue.
 encode modules
 ~~~~~~~~~~~~~~
 
-Encode modules are responsible for converting internal metric or log events
-into some other format.
+Encode a data format into another or into the internal metric/log format.
 
 decode modules
 ~~~~~~~~~~~~~~
 
-Decode modules convert external metric or log events into the internal format.
+Decode a data format into another or into the internal metric/log format.
 
 
 Important properties and behavior
@@ -206,8 +205,9 @@ Each module has a *successful* and *failed* queue.  Whenever a registered
 method (see :py:class:`wishbone.Actor.registerConsumer`) fails to process an
 event, the framework will submit the event into the *failed* queue.  Therefor
 it is important not to trap exceptions in the *registered consumer methods*
-but rather rely on another module to process the events from the module's
-*failed* queue in order to achieve a strategy which copes with this.
+but rather rely upon the fact Wishbone will trap that exception and submits it
+to the *failed* queue from which it can be further processed by another
+module.
 
 An example which takes advantage of this behavior might be connecting the
 *failed* queue of the :py:class:`wishbone.module.TCPOut` module to the *inbox*
@@ -221,16 +221,16 @@ An example which takes advantage of this behavior might be connecting the
 *successful* queue of the :py:class:`wishbone.module.TCPOut` module to the
 *acknowledgment* queue of the :py:class:`wishbone.module.AMQPOut` module.
 
-It's up to the *registered consumer method* to submit the event to some queue
-such as *outbox* from where it can be routed to the next module for further
-processing.
+It's up to the method which has been registered to consume a queue to submit
+the event to another queue such as *outbox* from where it can be routed to the
+next module for further processing.
 
 metrics and logs queues
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Each module has a *metrics* and *logs* queue which hold metric events and log
-events respectively, ready to be consumed by another module.  If these queues
-aren't connected to other queues then that data will be dropped.
+Each module has a *metrics* and *logs* queue which hold metric and log events
+respectively, ready to be consumed by another module.  If these queues aren't
+connected to other queues then that data will be dropped.
 
 
 Queues drop data by default
@@ -243,10 +243,12 @@ transported.
 Module default parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :py:class:`wishbone.Actor` baseclass can be initialized with 2 parameters:
+The :py:class:`wishbone.Actor` baseclass must be initialized with at least 3
+parameters:
 
-- size: determines the size of each queue in the module.
-- frequency: determines the frequency at which metrics are generated.
+- name: The name of the module.
+- size: The size of each of the module queues.
+- frequency: The frequency at which metrics are generated.
 
 Events
 ------
