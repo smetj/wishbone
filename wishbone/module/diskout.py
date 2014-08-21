@@ -89,7 +89,7 @@ class DiskOut(Actor):
                 break
             except QueueFull as err:
                 self.__flush_lock.wait()
-                spawn(self.flushDisk)
+                self.flushDisk()
                 self.counter += 1
                 err.waitUntilEmpty()
 
