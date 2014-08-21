@@ -43,4 +43,4 @@ class ReverseData(Actor):
             data = data.title()
         event["data"] = data
 
-        self.queuepool.outbox.put(event)
+        self.submit(event, self.queuepool.queue.outbox)
