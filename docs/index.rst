@@ -1,6 +1,3 @@
-This is an *alpha* release of Wishbone 0.5.0
-Make sure you use https://github.com/smetj/wishbone/tree/0.5 for testing.
-
 ========
 Wishbone
 ========
