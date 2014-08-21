@@ -27,7 +27,8 @@ import cPickle as pickle
 from gevent.fileobject import FileObjectThread
 from gevent import spawn, sleep, event
 from os import remove
-import glob
+import glob, os
+from time import time
 
 
 class DiskIn(Actor):
@@ -78,6 +79,7 @@ class DiskIn(Actor):
 
     def preHook(self):
         spawn(self.monitorDirectory)
+        spawn(self.diskMonitor)
 
     def monitorDirectory(self):
         while self.loop:
@@ -106,12 +108,13 @@ class DiskIn(Actor):
         '''Primitive monitor which checks whether new data is added to disk.'''
         counter = 0
         while self.loop():
-            if len(glob.glob("%s/*.writing" % (self.directory))) == 0:
-                counter += 1
-                if counter >= self.idle_time:
-                    self.reading.set()
+            try:
+                newest = max(glob.iglob("%s/*.ready" % (self.directory)), key=os.path.getmtime)
+            except:
+                pass
             else:
-                counter = 0
-                self.reading.clear()
-
+                if time() - os.path.getctime(newest) >= self.idle_time:
+                    self.reading.set()
+                else:
+                    self.reading.clear()
             sleep(1)
