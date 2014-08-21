@@ -5,48 +5,75 @@ Builtin Modules
 Input modules
 *************
 
+
+wishbone.input.amqp
+-------------------
+.. autoclass:: wishbone.module.AMQPIn
+
+--------
+
+wishbone.input.dictgenerator
+----------------------------
+.. autoclass:: wishbone.module.DictGenerator
+
+--------
+
 wishbone.input.disk
 -------------------
 .. autoclass:: wishbone.module.DiskIn
 
 --------
 
-wishbone.input.testevent
-------------------------
-.. autoclass:: wishbone.module.TestEvent
+wishbone.input.httpclient
+-------------------------
+.. autoclass:: wishbone.module.HTTPInClient
+
+--------
+
+wishbone.input.httpserver
+-------------------------
+.. autoclass:: wishbone.module.HTTPInServer
+
+--------
+
+wishbone.input.namedpipe
+-------------------------
+.. autoclass:: wishbone.module.NamedPipeIn
+
+--------
+
+wishbone.input.pull
+-------------------------
+.. autoclass:: wishbone.module.AMQPullIn
 
 --------
 
 wishbone.input.tcp
-------------------
+-------------------------
 .. autoclass:: wishbone.module.TCPIn
 
 --------
 
-wishbone.input.amqp
--------------------
-.. autoclass:: wishbone.module.AMQPIn
+wishbone.input.testevent
+-------------------------
+.. autoclass:: wishbone.module.TestEvent
 
-
-wishbone.input.dictgenerator
-----------------------------
-.. autoclass:: wishbone.module.DictGenerator
-
+--------
 
 wishbone.input.topic
-----------------------------
+-------------------------
 .. autoclass:: wishbone.module.ZMQTopicIn
+
+--------
+
+wishbone.input.udp
+-------------------------
+.. autoclass:: wishbone.module.UDPIn
 
 
 Output modules
 **************
 
-
-wishbone.output.disk
---------------------
-.. autoclass:: wishbone.module.DiskOut
-
---------
 
 wishbone.output.amqp
 --------------------
@@ -54,21 +81,9 @@ wishbone.output.amqp
 
 --------
 
-wishbone.output.stdout
-----------------------
-.. autoclass:: wishbone.module.STDOUT
-
---------
-
-wishbone.output.tcp
--------------------
-.. autoclass:: wishbone.module.TCPOut
-
---------
-
-wishbone.output.syslog
-----------------------
-.. autoclass:: wishbone.module.Syslog
+wishbone.output.disk
+--------------------
+.. autoclass:: wishbone.module.DiskOut
 
 --------
 
@@ -79,8 +94,44 @@ wishbone.output.null
 --------
 
 wishbone.output.topic
--------------------------
+---------------------
 .. autoclass:: wishbone.module.ZMQTopicOut
+
+--------
+
+wishbone.output.stdout
+----------------------
+.. autoclass:: wishbone.module.STDOUT
+
+--------
+
+wishbone.output.syslog
+----------------------
+.. autoclass:: wishbone.module.Syslog
+
+--------
+
+wishbone.output.tcp
+-------------------
+.. autoclass:: wishbone.module.TCPOut
+
+--------
+
+wishbone.output.push
+--------------------
+.. autoclass:: wishbone.module.ZMQPushOut
+
+--------
+
+wishbone.output.udp
+-------------------
+.. autoclass:: wishbone.module.UDPOut
+
+--------
+
+wishbone.output.UDSOut
+----------------------
+.. autoclass:: wishbone.module.UDSOut
 
 
 Flow modules
@@ -111,6 +162,12 @@ wishbone.function.header
 ------------------------
 .. autoclass:: wishbone.module.header
 
+--------
+
+wishbone.function.template
+------------------------
+.. autoclass:: wishbone.module.template
+
 
 Encode modules
 **************
@@ -119,15 +176,23 @@ wishbone.encode.graphite
 ------------------------
 .. autoclass:: wishbone.module.Graphite
 
+--------
 
 wishbone.encode.humanlogformat
 ------------------------------
 .. autoclass:: wishbone.module.HumanLogFormat
 
+--------
 
 wishbone.encode.msgpack
 -----------------------
 .. autoclass:: wishbone.module.MSGPackEncode
+
+--------
+
+wishbone.encode.json
+-----------------------
+.. autoclass:: wishbone.module.JSONEncode
 
 
 Decode modules
@@ -136,3 +201,9 @@ Decode modules
 wishbone.decode.msgpack
 -----------------------
 .. autoclass:: wishbone.module.MSGPackDecode
+
+--------
+
+wishbone.decode.json
+-----------------------
+.. autoclass:: wishbone.module.JSONDecode

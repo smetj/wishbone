@@ -4,10 +4,10 @@ Introduction
 
 Wishbone is a Python library to create IO driven event processing servers by
 defining a pipeline of inputs and outputs with a number of intermediate
-processing stages through which events travel.
+processing stages in between through which events travel.
 
-Wishbone comes with all the necessary tools and modules to bootstrap servers
-from CLI and have them running as a permanent solution in a minimum of time.
+Wishbone comes with the necessary tools and modules to bootstrap servers from
+CLI and have them running as a permanent solution in a minimum of time.
 
 
 Modules and Queues
@@ -30,11 +30,12 @@ between the different modules.
 Modules are registered using
 :py:func:`wishbone.router.Default.registerModule`. The router takes care of
 the proper startup :py:func:`wishbone.router.Default.start` and shutdown
-:py:func:`wishbone.router.Default.start` sequence of the registered modules.
+:py:func:`wishbone.router.Default.stop` sequence of the registered modules.
 
-The router automatically connects each module's *metrics* and *logs* queues to
+The router automatically connects each module's *metrics* and *logs* queue to
 a :py:class:`wishbone.module.Funnel` instance for your convenience.  This
-allows the user to further organize log and metric processing.
+allows the user to further organize log and metric processing by connecting
+other modules to one of these instances.
 
 Queues are connected to each other using
 :py:func:`wishbone.router.Default.connect`.  Queues can only have a "1 to 1"
@@ -45,7 +46,7 @@ builtin flow modules.
 Events
 ------
 
-Wishbone events which travel from module to module are simple data structures:
+Wishbone events are simple data structures:
 
 .. code-block:: python
 
