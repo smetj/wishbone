@@ -150,9 +150,11 @@ class Queue():
         '''Dumps the queue as a generator and cleans it when done.
         '''
 
-        for event in self.__q:
-            yield event
-        self.clean()
+        while True:
+            try:
+                yield self.get()
+            except QueueEmpty:
+                break
 
     def empty(self):
         '''Returns True when queue and unacknowledged is empty otherwise False.'''

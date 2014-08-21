@@ -25,7 +25,7 @@
 from wishbone import Actor
 import cPickle as pickle
 from gevent.fileobject import FileObjectThread
-from gevent import spawn, sleep
+from gevent import spawn, sleep, event
 from os import remove
 import glob
 
@@ -49,16 +49,31 @@ class DiskIn(Actor):
         - directory(str)
            |  The directory to write data to.
 
+        - idle_trigger(bool)(False)
+           |  When True, only reads events when no new events
+           |  have been written to disk for at least <idle_time>.
+
+
+        - idle_time(int)(10)
+           |  The time in seconds required that no new events
+           |  have been written to disk prior to start to consume
+           |  the buffered data.
+
+
     Queues:
 
         - outbox
            |  Incoming events.
     '''
 
-    def __init__(self, name, size=100, frequency=1, directory="./"):
+    def __init__(self, name, size=100, frequency=1, directory="./", idle_trigger=False, idle_time=10):
         Actor.__init__(self, name, size, frequency)
         self.name = name
         self.directory = directory
+        self.idle_trigger = idle_trigger
+        self.idle_time = idle_time
+        self.reading = event.Event()
+        self.reading.set()
         self.pool.createQueue("outbox")
 
     def preHook(self):
@@ -71,6 +86,7 @@ class DiskIn(Actor):
 
     def processDirectory(self):
         for filename in glob.glob("%s/*.ready" % (self.directory)):
+            self.reading.wait()
             self.readFile(filename)
 
     def readFile(self, filename):
@@ -84,5 +100,18 @@ class DiskIn(Actor):
                         self.submit(event, self.pool.queue.outbox)
                     except EOFError:
                         break
-
             remove(filename)
+
+    def diskMonitor(self):
+        '''Primitive monitor which checks whether new data is added to disk.'''
+        counter = 0
+        while self.loop():
+            if len(glob.glob("%s/*.writing" % (self.directory))) == 0:
+                counter += 1
+                if counter >= self.idle_time:
+                    self.reading.set()
+            else:
+                counter = 0
+                self.reading.clear()
+
+            sleep(1)
