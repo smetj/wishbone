@@ -4,8 +4,7 @@ WishBone
 What?
 -----
 
-A Python library and CLI tool to build and manage event pipeline servers with
-minimal effort.
+Build event pipeline servers with minimal effort.
 
 Example
 -------
@@ -44,32 +43,11 @@ Example
     I am number two: test
 
 
-Installing
-----------
-
-Through Pypi:
-
-	$ easy_install wishbone
-
-Or the latest development branch from Github:
-
-	$ git clone git@github.com:smetj/wishbone.git
-
-	$ cd wishbone
-
-	$ sudo python setup.py install
-
-
 Documentation
 -------------
 
 https://wishbone.readthedocs.org/en/latest/index.html
 
-
-Modules
--------
-
-https://github.com/smetj/wishboneModules
 
 Support
 -------
