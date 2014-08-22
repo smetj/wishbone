@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-#
 # -*- coding: utf-8 -*-
 #
 #  bootstrap.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,359 +23,44 @@
 #
 
 from wishbone.router import Default
-import pkg_resources
-from multiprocessing import Process
-from prettytable import PrettyTable
-import signal
-import daemon
+from wishbone.error import QueueConnected
+from wishbone.utils import BootstrapFile, Module, PIDFile
+from wishbone import ModuleManager
+
 import argparse
-import yaml
-import sys
-import time
+import multiprocessing
 import os
-import re
+import sys
+from daemon import DaemonContext
+from gevent import sleep, signal
+from pkg_resources import get_distribution
 
-class PidHandling():
-    def writePids(self, pids, filename):
-        with open (filename,'w') as f:
-            f.write("\n".join(pids))
-
-    def readPids(self, filename):
-        try:
-            with open (filename,'r') as f:
-                return [str(a.strip()) for a in f.readlines()]
-        except Exception as err:
-            print "Unable to open pidfile %s.  Reason: %s"%(filename, err)
-            sys.exit(0)
-
-    def deletePids(self, filename):
-        os.remove(filename)
-
-class ModuleHandling():
-
-    def extractSummary(self, entrypoint):
-        try:
-            doc=entrypoint.load().__doc__
-        except Exception as err:
-            return "! -> Unable to load.  Reason: %s"%(err)
-        try:
-            return re.search('.*?\*\*(.*?)\*\*', doc, re.DOTALL ).group(1)
-        except:
-            return "No description found."
-
-    def loadModule(self, entrypoint):
-        '''Loads a module from an entrypoint string and returns it.'''
-
-        e=entrypoint.split('.')
-        name=e[-1]
-        del(e[-1])
-        group=".".join(e)
-        module_instance=None
-
-        for module in pkg_resources.iter_entry_points(group=group, name=name):
-            try:
-                module_instance=module.load()
-            except Exception as err:
-                raise Exception ("Problem loading module %s  Reason: %s"%(module, err))
-
-        if module_instance != None:
-            return module_instance
-        else:
-            raise Exception ("Failed to load module %s  Reason: Not found"%(entrypoint))
-
-
-    def getVersion(self, entrypoint):
-        modulename = vars(entrypoint)["module_name"].split('.')[0]
-
-        try:
-            return pkg_resources.get_distribution(modulename).version
-        except Exception as err:
-            return "Unknown"
-
-class Initialize(ModuleHandling):
-    def __init__(self, filename):
-        self.filename=filename
-        self.config=None
-        self.router=Default(interval=1, rescue=False, uuid=False)
-
-    def setup(self):
-        self.config=self.loadConfig(self.filename)
-        self.setupLogging()
-        self.setupMetrics()
-        self.setupModules()
-        self.setupConnections()
-
-    def setupMetrics(self):
-        '''Sets up the metrics portion of the Wishbone instance.
-
-        If no metrics section is defined in the bootstrap file it connects the
-        null module to the metrics starting point to make sure that queue
-        isn't filling up. '''
-
-        if "metrics" in self.config:
-            for instance in self.config["metrics"]:
-                module = self.loadModule(self.config["metrics"][instance]["module"])
-                self.router.registerMetricModule(module, instance, **self.config["metrics"][instance].get("arguments",{}))
-        else:
-            module = self.loadModule("wishbone.builtin.output.null")
-            self.router.registerMetricModule(module, "metrics_null")
-
-    def setupModules(self):
-        '''Registers all bootstrap file defined modules in the router.'''
-
-
-        for instance in self.config["modules"]:
-            module = self.loadModule(self.config["modules"][instance]["module"])
-            try:
-                self.router.register(module, instance, **self.config["modules"][instance].get("arguments",{}))
-            except Exception as err:
-                raise Exception ("Failed to initialize module %s.  Reason: %s"%(instance, err))
-
-    def setupConnections(self):
-        '''Makes all connections defined in the bootstrap file.'''
-
-        for connection in self.config["routingtable"]:
-            try:
-                source=connection.split('->')[0].strip()
-                destination=connection.split('->')[1].strip()
-            except Exception as err:
-                sys.stderr.write("There seems to be a routing table format error in this rule: %s\n"%(connection))
-                sys.stderr.flush()
-                sys.exit(1)
-            self.router.connect(source, destination)
-
-    def loadConfig(self, filename):
-
-        '''Loads the bootstrap file from disk and converts it from YAML to
-        Python object.'''
-
-        try:
-            with open (filename, 'r') as f:
-                return yaml.load(f)
-        except Exception as err:
-            print "Failed to load config file.  Reason: %s"%(err)
-            sys.exit(1)
-
-    def start(self):
-        '''Starts the Wishbone instance bootstrapped from file.'''
-
-        self.router.start()
-        self.router.block()
-
-class Start(Initialize):
-
-    def setupLogging(self):
-        '''Sets up logging in case we're running in start mode.
-
-        If the bootstrap file has no log section logs are written to syslog.
-        '''
-
-        if "logs" in self.config:
-            for instance in self.config["logs"]:
-                module = self.loadModule(self.config["logs"][instance]["module"])
-                self.router.registerLogModule(module, instance, **self.config["logs"][instance].get("arguments",{}))
-        else:
-            loglevelfilter=self.loadModule("wishbone.builtin.logging.loglevelfilter")
-            self.router.registerLogModule(loglevelfilter, "loglevelfilter")
-
-            syslog=self.loadModule("wishbone.builtin.output.syslog")
-            self.router.register(syslog, "syslog")
-
-            self.router.connect("loglevelfilter.outbox", "syslog.inbox")
-
-class Debug(Initialize):
-
-    def setupLogging(self):
-        '''Sets up logging in case we're running in debug mode.
-
-        If the bootstrap file has no log section logs are written to stdout.
-        '''
-
-        if "logs" in self.config:
-            for instance in self.config["logs"]:
-                module = self.loadModule(self.config["logs"][instance]["module"])
-                self.router.registerLogModule(module, instance, **self.config["logs"][instance].get("arguments",{}))
-        else:
-            loglevelfilter=self.loadModule("wishbone.builtin.logging.loglevelfilter")
-            self.router.registerLogModule(loglevelfilter, "loglevelfilter", max_level=7)
-
-            humanlogformatter=self.loadModule("wishbone.builtin.logging.humanlogformatter")
-            self.router.register(humanlogformatter, "humanlogformatter")
-
-            stdout=self.loadModule("wishbone.builtin.output.stdout")
-            self.router.register(stdout, "stdout_logs")
-
-            self.router.connect("loglevelfilter.outbox", "humanlogformatter.inbox")
-            self.router.connect("humanlogformatter.outbox", "stdout_logs.inbox")
-
-class Stop(PidHandling):
-
-    def __init__(self, pid):
-        self.pid=pid
-
-    def do(self):
-        '''Initiates the stopping process.'''
-
-        pids=self.readPids(self.pid)
-        for pid in pids:
-            os.kill(int(pid), signal.SIGINT)
-        sys.stdout.write("Stopping instances .")
-        for pid in pids:
-            while True:
-                sys.stdout.write(".")
-                sys.stdout.flush()
-                try:
-                    os.kill(int(pid), 0)
-                    time.sleep(1)
-                except:
-                    break
-        self.deletePids(self.pid)
-        print("")
-
-class Kill(PidHandling):
-
-    def __init__(self, pid):
-        self.pid=pid
-
-    def do(self):
-        '''Kills all processes.'''
-
-        print ("Killing all processes")
-        pids=self.readPids(self.pid)
-        for pid in pids:
-            os.kill(int(pid), signal.SIGKILL)
-        self.deletePids(self.pid)
-
-class List(ModuleHandling):
-
-    def __init__(self, group ):
-        self.group=group
-        self.current_version=pkg_resources.get_distribution('wishbone').version
-
-    def do(self):
-        '''Produces an overview of all available Wishbone modules.'''
-
-        groups=[ "wishbone.builtin.logging", "wishbone.builtin.metrics", "wishbone.builtin.flow",
-        "wishbone.builtin.function", "wishbone.builtin.input","wishbone.builtin.output",
-        "wishbone.input","wishbone.output","wishbone.function"]
-
-        print ("Available Wishbone modules:")
-        table = PrettyTable(["Group","Module","Version","Description"])
-        table.align["Group"]='l'
-        table.align["Module"]='l'
-        table.align["Version"]='l'
-        table.align["Description"]='l'
-
-        if self.group != None:
-            groups = [self.group]
-
-        for group in groups:
-            g=group
-            for module in pkg_resources.iter_entry_points(group=group, name=None):
-                if g.startswith("wishbone.builtin"):
-                    table.add_row([group, str(module).split()[0], self.current_version, self.extractSummary(module)])
-                else:
-                    table.add_row([group, str(module).split()[0], self.getVersion(module), self.extractSummary(module)])
-                group=""
-            table.add_row(["","","",""])
-
-        print table
-
-class Show(ModuleHandling):
-
-    def __init__(self, module):
-        self.module=module
-
-    def do(self):
-        module = self.loadModule(self.module)
-        print module.__doc__
-
-class Dispatch(PidHandling):
-
-    def __init__(self):
-        self.procs=[]
-
-    def createDebugInstance(self, config):
-        instance=Debug(config)
-        instance.setup()
-        instance.start()
-
-    def createStartInstance(self, config):
-        instance=Start(config)
-        instance.setup()
-        instance.start()
-
-    def daemonize(self, config, instances, pid):
-        if instances == 1:
-            self.writePids([str(os.getpid())], pid)
-            self.createStartInstance(config)
-        else:
-            procs = []
-            for wb in range(instances):
-                procs.append(Process(target=self.createStartInstance, args=(config,)))
-                procs[-1].daemon=True
-                procs[-1].start()
-            try:
-                self.writePids([str(a.pid) for a in procs]+[str(os.getpid())], pid)
-                while True:
-                    time.sleep(1)
-            except KeyboardInterrupt:
-                for proc in procs:
-                    proc.join()
-
-    def debug(self, command, config, instances):
-        if instances == 1:
-            self.createDebugInstance(config)
-        else:
-            procs = []
-            for wb in range(instances):
-                procs.append(Process(target=self.createDebugInstance, args=(config,)))
-                procs[-1].daemon=True
-                procs[-1].start()
-
-            try:
-                while True:
-                    time.sleep(1)
-            except KeyboardInterrupt:
-                for proc in procs:
-                    proc.join()
-
-    def start(self, command, config, instances, pid):
-
-        print "Starting %s wishbone instances in background.  Logs are written to syslog. Pidfile is %s"%(instances, pid)
-        with daemon.DaemonContext(stdout = sys.stdout, stderr = sys.stderr, working_directory=os.getcwd()):
-            self.daemonize(config, instances, pid)
-
-    def stop(self, command, pid):
-        stop=Stop(pid)
-        stop.do()
-
-    def kill(self, command, pid):
-        kill=Kill(pid)
-        kill.do()
-
-    def list(self, command, group):
-        lst=List(group)
-        lst.do()
-
-    def show(self, command, module):
-        show=Show(module)
-        show.do()
 
 class BootStrap():
 
-    def __init__(self, description="Wishbone bootstrap server."):
+    '''
+    Parses command line arguments and bootstraps the Wishbone instance.
+    '''
+
+    def __init__(self, description="Wishbone bootstrap server. Build event pipeline servers with minimal effort."):
+
         parser = argparse.ArgumentParser(description=description)
         subparsers = parser.add_subparsers(dest='command')
 
         start = subparsers.add_parser('start', description="Starts a Wishbone instance and detaches to the background.  Logs are written to syslog.")
         start.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
         start.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
-        start.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
+        start.add_argument('--pid', type=str, dest='pid', default='%s/wishbone.pid' % (os.getcwd()), help='The pidfile to use.')
+        start.add_argument('--queue-size', type=int, dest='queue_size', default=100, help='The queue size to use.')
+        start.add_argument('--frequency', type=int, dest='frequency', default=1, help='The metric frequency.')
+        start.add_argument('--id', type=str, dest='ident', default=None, help='An identification string.')
 
         debug = subparsers.add_parser('debug', description="Starts a Wishbone instance in foreground and writes logs to STDOUT.")
         debug.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
         debug.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
+        debug.add_argument('--queue-size', type=int, dest='queue_size', default=100, help='The queue size to use.')
+        debug.add_argument('--frequency', type=int, dest='frequency', default=1, help='The metric frequency.')
+        debug.add_argument('--id', type=str, dest='ident', default=None, help='An identification string.')
 
         stop = subparsers.add_parser('stop', description="Tries to gracefully stop the Wishbone instance.")
         stop.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
@@ -388,21 +72,306 @@ class BootStrap():
         llist.add_argument('--group', type=str, dest='group', default=None, help='List the modules of this group type.')
 
         show = subparsers.add_parser('show', description="Shows the details of a module.")
-        show.add_argument('module', type=str, help='Shows the documentation of the module. ')
+        show.add_argument('--module', type=str, help='Shows the documentation of the module. ')
 
-        arguments=vars(parser.parse_args())
+        arguments = vars(parser.parse_args())
 
-        dispatch=Dispatch()
+        dispatch = Dispatch()
         getattr(dispatch, arguments["command"])(**arguments)
 
-def main():
 
+class Dispatch():
+
+    '''
+    Handles the Wishbone instance commands.
+    '''
+
+    def __init__(self):
+
+        self.config = BootstrapFile()
+        self.routers = []
+        signal(2, self.__stopSequence)
+        self.__stopping = False
+        self.module_manager = ModuleManager()
+
+    def generateHeader(self):
+        '''
+        Prints a header.
+        '''
+
+        return """          __       __    __
+.--.--.--|__.-----|  |--|  |--.-----.-----.-----.
+|  |  |  |  |__ --|     |  _  |  _  |     |  -__|
+|________|__|_____|__|__|_____|_____|__|__|_____|
+                                   version %s
+
+Build event pipeline servers with minimal effort.
+
+""" % (get_distribution('wishbone').version)
+
+    def debug(self, command, config, instances, queue_size, frequency, ident):
+        '''
+        Handles the Wishbone debug command.
+        '''
+
+        config = self.config.load(config)
+
+        if instances == 1:
+            self.routers.append(RouterBootstrap(config, debug=True, queue_size=queue_size, frequency=frequency, ident=ident))
+            self.routers[-1].start()
+
+        else:
+            for x in xrange(instances):
+                self.routers.append(RouterBootstrapProcess(config, debug=True, queue_size=queue_size, frequency=frequency, ident=ident))
+                self.routers[-1].start()
+
+            while multiprocessing.active_children():
+                sleep(1)
+
+        sys.exit(0)
+
+    def list(self, command, group, category=None):
+
+        print self.generateHeader()
+        print "Available modules:"
+        print self.module_manager.getModuleTable(category, group)
+
+    def show(self, command, module):
+        '''
+        Shows the help message of a module.
+        '''
+
+        print self.generateHeader()
+        try:
+            (category, group, module) = module.split('.')
+        except ValueError:
+            (category, sub, group, module) = module.split('.')
+            category = "%s.%s" % (category, sub)
+
+        try:
+            title = self.module_manager.getModuleTitle(category, group, module)
+            version = self.module_manager.getModuleVersion(category, group, module)
+            header = "%s.%s.%s" % (category, group, module)
+            print
+            print "="*len(header)
+            print header
+            print "="*len(header)
+            print
+            print "Version: %s" % (version)
+            print
+            print title
+            print "-"*len(title)
+            print self.module_manager.getModuleDoc(category, group, module)
+        except Exception:
+            print "Failed to load module %s.%s.%s." % (category, group, module)
+
+    def start(self, command, config, instances, pid, queue_size, frequency, ident):
+        '''
+        Handles the Wishbone start command.
+        '''
+
+        config = self.config.load(config)
+        self.pid = PIDFile(pid)
+
+        if instances == 1:
+            print ("Starting 1 instance to background with pid %s." % (os.getpid()))
+            try:
+                with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
+                    self.pid.create([os.getpid()])
+                    instance = RouterBootstrap(config, debug=False, queue_size=queue_size, frequency=frequency, ident=ident)
+                    instance.start()
+            except Exception as err:
+                sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
+        else:
+            try:
+                print "Starting %s instances in background." % (instances)
+                with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
+                    pids = []
+                    processes = []
+                    for counter in xrange(instances):
+                        processes.append(RouterBootstrapProcess(config, debug=False, queue_size=queue_size, frequency=frequency, ident=ident))
+                        processes[-1].start()
+                        pids.append(processes[-1].pid)
+                    self.pid.create(pids)
+                    for process in processes:
+                        process.join()
+
+            except Exception as err:
+                sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
+
+    def stop(self, command, pid):
+        '''
+        Handles the Wishbone stop command.
+        '''
+
+        try:
+            pid = PIDFile(pid)
+            sys.stdout.write("Stopping instance with PID ")
+            sys.stdout.flush()
+            for entry in pid.read():
+                sys.stdout.write(" %s " % (entry))
+                sys.stdout.flush()
+                pid.sendSigint(entry)
+            pid.cleanup()
+            print("")
+        except Exception as err:
+            print ("")
+            print ("Failed to stop instances.  Reason: %s" % (err))
+
+    def __stopSequence(self):
+        '''
+        Calls the stop() function of each instance.
+        '''
+
+        if not self.__stopping:
+            # TODO: Weird hack, otherwise when trapping signal(2) this function is
+            #      executed many times.
+            self.__stopping = True
+            for instance in self.routers:
+                if hasattr(instance, "stop"):
+                    instance.stop()
+
+    def __getCurrentFD(self):
+        '''
+        returns a list with filedescriptors in use.
+        '''
+
+        try:
+            return [int(x) for x in os.listdir("/proc/self/fd")]
+        except Exception as err:
+            print ("Failed to get active filedescriptors.  Reason: %s." % (err))
+            sys.exit(1)
+
+    def __alive(self, pid):
+        try:
+            os.kill(pid, 0)
+            return True
+        except:
+            False
+
+
+class RouterBootstrapProcess(multiprocessing.Process):
+
+    '''
+    Wraps RouterBootstrap into a Process class.
+    '''
+
+    def __init__(self, config, debug=False, queue_size=100, frequency=1, ident=None):
+        multiprocessing.Process.__init__(self)
+        self.config = config
+        self.ident = ident
+        self.debug = debug
+        self.queue_size = queue_size
+        self.daemon = True
+
+    def run(self):
+        '''
+        Executed by Process when started.
+        '''
+
+        router = RouterBootstrap(self.config, self.debug, self.queue_size, self.frequency, self.ident)
+        router.start()
+
+
+class RouterBootstrap():
+
+    '''
+    Setup, configure and a router process.
+    '''
+
+    def __init__(self, config, debug=False, queue_size=100, frequency=1, ident=None):
+        self.config = config
+        self.ident = ident
+        self.debug = debug
+        self.router = Default(size=queue_size, frequency=frequency)
+        self.module = Module()
+
+    def loadModule(self, name):
+        '''
+        Loads a module using the entrypoint name.
+        '''
+
+        return self.module.load(name)
+
+    def setupModules(self, modules):
+        '''
+        Loads and initialzes the modules from the bootstrap file.
+        '''
+
+        for module in modules:
+            m = self.loadModule(modules[module]["module"])
+            if "arguments" in modules[module]:
+                self.router.registerModule(m, module, **modules[module]["arguments"])
+            else:
+                self.router.registerModule(m, module)
+
+    def setupRoutes(self, table):
+        '''
+        Connects the modules from the bootstrap file.
+        '''
+
+        for route in table:
+            sm, sq, dm, dq = self.__splitRoute(route)
+            self.router.pool.getModule(sm).connect(sq, self.router.pool.getModule(dm), dq)
+
+    def start(self):
+        '''
+        Calls the router's start() function.
+        '''
+
+        self.setupModules(self.config["modules"])
+        self.setupRoutes(self.config["routingtable"])
+
+        if self.debug:
+            self.__debug()
+
+        try:
+            syslog = self.loadModule("wishbone.output.syslog")
+            self.router.registerModule(syslog, "syslog", ident=self.ident)
+            self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("syslog"), "inbox")
+        except QueueConnected:
+            pass
+
+        self.router.start()
+        while self.router.isRunning():
+            sleep(1)
+
+    def stop(self):
+        '''
+        Calls the router's stop() function.
+        '''
+
+        self.router.stop()
+
+    def __debug(self):
+        '''
+        In debug mode we route all logging to SDOUT.
+        '''
+
+        # In debug mode we write our logs to STDOUT
+        log_stdout = self.loadModule("wishbone.output.stdout")
+        log_human = self.loadModule("wishbone.encode.humanlogformat")
+        self.router.registerModule(log_stdout, "log_stdout")
+        self.router.registerModule(log_human, "log_format", ident=self.ident)
+        self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("log_format"), "inbox")
+        self.router.pool.getModule("log_format").connect("outbox", self.router.pool.getModule("log_stdout"), "inbox")
+
+    def __splitRoute(self, definition):
+        '''
+        Splits the route definition string into 4 separate string.
+        '''
+
+        (source, destination) = definition.split('->')
+        (sm, sq) = source.rstrip().lstrip().split('.')
+        (dm, dq) = destination.rstrip().lstrip().split('.')
+        return sm, sq, dm, dq
+
+
+def main():
     try:
         BootStrap()
     except Exception as err:
-        sys.stderr.write("Failed to bootstrap instance.  Reason: %s\n"%(err))
-        sys.stderr.flush()
-        sys.exit(1)
+        print "Failed to bootstrap instance.  Reason: %s" % (err)
 
 if __name__ == '__main__':
     main()
