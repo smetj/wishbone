@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  funnel.py
+#  jsonencode.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -23,13 +23,15 @@
 #
 
 from wishbone import Actor
+from json import dumps, loads
 
 
-class Funnel(Actor):
+class JSONEncode(Actor):
 
-    '''**Funnel multiple incoming queues to 1 outgoing queue.**
+    '''**Encodes Python data structures to JSON strings.**
 
-    Funnel multiple incoming queues to 1 outgoing queue.
+    Encodes Python data structures to JSON.
+
 
     Parameters:
 
@@ -42,24 +44,31 @@ class Funnel(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
+
     Queues:
 
-        outbox:     Outgoing events.
+        - inbox
+           |  Incoming messages
 
+        - outbox
+           |  Outgoing messges
     '''
 
-    def __init__(self, name, size=100, frequency=1):
+    def __init__(self, name, size, frequency):
 
-        Actor.__init__(self, name, size, frequency)
+        Actor.__init__(self, name)
         self.name = name
+
+        self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
-
-    def preHook(self):
-
-        for queue in self.pool.listQueues(default=False, names=True):
-            if queue != "outbox":
-                self.registerConsumer(self.consume, queue)
+        self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
 
-        self.pool.queue.outbox.put(event)
+        try:
+            event["data"] = dumps(event["data"])
+        except Exception as err:
+            self.logging.warn("Unable to convert incoming data.  Reason: %s" % (err))
+            raise
+
+        self.submit(event, self.pool.queue.outbox)
