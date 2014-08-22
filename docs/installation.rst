@@ -10,9 +10,8 @@ Versioning
 - Wishbone uses `Semantic Versioning`_.
 - Each release is tagged in `Github`_ with the release number.
 - The master branch contains the latest stable release.
-- The development branch is where all development is done.  There is no
-  the code works.
-- Other branches are special test cases or experiments.
+- The development branch is where all development is done.
+
 
 Wishbone
 --------
