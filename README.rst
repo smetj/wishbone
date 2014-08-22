@@ -6,43 +6,6 @@ What?
 
 Build event pipeline servers with minimal effort.
 
-Example
--------
-
-.. image:: docs/intro.png
-    :align: center
-
-.. code-block:: python
-
-    >>> from wishbone.router import Default
-    >>> from wishbone.module import TestEvent
-    >>> from wishbone.module import RoundRobin
-    >>> from wishbone.module import STDOUT
-
-    >>> router = Default()
-    >>> router.registerModule(TestEvent, "input", interval=1)
-    >>> router.registerModule(RoundRobin, "mixing")
-    >>> router.registerModule(STDOUT, "output1", prefix="I am number one: ")
-    >>> router.registerModule(STDOUT, "output2", prefix="I am number two: ")
-
-    >>> router.connect("input.outbox", "mixing.inbox")
-    >>> router.connect("mixing.one", "output1.inbox")
-    >>> router.connect("mixing.two", "output2.inbox")
-
-    >>> router.start()
-    >>> router.block()
-    I am number one: test
-    I am number two: test
-    I am number one: test
-    I am number two: test
-    I am number one: test
-    I am number two: test
-    I am number one: test
-    I am number two: test
-    I am number one: test
-    I am number two: test
-
-
 Documentation
 -------------
 
