@@ -106,10 +106,10 @@ class DiskIn(Actor):
 
     def diskMonitor(self):
         '''Primitive monitor which checks whether new data is added to disk.'''
-        counter = 0
+
         while self.loop():
             try:
-                newest = max(glob.iglob("%s/*.ready" % (self.directory)), key=os.path.getmtime)
+                newest = max(glob.iglob("%s/*" % (self.directory)), key=os.path.getmtime)
             except:
                 pass
             else:
