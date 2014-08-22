@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  funnel.py
+#  tcpout.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -23,13 +23,17 @@
 #
 
 from wishbone import Actor
+from gevent import sleep, spawn, socket
 
 
-class Funnel(Actor):
+class UDPOut(Actor):
 
-    '''**Funnel multiple incoming queues to 1 outgoing queue.**
+    '''**A UDP client which writes data to an UDP socket.**
 
-    Funnel multiple incoming queues to 1 outgoing queue.
+    Writes data to an UDP socket.
+
+    When <data> is of type list, all elements
+    will be joined using <delimiter> and submitted together.
 
     Parameters:
 
@@ -42,24 +46,37 @@ class Funnel(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
+        - host(string)("localhost")
+           |  The host to submit to.
+
+        - port(int)(19283)
+           |  The port to submit to.
+
+        - delimiter(str)("\\n")
+           |  A delimiter to add to each event.
+
+
     Queues:
 
-        outbox:     Outgoing events.
+        - inbox
+           |  Incoming events submitted to the outside.
 
     '''
 
-    def __init__(self, name, size=100, frequency=1):
-
+    def __init__(self, name, size=100, frequency=1, host="127.0.0.1", port=19283, delimiter="\n"):
         Actor.__init__(self, name, size, frequency)
-        self.name = name
-        self.pool.createQueue("outbox")
 
-    def preHook(self):
+        self.pool.createQueue("inbox")
+        self.registerConsumer(self.consume, "inbox")
 
-        for queue in self.pool.listQueues(default=False, names=True):
-            if queue != "outbox":
-                self.registerConsumer(self.consume, queue)
+        self.name=name
+        self.host=host
+        self.port=port
+        self.socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def consume(self, event):
-
-        self.pool.queue.outbox.put(event)
+        if isinstance(event["data"],list):
+            data = ''.join(event["data"])
+        else:
+            data = event["data"]
+        self.socket.sendto(str(data), (self.host, self.port))

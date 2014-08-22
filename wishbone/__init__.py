@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-#
 # -*- coding: utf-8 -*-
 #
 #  __init__.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,8 +22,8 @@
 #
 #
 
-from wishbone.base import Actor
-from wishbone.base import BaseActor
-from pkg_resources import get_distribution
-
-__version__ = get_distribution('wishbone').version
+from actor import Actor
+from queue import Queue
+from queue import QueuePool
+from logging import Logging
+from modulemanager import ModuleManager

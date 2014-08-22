@@ -23,14 +23,14 @@ store this under the <self.name> key, which is unique anyway within a router
 instance.
 
 The <self.name> value of a module is determined when registering the module
-using :py:func:`wishbone.router.Default.register`.
+using :py:func:`wishbone.router.Default.registerModule`.
 
 So when registering a module like this:
 
 .. code-block:: python
 
     router = Default(interval=1)
-    router.register(STDOUT, "on_screen")
+    router.registerModule(STDOUT, "on_screen")
 
 Then any information this module instance wants to write into the header
 should look like:
@@ -69,65 +69,32 @@ Consider following example module:
 Writing output modules
 ----------------------
 
-Starting state
-~~~~~~~~~~~~~~
-
-An output module should always start with the **inbox** queue in a
-:py:func:`wishbone.tools.WishboneQueue.putLock` state.  The moment the module
-detects it is capable of sending incoming events to the outside world, it
-should unlock the **inbox** queue using
-:py:func:`wishbone.tools.WishboneQueue.putUnlock`.
-
 Handle failed and successful events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Output modules are responsible to deliver messages to the outside world.
-Preferably we want this to be done as reliably.  When submitting events to the
-outside world (aka outside a Wishbone process.) fails or succeeds we might
-require a specific strategy to deal with that specific situation.
+Output modules are responsible of delivering messages to the outside world.
+Obviously, we want this to happen as reliable as possible. Whenever the
+function registered with py:class:`wishbone.Actor.registerConsumer` fails to
+submit the event to the outside world and because of that raises an exception,
+then Wishbone will submit the event to the module's **failed** queue.
 
-A possible strategy is have 2 additional queues:
+On the contrary, whenever the function registered with
+py:class:`wishbone.Actor.registerConsumer` exits successfully the event is
+submitted to the module's **successful** queue.
 
-    - successful
-    - failed
+It is up the user to connect these queues to another queue in order come to
+the desired strategy.
 
-As you might guess, events which have been submitted successfully to the
-outside world are then submitted to the *successful* queue while the events
-which failed to go out to the *failed* queue.
-
-It is up the user to connect these queues on their turn to another destination
-in order come to the desired strategy.
+Whenever these queues remain unconnected, all messages submitted to them are
+discarded.
 
 Some practical examples:
 
-- After submitting an event successfully over TCP to the outside world is is
+- After submitting an event successfully over TCP to the outside world, it is
   submitted to the `successful` queue.  This queue is on its turn connected to
   the AMQP `acknowledge` queue to ascertain it is acknowledged from AMQP.
 
-- After submitting an event over TCP failed, the event is written to the
-  failed queue from where it is forwarded to another module which writes the
+- After submitting an event over TCP failed, the event is submitted to the
+  `failed` queue from where it is forwarded to another module which writes the
   event to disk.
 
-Whenever this pattern is *not* used, the expected behavior should be:
-
-- Successfully submitted events are discarded
-- Unsuccessfully submitted events should be send back to the `inbox` queue
-  using :py:func:`wishbone.tools.WishboneQueue.rescue`.
-
-
-
-Retrying and monitors
-~~~~~~~~~~~~~~~~~~~~~
-
-When possible an output module should have a "monitor" thread running
-endlessly in a separate greenthread trying to create a valid connection object
-to the outside service.
-
-This monitor process should be blocked until :py:func:`wishbone.Actor.consume`
-fails to submit an event via the connection object.
-
-During the time the monitor process is retrying to create a valid connection
-object, it should block the `inbox` queue using
-:py:func:`wishbone.tools.WishboneQueue.putLock` since it makes no sense to
-allow events to come into the module  since they can't be delivered to the
-outside world anyway.
