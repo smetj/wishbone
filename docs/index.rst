@@ -1,8 +1,3 @@
-.. Wishbone documentation master file, created by
-   sphinx-quickstart on Wed Aug  7 21:08:21 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 ========
 Wishbone
 ========
@@ -10,13 +5,11 @@ https://github.com/smetj/wishbone
 
 .. currentmodule:: wishbone.module
 
-A Python library to build and CLI tool to manage asynchronous coroutine based
-event pipeline servers with minimal effort.
+A Python library and CLI tool to build and manage event pipeline servers with
+minimal effort.
 
-Works on python 2.6+, 2.7+ including Python 3 and PyPy 2.0.2
-
-.. image:: intro.png
-    :align: right
+Creating a server in Python
+===========================
 
 .. code-block:: python
 
@@ -24,17 +17,17 @@ Works on python 2.6+, 2.7+ including Python 3 and PyPy 2.0.2
     >>> from wishbone.module import TestEvent
     >>> from wishbone.module import RoundRobin
     >>> from wishbone.module import STDOUT
-    >>>
-    >>> router=Default()
-    >>> router.register(TestEvent, "input")
-    >>> router.register(RoundRobin, "mixing")
-    >>> router.register(STDOUT, "output1", prefix="I am number one: ")
-    >>> router.register(STDOUT, "output2", prefix="I am number two: ")
-    >>>
+
+    >>> router = Default()
+    >>> router.registerModule(TestEvent, "input", interval=1)
+    >>> router.registerModule(RoundRobin, "mixing")
+    >>> router.registerModule(STDOUT, "output1", prefix="I am number one: ")
+    >>> router.registerModule(STDOUT, "output2", prefix="I am number two: ")
+
     >>> router.connect("input.outbox", "mixing.inbox")
     >>> router.connect("mixing.one", "output1.inbox")
     >>> router.connect("mixing.two", "output2.inbox")
-    >>>
+
     >>> router.start()
     >>> router.block()
     I am number one: test
@@ -49,39 +42,51 @@ Works on python 2.6+, 2.7+ including Python 3 and PyPy 2.0.2
     I am number two: test
 
 
-This example we initialize the :class:`wishbone.router.Default` router to
-create a simple setup in which we connect the :py:class:`TestEvent` input
-module, which does nothing more than generating the word "test" every second,
-to the :class:`wishbone.module.RoundRobin` module which on its turn
-roundrobins the incoming events to 2 :class:`wishbone.module.STDOUT` module
-instances which print all incoming events to STDOUT.
+.. image:: intro.png
+    :align: right
 
 
-Bootstrapping
-=============
+In this example we initialize :class:`wishbone.router.Default` to create a
+simple setup in which we connect :py:class:`wishbone.module.TestEvent`, which
+does nothing more than generating the word "test" every second, to
+:class:`wishbone.module.RoundRobin` which on its turn "roundrobins" the
+incoming events to two :class:`wishbone.module.STDOUT` instances which print
+all incoming events to STDOUT.
 
-Wishbone comes with a CLI tool to easily bootstrap a server using a YAML
-formatted config file.  Following file creates exactly the same environment as
-the above example:
+
+Bootstrapping server from CLI
+=============================
+
+Wishbone comes with a CLI tool to bootstrap servers using a YAML formatted
+config file.  The bootstrap file describes the modules to initialize and how
+the modules should be connected to each other.
+
+Following bootstrap file creates exactly the same setup as shown in the above
+example:
 
 .. literalinclude:: examples/test_setup.yaml
    :language: yaml
 
 Bootstrapping the environment is just a matter of invoking the **wishbone**
-executable with the --config parameter pointing to the bootstrap file.
+executable using the *--config* parameter pointing to the bootstrap file.
 
 .. code-block:: sh
 
-    [smetj@indigo ~]$ wishbone debug --config test.yaml
-    2013-08-09T23:13:39 pid-13797 informational Router: Queue one does not exist in module mixing.  Autocreate queue.
-    2013-08-09T23:13:39 pid-13797 informational Router: Queue two does not exist in module mixing.  Autocreate queue.
-    2013-08-09T23:13:39 pid-13797 informational Router: Starting.
-    2013-08-09T23:13:39 pid-13797 informational loglevelfilter: Initiated
-    2013-08-09T23:13:39 pid-13797 informational loglevelfilter: Created module queue named inbox with max_size 0.
-    2013-08-09T23:13:39 pid-13797 informational loglevelfilter: Created module queue named outbox with max_size 0.
-    ... snip ...
-    2013-08-09T23:13:39 pid-13797 informational input: Started
-    I am number two: test
+    [smetj@indigo ~]$ wishbone debug --config simple.yaml --id docker
+    2014-08-06T23:17:41 wishbone[6609]: debug metrics_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug metrics_funnel: preHook() found, executing
+    2014-08-06T23:17:41 wishbone[6609]: debug logs_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug logs_funnel: preHook() found, executing
+    2014-08-06T23:17:41 wishbone[6609]: debug mixing: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug mixing: preHook() found, executing
+    2014-08-06T23:17:41 wishbone[6609]: debug input: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug input: preHook() found, executing
+    2014-08-06T23:17:41 wishbone[6609]: debug output1: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug output2: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug log_stdout: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug log_format: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug syslog: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2014-08-06T23:17:41 wishbone[6609]: debug syslog: preHook() found, executing
     I am number one: test
     I am number two: test
     I am number one: test
@@ -89,15 +94,9 @@ executable with the --config parameter pointing to the bootstrap file.
     I am number one: test
     I am number two: test
     I am number one: test
-    ^C2013-08-09T23:13:47 pid-13797 informational Router: Received SIGINT. Shutting down.
-    2013-08-09T23:13:47 pid-13797 informational Router: Stopping.
-    2013-08-09T23:13:47 pid-13797 informational output2: Shutdown
-    2013-08-09T23:13:48 pid-13797 warning output2: Queue <wishbone.tools.wishbonequeue.WishboneQueue instance at 0x2101a28> locked.
-    2013-08-09T23:13:48 pid-13797 informational output1: Shutdown
-    2013-08-09T23:13:48 pid-13797 warning output1: Queue <wishbone.tools.wishbonequeue.WishboneQueue instance at 0x2101680> locked.
-    2013-08-09T23:13:48 pid-13797 informational mixing: Shutdown
-    2013-08-09T23:13:48 pid-13797 warning mixing: Queue <wishbone.tools.wishbonequeue.WishboneQueue instance at 0x2101098> locked.
-    2013-08-09T23:13:49 pid-13797 informational input: Shutdown
+    ^C2014-08-06T23:18:09 wishbone[6609]: debug syslog: postHook() found, executing
+    2014-08-06T23:18:09 wishbone[6609]: debug syslog: postHook() found, executing
+    2014-08-06T23:18:09 wishbone[6609]: informational input: Stopped producing events.
     [smetj@indigo ~]$
 
 
@@ -108,11 +107,12 @@ Contents:
 
     installation
     introduction
-    actor
+    wishbone module
     router
-    modules
+    builtin modules
     bootstrap
     patterns
+    components
 
 Indices and tables
 ==================

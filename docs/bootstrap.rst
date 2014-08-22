@@ -33,7 +33,8 @@ start the Wishbone instance.
 
     [smetj@indigo ~]$ wishbone start -h
     usage: wishbone start [-h] [--config CONFIG] [--instances INSTANCES]
-                          [--pid PID]
+                          [--pid PID] [--queue-size QUEUE_SIZE]
+                          [--frequency FREQUENCY] [--id IDENT]
 
     Starts a Wishbone instance and detaches to the background. Logs are written to
     syslog.
@@ -45,6 +46,11 @@ start the Wishbone instance.
                             The number of parallel Wishbone instances to
                             bootstrap.
       --pid PID             The pidfile to use.
+      --queue-size QUEUE_SIZE
+                            The queue size to use.
+      --frequency FREQUENCY
+                            The metric frequency.
+      --id IDENT            An identification string.
 
 
 ------------------
@@ -60,6 +66,8 @@ STDOUT.  The running instance can be stopped gracefully with CTRL+C
 
     [smetj@indigo ~]$ wishbone debug -h
     usage: wishbone debug [-h] [--config CONFIG] [--instances INSTANCES]
+                          [--queue-size QUEUE_SIZE] [--frequency FREQUENCY]
+                          [--id IDENT]
 
     Starts a Wishbone instance in foreground and writes logs to STDOUT.
 
@@ -69,6 +77,11 @@ STDOUT.  The running instance can be stopped gracefully with CTRL+C
       --instances INSTANCES
                             The number of parallel Wishbone instances to
                             bootstrap.
+      --queue-size QUEUE_SIZE
+                            The queue size to use.
+      --frequency FREQUENCY
+                            The metric frequency.
+      --id IDENT            An identification string.
 
 
 ------------------
@@ -119,55 +132,48 @@ Lists all installed Wishbone modules, given that they have the correct entry-poi
 .. code-block:: sh
 
     [smetj@indigo ~]$ wishbone list
-    Available Wishbone modules:
-    +---------------------------+-------------------+-----------+------------------------------------------------------------------------------------------+
-    | Group                     | Module            | Version   | Description                                                                              |
-    +---------------------------+-------------------+-----------+------------------------------------------------------------------------------------------+
-    | wishbone.builtin.logging  | loglevelfilter    | 0.4.0beta | A builtin Wishbone module which filters Wishbone log events.                             |
-    |                           | humanlogformatter | 0.4.0beta | A builtin Wishbone module which formats Wishbone log events.                             |
-    |                           |                   |           |                                                                                          |
-    | wishbone.builtin.metrics  | graphite          | 0.4.0beta | A builtin Wishbone module which formats the internal metric format into Graphite format. |
-    |                           |                   |           |                                                                                          |
-    | wishbone.builtin.flow     | roundrobin        | 0.4.0beta | A builtin Wishbone module which round robins incoming events                             |
-    |                           |                   |           |     over all connected queues.                                                           |
-    |                           | fanout            | 0.4.0beta | A builtin Wishbone module which duplicates incoming events to all                        |
-    |                           |                   |           |     connected queues.                                                                    |
-    |                           | tippingbucket     | 0.4.0beta | A builtin Wishbone module which buffers data.                                            |
-    |                           | funnel            | 0.4.0beta | A builtin Wishbone module which merges incoming events from different                    |
-    |                           |                   |           |     queues into 1 queue.                                                                 |
-    |                           | lockbuffer        | 0.4.0beta | A builtin Wishbone module with a fixed size inbox queue.                                 |
-    |                           |                   |           |                                                                                          |
-    | wishbone.builtin.function | header            | 0.4.0beta |  A builtin Wishbone module which adds the defined dictionary                             |
-    |                           |                   |           |     to the header of each passing event.                                                 |
-    |                           |                   |           |                                                                                          |
-    | wishbone.builtin.input    | testevent         | 0.4.0beta | A WishBone input module which generates a test event at the chosen interval.             |
-    |                           |                   |           |                                                                                          |
-    | wishbone.builtin.output   | syslog            | 0.4.0beta | Writes Wishbone log events to syslog.                                                    |
-    |                           | null              | 0.4.0beta | Accepts events and purges these without any further processing.                          |
-    |                           | stdout            | 0.4.0beta | A builtin Wishbone module prints events to STDOUT.                                       |
-    |                           |                   |           |                                                                                          |
-    | wishbone.input            | dictgenerator     | 0.1       | A WishBone input module which generates dictionaries build out of words randomly         |
-    |                           |                   |           |     chosen from a provided wordlist.                                                     |
-    |                           | amqp              | 0.1       | A Wishbone AMQP input module.                                                            |
-    |                           | gearman           | 0.1       | A Wishbone input module which consumes jobs from a Gearmand server.                      |
-    |                           | generator         | 0.1       | A WishBone IO module which generates random data for testing purposes.                   |
-    |                           | namedpipe         | 0.1       | A Wishbone IO module which accepts external input from a named pipe.                     |
-    |                           | tcp               | 0.1       | A Wishbone input module which listens on a TCP socket.                                   |
-    |                           | udp               | 0.1       | A Wishbone module which handles UDP input.                                               |
-    |                           | uds               | 0.1       | A Wishbone input module which listens on a unix domain socket.                           |
-    |                           | mongodb           | 0.1       | A Wishbone output module to write data in MongoDB.                                       |
-    |                           |                   |           |                                                                                          |
-    | wishbone.output           | amqp              | 0.1       | A Wishbone AMQP output module.                                                           |
-    |                           | tcp               | 0.1       | A Wishbone IO module which writes data to a TCP socket.                                  |
-    |                           | uds               | 0.1       | A Wishbone IO module which writes data to a Unix domain socket.                          |
-    |                           |                   |           |                                                                                          |
-    | wishbone.function         | skeleton          | 0.1       | A bare minimum Wishbone function module.                                                 |
-    |                           | msgpack           | 0.1       | A Wishbone which de/serializes data into or from msgpack format.                         |
-    |                           | snappy            | 0.1       | A Wishbone module which compresses or decompresses data using Snappy.                    |
-    |                           | json              | 0.1       | A Wishbone module which converts and validates JSON.                                     |
-    |                           | waitseconds       | 0.1       | An output module which takes x seconds to finish the <consume> function.                 |
-    |                           |                   |           |                                                                                          |
-    +---------------------------+-------------------+-----------+------------------------------------------------------------------------------------------+
+              __       __    __
+    .--.--.--|__.-----|  |--|  |--.-----.-----.-----.
+    |  |  |  |  |__ --|     |  _  |  _  |     |  -__|
+    |________|__|_____|__|__|_____|_____|__|__|_____|
+                                       version 0.5.0
+
+    Build event pipeline servers with minimal effort.
+
+
+    Available modules:
+    +----------+----------+----------------+---------+------------------------------------------------------------+
+    | Category | Group    | Module         | Version | Description                                                |
+    +----------+----------+----------------+---------+------------------------------------------------------------+
+    |          |          |                |         |                                                            |
+    | wishbone | flow     | funnel         |   0.5.0 | Funnel multiple incoming queues to 1 outgoing queue.       |
+    |          |          | fanout         |   0.5.0 | Funnel multiple incoming queues to 1 outgoing queue.       |
+    |          |          | roundrobin     |   0.5.0 | Round-robins incoming events to all connected queues.      |
+    |          |          |                |         |                                                            |
+    |          | encode   | humanlogformat |   0.5.0 | Formats Wishbone log events.                               |
+    |          |          | msgpack        |   0.5.0 | Encodes events to MSGPack format.                          |
+    |          |          | graphite       |   0.5.0 | Converts the internal metric format to Graphite format.    |
+    |          |          |                |         |                                                            |
+    |          | decode   | msgpack        |   0.5.0 | Decodes events from MSGPack format.                        |
+    |          |          |                |         |                                                            |
+    |          | function | header         |   0.5.0 | Adds information to event headers.                         |
+    |          |          |                |         |                                                            |
+    |          | input    | amqp           |   0.5.0 | Consumes messages from AMQP.                               |
+    |          |          | testevent      |   0.5.0 | Generates a test event at the chosen interval.             |
+    |          |          | tcp            |   0.5.0 | A Wishbone input module which listens on a TCP socket.     |
+    |          |          | subscriber     |   0.5.0 | Subscribes to one or more ZeroMQ publishers.               |
+    |          |          | dictgenerator  |   0.5.0 | Generates random dictionaries.                             |
+    |          |          | disk           |   0.5.0 | Reads messages from a disk buffer.                         |
+    |          |          |                |         |                                                            |
+    |          | output   | publisher      |   0.5.0 | Publishes data to one or more ZeroMQ receivers.            |
+    |          |          | null           |   0.5.0 | Purges incoming events.                                    |
+    |          |          | amqp           |   0.5.0 | Produces messages to AMQP.                                 |
+    |          |          | stdout         |   0.5.0 | Prints incoming events to STDOUT.                          |
+    |          |          | tcp            |   0.5.0 | A Wishbone ouput module which writes data to a TCP socket. |
+    |          |          | syslog         |   0.5.0 | Writes log events to syslog.                               |
+    |          |          | disk           |   0.5.0 | Writes messages to a disk buffer.                          |
+    |          |          |                |         |                                                            |
+    +----------+----------+----------------+---------+------------------------------------------------------------+
 
 
 ------------------
@@ -180,30 +186,47 @@ Displays the docstring of the requested module.
 
 .. code-block:: sh
 
-    [smetj@indigo ~]$ wishbone show wishbone.builtin.flow.fanout
-    **A builtin Wishbone module which duplicates incoming events to all
-        connected queues.**
+    [smetj@indigo ~]$ wishbone show --module wishbone.flow.fanout
+              __       __    __
+    .--.--.--|__.-----|  |--|  |--.-----.-----.-----.
+    |  |  |  |  |__ --|     |  _  |  _  |     |  -__|
+    |________|__|_____|__|__|_____|_____|__|__|_____|
+                                       version 0.5.0
 
-        Create a "1 to n" relationship with queues.  Events arriving in inbox
-        are then copied to each queue connected to this module.  Keep in mind
-        that the outbox queue is never used.
+    Build event pipeline servers with minimal effort.
 
-        When clone is True, each incoming event is duplicated for each outgoing
-        queue.  This might be usefull if you require to change the content of the
-        events later down the pipeline.  Otherwise references are used which means
-        changing the event will change it everywhere in the current Wishbone
-        framework.
 
+
+    ====================
+    wishbone.flow.fanout
+    ====================
+
+    Version: 0.5.0
+
+    Funnel multiple incoming queues to 1 outgoing queue.
+    ----------------------------------------------------
+
+
+        Funnel multiple incoming queues to 1 outgoing queue.
 
         Parameters:
 
-            name(str):      The name of the module.
+            - name(str)
+               |  The name of the module.
 
-            clone(bool):    When True actually makes a copy instead of passing
-                            a reference.
+            - size(int)
+               |  The default max length of each queue.
+
+            - frequency(int)
+               |  The frequency in seconds to generate metrics.
+
+            - dupe(bool)(False)
+               |  Determines whether we send references to the
+                  original event to all destination or an
+                  actual copy.
+
 
         Queues:
 
-            inbox:  Incoming events
-
-
+            outbox
+             |  Outgoing events.
