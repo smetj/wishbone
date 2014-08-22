@@ -91,7 +91,7 @@ The following commands runs a Wishbone container:
 
 .. code-block:: sh
 
-    $ docker run --privileged=true -t -i --volume /bootstrap:/bootstrap wishbone:latest debug --config /bootstrap/simple.yaml
+    $ docker run --privileged=true -t -i --volume /bootstrap:/bootstrap smetj/wishbone:1.0.0 debug --config /bootstrap/simple.yaml
 
 The idea is that the Docker *host* has a directory called "/bootstrap" which
 contains all the Wishbone bootstrap files. The above command mounts the host's
