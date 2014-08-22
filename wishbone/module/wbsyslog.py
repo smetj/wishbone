@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-#
 # -*- coding: utf-8 -*-
 #
-#  syslog.py
+#  wbsyslog.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,12 +23,13 @@
 #
 
 from wishbone import Actor
-#from gevent import monkey;monkey.patch_all
 import syslog
 import sys
 import os
 
+
 class Syslog(Actor):
+
     '''**Writes log events to syslog.**
 
     Logevents have following format:
@@ -38,25 +38,39 @@ class Syslog(Actor):
 
     The first value corresponds to the syslog severity level.
 
-        Parameters
+    Parameters:
 
-            - name(str) :   The name of the module.
+        - name(str)
+           |  The name of the module.
+
+        - size(int)
+           |  The default max length of each queue.
+
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
 
-        Queues:
+    Queues:
 
-            - inbox: incoming events
+        - inbox
+           |  incoming events
     '''
 
-    def __init__(self, name):
-        Actor.__init__(self, name)
-        self.name=name
+    def __init__(self, name, size=100, frequency=1, ident=None):
+        Actor.__init__(self, name, size, frequency)
+        self.name = name
+        if ident is None:
+            self.ident = os.path.basename(sys.argv[0])
+        else:
+            self.ident = ident
+        self.pool.createQueue("inbox")
+        self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        syslog.openlog("%s(%s)"%(os.path.basename(sys.argv[0]), os.getpid()))
+        syslog.openlog("%s[%s]" % (self.ident, os.getpid()))
 
     def consume(self, event):
-        syslog.syslog(event["data"][0], "%s: %s"%(event["data"][3], event["data"][4]))
+        syslog.syslog(event["data"][0], "%s: %s" % (event["data"][3], event["data"][4]))
 
     def postHook(self):
         syslog.closelog()
