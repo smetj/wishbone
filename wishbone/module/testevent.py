@@ -1,37 +1,35 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#       testevent.py
+#  testevent.py
 #
-#       Copyright 2013 Jelle Smet development@smetj.net
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
-#       This program is free software; you can redistribute it and/or modify
-#       it under the terms of the GNU General Public License as published by
-#       the Free Software Foundation; either version 3 of the License, or
-#       (at your option) any later version.
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 3 of the License, or
+#  (at your option) any later version.
 #
-#       This program is distributed in the hope that it will be useful,
-#       but WITHOUT ANY WARRANTY; without even the implied warranty of
-#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#       GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 #
-#       You should have received a copy of the GNU General Public License
-#       along with this program; if not, write to the Free Software
-#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-#       MA 02110-1301, USA.
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
 #
 #
 
 from wishbone import Actor
-from wishbone.errors import QueueLocked, QueueFull, SetupError
-from gevent import sleep, spawn
-from gevent.event import Event
+from gevent import sleep
+
 
 class TestEvent(Actor):
 
     '''**Generates a test event at the chosen interval.**
 
-    This module is only available for testing purposes and has further hardly any use.
 
     Events have following format:
 
@@ -39,70 +37,73 @@ class TestEvent(Actor):
 
     Parameters:
 
-        - name (str):               The instance name when initiated.
+        - name(str)
+           |  The name of the module.
 
-        - interval (float):         The interval in seconds between each generated event.
-                                    Should have a value > 0.
-                                    default: 1
+        - size(int)
+           |  The default max length of each queue.
 
-        - message (string):         The content of the test message.
-                                    default: "test"
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
-        - numbered (bool):          When true, appends a sequential number to the end.
-                                    default: False
+        - interval(float)(1)
+           |  The interval in seconds between each generated event.
+           |  A value of 0 means as fast as possible.
+
+        - message(string)("test")
+           |  The content of the test message.
+
+        - numbered(bool)
+           |  When true, appends a sequential number to the end.
+
 
     Queues:
 
-        - outbox:    Contains the generated events.
+        - outbox
+           |  Contains the generated events.
     '''
 
-    def __init__(self, name, interval=1, message="test", numbered=False):
-        Actor.__init__(self, name, setupbasic=False)
-        self.createQueue("outbox")
+    def __init__(self, name, size=100, frequency=1, interval=1, message="test", numbered=False):
+        Actor.__init__(self, name, size, frequency)
         self.name = name
+        self.interval = interval
         self.message = message
-        self.interval=interval
+        self.numbered = numbered
+
+        self.pool.createQueue("outbox")
+
         if interval == 0:
-            self.sleep = self.doNoSleep
+            self.sleep = self.__doNoSleep
         else:
-            self.sleep = self.doSleep
+            self.sleep = self.__doSleep
 
-        self.throttle=Event()
-        self.throttle.set()
-        if numbered == True:
-            self.number = self.doNumber
-            self.n=0
+        if numbered:
+            self.number = self.__doNumber
+            self.n = 0
         else:
-            self.number = self.doNoNumber
-
-    def doNumber(self):
-        self.n += 1
-        return "_%s"%(self.n)
-
-    def doNoNumber(self):
-        return ""
+            self.number = self.__doNoNumber
 
     def preHook(self):
-        spawn(self.go)
+        self.threads.spawn(self.produce)
 
-    def go(self):
-        switcher = self.getContextSwitcher(100)
-        while switcher():
-            self.throttle.wait()
-            try:
-                self.queuepool.outbox.put({"header":{},"data":"%s%s"%(self.message, self.number())})
-            except (QueueFull, QueueLocked):
-                self.queuepool.outbox.waitUntilPutAllowed()
-            self.sleep(self.interval)
+    def produce(self):
 
-    def doSleep(self, interval):
-        sleep(interval)
+        while self.loop():
+            event = {"header": {}, "data": "%s%s" % (self.message, self.number())}
+            self.submit(event, self.pool.queue.outbox)
+            self.sleep()
 
-    def doNoSleep(self, interval):
+        self.logging.info("Stopped producing events.")
+
+    def __doSleep(self):
+        sleep(self.interval)
+
+    def __doNoSleep(self):
         pass
 
-    def enableThrottling(self):
-        self.throttle.clear()
+    def __doNumber(self):
+        self.n += 1
+        return "_%s" % (self.n)
 
-    def disableThrottling(self):
-        self.throttle.set()
+    def __doNoNumber(self):
+        return ""

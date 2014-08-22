@@ -4,7 +4,7 @@
 #
 #  roundrobin.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 from wishbone import Actor
 from itertools import cycle
 from random import randint
-from gevent import sleep
+
 
 class RoundRobin(Actor):
 
@@ -36,42 +36,51 @@ class RoundRobin(Actor):
     are then submitted in a roundrobin (or randomized) fashion to the
     connected queues.  The outbox queue is non existent.
 
-
     Parameters:
 
-        name(str):      The name of the module.
+        - name(str)
+           |  The name of the module.
 
-        randomize(bool):    Randomizes the queue selection instead of going
-                            round robin over all queues.
+        - size(int)
+           |  The default max length of each queue.
+
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
+
+        - randomize(bool)
+            |  Randomizes the queue selection instead of going round-robin
+            |  over all queues.
+
 
     Queues:
 
-        inbox:  Incoming events
+        - inbox
+           |  Incoming events
     '''
 
-    def __init__(self, name, randomize=False):
-        Actor.__init__(self, name)
-        self.deleteQueue("outbox")
-        self.randomize=randomize
+    def __init__(self, name, size=100, frequency=1, randomize=False):
+        Actor.__init__(self, name, size, frequency)
+        self.pool.createQueue("inbox")
+        self.registerConsumer(self.consume, "inbox")
+
+        self.randomize = randomize
 
     def preHook(self):
-        destination_queues = self.queuepool.getQueueInstances()
-        del(destination_queues["inbox"])
 
-        self.destination_queues = [destination_queues[queue] for queue in destination_queues.keys()]
+        self.destination_queues = []
+        for queue in self.pool.listQueues(names=True):
+            if queue not in ["admin_in", "admin_out", "failed", "success", "metrics", "logs"]:
+                self.destination_queues.append(self.pool.getQueue(queue))
 
-        if self.randomize == False:
+        if not self.randomize:
             self.cycle = cycle(self.destination_queues)
-            self.chooseQueue=self.__chooseNextQueue
+            self.chooseQueue = self.__chooseNextQueue
         else:
-            self.chooseQueue=self.__chooseRandomQueue
+            self.chooseQueue = self.__chooseRandomQueue
 
     def consume(self, event):
         queue = self.chooseQueue()
-        try:
-            queue.put(event)
-        except:
-            self.queuepool.inbox.rescue(event)
+        queue.put(event)
 
     def __chooseNextQueue(self):
         return self.cycle.next()

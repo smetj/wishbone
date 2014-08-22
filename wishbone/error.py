@@ -1,7 +1,8 @@
 #!/usr/bin/env python
+#
 # -*- coding: utf-8 -*-
 #
-#  null.py
+#  error.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -22,40 +23,48 @@
 #
 #
 
-from wishbone import Actor
+
+class QueueLocked(Exception):
+    pass
 
 
-class Null(Actor):
-
-    '''**Purges incoming events.**
-
-    Purges incoming events.
-
-
-        Parameters:
-
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
+class QueueEmpty(Exception):
+    def __init__(self, message, waitUntilFull, waitUntilContent):
+        Exception.__init__(self, message)
+        self.waitUntilFull = waitUntilFull
+        self.waitUntilContent = waitUntilContent
 
 
-    Queues:
+class QueueFull(Exception):
+    def __init__(self, message, waitUntilEmpty, waitUntilFree):
+        Exception.__init__(self, message)
+        self.waitUntilEmpty = waitUntilEmpty
+        self.waitUntilFree = waitUntilFree
 
-        - inbox
-           |  incoming events
-    '''
 
-    def __init__(self, name, size=100, frequency=1):
+class QueueMissing(Exception):
+    pass
 
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
-        self.pool.createQueue("inbox")
-        self.registerConsumer(self.consume, "inbox")
 
-    def consume(self, event):
-        pass
+class QueueOccupied(Exception):
+    pass
+
+
+class QueueConnected(Exception):
+    pass
+
+
+class SetupError(Exception):
+    pass
+
+
+class ReservedName(Exception):
+    pass
+
+
+class ModuleInitFailure(Exception):
+    pass
+
+
+class NoSuchModule(Exception):
+    pass
