@@ -3,7 +3,7 @@
 #
 #  setup.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,13 +27,14 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '0.4.10'
-install_requires=['gevent>=1.0','argparse','greenlet>=0.3.2','jsonschema','prettytable','python-daemon', "pyyaml", "gevent_inotifyx", "pyyaml"]
+VERSION = '1.0.0'
+install_requires = ['gevent>=1.1', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', 'pyyaml', 'msgpack-python', 'pyzmq', 'amqp', 'grequests', 'jinja2', 'jsonschema']
 
 try:
     long_description = open('README.rst', 'rt').read()
 except IOError:
     long_description = ''
+
 
 class PyTest(TestCommand):
     def finalize_options(self):
@@ -50,7 +51,7 @@ setup(
     name=PROJECT,
     version=VERSION,
 
-    description='A Python application framework and CLI tool to build and manage async event pipeline servers with minimal effort.',
+    description='Build event pipeline servers with minimal effort.',
     long_description=long_description,
 
     author='Jelle Smet',
@@ -63,7 +64,6 @@ setup(
                  'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
                  'Programming Language :: Python',
                  'Programming Language :: Python :: 2',
-                 'Programming Language :: Python :: 2.6',
                  'Programming Language :: Python :: 2.7',
                  'Programming Language :: Python :: 3.3',
                  'Programming Language :: Python :: Implementation :: PyPy',
@@ -82,40 +82,67 @@ setup(
     install_requires=install_requires,
     namespace_packages=[],
     packages=find_packages(),
+    package_data={'': ['data/wordlist.txt']},
     zip_safe=False,
+    dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.1'],
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
-        'wishbone.builtin.flow': [
+        'wishbone.flow': [
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
-            'lockbuffer = wishbone.module.lockbuffer:LockBuffer',
-            'roundrobin = wishbone.module.roundrobin:RoundRobin',
-            'tippingbucket = wishbone.module.tippingbucket:TippingBucket'
-             ],
-        'wishbone.builtin.logging': [
-            'humanlogformatter = wishbone.module.humanlogformatter:HumanLogFormatter',
-            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
-            ],
-        'wishbone.builtin.metrics': [
+            'roundrobin = wishbone.module.roundrobin:RoundRobin'
+        ],
+        'wishbone.encode': [
             'graphite = wishbone.module.graphite:Graphite',
-            ],
-        'wishbone.builtin.function': [
+            'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
+            'msgpack = wishbone.module.msgpackencode:MSGPackEncode',
+            'json = wishbone.module.jsonencode:JSONEncode'
+        ],
+        'wishbone.decode': [
+            'msgpack = wishbone.module.msgpackdecode:MSGPackDecode',
+            'json = wishbone.module.jsondecode:JSONDecode'
+        ],
+        'wishbone.function': [
             'header = wishbone.module.header:Header',
-            ],
-        'wishbone.builtin.input': [
-            'testevent = wishbone.module.testevent:TestEvent'
-            ],
-        'wishbone.builtin.output': [
+            'template = wishbone.module.template:Template'
+            # 'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
+        ],
+        'wishbone.input': [
+            'amqp = wishbone.module.amqpin:AMQPIn',
+            'dictgenerator = wishbone.module.dictgenerator:DictGenerator',
+            'disk = wishbone.module.diskin:DiskIn',
+            'httpclient = wishbone.module.httpinclient:HTTPInClient',
+            'httpserver = wishbone.module.httpinserver:HTTPInServer',
+            'namedpipe = wishbone.module.namedpipein:NamedPipeIn',
+            'pull = wishbone.module.zmqpullin:ZMQPullIn',
+            'tcp = wishbone.module.tcpin:TCPIn',
+            'testevent = wishbone.module.testevent:TestEvent',
+            'topic = wishbone.module.zmqtopicin:ZMQTopicIn',
+            'udp = wishbone.module.udpin:UDPIn',
+        ],
+        'wishbone.output': [
+            'amqp = wishbone.module.amqpout:AMQPOut',
+            'disk = wishbone.module.diskout:DiskOut',
             'null = wishbone.module.null:Null',
+            'topic = wishbone.module.zmqtopicout:ZMQTopicOut',
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog',
-            'slow = wishbone.module.slow:Slow',
-            ],
-        'wishbone.input': [
-            ],
-        'wishbone.output': [
-            ],
-        'wishbone.function': [
-            ]
+            'tcp = wishbone.module.tcpout:TCPOut',
+            'push = wishbone.module.zmqpushout:ZMQPushOut',
+            'udp = wishbone.module.udpout:UDPOut',
+            'uds = wishbone.module.udsout:UDSOut'
+        ],
+        'wishbone.contrib.flow': [
+        ],
+        'wishbone.contrib.encode': [
+        ],
+        'wishbone.contrib.decode': [
+        ],
+        'wishbone.contrib.function': [
+        ],
+        'wishbone.contrib.input': [
+        ],
+        'wishbone.contrib.output': [
+        ]
     }
 )

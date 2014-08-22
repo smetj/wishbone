@@ -2,6 +2,17 @@
 Installation
 ============
 
+Wishbone works on python 2.7+ and PyPy 2.3.1+
+
+Versioning
+----------
+
+- Wishbone uses `Semantic Versioning`_.
+- Each release is tagged in `Github`_ with the release number.
+- The master branch contains the latest stable release.
+- The development branch is where all development is done.  There is no
+  the code works.
+- Other branches are special test cases or experiments.
 
 Wishbone
 --------
@@ -9,32 +20,25 @@ Wishbone
 Pypi
 '''''
 
-You can install the latest stable version of Wishbone from
-https://pypi.python.org/pypi/wishbone/ by using easy_install or pip:
-
-
-
-.. code-block:: sh
-
-    $ easy_install wishbone
-
-Or
+To install the latest stable release from
+https://pypi.python.org/pypi/wishbone use *pip*.
 
 .. code-block:: sh
 
     $ pip install wishbone
 
-All dependencies should be resolved automatically.
+
 
 
 From source
 '''''''''''
+Wishbone' source can be downloaded from http://github.com/smetj/wishbone
 
-You can install the latest stable or development version from
-https://github.com/smetj/wishbone
 
 Stable
 ~~~~~~
+
+Install the latest *stable* release from the **master** branch.
 
 .. code-block:: sh
 
@@ -47,8 +51,7 @@ Stable
 Development
 ~~~~~~~~~~~
 
-To install the latest development release you have to checkout the develop
-branch and build from there:
+Install the latest *development* release from the **development** branch.
 
 .. code-block:: sh
 
@@ -56,6 +59,46 @@ branch and build from there:
     $ cd wishbone
     $ git checkout develop
     $ sudo python setup.py install
+
+
+Docker
+''''''
+
+Wishbone is also available as a Docker container.
+
+Pull the *smetj/wishbone* repository from
+https://registry.hub.docker.com/u/smetj/wishbone into your Docker environment:
+
+.. code-block:: sh
+
+    $ docker pull smetj/wishbone
+    $ docker images
+    REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+    smetj/wishbone      latest              e4acd2360be8        40 minutes ago      932.3 MB
+    smetj/wishbone      alertmachine        9bb81f6baa3a        4 months ago        756.2 MB
+
+The container is prepared to be run as an executable:
+
+.. code-block:: sh
+
+    $ docker run -i -t smetj/wishbone:latest
+    usage: wishbone [-h] {show,stop,list,start,kill,debug} ...
+    wishbone: error: too few arguments
+
+
+The following commands runs a Wishbone container:
+
+
+.. code-block:: sh
+
+    $ docker run --privileged=true -t -i --volume /bootstrap:/bootstrap wishbone:latest debug --config /bootstrap/simple.yaml
+
+The idea is that the Docker *host* has a directory called "/bootstrap" which
+contains all the Wishbone bootstrap files. The above command mounts the host's
+**/bootstrap** directory to the container's mountpoint called "/bootstrap".
+Once done you can point the *--config* parameter to the mountpoint and load
+the bootstrap files stored on the host.
+
 
 
 Verify installation
@@ -77,124 +120,5 @@ path:
     optional arguments:
       -h, --help            show this help message and exit
 
-
-Modules
--------
-
-Builtin modules
-'''''''''''''''
-
-Wishbone comes with a set of builtin modules.  You can verify the available
-default modules by using the *list* command:
-
-.. code-block:: sh
-
-    $ wishbone list
-    Available Wishbone modules:
-    +---------------------------+-------------------+---------+----------------------------------------------------------------------+
-    | Group                     | Module            | Version | Description                                                          |
-    +---------------------------+-------------------+---------+----------------------------------------------------------------------+
-    | wishbone.builtin.logging  | loglevelfilter    | 0.4.8   | Filters Wishbone log events.                                         |
-    |                           | humanlogformatter | 0.4.8   | Formats Wishbone log events.                                         |
-    |                           |                   |         |                                                                      |
-    | wishbone.builtin.metrics  | graphite          | 0.4.8   | Converts the internal metric format to Graphite format.              |
-    |                           |                   |         |                                                                      |
-    | wishbone.builtin.flow     | roundrobin        | 0.4.8   | Round-robins incoming events to all connected queues.                |
-    |                           | fanout            | 0.4.8   | Duplicates incoming events to all connected queues.                  |
-    |                           | tippingbucket     | 0.4.8   | Event buffer module.                                                 |
-    |                           | funnel            | 0.4.8   | Merges incoming events from multiple queues to 1 queue.              |
-    |                           | lockbuffer        | 0.4.8   | A module with a fixed size inbox queue.                              |
-    |                           |                   |         |                                                                      |
-    | wishbone.builtin.function | header            | 0.4.8   | Adds information to event headers.                                   |
-    |                           |                   |         |                                                                      |
-    | wishbone.builtin.input    | testevent         | 0.4.8   | Generates a test event at the chosen interval.                       |
-    |                           |                   |         |                                                                      |
-    | wishbone.builtin.output   | syslog            | 0.4.8   | Writes log events to syslog.                                         |
-    |                           | null              | 0.4.8   | Purges incoming events..                                             |
-    |                           | stdout            | 0.4.8   | Prints incoming events to STDOUT.                                    |
-    |                           | slow              | 0.4.8   | Processes an incoming event per X seconds.                           |
-    |                           |                   |         |                                                                      |
-    +---------------------------+-------------------+---------+----------------------------------------------------------------------+
-
-Modules are stored into a hierarchic name space.  The complete name of a
-module consists out of the group name + the module name.  You can read the details of a module by executing the *show* command:
-
-.. code-block:: sh
-
-    $ wishbone show wishbone.builtin.input.testevent
-    **Generates a test event at the chosen interval.**
-
-        This module is only available for testing purposes and has further hardly any use.
-
-        Events have following format:
-
-            { "header":{}, "data":"test" }
-
-        Parameters:
-
-            - name (str):               The instance name when initiated.
-
-            - interval (float):         The interval in seconds between each generated event.
-                                        Should have a value > 0.
-                                        default: 1
-
-        Queues:
-
-            - outbox:    Contains the generated events.
-
-
-External modules
-''''''''''''''''
-
-Not all modules are builtin modules.  There is a collection of modules which
-can be downloaded from https://github.com/smetj/wishboneModules.  The reason
-they are not builtin modules is to limit the number of dependencies for
-Wishbone itself.  All modules are also in 1 repository.  Within time they will
-be available as separate projects and added to Pypi.
-
-To install an *external* module follow these steps:
-
-.. code-block:: sh
-
-    $ git clone https://github.com/smetj/wishboneModules.git
-    $ cd wb_output_tcp
-    $ python setup.py install
-    $ wishbone show wishbone.output.tcp
-    **A Wishbone IO module which writes data to a TCP socket.**
-
-    Writes data to a tcp socket.
-
-    Parameters:
-
-        - name (str):       The instance name when initiated.
-
-        - host (string):    The host to submit to.
-                            Default: "localhost"
-
-        - port (int):       The port to submit to.
-                            Default: 19283
-
-        - timeout(int):     The time in seconds to timeout when
-                            connecting
-                            Default: 1
-
-        - delimiter(str):   A delimiter to add to each event.
-                            Default: "\n"
-
-        - success (bool):   When True, submits succesfully outgoing
-                            events to the 'success' queue.
-                            Default: False
-
-        - failed (bool):    When True, submits failed outgoing
-                            events to the 'failed' queue.
-                            Default: False
-
-    Queues:
-
-        - inbox:    Incoming events submitted to the outside.
-
-        - success:  Contains events which went out succesfully.
-                    (optional)
-
-        - failed:   Contains events which did not go out successfully.
-                    (optional)
+.. _semantic versioning: http://semver.org/
+.. _Github: https://github.com/smetj/wishbone/releases
