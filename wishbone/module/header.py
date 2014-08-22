@@ -4,7 +4,7 @@
 #
 #  header.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,57 +27,71 @@ from wishbone import Actor
 
 
 class Header(Actor):
+
     '''**Adds information to event headers.**
+
 
     Parameters:
 
-        - name(str):    The name of the module
+        - name(str)
+           |  The name of the module.
 
-        - key (str):    The header key to store the information.
-                        Default: <name>
+        - size(int)
+           |  The default max length of each queue.
 
-        - header(dict): The data to store.
-                        Default: {}
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
-        - expr(str):    printf-style String Formatting.
-                        Expects event["data"] to be a dictionary.
-                        the dictionary.
-                        Default: None
+        - key(str)(self.name)
+           |  The header key to store the information.
+
+        - header(dict)({})
+           |  The data to store.
+
+        - expr(str)(None)
+           |  printf-style String Formatting.
+           |  Expects event["data"] to be a dictionary.
+
 
     Queues:
 
-        - inbox:      Incoming events.
+        - inbox
+           |  Incoming events.
 
-        - outbox:     Outgoing modified events.
-
+        - outbox
+           |  Outgoing events.
     '''
 
-    def __init__(self, name, key=None, header={}, expr=None):
-        Actor.__init__(self, name)
-        if key == None:
-            self.key=name
+    def __init__(self, name, size=100, frequency=1, key=None, header={}, expr=None):
+        Actor.__init__(self, name, size, frequency)
+        if key is None:
+            self.key = name
         else:
-            self.key=key
+            self.key = key
 
-        self.header=header
-        self.expr=expr
+        self.header = header
+        self.expr = expr
 
-        if expr == None:
-            self.addHeader=self.__doHeader
+        if expr is None:
+            self.addHeader = self.__doHeader
         else:
-            self.addHeader=self.__doPrintf
+            self.addHeader = self.__doPrintf
+
+        self.pool.createQueue("inbox")
+        self.pool.createQueue("outbox")
+        self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
-        event=self.addHeader(event)
-        self.queuepool.outbox.put(event)
+        event = self.addHeader(event)
+        self.pool.queue.outbox.put(event)
 
     def __doHeader(self, event):
-        event["header"][self.key]=self.header
+        event["header"][self.key] = self.header
         return event
 
     def __doPrintf(self, event):
         try:
-            return self.expr%event["data"]
+            return self.expr % event["data"]
         except Exception as err:
-            self.logging.error("String replace failed.  Reason: %s"%(err))
+            self.logging.error("String replace failed.  Reason: %s" % (err))
             return event

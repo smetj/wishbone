@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  funnel.py
+#  msgpackencode.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -23,13 +23,13 @@
 #
 
 from wishbone import Actor
+import msgpack
 
 
-class Funnel(Actor):
+class MSGPackDecode(Actor):
+    '''**Decodes events from MSGPack format.**
 
-    '''**Funnel multiple incoming queues to 1 outgoing queue.**
-
-    Funnel multiple incoming queues to 1 outgoing queue.
+    Decodes the payload or complete events from MSGPack format.
 
     Parameters:
 
@@ -42,24 +42,44 @@ class Funnel(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
+        - complete(bool)(False)
+           |  When True encodes the complete event.  If False only
+           |  encodes the data part.
+
     Queues:
 
-        outbox:     Outgoing events.
+        - inbox
+           |  Incoming messages
 
+        - outbox
+           |  Outgoing messges
     '''
 
-    def __init__(self, name, size=100, frequency=1):
-
+    def __init__(self, name, size, frequency, complete=False):
         Actor.__init__(self, name, size, frequency)
-        self.name = name
+
+        self.complete = complete
+        self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
+        self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-
-        for queue in self.pool.listQueues(default=False, names=True):
-            if queue != "outbox":
-                self.registerConsumer(self.consume, queue)
+        if self.complete:
+            self.decode = self.__decodeComplete
+        else:
+            self.decode = self.__decodeData
 
     def consume(self, event):
-
+        event = self.decode(event)
         self.pool.queue.outbox.put(event)
+
+    def __decodeComplete(self, event):
+        return msgpack.unpackb(event["data"])
+
+    def __decodeData(self, event):
+
+        event["data"] = msgpack.unpackb(event["data"])
+        return event
+
+
+
