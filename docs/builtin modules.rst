@@ -44,7 +44,7 @@ wishbone.input.namedpipe
 
 wishbone.input.pull
 -------------------------
-.. autoclass:: wishbone.module.AMQPullIn
+.. autoclass:: wishbone.module.ZMQPullIn
 
 --------
 
