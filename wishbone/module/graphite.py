@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-#
 # -*- coding: utf-8 -*-
 #
-#  stdout.py
+#  graphite.py
 #
-#  Copyright 2013 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,11 +23,10 @@
 #
 
 from wishbone import Actor
-from time import time
-from gevent import socket
-from sys import argv
 from os.path import basename
+from sys import argv
 from os import getpid
+
 
 class Graphite(Actor):
 
@@ -43,47 +41,71 @@ class Graphite(Actor):
 
     Parameters:
 
-        - name(str):    The name of the module.
+        - name(str)
+           |  The name of the module.
 
-        - prefix(str):  Some prefix to put in front of the metric name.
+        - size(int)
+           |  The default max length of each queue.
 
-        - script(bool): Include the script name.
-                        Default: True
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
 
-        - pid(bool):    Include pid value in script name.
-                        Default: False
+        - prefix(str)
+           |  Some prefix to put in front of the metric name.
 
-        - source(bool): Include the source name in the naming schema.
-                        Default: True
+        - script(bool)(True)
+           |  Include the script name.
 
+        - pid(bool)(False)
+           |  Include pid value in script name.
+
+        - source(bool)(True):
+           |  Include the source name in the naming schema.
+
+
+    Queues:
+
+        - inbox
+           |  Incoming messages
+
+        - outbox
+           |  Outgoing messges
     '''
 
-    def __init__(self, name, prefix='', script=True, pid=False, source=True):
-        Actor.__init__(self, name)
-        self.name=name
-        self.prefix=prefix
-        if script == True:
-            self.script_name = '.%s'%(basename(argv[0]).replace(".py",""))
+    def __init__(self, name, size=100, frequency=1, prefix='', script=True, pid=False, source=True):
+        Actor.__init__(self, name, size, frequency)
+        self.name = name
+        self.prefix = prefix
+        if script:
+            self.script_name = '.%s' % (basename(argv[0]).replace(".py", ""))
         else:
             self.script_name = ''
-        if pid == True:
-            self.pid="-%s"%(getpid())
+        if pid:
+            self.pid = "-%s" % (getpid())
         else:
-            self.pid=''
+            self.pid = ''
 
-        self.source=source
+        self.source = source
 
-    def preHook(self):
-        if self.source == True:
-            self.doConsume=self.__consumeSource
+        if self.source:
+            self.doConsume = self.__consumeSource
         else:
-            self.doConsume=self.__consumeNoSource
+            self.doConsume = self.__consumeNoSource
+
+        self.pool.createQueue("inbox")
+        self.pool.createQueue("outbox")
+        self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
+
         self.doConsume(event)
 
     def __consumeSource(self, event):
-        self.queuepool.outbox.put({"header":{}, "data":"%s%s%s%s.%s %s %s"%(self.prefix, event["data"][2], self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})
+
+        event = {"header": {}, "data": "%s%s%s%s.%s %s %s" % (self.prefix, event["data"][2], self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])}
+        self.pool.queue.outbox.put(event)
 
     def __consumeNoSource(self, event):
-        self.queuepool.outbox.put({"header":{}, "data":"%s%s%s.%s %s %s"%(self.prefix, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])})
+
+        event = {"header": {}, "data": "%s%s%s.%s %s %s" % (self.prefix, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])}
+        self.pool.queue.outbox.put(event)
