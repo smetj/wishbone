@@ -45,6 +45,13 @@ class ModuleManager():
                     groups = [m.name for m in pkg_resources.iter_entry_points(group=group_name)]
                     for m in sorted(groups):
                         yield (category, group, m)
+        else:
+
+            groups = [m.name for m in pkg_resources.iter_entry_points(group=category)]
+            for m in sorted(groups):
+                (c, g) = (category.split('.'))
+                print(c, g, m)
+                yield (c, g, m)
 
     def getModule(self, category, group, name):
 
@@ -54,23 +61,34 @@ class ModuleManager():
 
     def getModuleDoc(self, category, group, name):
 
-        doc = self.getModule(category, group, name).__doc__
-        doc = re.search('(\*\*.*?\*\*)(.*)', doc, re.DOTALL).group(2)
-        return doc
+        try:
+            doc = self.getModule(category, group, name).__doc__
+            doc = re.search('(\*\*.*?\*\*)(.*)', doc, re.DOTALL).group(2)
+            return doc
+        except Exception as err:
+            return "Unknown. Reason: %s" % (err)
 
     def getModuleTitle(self, category, group, name):
 
-        doc = self.getModule(category, group, name).__doc__
-        title = re.search('\*\*(.*?)\*\*(.*)', doc).group(1)
-        return title
+        try:
+            doc = self.getModule(category, group, name).__doc__
+            title = re.search('\*\*(.*?)\*\*(.*)', doc).group(1)
+            return title
+        except Exception as err:
+            return "Unknown. Reason: %s" % (err)
 
-    def getModuleTable(self, category=None, group=None):
+    def getModuleTable(self, category=None, group=None, include_groups=[]):
 
         table = self.__getTable()
 
         category_header = None
         group_header = None
-        for (category, group, module) in self.listNames():
+        all_items = list(self.listNames())
+
+        for g in include_groups:
+            all_items += list(self.listNames(g))
+
+        for (category, group, module) in all_items:
             title = self.getModuleTitle(category, group, module)
             version = self.getModuleVersion(category, group, module)
             if category_header == category:
