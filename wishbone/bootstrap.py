@@ -42,7 +42,7 @@ class BootStrap():
     Parses command line arguments and bootstraps the Wishbone instance.
     '''
 
-    def __init__(self, description="Wishbone bootstrap server. Build event pipeline servers with minimal effort.", include_groups=["metricfactory.decoder"]):
+    def __init__(self, description="Wishbone bootstrap server. Build event pipeline servers with minimal effort.", include_groups=[]):
 
         parser = argparse.ArgumentParser(description=description)
         subparsers = parser.add_subparsers(dest='command')
@@ -75,7 +75,9 @@ class BootStrap():
         show.add_argument('--module', type=str, help='Shows the documentation of the module. ')
 
         arguments = vars(parser.parse_args())
-        arguments["include_groups"] = include_groups
+
+        if arguments["command"] == "list":
+            arguments["include_groups"] = include_groups
 
         dispatch = Dispatch()
         getattr(dispatch, arguments["command"])(**arguments)
