@@ -46,11 +46,9 @@ class ModuleManager():
                     for m in sorted(groups):
                         yield (category, group, m)
         else:
-
             groups = [m.name for m in pkg_resources.iter_entry_points(group=category)]
             for m in sorted(groups):
                 (c, g) = (category.split('.'))
-                print(c, g, m)
                 yield (c, g, m)
 
     def getModule(self, category, group, name):
