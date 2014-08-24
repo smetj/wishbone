@@ -27,8 +27,9 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '1.0.0'
-install_requires = ['gevent>=1.1', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', 'pyyaml', 'msgpack-python', 'pyzmq', 'amqp', 'grequests', 'jinja2', 'jsonschema']
+VERSION = '1.0.1'
+install_requires = ['gevent>=1.1', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', 'pyyaml', 'msgpack-python', 'pyzmq', 'amqp', 'grequests', 'jinja2', 'jsonschema',
+                    'gearman', 'pycrypto']
 
 try:
     long_description = open('README.rst', 'rt').read()
@@ -119,6 +120,7 @@ setup(
             'testevent = wishbone.module.testevent:TestEvent',
             'topic = wishbone.module.zmqtopicin:ZMQTopicIn',
             'udp = wishbone.module.udpin:UDPIn',
+            'gearman = wishbone.module.gearmanin:GearmanIn'
         ],
         'wishbone.output': [
             'amqp = wishbone.module.amqpout:AMQPOut',
