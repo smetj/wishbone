@@ -83,7 +83,7 @@ setup(
     install_requires=install_requires,
     namespace_packages=[],
     packages=find_packages(),
-    package_data={'': ['data/wordlist.txt']},
+    package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/index.html']},
     zip_safe=False,
     dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.1'],
     entry_points={
@@ -132,7 +132,8 @@ setup(
             'tcp = wishbone.module.tcpout:TCPOut',
             'push = wishbone.module.zmqpushout:ZMQPushOut',
             'udp = wishbone.module.udpout:UDPOut',
-            'uds = wishbone.module.udsout:UDSOut'
+            'uds = wishbone.module.udsout:UDSOut',
+            'sse = wishbone.module.sse:ServerSentEvents'
         ],
         'wishbone.contrib.flow': [
         ],
