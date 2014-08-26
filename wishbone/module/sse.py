@@ -112,11 +112,14 @@ class ServerSentEvents(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, bind="0.0.0.0", port=19283, show_last=False, keepalive=False):
+    def __init__(self, name, size=100, frequency=1, bind="0.0.0.0", port=19283, show_last=False, keepalive=False, keepalive_interval=5):
 
         Actor.__init__(self, name, size, frequency)
         self.bind = bind
         self.port = port
+        self.show_last = show_last
+        self.keepalive = keepalive
+        self.keepalive_interval = keepalive_interval
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
         self.session_queues = {}
@@ -144,10 +147,11 @@ class ServerSentEvents(Actor):
             try:
                 while self.loop():
                     try:
-                        result = self.session_queues[destination][queue_id].get(timeout=5)
+                        result = self.session_queues[destination][queue_id].get(timeout=self.keepalive_interval)
                     except:
-                        ev = ServerSentEvent(":keep-alive")
-                        yield ev.encode()
+                        if self.keepalive:
+                            ev = ServerSentEvent(":keep-alive")
+                            yield ev.encode()
                     else:
                         ev = ServerSentEvent(str(result))
                         yield ev.encode()
@@ -172,7 +176,7 @@ class ServerSentEvents(Actor):
 
         try:
             for q in self.session_queues[destination]:
-                self.session_queues[''][q].put(str(event["data"]))
+                self.session_queues[destination][q].put(str(event["data"]))
         except KeyError:
             if destination == '':
                 destination = '/'
