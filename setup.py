@@ -29,7 +29,7 @@ import sys
 PROJECT = 'wishbone'
 VERSION = '1.0.1'
 install_requires = ['gevent>=1.1', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', 'pyyaml', 'msgpack-python', 'pyzmq', 'amqp', 'grequests', 'jinja2', 'jsonschema',
-                    'gearman', 'pycrypto']
+                    'gearman', 'pycrypto', 'flask']
 
 try:
     long_description = open('README.rst', 'rt').read()
