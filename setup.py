@@ -83,7 +83,7 @@ setup(
     install_requires=install_requires,
     namespace_packages=[],
     packages=find_packages(),
-    package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/index.html']},
+    package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/sse.html']},
     zip_safe=False,
     dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.1'],
     entry_points={
