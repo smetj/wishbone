@@ -1,6 +1,16 @@
 Wishbone changelog
 ==================
 
+Version 1.0.1
+~~~~~~~~~~~~~
+
+- Make extra module groups to include configurable
+  when making a Wishbone based entrypoint.
+- Raise proper error when getQueue() requests
+  non-existing queue
+- Added Gearman input module
+- Added SSE (server sent events) output module
+
 Version 1.0.0
 ~~~~~~~~~~~~~
 
