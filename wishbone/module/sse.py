@@ -52,11 +52,6 @@ class ServerSentEvent(object):
         return "%s\n\n" % "\n".join(lines)
 
 
-class Silence(logging.Filter):
-    def filter(self, log_record):
-        return True
-
-
 class ServerSentEvents(Actor):
 
     '''**A server sent events module.**
