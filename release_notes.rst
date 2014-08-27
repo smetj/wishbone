@@ -10,6 +10,7 @@ Version 1.0.1
   non-existing queue
 - Added Gearman input module
 - Added SSE (server sent events) output module
+- Added LogLevelFilter module
 
 Version 1.0.0
 ~~~~~~~~~~~~~
