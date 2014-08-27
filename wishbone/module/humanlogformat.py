@@ -29,6 +29,7 @@ from time import strftime, localtime
 import os
 import sys
 
+
 class HumanLogFormat(Actor):
 
     '''**Formats Wishbone log events.**
