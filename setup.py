@@ -105,8 +105,8 @@ setup(
         ],
         'wishbone.function': [
             'header = wishbone.module.header:Header',
-            'template = wishbone.module.template:Template'
-            # 'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
+            'template = wishbone.module.template:Template',
+            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
         ],
         'wishbone.input': [
             'amqp = wishbone.module.amqpin:AMQPIn',
