@@ -69,18 +69,23 @@ class BootStrap():
         kill.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
 
         llist = subparsers.add_parser('list', description="Lists the available Wishbone modules.")
-        llist.add_argument('--group', type=str, dest='group', default=[], help='List the modules of this group type.')
+        llist.add_argument('--group', type=str, dest='group', default=None, help='List the modules of this group type.')
 
         show = subparsers.add_parser('show', description="Shows the details of a module.")
         show.add_argument('--module', type=str, help='Shows the documentation of the module. ')
 
         arguments = vars(parser.parse_args())
 
-        if arguments["command"] == "list":
-            if include_groups != []:
-                arguments["include_groups"] = include_groups
-            else:
-                arguments["include_groups"] = [arguments["group"]]
+        if arguments["group"] is not None:
+            arguments["include_groups"] = [arguments["group"]]
+        elif include_groups != []:
+            arguments["include_groups"] = include_groups
+
+        # if arguments["command"] == "list":
+        #     if include_groups != []:
+        #         arguments["include_groups"] = include_groups
+        #     else:
+        #         arguments["include_groups"] = [arguments["group"]]
 
         dispatch = Dispatch()
         getattr(dispatch, arguments["command"])(**arguments)
