@@ -11,6 +11,8 @@ Version 1.0.1
 - Added Gearman input module
 - Added SSE (server sent events) output module
 - Added LogLevelFilter module
+- Fixed bug where --group parameter is ignore with
+  list command.
 
 Version 1.0.0
 ~~~~~~~~~~~~~
