@@ -23,7 +23,7 @@
 #
 #
 
-from wishbone.errors import QueueFull, QueueLocked
+from wishbone.error import QueueFull, QueueLocked
 from jinja2 import Environment, FileSystemLoader
 from jinja2 import Template as JinjaTemplate
 from gevent import spawn
