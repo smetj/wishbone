@@ -23,7 +23,7 @@
 #
 
 from wishbone import Actor
-from json import dumps, loads
+from json import dumps
 
 
 class JSONEncode(Actor):
