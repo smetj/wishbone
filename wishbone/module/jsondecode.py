@@ -23,7 +23,7 @@
 #
 
 from wishbone import Actor
-from json import dumps, loads
+from json import loads
 from jsonschema import Draft3Validator as Validator
 from jsonschema import ValidationError
 
