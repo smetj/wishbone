@@ -23,7 +23,7 @@
 #
 
 from wishbone import Actor
-from gevent import sleep, spawn, socket
+from gevent import socket
 
 
 class UDPOut(Actor):
