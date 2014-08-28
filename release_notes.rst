@@ -13,6 +13,8 @@ Version 1.0.1
 - Added LogLevelFilter module
 - Fixed bug where --group parameter is ignore with
   list command.
+- Fix dependency versions.
+
 
 Version 1.0.0
 ~~~~~~~~~~~~~
