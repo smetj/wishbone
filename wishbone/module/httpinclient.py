@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#       httprequest.py
+#       httpinclient.py
 #
-#       Copyright 2013 Jelle Smet development@smetj.net
+#       Copyright 2014 Jelle Smet development@smetj.net
 #
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -23,8 +23,7 @@
 #
 
 from wishbone import Actor
-from wishbone.errors import QueueLocked
-from gevent import spawn, sleep, event
+from gevent import spawn, sleep
 import grequests
 
 

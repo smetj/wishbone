@@ -24,6 +24,12 @@ wishbone.input.disk
 
 --------
 
+wishbone.input.gearman
+----------------------
+.. autoclass:: wishbone.module.GearmanIn
+
+--------
+
 wishbone.input.httpclient
 -------------------------
 .. autoclass:: wishbone.module.HTTPInClient
@@ -99,6 +105,12 @@ wishbone.output.topic
 
 --------
 
+wishbone.output.sse
+-------------------
+.. autoclass:: wishbone.module.ServerSentEvents
+
+--------
+
 wishbone.output.stdout
 ----------------------
 .. autoclass:: wishbone.module.STDOUT
@@ -165,7 +177,7 @@ wishbone.function.header
 --------
 
 wishbone.function.template
-------------------------
+--------------------------
 .. autoclass:: wishbone.module.template
 
 
