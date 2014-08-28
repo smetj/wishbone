@@ -77,7 +77,7 @@ setup(
     url='https://github.com/smetj/wishbone',
     download_url='https://github.com/smetj/wishbone/tarball/master',
 
-    classifiers=['Development Status ::  5 - Production/Stable',
+    classifiers=['Development Status :: 5 - Production/Stable',
                  'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
                  'Programming Language :: Python',
                  'Programming Language :: Python :: 2',
