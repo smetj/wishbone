@@ -14,7 +14,7 @@ Version 1.0.1
 - Fixed bug where --group parameter is ignore with
   list command.
 - Fix dependency versions.
-
+- Adding first tests
 
 Version 1.0.0
 ~~~~~~~~~~~~~
