@@ -27,8 +27,24 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '1.0.0'
-install_requires = ['gevent>=1.1', 'argparse', 'greenlet>=0.3.2', 'jsonschema', 'prettytable', 'python-daemon', 'pyyaml', 'msgpack-python', 'pyzmq', 'amqp', 'grequests', 'jinja2', 'jsonschema']
+VERSION = '1.0.1'
+
+install_requires = ['gevent>=1.1',
+                    'greenlet>=0.3.2',
+                    'argparse==1.2.1',
+                    'jsonschema==2.3.0',
+                    'prettytable==0.7.2',
+                    'python-daemon==1.6',
+                    'pyyaml==3.11',
+                    'msgpack-python==0.4.2',
+                    'pyzmq==14.3.1',
+                    'amqp==1.4.5',
+                    'grequests==0.2.0',
+                    'jinja2==2.7.3',
+                    'jsonschema==2.3.0',
+                    'gearman==2.0.2',
+                    'pycrypto==2.6.1',
+                    'flask==0.10.1']
 
 try:
     long_description = open('README.rst', 'rt').read()
@@ -37,6 +53,7 @@ except IOError:
 
 
 class PyTest(TestCommand):
+
     def finalize_options(self):
         TestCommand.finalize_options(self)
         self.test_args = []
@@ -60,7 +77,7 @@ setup(
     url='https://github.com/smetj/wishbone',
     download_url='https://github.com/smetj/wishbone/tarball/master',
 
-    classifiers=['Development Status :: 4 - Beta',
+    classifiers=['Development Status ::  5 - Production/Stable',
                  'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
                  'Programming Language :: Python',
                  'Programming Language :: Python :: 2',
@@ -74,15 +91,14 @@ setup(
         'testing': ['pytest'],
     },
     platforms=['Linux'],
-    test_suite='wishbone.test.test_wishbone',
+    test_suite='tests.test_wishbone',
     cmdclass={'test': PyTest},
     scripts=[],
-
     provides=[],
     install_requires=install_requires,
     namespace_packages=[],
     packages=find_packages(),
-    package_data={'': ['data/wordlist.txt']},
+    package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/sse.html']},
     zip_safe=False,
     dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.1'],
     entry_points={
@@ -104,8 +120,8 @@ setup(
         ],
         'wishbone.function': [
             'header = wishbone.module.header:Header',
-            'template = wishbone.module.template:Template'
-            # 'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
+            'template = wishbone.module.template:Template',
+            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
         ],
         'wishbone.input': [
             'amqp = wishbone.module.amqpin:AMQPIn',
@@ -119,6 +135,7 @@ setup(
             'testevent = wishbone.module.testevent:TestEvent',
             'topic = wishbone.module.zmqtopicin:ZMQTopicIn',
             'udp = wishbone.module.udpin:UDPIn',
+            'gearman = wishbone.module.gearmanin:GearmanIn'
         ],
         'wishbone.output': [
             'amqp = wishbone.module.amqpout:AMQPOut',
@@ -130,7 +147,8 @@ setup(
             'tcp = wishbone.module.tcpout:TCPOut',
             'push = wishbone.module.zmqpushout:ZMQPushOut',
             'udp = wishbone.module.udpout:UDPOut',
-            'uds = wishbone.module.udsout:UDSOut'
+            'uds = wishbone.module.udsout:UDSOut',
+            'sse = wishbone.module.sse:ServerSentEvents'
         ],
         'wishbone.contrib.flow': [
         ],
