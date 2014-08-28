@@ -91,11 +91,12 @@ class QueuePool():
     def join(self):
         '''Blocks untill all queues in the pool are empty.'''
         for queue in self.listQueues():
-            while True:
-                if queue.size() > 0:
-                    sleep(0.1)
-                else:
-                    break
+            queue.waitUntilEmpty()
+            # while True:
+            #     if queue.size() > 0:
+            #         sleep(0.1)
+            #     else:
+            #         break
 
 
 class Queue():
