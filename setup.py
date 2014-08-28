@@ -91,7 +91,7 @@ setup(
         'testing': ['pytest'],
     },
     platforms=['Linux'],
-    test_suite='wishbone.test.test_wishbone',
+    test_suite='tests.test_wishbone',
     cmdclass={'test': PyTest},
     scripts=[],
     provides=[],
