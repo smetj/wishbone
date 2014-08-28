@@ -23,7 +23,7 @@
 #
 
 from wishbone import Actor
-from wishbone.errors import QueueLocked
+from wishbone.error import QueueLocked
 from gevent import spawn, sleep, event
 import grequests
 
