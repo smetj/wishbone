@@ -23,14 +23,12 @@
 #
 
 from wishbone import Actor
-from gevent import sleep, spawn, socket, pool, signal
+from gevent import spawn, pool
 from gevent.wsgi import WSGIServer
 from flask import Flask, Response, render_template_string
 from gevent.queue import Queue
 from uuid import uuid4
-from logging import ERROR
 import os
-import logging
 
 
 class ServerSentEvent(object):

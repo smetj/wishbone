@@ -23,7 +23,6 @@
 #
 
 from wishbone import Actor
-from gevent import spawn
 from gevent.server import DatagramServer
 
 
