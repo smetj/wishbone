@@ -25,7 +25,7 @@
 
 from uuid import uuid4
 from collections import deque
-from wishbone.error import QueueEmpty, QueueFull, ReservedName
+from wishbone.error import QueueEmpty, QueueFull, ReservedName, QueueMissing
 from gevent import sleep
 from gevent.event import Event
 from time import time
@@ -83,16 +83,20 @@ class QueuePool():
     def getQueue(self, name):
         '''Convenience funtion which returns the queue instance.'''
 
-        return getattr(self.queue, name)
+        try:
+            return getattr(self.queue, name)
+        except:
+            raise QueueMissing
 
     def join(self):
         '''Blocks untill all queues in the pool are empty.'''
         for queue in self.listQueues():
-            while True:
-                if queue.size() > 0:
-                    sleep(0.1)
-                else:
-                    break
+            queue.waitUntilEmpty()
+            # while True:
+            #     if queue.size() > 0:
+            #         sleep(0.1)
+            #     else:
+            #         break
 
 
 class Queue():
