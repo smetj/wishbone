@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  udpin.py
+#  loglevelfilter.py
 #
-#  Copyright 2014 Jelle Smet development@smetj.net
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,14 +23,18 @@
 #
 
 from wishbone import Actor
-from gevent.server import DatagramServer
 
 
-class UDPIn(Actor):
+class LogLevelFilter(Actor):
 
-    '''**A UDP server.**
+    '''**Filters log events based on loglevel.**
 
-    A UDP server.
+    Drops internal Wishbone logs based on loglevel.
+
+    Internal Wishbone format:
+
+    (6, 1367682301.430527, 'Router', 'Received SIGINT. Shutting down.')
+
 
     Parameters:
 
@@ -43,39 +47,27 @@ class UDPIn(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
-        - address(string)("0.0.0.0")
-           |  The address to bind to.
+        - loglevel(int)(6)
+           |  The maximum allowed loglevel.
 
-        - port(int)(19283)
-           |  The port to listen on.
-
-        - reuse_port(bool)(False)
-           |  Whether or not to set the SO_REUSEPORT socket option.
-           |  Allows multiple instances to bind to the same port.
-           |  Requires Linux kernel >= 3.9
 
     Queues:
 
-        - outbox
-           |  Incoming events.
+        - inbox
+           |  Incoming messages
 
+        - outbox
+           |  Outgoing messges
     '''
 
-    def __init__(self, name, size=100, frequency=1, address="0.0.0.0", port=19283):
+    def __init__(self, name, size=100, frequency=1, loglevel=6):
         Actor.__init__(self, name, size, frequency)
+        self.loglevel = loglevel
+        self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
-        self.name = name
-        self._address = address
-        self.port = port
+        self.registerConsumer(self.consumer, "inbox")
 
-        self.server = DatagramServer("%s:%s" % (address, port), self.handle)
+    def consumer(self, event):
 
-    def handle(self, data, address):
-        '''Is called upon each incoming message'''
-
-        self.submit({'header': {}, 'data': data}, self.pool.queue.outbox)
-
-    def preHook(self):
-        self.logging.info('Started listening on %s:%s' % (self._address, self.port))
-        self.server.start()
-
+        if event["data"][0] <= self.loglevel:
+            self.submit(event, self.pool.queue.outbox)
