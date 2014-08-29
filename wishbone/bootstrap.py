@@ -76,10 +76,11 @@ class BootStrap():
 
         arguments = vars(parser.parse_args())
 
-        if arguments["command"] == "list" and arguments["group"] is not None:
-            arguments["include_groups"] = [arguments["group"]]
-        elif include_groups != []:
-            arguments["include_groups"] = include_groups
+        if arguments["command"] == "list":
+            if arguments["group"] is not None:
+                arguments["include_groups"] = [arguments["group"]]
+            else:
+                arguments["include_groups"] = include_groups
 
         dispatch = Dispatch()
         getattr(dispatch, arguments["command"])(**arguments)
