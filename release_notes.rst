@@ -1,6 +1,12 @@
 Wishbone changelog
 ==================
 
+Version 1.0.2
+~~~~~~~~~~~~~
+
+- Fixed bug in slow amqpin consumption.
+
+
 Version 1.0.1
 ~~~~~~~~~~~~~
 
