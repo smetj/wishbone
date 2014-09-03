@@ -140,6 +140,7 @@ setup(
         'wishbone.output': [
             'amqp = wishbone.module.amqpout:AMQPOut',
             'disk = wishbone.module.diskout:DiskOut',
+            'email = wishbone.module.emailout:EmailOut',
             'null = wishbone.module.null:Null',
             'topic = wishbone.module.zmqtopicout:ZMQTopicOut',
             'stdout = wishbone.module.stdout:STDOUT',
