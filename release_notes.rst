@@ -5,7 +5,7 @@ Version 1.0.2
 ~~~~~~~~~~~~~
 
 - Fixed bug in slow amqpin consumption.
-
+- Added wishbone.output.email module
 
 Version 1.0.1
 ~~~~~~~~~~~~~
