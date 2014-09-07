@@ -81,7 +81,7 @@ class AMQPOut(Actor):
            |  Declare a durable exchange.
 
         - queue(str)("")
-           |  The queue to declare and ultimately sumit messages to.
+           |  The queue to declare and to submit messages to.
 
         - queue_durable(bool)(false)
            |  Declare a durable queue.
