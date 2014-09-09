@@ -29,7 +29,7 @@ class Mock(object):
             mockType.__module__ = __name__
             return mockType
         else:
-            return Mock()
+            return Mock(*args, **kwargs)
 
 MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable',
                 'python-daemon', "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
@@ -41,7 +41,7 @@ MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable',
                 "werkzeug.local", "LocalStack", "LocalProxy"]
 
 for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = Mock
+    sys.modules[mod_name] = Mock()
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
