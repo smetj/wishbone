@@ -41,7 +41,7 @@ MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable',
                 "werkzeug.local", "LocalStack", "LocalProxy"]
 
 for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = Mock()
+    sys.modules[mod_name] = Mock
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
