@@ -37,7 +37,7 @@ MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable',
                 "amqp", "amqp.connection", "gevent.hub", "gevent.wsgi", "gevent.queue",
                 "werkzeug.exceptions", "werkzeug", "abort", "redirect", "werkzeug.utils", "utils",
                 "werkzeug.datastructures", "ImmutableDict", "werkzeug.routing", "Map",
-                "Rule", "RequestRedirect", "BuildError"]
+                "Rule", "RequestRedirect", "BuildError", "urlparse", "quote", "url_quote"]
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
