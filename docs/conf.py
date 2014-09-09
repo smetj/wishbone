@@ -21,7 +21,7 @@ class Mock(object):
         return Mock(*args, **kwargs)
 
     @classmethod
-    def __getattr__(cls, name):
+    def __getattr__(cls, name, *args, **kwargs):
         if name in ('__file__', '__path__'):
             return '/dev/null'
         elif name[0] == name[0].upper():
@@ -29,7 +29,7 @@ class Mock(object):
             mockType.__module__ = __name__
             return mockType
         else:
-            return Mock()
+            return Mock(*args, **kwargs)
 
 MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable',
                 'python-daemon', "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
