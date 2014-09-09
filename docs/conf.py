@@ -18,7 +18,7 @@ class Mock(object):
         pass
 
     def __call__(self, *args, **kwargs):
-        return Mock()
+        return Mock(*args, **kwargs)
 
     @classmethod
     def __getattr__(cls, name):
@@ -29,7 +29,7 @@ class Mock(object):
             mockType.__module__ = __name__
             return mockType
         else:
-            return Mock(*args, **kwargs)
+            return Mock()
 
 MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable',
                 'python-daemon', "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
