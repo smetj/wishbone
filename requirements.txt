@@ -11,6 +11,7 @@ cffi==0.8
 gearman==2.0.2
 greenlet==0.4.0
 grequests==0.2.0
+requests==2.3.0
 itsdangerous==0.24
 jsonschema==2.3.0
 lockfile==0.9.1
