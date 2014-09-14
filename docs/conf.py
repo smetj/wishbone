@@ -40,14 +40,15 @@ class Mock(MagicMock):
     def __getattr__(cls, name):
             return Mock()
 
-MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable',
-                'python-daemon', "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
-                "gevent.pool", "wishbone.tools", "gevent.fileobject",   "gevent.server",
-                "amqp", "amqp.connection", "gevent.hub", "gevent.wsgi", "gevent.queue",
-                "werkzeug.exceptions", "werkzeug", "abort", "redirect", "werkzeug.utils", "utils",
-                "werkzeug.datastructures", "ImmutableDict", "werkzeug.routing", "Map",
-                "Rule", "RequestRedirect", "BuildError", "urlparse", "quote", "url_quote",
-                "werkzeug.local", "LocalStack", "LocalProxy"]
+MOCK_MODULES = ['gevent']
+                # 'argparse', 'greenlet', 'jsonschema', 'prettytable',
+                # 'python-daemon', "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
+                # "gevent.pool", "wishbone.tools", "gevent.fileobject",   "gevent.server",
+                # "amqp", "amqp.connection", "gevent.hub", "gevent.wsgi", "gevent.queue",
+                # "werkzeug.exceptions", "werkzeug", "abort", "redirect", "werkzeug.utils", "utils",
+                # "werkzeug.datastructures", "ImmutableDict", "werkzeug.routing", "Map",
+                # "Rule", "RequestRedirect", "BuildError", "urlparse", "quote", "url_quote",
+                # "werkzeug.local", "LocalStack", "LocalProxy"]
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
