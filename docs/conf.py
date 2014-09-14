@@ -40,7 +40,8 @@ class Mock(object):
 #     def __getattr__(cls, name):
 #             return Mock()
 
-MOCK_MODULES = ['gevent']
+MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "gevent.server",
+                "gevent.hub", "gevent.wsgi", "gevent.queue"]
 
 # 'argparse', 'greenlet', 'jsonschema', 'prettytable',
 # 'python-daemon', "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
