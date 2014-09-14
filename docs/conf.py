@@ -11,15 +11,27 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import os
+
 import sys
+import os
 
-from mock import Mock as MagicMock
 
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        pass
 
-class Mock(MagicMock):
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
     @classmethod
     def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name[0] == name[0].upper():
+            mockType = type(name, (), {})
+            mockType.__module__ = __name__
+            return mockType
+        else:
             return Mock()
 
 MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable',
@@ -31,7 +43,8 @@ MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable',
                 "Rule", "RequestRedirect", "BuildError", "urlparse", "quote", "url_quote",
                 "werkzeug.local", "LocalStack"]
 
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = Mock()
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
