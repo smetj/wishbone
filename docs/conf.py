@@ -44,7 +44,7 @@ MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "g
                 "werkzeug.exceptions", "werkzeug", "abort", "redirect", "werkzeug.utils", "utils",
                 "werkzeug.datastructures", "ImmutableDict", "werkzeug.routing", "Map",
                 "Rule", "RequestRedirect", "BuildError", "urlparse", "quote", "url_quote",
-                "werkzeug.local", "LocalStack", "LocalProxy", "werkzeug.exceptions"]
+                "werkzeug.local", "LocalStack", "LocalProxy", "werkzeug.exceptions", "flask.globals"]
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
