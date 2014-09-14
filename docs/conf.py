@@ -41,7 +41,7 @@ MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable',
                 "werkzeug.exceptions", "werkzeug", "abort", "redirect", "werkzeug.utils", "utils",
                 "werkzeug.datastructures", "ImmutableDict", "werkzeug.routing", "Map",
                 "Rule", "RequestRedirect", "BuildError", "urlparse", "quote", "url_quote",
-                "werkzeug.local", "LocalStack"]
+                "werkzeug.local", "LocalStack", "LocalProxy", "werkzeug"]
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
