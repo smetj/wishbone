@@ -44,7 +44,7 @@ MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "g
                 "python-daemon", "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
                 "gevent.pool", "wishbone.tools", "gevent.fileobject",   "gevent.server",
                 "amqp", "amqp.connection", "gevent.hub", "gevent.wsgi", "gevent.queue",
-                "sse"]
+                "sse", "ServerSentEvents"]
                 # "werkzeug.exceptions", "werkzeug", "abort", "redirect", "werkzeug.utils", "utils",
                 # "werkzeug.datastructures", "ImmutableDict", "werkzeug.routing", "Map",
                 # "Rule", "RequestRedirect", "BuildError", "urlparse", "quote", "url_quote",
