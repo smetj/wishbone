@@ -26,8 +26,8 @@ class Mock(object):
 
     @classmethod
     def __getattr__(cls, name):
-        if name in ('__file__', '__path__'):
-            return '/dev/null'
+        if name in ("__file__", "__path__"):
+            return "/dev/null"
         elif name[0] == name[0].upper():
             mockType = type(name, (), {})
             mockType.__module__ = __name__
@@ -41,77 +41,76 @@ class Mock(object):
 #             return Mock()
 
 MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "gevent.server",
-                "gevent.hub", "gevent.wsgi", "gevent.queue", "gevent.event", "requests"]
-
-# 'argparse', 'greenlet', 'jsonschema', 'prettytable',
-# 'python-daemon', "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
-# "gevent.pool", "wishbone.tools", "gevent.fileobject",   "gevent.server",
-# "amqp", "amqp.connection", "gevent.hub", "gevent.wsgi", "gevent.queue"
-# "werkzeug.exceptions", "werkzeug", "abort", "redirect", "werkzeug.utils", "utils",
-# "werkzeug.datastructures", "ImmutableDict", "werkzeug.routing", "Map",
-# "Rule", "RequestRedirect", "BuildError", "urlparse", "quote", "url_quote",
-# "werkzeug.local", "LocalStack", "LocalProxy"]
+                "gevent.hub", "gevent.wsgi", "gevent.queue", "gevent.event", "requests",
+                "argparse", "greenlet", "jsonschema", "prettytable",
+                "python-daemon", "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
+                "gevent.pool", "wishbone.tools", "gevent.fileobject",   "gevent.server",
+                "amqp", "amqp.connection", "gevent.hub", "gevent.wsgi", "gevent.queue"
+                "werkzeug.exceptions", "werkzeug", "abort", "redirect", "werkzeug.utils", "utils",
+                "werkzeug.datastructures", "ImmutableDict", "werkzeug.routing", "Map",
+                "Rule", "RequestRedirect", "BuildError", "urlparse", "quote", "url_quote",
+                "werkzeug.local", "LocalStack", "LocalProxy"]
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
 
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 
-if not on_rtd:  # only import and set the theme if we're building docs locally
+if not on_rtd:  # only import and set the theme if we"re building docs locally
     import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'
+    html_theme = "sphinx_rtd_theme"
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+#sys.path.insert(0, os.path.abspath("."))
 
-# sys.path.insert(0, os.path.abspath('../wishbone'))
-# sys.path.insert(0, os.path.abspath('../wishbone/module'))
-# sys.path.insert(0, os.path.abspath('../wishbone/tools'))
-# sys.path.insert(0, os.path.abspath('../wishbone/errors'))
-# sys.path.insert(0, os.path.abspath('../wishbone/router'))
+# sys.path.insert(0, os.path.abspath("../wishbone"))
+# sys.path.insert(0, os.path.abspath("../wishbone/module"))
+# sys.path.insert(0, os.path.abspath("../wishbone/tools"))
+# sys.path.insert(0, os.path.abspath("../wishbone/errors"))
+# sys.path.insert(0, os.path.abspath("../wishbone/router"))
 
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-#needs_sphinx = '1.0'
+#needs_sphinx = "1.0"
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
-# coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
+# coming with Sphinx (named "sphinx.ext.*") or your custom ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.coverage',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.viewcode'
+    "sphinx.ext.autodoc",
+    "sphinx.ext.coverage",
+    "sphinx.ext.doctest",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The encoding of source files.
-#source_encoding = 'utf-8-sig'
+#source_encoding = "utf-8-sig"
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = u'Wishbone'
-copyright = u'2014, Jelle Smet'
+project = u"Wishbone"
+copyright = u"2014, Jelle Smet"
 
-# The version info for the project you're documenting, acts as replacement for
+# The version info for the project you"re documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = '0.5.0'
+version = "0.5.0"
 # The full version, including alpha/beta/rc tags.
-release = '0.5.0'
+release = "0.5.0"
 
 # The language for content autogenerated by Sphinx. Refer to documentation
 # for a list of supported languages.
@@ -119,18 +118,18 @@ release = '0.5.0'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
-#today = ''
+#today = ""
 # Else, today_fmt is used as the format for a strftime call.
-#today_fmt = '%B %d, %Y'
+#today_fmt = "%B %d, %Y"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', 'gevent.pool']
+exclude_patterns = ["_build", "gevent.pool"]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
 
-# If true, '()' will be appended to :func: etc. cross-reference text.
+# If true, "()" will be appended to :func: etc. cross-reference text.
 #add_function_parentheses = True
 
 # If true, the current module name will be prepended to all description
@@ -142,7 +141,7 @@ exclude_patterns = ['_build', 'gevent.pool']
 #show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -152,15 +151,15 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-# html_theme = 'sphinx_rtd_theme'
+# html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 
 html_theme_options = {
-  # 'content_fixed': True,
-  # 'content_width': '700px',
+  # "content_fixed": True,
+  # "content_width": "700px",
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -185,11 +184,11 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
-# If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
+# If not "", a "Last updated on:" timestamp is inserted at every page bottom,
 # using the given strftime format.
-#html_last_updated_fmt = '%b %d, %Y'
+#html_last_updated_fmt = "%b %d, %Y"
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -223,33 +222,33 @@ html_static_path = ['_static']
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the
 # base URL from which the finished HTML is served.
-#html_use_opensearch = ''
+#html_use_opensearch = ""
 
 # This is the file name suffix for HTML files (e.g. ".xhtml").
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Wishbonedoc'
+htmlhelp_basename = "Wishbonedoc"
 
 
 # -- Options for LaTeX output --------------------------------------------------
 
 latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+# The paper size ("letterpaper" or "a4paper").
+#"papersize": "letterpaper",
 
-# The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+# The font size ("10pt", "11pt" or "12pt").
+#"pointsize": "10pt",
 
 # Additional stuff for the LaTeX preamble.
-#'preamble': '',
+#"preamble": "",
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Wishbone.tex', u'Wishbone Documentation',
-   u'Jelle Smet', 'manual'),
+  ("index", "Wishbone.tex", u"Wishbone Documentation",
+   u"Jelle Smet", "manual"),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -278,8 +277,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'wishbone', u'Wishbone Documentation',
-     [u'Jelle Smet'], 1)
+    ("index", "wishbone", u"Wishbone Documentation",
+     [u"Jelle Smet"], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -292,9 +291,9 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Wishbone', u'Wishbone Documentation',
-   u'Jelle Smet', 'Wishbone', 'One line description of project.',
-   'Miscellaneous'),
+  ("index", "Wishbone", u"Wishbone Documentation",
+   u"Jelle Smet", "Wishbone", "One line description of project.",
+   "Miscellaneous"),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -303,5 +302,5 @@ texinfo_documents = [
 # If false, no module index is generated.
 #texinfo_domain_indices = True
 
-# How to display URL addresses: 'footnote', 'no', or 'inline'.
-#texinfo_show_urls = 'footnote'
+# How to display URL addresses: "footnote", "no", or "inline".
+#texinfo_show_urls = "footnote"
