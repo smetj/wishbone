@@ -35,11 +35,6 @@ class Mock(object):
         else:
             return Mock()
 
-# class Mock(MagicMock):
-#     @classmethod
-#     def __getattr__(cls, name):
-#             return Mock()
-
 MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "gevent.server",
                 "gevent.hub", "gevent.wsgi", "gevent.queue", "gevent.event", "requests",
                 "argparse", "greenlet", "jsonschema", "prettytable",
@@ -61,24 +56,6 @@ if not on_rtd:  # only import and set the theme if we"re building docs locally
     html_theme = "sphinx_rtd_theme"
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath("."))
-
-# sys.path.insert(0, os.path.abspath("../wishbone"))
-# sys.path.insert(0, os.path.abspath("../wishbone/module"))
-# sys.path.insert(0, os.path.abspath("../wishbone/tools"))
-# sys.path.insert(0, os.path.abspath("../wishbone/errors"))
-# sys.path.insert(0, os.path.abspath("../wishbone/router"))
-
-# -- General configuration -----------------------------------------------------
-
-# If your documentation needs a minimal Sphinx version, state it here.
-#needs_sphinx = "1.0"
-
-# Add any Sphinx extension module names here, as strings. They can be extensions
-# coming with Sphinx (named "sphinx.ext.*") or your custom ones.
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
