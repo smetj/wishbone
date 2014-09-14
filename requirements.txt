@@ -24,3 +24,4 @@ readline==6.2.4.1
 requests==2.3.0
 wishbone==1.0.1
 wsgiref==0.1.2
+werkzeug=0.9.6
