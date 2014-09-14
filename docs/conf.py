@@ -21,7 +21,7 @@ class Mock(object):
         pass
 
     def __call__(self, *args, **kwargs):
-        return Mock()
+        return Mock(*args, **kwargs)
 
     @classmethod
     def __getattr__(cls, name):
@@ -32,7 +32,7 @@ class Mock(object):
             mockType.__module__ = __name__
             return mockType
         else:
-            return Mock()
+            return Mock(*args, **kwargs)
 
 MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable',
                 'python-daemon', "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
@@ -41,7 +41,7 @@ MOCK_MODULES = ['gevent', 'argparse', 'greenlet', 'jsonschema', 'prettytable',
                 "werkzeug.exceptions", "werkzeug", "abort", "redirect", "werkzeug.utils", "utils",
                 "werkzeug.datastructures", "ImmutableDict", "werkzeug.routing", "Map",
                 "Rule", "RequestRedirect", "BuildError", "urlparse", "quote", "url_quote",
-                "werkzeug.local", "LocalStack", "LocalProxy", "werkzeug"]
+                "werkzeug.local", "LocalStack", "LocalProxy"]
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
