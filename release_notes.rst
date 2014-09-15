@@ -6,6 +6,7 @@ Version 1.0.2
 
 - Fixed bug in slow amqpin consumption.
 - Added wishbone.output.email module
+- diskin and diskout autocreate buffer directory if missing.
 
 Version 1.0.1
 ~~~~~~~~~~~~~
