@@ -375,7 +375,6 @@ class RouterBootstrap():
 
 
 def main():
-    BootStrap()
     try:
         BootStrap()
     except Exception as err:
