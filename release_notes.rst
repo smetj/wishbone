@@ -9,6 +9,7 @@ Version 1.0.2
 - diskin and diskout autocreate buffer directory if missing.
 - Fixed bug which prevented bootstrapping multiple processes.
 - More sanity checking on bootstrap file.
+- Add wishbone.flow.match module, derived from (and replacement of) PySeps.
 
 Version 1.0.1
 ~~~~~~~~~~~~~
