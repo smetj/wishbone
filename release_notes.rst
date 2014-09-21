@@ -8,6 +8,7 @@ Version 1.0.2
 - Added wishbone.output.email module
 - diskin and diskout autocreate buffer directory if missing.
 - Fixed bug which prevented bootstrapping multiple processes.
+- More sanity checking on bootstrap file.
 
 Version 1.0.1
 ~~~~~~~~~~~~~
