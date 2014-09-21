@@ -44,7 +44,8 @@ install_requires = ['gevent>=1.1',
                     'jsonschema==2.3.0',
                     'gearman==2.0.2',
                     'pycrypto==2.6.1',
-                    'flask==0.10.1']
+                    'flask==0.10.1',
+                    'gevent_inotifyx==0.1.1']
 
 try:
     long_description = open('README.rst', 'rt').read()
@@ -106,6 +107,7 @@ setup(
         'wishbone.flow': [
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
+            'match = wishbone.module.match:Match',
             'roundrobin = wishbone.module.roundrobin:RoundRobin'
         ],
         'wishbone.encode': [
