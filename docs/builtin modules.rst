@@ -93,6 +93,12 @@ wishbone.output.disk
 
 --------
 
+wishbone.output.file
+--------------------
+.. autoclass:: wishbone.module.FileOut
+
+--------
+
 wishbone.output.null
 --------------------
 .. autoclass:: wishbone.module.Null
@@ -159,6 +165,12 @@ wishbone.flow.funnel
 wishbone.flow.fanout
 --------------------
 .. autoclass:: wishbone.module.Fanout
+
+--------
+
+wishbone.flow.match
+--------------------
+.. autoclass:: wishbone.module.Match
 
 --------
 
