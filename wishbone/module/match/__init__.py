@@ -38,14 +38,12 @@ class Match(Actor):
 
     Rules on disk are in YAML format and consist out of 2 parts:
 
-        condition
-        ~~~~~~~~~
+        - condition:
 
         The condition part contains the individual conditions which have to
         match for the complete rule to match.
 
-        queue
-        ~~~~~
+        - queue:
 
         The queue section contains a list of dictionaries/maps each containing
         1 key with another dictionary/map as a value.  These key/value pairs
@@ -54,17 +52,22 @@ class Match(Actor):
         If you are not interested in adding any information to the header you
         can leave the dictionary empty.  So this would be valid:
 
+        ::
+
             condition:
                 "greeting": re:^hello$
             queue:
                 - outbox:
 
-        This would route events wich have the field "greeting" containing
+
+        This example would route events wich have the field "greeting" containing
         the value "hello" to the outbox queue without adding any information
-        to the header of the eventself.
+        to the header of the event itself.
 
     Example
     ~~~~~~~
+
+    ::
 
         condition:
             "check_command": re:check:host.alive
@@ -78,6 +81,8 @@ class Match(Actor):
                     - oncall@yourdomain.com
                 subject: UMI - Host  {{ hostname }} is  {{ hoststate }}.
                 template: host_email_alert
+
+
 
 
     When connecting modules to non-existing queues, they will be automatically
