@@ -26,7 +26,7 @@
 from wishbone import Actor
 
 
-class File(Actor):
+class FileOut(Actor):
 
     '''**Writes events to a file**
 
