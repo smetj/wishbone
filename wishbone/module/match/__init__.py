@@ -51,7 +51,17 @@ class Match(Actor):
         1 key with another dictionary/map as a value.  These key/value pairs
         are added to the *header section* of the event and stored under the
         queue name key.
+        If you are not interested in adding any information to the header you
+        can leave the dictionary empty.  So this would be valid:
 
+            condition:
+                "greeting": re:^hello$
+            queue:
+                - outbox:
+
+        This would route events wich have the field "greeting" containing
+        the value "hello" to the outbox queue without adding any information
+        to the header of the eventself.
 
     Example
     ~~~~~~~
@@ -86,8 +96,12 @@ class Match(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
-        - location(str)("rules/")
+        - location(str)(None)
            |  The directory containing rules.
+           |  If none, no rules are read from disk.
+
+        - rules(list)({})
+           |  A list of rules in the above described format.
 
 
     Queues:
@@ -100,29 +114,35 @@ class Match(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, location='rules/'):
+    def __init__(self, name, size=100, frequency=1, location=None, rules={}):
         Actor.__init__(self, name, size, frequency)
         self.location = location
+        self.rules = rules
+        self.__active_rules = {}
         self.match = MatchRules()
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        spawn(self.getRules)
+
+        self.__active_rules = self.rules
+        if self.location is not None:
+            self.logging.info("Rules directoy '%s' defined." % (self.location))
+            spawn(self.getRules)
 
     def getRules(self):
 
         self.logging.info("Monitoring directory '%s' for changes" % (self.location))
-        while self.loop():
+        self.read = ReadRulesDisk(self.location)
 
+        while self.loop():
             try:
                 while self.loop():
-                    self.read = ReadRulesDisk(self.location)
-                    self.rules = self.read.readDirectory()
+                    self.__active_rules = dict(self.read.readDirectory().items() + self.rules.items())
                     self.logging.info("New set of rules loaded from disk")
                     break
                 while self.loop():
-                    self.rules = self.read.get()
+                    self.__active_rules = dict(self.read.get().items() + self.rules.items())
                     self.logging.info("New set of rules loaded from disk")
             except Exception as err:
                 self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
@@ -132,11 +152,11 @@ class Match(Actor):
         '''Submits matching documents to the defined queue along with
         the defined header.'''
 
-        for rule in self.rules:
-            if self.evaluateCondition(self.rules[rule]["condition"], event["data"]):
+        for rule in self.__active_rules:
+            if self.evaluateCondition(self.__active_rules[rule]["condition"], event["data"]):
                 self.logging.debug("rule %s matches %s" % (rule, event["data"]))
                 event["header"].update({self.name: {"rule": rule}})
-                for queue in self.rules[rule]["queue"]:
+                for queue in self.__active_rules[rule]["queue"]:
                     for name in queue:
                         if queue[name] is not None:
                             event["header"][self.name].update(queue[name])
