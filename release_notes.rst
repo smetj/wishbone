@@ -8,8 +8,9 @@ Version 1.0.2
 - Added wishbone.output.email module
 - diskin and diskout autocreate buffer directory if missing.
 - Fixed bug which prevented bootstrapping multiple processes.
-- More sanity checking on bootstrap file.
-- Add wishbone.flow.match module, derived from (and replacement of) PySeps.
+- Added more sanity checks on bootstrap file.
+- Added wishbone.flow.match module, derived from (and replacement of) PySeps.
+- Added wishbone.output.file module.
 
 Version 1.0.1
 ~~~~~~~~~~~~~
@@ -21,7 +22,7 @@ Version 1.0.1
 - Added Gearman input module
 - Added SSE (server sent events) output module
 - Added LogLevelFilter module
-- Fixed bug where --group parameter is ignore with
+- Fixed bug where --group parameter is ignored by
   list command.
 - Fix dependency versions.
 - Adding first tests
