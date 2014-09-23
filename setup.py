@@ -143,6 +143,7 @@ setup(
             'amqp = wishbone.module.amqpout:AMQPOut',
             'disk = wishbone.module.diskout:DiskOut',
             'email = wishbone.module.emailout:EmailOut',
+            'file = wishbone.module.fileout:File',
             'null = wishbone.module.null:Null',
             'topic = wishbone.module.zmqtopicout:ZMQTopicOut',
             'stdout = wishbone.module.stdout:STDOUT',
