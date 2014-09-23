@@ -39,7 +39,7 @@ class Mock(object):
             return Mock()
 
 MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "gevent.server",
-                "gevent.hub", "gevent.wsgi", "gevent.queue", "gevent.event", "requests",
+                "gevent.hub", "gevent.wsgi", "gevent.queue", "gevent.event", "gevent.select", "requests",
                 "argparse", "greenlet", "jsonschema", "prettytable",
                 "python-daemon", "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
                 "gevent.pool", "wishbone.tools", "gevent.fileobject", "gevent.server",
