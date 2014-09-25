@@ -33,7 +33,7 @@ class Match(Actor):
 
     '''**Pattern matching on a key/value document stream.**
 
-    This module evaluates all rules sequentually against incoming documents.
+    This module routes messages to queue based upon the matching rule.
     Multiple matching rules are possible.
 
     Rules on disk are in YAML format and consist out of 2 parts:
@@ -42,6 +42,15 @@ class Match(Actor):
 
         The condition part contains the individual conditions which have to
         match for the complete rule to match.
+
+        re:     Regex matching
+        !re:    Negative regex matching
+        >:      Bigger than
+        >=:     Bigger or equal than
+        <:      Smaller than
+        <=:     Smaller or equal than
+        =:      Equal than
+        in:     Evaluate list membership
 
         - queue:
 
