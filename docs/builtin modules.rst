@@ -184,13 +184,13 @@ Function modules
 
 wishbone.function.header
 ------------------------
-.. autoclass:: wishbone.module.header
+.. autoclass:: wishbone.module.Header
 
 --------
 
 wishbone.function.template
 --------------------------
-.. autoclass:: wishbone.module.template
+.. autoclass:: wishbone.module.Template
 
 
 Encode modules
