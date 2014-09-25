@@ -47,7 +47,7 @@ class RoundRobin(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
-        - randomize(bool)
+        - randomize(bool)(False)
             |  Randomizes the queue selection instead of going round-robin
             |  over all queues.
 
