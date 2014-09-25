@@ -33,10 +33,15 @@ class Match(Actor):
 
     '''**Pattern matching on a key/value document stream.**
 
-    This module routes messages to queue based upon the matching rule.
-    Multiple matching rules are possible.
+    This module routes messages to a queue associated to the matching rule
+    set.  The event['data'] payload has to be of <type 'dict'>.  Typically,
+    the source data is JSON converted to a Python dictionary.
 
-    Rules on disk are in YAML format and consist out of 2 parts:
+    The match rules can be either stored on disk or directly defined into the
+    bootstrap file.
+
+
+    A match rule consists out of 2 parts:
 
         - condition:
 
@@ -61,20 +66,27 @@ class Match(Actor):
         If you are not interested in adding any information to the header you
         can leave the dictionary empty.  So this would be valid:
 
-        ::
-
-            condition:
-                "greeting": re:^hello$
-            queue:
-                - outbox:
 
 
-        This example would route events wich have the field "greeting" containing
-        the value "hello" to the outbox queue without adding any information
-        to the header of the event itself.
+    Examples
+    ~~~~~~~~
 
-    Example
-    ~~~~~~~
+    This example would route the events - with field "greeting" containing
+    the value "hello" - to the outbox queue without adding any information
+    to the header of the event itself.
+
+    ::
+
+        condition:
+            "greeting": re:^hello$
+        queue:
+            - outbox:
+
+
+
+    This example combines multiple conditions and stores 4 variables under
+    event["header"][self.name] while submitting the event to the modules'
+    **email** queue.
 
     ::
 
@@ -91,12 +103,6 @@ class Match(Actor):
                 subject: UMI - Host  {{ hostname }} is  {{ hoststate }}.
                 template: host_email_alert
 
-
-
-
-    When connecting modules to non-existing queues, they will be automatically
-    created.  When a document machtes and is submitted to a queue which does
-    not exist then the messages will be discarded.
 
 
     Parameters:
