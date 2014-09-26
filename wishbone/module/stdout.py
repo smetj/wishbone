@@ -116,18 +116,9 @@ class STDOUT(Actor):
         self.counter = counter
         self.prefix = prefix
         self.format = Format(complete, counter, pid)
-        # self.stdout=FileObjectThread(stdout)
 
-        # spawn(self.flusher)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
-        # self.stdout.write("%s%s\n"%(self.prefix,self.format.do(event)))
         print ("%s%s" % (self.prefix, self.format.do(event)))
-
-    def flusher(self):
-
-        while self.loop():
-            self.stdout.flush()
-            sleep(0.1)
