@@ -11,6 +11,8 @@ Version 1.0.2
 - Added more sanity checks on bootstrap file.
 - Added wishbone.flow.match module, derived from (and replacement of) PySeps.
 - Added wishbone.output.file module.
+- Removed incremental number from wishbone.output.disk
+- Fix bug in wishbone.flow.funnel where queuefull was not taken into account.
 
 Version 1.0.1
 ~~~~~~~~~~~~~
