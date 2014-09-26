@@ -74,7 +74,6 @@ class DiskOut(Actor):
         self.pool.createQueue("disk")
         self.pool.queue.disk.disableFallThrough()
 
-        self.counter = 0
         self.__flush_lock = Event()
         self.__flush_lock.set()
 
@@ -103,7 +102,6 @@ class DiskOut(Actor):
             except QueueFull as err:
                 self.__flush_lock.wait()
                 self.flushDisk()
-                self.counter += 1
                 err.waitUntilEmpty()
 
     def flushDisk(self):
@@ -112,19 +110,18 @@ class DiskOut(Actor):
         if self.pool.queue.disk.size() > 0:
 
             i = str(uuid4())
-            filename = "%s/%s.%s.%s.writing" % (self.directory, self.name, self.counter, i)
+            filename = "%s/%s.%s.writing" % (self.directory, self.name, i)
             self.logging.debug("Flusing %s messages to %s." % (self.pool.queue.disk.size(), filename))
 
             try:
-                with open(r"%s/%s.%s.%s.writing" % (self.directory, self.name, self.counter, i), "wb") as output_file:
+                with open(r"%s/%s.%s.writing" % (self.directory, self.name, i), "wb") as output_file:
                     f = FileObjectThread(output_file)
                     for event in self.pool.queue.disk.dump():
                         pickle.dump(event, f)
             except Exception as err:
-                print err
-                os.rename("%s/%s.%s.%s.writing" % (self.directory, self.name, self.counter, i), "%s/%s.%s.%s.failed" % (self.directory, self.name, self.counter, i))
+                os.rename("%s/%s.%s.writing" % (self.directory, self.name, i), "%s/%s.%s.failed" % (self.directory, self.name, i))
             else:
-                os.rename("%s/%s.%s.%s.writing" % (self.directory, self.name, self.counter, i), "%s/%s.%s.%s.ready" % (self.directory, self.name, self.counter, i))
+                os.rename("%s/%s.%s.writing" % (self.directory, self.name, i), "%s/%s.%s.ready" % (self.directory, self.name, i))
         self.__flush_lock.set()
 
     def __flushTimer(self):
