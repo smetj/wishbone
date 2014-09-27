@@ -80,7 +80,7 @@ class RoundRobin(Actor):
 
     def consume(self, event):
         queue = self.chooseQueue()
-        queue.put(event)
+        self.submit(event, queue)
 
     def __chooseNextQueue(self):
         return self.cycle.next()
