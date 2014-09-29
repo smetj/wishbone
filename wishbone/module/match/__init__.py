@@ -176,7 +176,7 @@ class Match(Actor):
 
         for rule in self.__active_rules:
             if self.evaluateCondition(self.__active_rules[rule]["condition"], event["data"]):
-                self.logging.debug("rule %s matches %s" % (rule, event["data"]))
+                # self.logging.debug("rule %s matches %s" % (rule, event["data"]))
                 event["header"].update({self.name: {"rule": rule}})
                 for queue in self.__active_rules[rule]["queue"]:
                     for name in queue:
@@ -184,7 +184,8 @@ class Match(Actor):
                             event["header"][self.name].update(queue[name])
                         self.submit(event, self.pool.getQueue(name))
             else:
-                self.logging.debug("Rule %s does not match event: %s" % (rule, event["data"]))
+                pass
+                # self.logging.debug("Rule %s does not match event: %s" % (rule, event["data"]))
 
     def evaluateCondition(self, conditions, fields):
         for condition in conditions:
