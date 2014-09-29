@@ -66,7 +66,9 @@ class Match(Actor):
         If you are not interested in adding any information to the header you
         can leave the dictionary empty.  So this would be valid:
 
-
+    All rules will be evaluated sequentially in no particular order.  When a
+    rule matches, evaluation the other rules will continue untill all rules
+    are processed.
 
     Examples
     ~~~~~~~~
@@ -181,7 +183,6 @@ class Match(Actor):
                         if queue[name] is not None:
                             event["header"][self.name].update(queue[name])
                         self.submit(event, self.pool.getQueue(name))
-                return
             else:
                 self.logging.debug("Rule %s does not match event: %s" % (rule, event["data"]))
 
