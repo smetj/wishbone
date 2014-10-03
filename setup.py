@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 
 install_requires = ['gevent>=1.1',
                     'greenlet>=0.3.2',
@@ -44,7 +44,8 @@ install_requires = ['gevent>=1.1',
                     'jsonschema==2.3.0',
                     'gearman==2.0.2',
                     'pycrypto==2.6.1',
-                    'flask==0.10.1']
+                    'flask==0.10.1',
+                    'gevent_inotifyx==0.1.1']
 
 try:
     long_description = open('README.rst', 'rt').read()
@@ -106,6 +107,7 @@ setup(
         'wishbone.flow': [
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
+            'match = wishbone.module.match:Match',
             'roundrobin = wishbone.module.roundrobin:RoundRobin'
         ],
         'wishbone.encode': [
@@ -121,7 +123,8 @@ setup(
         'wishbone.function': [
             'header = wishbone.module.header:Header',
             'template = wishbone.module.template:Template',
-            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter'
+            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
+            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate'
         ],
         'wishbone.input': [
             'amqp = wishbone.module.amqpin:AMQPIn',
@@ -140,6 +143,8 @@ setup(
         'wishbone.output': [
             'amqp = wishbone.module.amqpout:AMQPOut',
             'disk = wishbone.module.diskout:DiskOut',
+            'email = wishbone.module.emailout:EmailOut',
+            'file = wishbone.module.fileout:FileOut',
             'null = wishbone.module.null:Null',
             'topic = wishbone.module.zmqtopicout:ZMQTopicOut',
             'stdout = wishbone.module.stdout:STDOUT',

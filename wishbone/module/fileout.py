@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  msgpackencode.py
+#  fileout.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -22,15 +22,18 @@
 #
 #
 
+
 from wishbone import Actor
-import msgpack
 
 
-class MSGPackDecode(Actor):
+class FileOut(Actor):
 
-    '''**Decodes MSGPack data into Python objects.**
+    '''**Writes events to a file**
 
-    Decodes the payload or complete events from MSGPack format.
+    Writes incoming events to a file.  Each line represents an event. Keep in
+    mind no rotation of the file is done so data is always appended to the end
+    of the file.
+
 
     Parameters:
 
@@ -43,44 +46,33 @@ class MSGPackDecode(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
-        - complete(bool)(False)
-           |  When True encodes the complete event.  If False only
-           |  encodes the data part.
+        - location(str)("./wishbone.out")
+           |  The location of the output file.
 
     Queues:
 
         - inbox
            |  Incoming messages
 
-        - outbox
-           |  Outgoing messges
     '''
 
-    def __init__(self, name, size, frequency, complete=False):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, name, size, frequency, location="./wishbone.out"):
 
-        self.complete = complete
+        Actor.__init__(self, name)
+        self.name = name
+        self.location = location
+
         self.pool.createQueue("inbox")
-        self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        if self.complete:
-            self.decode = self.__decodeComplete
-        else:
-            self.decode = self.__decodeData
+
+        self.file = open(self.location, "a")
 
     def consume(self, event):
-        event = self.decode(event)
-        self.submit(event, self.pool.queue.outbox)
+        self.file.write(str(event["data"]) + "\n")
+        self.file.flush()
 
-    def __decodeComplete(self, event):
-        return msgpack.unpackb(event["data"])
+    def postHook(self):
 
-    def __decodeData(self, event):
-
-        event["data"] = msgpack.unpackb(event["data"])
-        return event
-
-
-
+        self.file.close()
