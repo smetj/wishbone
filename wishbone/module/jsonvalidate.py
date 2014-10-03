@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  jsondecode.py
+#  jsonvalidate.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -24,13 +24,17 @@
 
 from wishbone import Actor
 from json import loads
+from jsonschema import validate
 
 
-class JSONDecode(Actor):
+class JSONValidate(Actor):
 
-    '''**Decodes JSON data to Python data objects.**
+    '''**Validates JSON data against JSON-schema.**
 
-    Decodes the payload or complete events from JSON format.
+    Validates the a Python dictionary (converted from a JSON string) against a
+    predefined JSONschema. http://json-schema.org/
+
+    The defined schema has to be valid JSON data.
 
     Parameters:
 
@@ -43,6 +47,10 @@ class JSONDecode(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
+        - schema(str)(None)
+           |  The filename of the JSON validation schema to load.  When no
+           |  schema is defined no validation is done.
+
 
     Queues:
 
@@ -53,25 +61,44 @@ class JSONDecode(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size, frequency):
+    def __init__(self, name, size, frequency, schema=None):
 
         Actor.__init__(self, name)
         self.name = name
+        self.schema = schema
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
 
+    def preHook(self):
+        if self.schema is not None:
+            self.logging.debug("Validation schema defined.  Doing validation.")
+            self.schema_data = self.__loadValidationSchema(self.schema)
+            self.validate = self.__validate
+        else:
+            self.logging.debug("No validation schema defined.  No validation.")
+            self.validate = self.__noValidate
+
     def consume(self, event):
 
         try:
-            event["data"] = self.convert(event["data"])
+            self.validate(event["data"])
         except Exception as err:
-            self.logging.warn("Unable to decode JSON data.  Reason: %s" % (err))
+            self.logging.warn("JSON data does not pass the validation schema.  Reason: %s" % (
+                str(err).replace("\n", " > ")))
             raise
+        else:
+            self.submit(event, self.pool.queue.outbox)
 
-        self.submit(event, self.pool.queue.outbox)
+    def __loadValidationSchema(self, path):
+        with open(path, 'r') as schema:
+            data = ''.join(schema.readlines())
+            return loads(data)
 
-    def convert(self, data):
-        return loads(data)
+    def __validate(self, data):
 
+        return validate(data, self.schema_data)
+
+    def __noValidate(self, data):
+        return True
