@@ -56,3 +56,7 @@ from jsonencode import JSONEncode
 from udpin import UDPIn
 from gearmanin import GearmanIn
 from sse import ServerSentEvents
+from emailout import EmailOut
+from match import Match
+from fileout import FileOut
+from jsonvalidate import JSONValidate

@@ -103,9 +103,9 @@ class Graphite(Actor):
     def __consumeSource(self, event):
 
         event = {"header": {}, "data": "%s%s%s%s.%s %s %s" % (self.prefix, event["data"][2], self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])}
-        self.pool.queue.outbox.put(event)
+        self.submit(event, self.pool.queue.outbox)
 
     def __consumeNoSource(self, event):
 
         event = {"header": {}, "data": "%s%s%s.%s %s %s" % (self.prefix, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])}
-        self.pool.queue.outbox.put(event)
+        self.submit(event, self.pool.queue.outbox)

@@ -93,6 +93,12 @@ wishbone.output.disk
 
 --------
 
+wishbone.output.file
+--------------------
+.. autoclass:: wishbone.module.FileOut
+
+--------
+
 wishbone.output.null
 --------------------
 .. autoclass:: wishbone.module.Null
@@ -162,6 +168,12 @@ wishbone.flow.fanout
 
 --------
 
+wishbone.flow.match
+--------------------
+.. autoclass:: wishbone.module.Match
+
+--------
+
 wishbone.flow.roundrobin
 ------------------------
 .. autoclass:: wishbone.module.RoundRobin
@@ -172,13 +184,17 @@ Function modules
 
 wishbone.function.header
 ------------------------
-.. autoclass:: wishbone.module.header
+.. autoclass:: wishbone.module.Header
 
 --------
 
 wishbone.function.template
 --------------------------
-.. autoclass:: wishbone.module.template
+.. autoclass:: wishbone.module.Template
+
+wishbone.funtion.validatejson
+-----------------------------
+.. autoclass:: wishbone.module.JSONValidate
 
 
 Encode modules
