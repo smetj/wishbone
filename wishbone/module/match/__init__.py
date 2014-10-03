@@ -27,6 +27,7 @@ from wishbone import Actor
 from gevent import spawn, sleep
 from .matchrules import MatchRules
 from .readrules import ReadRulesDisk
+import os
 
 
 class Match(Actor):
@@ -147,10 +148,22 @@ class Match(Actor):
 
     def preHook(self):
 
+        self.createDir()
         self.__active_rules = self.rules
         if self.location is not None:
             self.logging.info("Rules directoy '%s' defined." % (self.location))
             spawn(self.getRules)
+
+    def createDir(self):
+
+        if os.path.exists(self.location):
+            if not os.path.isdir(self.location):
+                raise Exception("%s exists but is not a directory" % (self.location))
+            else:
+                self.logging.info("Directory %s exists so I'm using it." % (self.location))
+        else:
+            self.logging.info("Directory %s does not exist so I'm creating it." % (self.location))
+            os.makedirs(self.location)
 
     def getRules(self):
 

@@ -38,28 +38,28 @@ class ReadRulesDisk():
 
     Parameters:
 
-        location(string):   The directory to load rules from.
+        directory(string):   The directory to load rules from.
                             default: rules/
     '''
 
-    def __init__(self, location="rules/"):
-        self.location = location
+    def __init__(self, directory="rules/"):
+        self.directory = directory
         self.wait = event.Event()
         self.wait.clear()
         self.__rules = {}
 
-        if os.access(self.location, os.R_OK):
+        if os.access(self.directory, os.R_OK):
             spawn(self.monitorDirectory)
         else:
             raise Exception(
-                "Directory '%s' is not readable. Please verify." % (self.location))
+                "Directory '%s' is not readable. Please verify." % (self.directory))
 
     def monitorDirectory(self):
         '''Monitors the given directory for changes.'''
 
         fd = inotify.init()
         wb = inotify.add_watch(
-            fd, self.location, inotify.IN_CLOSE_WRITE + inotify.IN_DELETE)
+            fd, self.directory, inotify.IN_CLOSE_WRITE + inotify.IN_DELETE)
         self.__rules = self.readDirectory()
 
         while True:
@@ -76,7 +76,7 @@ class ReadRulesDisk():
         containing the rules.'''
 
         rules = {}
-        for filename in glob("%s/*.yaml" % (self.location)):
+        for filename in glob("%s/*.yaml" % (self.directory)):
             f = open(filename, 'r')
             rules[os.path.basename(filename).rstrip(".yaml")] = yaml.load(
                 "\n".join(f.readlines()))
