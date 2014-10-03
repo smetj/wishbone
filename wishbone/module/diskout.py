@@ -29,7 +29,7 @@ import cPickle as pickle
 from gevent.fileobject import FileObjectThread
 from gevent.event import Event
 from gevent import spawn, sleep
-from os import rename
+import os
 from uuid import uuid4
 
 
@@ -74,12 +74,24 @@ class DiskOut(Actor):
         self.pool.createQueue("disk")
         self.pool.queue.disk.disableFallThrough()
 
-        self.counter = 0
         self.__flush_lock = Event()
         self.__flush_lock.set()
 
     def preHook(self):
+
+        self.createDir()
         spawn(self.__flushTimer)
+
+    def createDir(self):
+
+        if os.path.exists(self.directory):
+            if not os.path.isdir(self.directory):
+                raise Exception("%s exists but is not a directory" % (self.directory))
+            else:
+                self.logging.info("Directory %s exists so I'm using it." % (self.directory))
+        else:
+            self.logging.info("Directory %s does not exist so I'm creating it." % (self.directory))
+            os.makedirs(self.directory)
 
     def consume(self, event):
 
@@ -90,7 +102,6 @@ class DiskOut(Actor):
             except QueueFull as err:
                 self.__flush_lock.wait()
                 self.flushDisk()
-                self.counter += 1
                 err.waitUntilEmpty()
 
     def flushDisk(self):
@@ -99,19 +110,18 @@ class DiskOut(Actor):
         if self.pool.queue.disk.size() > 0:
 
             i = str(uuid4())
-            filename = "%s/%s.%s.%s.writing" % (self.directory, self.name, self.counter, i)
+            filename = "%s/%s.%s.writing" % (self.directory, self.name, i)
             self.logging.debug("Flusing %s messages to %s." % (self.pool.queue.disk.size(), filename))
 
             try:
-                with open(r"%s/%s.%s.%s.writing" % (self.directory, self.name, self.counter, i), "wb") as output_file:
+                with open(r"%s/%s.%s.writing" % (self.directory, self.name, i), "wb") as output_file:
                     f = FileObjectThread(output_file)
                     for event in self.pool.queue.disk.dump():
                         pickle.dump(event, f)
             except Exception as err:
-                print err
-                rename("%s/%s.%s.%s.writing" % (self.directory, self.name, self.counter, i), "%s/%s.%s.%s.failed" % (self.directory, self.name, self.counter, i))
+                os.rename("%s/%s.%s.writing" % (self.directory, self.name, i), "%s/%s.%s.failed" % (self.directory, self.name, i))
             else:
-                rename("%s/%s.%s.%s.writing" % (self.directory, self.name, self.counter, i), "%s/%s.%s.%s.ready" % (self.directory, self.name, self.counter, i))
+                os.rename("%s/%s.%s.writing" % (self.directory, self.name, i), "%s/%s.%s.ready" % (self.directory, self.name, i))
         self.__flush_lock.set()
 
     def __flushTimer(self):
