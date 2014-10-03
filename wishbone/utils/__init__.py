@@ -61,6 +61,11 @@ class BootstrapFile():
             assert "module" in content["modules"][module], "Cannot find the 'module' keyword in the '%s' module definition." % (module)
         # assert any([False for m in content.keys() if m not in ["routingtable","modules"]]), "Unknown content in bootstrap file."
 
+        for route in content["routingtable"]:
+            (left, right) = route.split("->")
+            assert "." in left.lstrip().rstrip(), "routingtable rule \"%s\" does not have the right format. Missing a dot." % (route)
+            assert "." in right.lstrip().rstrip(), "routingtable rule \"%s\" does not have the right format. Missing a dot." % (route)
+
         return content
 
 
