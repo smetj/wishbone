@@ -28,7 +28,7 @@ from json import dumps
 
 class JSONEncode(Actor):
 
-    '''**Encodes Python data structures to JSON strings.**
+    '''**Encodes Python data objects to JSON strings.**
 
     Encodes Python data structures to JSON.
 
@@ -68,7 +68,7 @@ class JSONEncode(Actor):
         try:
             event["data"] = dumps(event["data"])
         except Exception as err:
-            self.logging.warn("Unable to convert incoming data.  Reason: %s" % (err))
+            self.logging.warn("Unable to encode data to JSON.  Reason: %s" % (err))
             raise
 
         self.submit(event, self.pool.queue.outbox)

@@ -62,4 +62,4 @@ class Funnel(Actor):
 
     def consume(self, event):
 
-        self.pool.queue.outbox.put(event)
+        self.submit(event, self.pool.queue.outbox)
