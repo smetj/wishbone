@@ -13,6 +13,7 @@ Version 1.0.2
 - Added wishbone.output.file module.
 - Removed incremental number from wishbone.output.disk
 - Fix bug in wishbone.flow.funnel where queuefull was not taken into account.
+- Added more bootstrap file verification tests
 
 Version 1.0.1
 ~~~~~~~~~~~~~
