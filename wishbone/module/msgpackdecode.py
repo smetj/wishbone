@@ -27,7 +27,8 @@ import msgpack
 
 
 class MSGPackDecode(Actor):
-    '''**Decodes events from MSGPack format.**
+
+    '''**Decodes MSGPack data into Python objects.**
 
     Decodes the payload or complete events from MSGPack format.
 
