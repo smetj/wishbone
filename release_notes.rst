@@ -5,15 +5,16 @@ Version 1.0.2
 ~~~~~~~~~~~~~
 
 - Fixed bug in slow amqpin consumption.
-- Added wishbone.output.email module
+- Added wishbone.output.email module.
 - diskin and diskout autocreate buffer directory if missing.
 - Fixed bug which prevented bootstrapping multiple processes.
 - Added more sanity checks on bootstrap file.
 - Added wishbone.flow.match module, derived from (and replacement of) PySeps.
 - Added wishbone.output.file module.
-- Removed incremental number from wishbone.output.disk
+- Removed incremental number from wishbone.output.disk.
 - Fix bug in wishbone.flow.funnel where queuefull was not taken into account.
-- Added more bootstrap file verification tests
+- Added more bootstrap file verification tests.
+- Added wishbone.function.jsonvalidate as a separate daemon.
 
 Version 1.0.1
 ~~~~~~~~~~~~~
