@@ -24,8 +24,7 @@
 
 from wishbone import Actor
 from json import loads
-from jsonschema import Draft3Validator as Validator
-from jsonschema import ValidationError
+from jsonschema import validate
 
 
 class JSONValidate(Actor):
@@ -34,6 +33,8 @@ class JSONValidate(Actor):
 
     Validates the a Python dictionary (converted from a JSON string) against a
     predefined JSONschema. http://json-schema.org/
+
+    The defined schema has to be valid JSON data.
 
     Parameters:
 
@@ -66,41 +67,38 @@ class JSONValidate(Actor):
         self.name = name
         self.schema = schema
 
-        if schema is not None:
-            self.logging.debug("Validation schema defined.  Doing validation.")
-            schema_data = self.__loadValidationSchema(schema)
-            self.validate = self.__validate
-            self.validator = Validator(schema_data)
-        else:
-            self.logging.debug("No validation schema defined.  No validation.")
-            self.validate = self.__noValidate
-
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
+
+    def preHook(self):
+        if self.schema is not None:
+            self.logging.debug("Validation schema defined.  Doing validation.")
+            self.schema_data = self.__loadValidationSchema(self.schema)
+            self.validate = self.__validate
+        else:
+            self.logging.debug("No validation schema defined.  No validation.")
+            self.validate = self.__noValidate
 
     def consume(self, event):
 
         try:
             self.validate(event["data"])
-        except ValidationError as err:
+        except Exception as err:
             self.logging.warn("JSON data does not pass the validation schema.  Reason: %s" % (
                 str(err).replace("\n", " > ")))
             raise
-
-        self.submit(event, self.pool.queue.outbox)
+        else:
+            self.submit(event, self.pool.queue.outbox)
 
     def __loadValidationSchema(self, path):
         with open(path, 'r') as schema:
             data = ''.join(schema.readlines())
-            print loads(data)
             return loads(data)
 
-    def convert(self, data):
-        return loads(data)
-
     def __validate(self, data):
-        return self.validator.validate(data)
+
+        return validate(data, self.schema_data)
 
     def __noValidate(self, data):
         return True
