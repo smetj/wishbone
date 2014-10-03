@@ -46,6 +46,10 @@ class DictGenerator(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
+        - keys(list)([])
+           |  If provided, documents are created using the provided
+           |  keys to which random values will be assigned.
+
         - randomize_keys(bool)(True)
            |  Randomizes the keys.  Otherwise keys are sequential
            |  numbers.
@@ -71,10 +75,11 @@ class DictGenerator(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size, frequency, randomize_keys=True, num_values=False, num_values_min=0, num_values_max=1, min_elements=1, max_elements=1, interval=1):
+    def __init__(self, name, size, frequency, keys=[], randomize_keys=True, num_values=False, num_values_min=0, num_values_max=1, min_elements=1, max_elements=1, interval=1):
         Actor.__init__(self, name, size, frequency)
         self.pool.createQueue("outbox")
         self.name = name
+        self.keys = keys
         self.randomize_keys = randomize_keys
         self.num_values = num_values
         self.num_values_min = num_values_min
@@ -108,17 +113,34 @@ class DictGenerator(Actor):
         else:
             self.sleep = self.__doNoSleep
 
+        if self.keys != []:
+            self.getDict = self.getDictPredefinedKeys
+        else:
+            self.getDict = self.getDictGeneratedKeys
+
         spawn(self.generateDicts)
 
     def generateDicts(self):
 
         while self.loop():
-            data = {}
-            for x in xrange(0, randint(self.min_elements, self.max_elements)):
-                data[self.generateKey()] = self.generateValue()
-            self.sleep()
-            self.submit({"header": {}, "data": data}, self.pool.queue.outbox)
+            d = self.getDict()
+            self.submit({"header": {}, "data": d}, self.pool.queue.outbox)
             self.key_number = +1
+            self.sleep()
+
+    def getDictPredefinedKeys(self):
+
+        d = {}
+        for key in self.keys:
+            d[key] = self.pickWord()
+
+        return d
+
+    def getDictGeneratedKeys(self):
+
+        d = {}
+        for x in xrange(0, randint(self.min_elements, self.max_elements)):
+            data[self.generateKey()] = self.generateValue()
 
     def pickWord(self):
         '''Returns a word as string from the wordlist.'''

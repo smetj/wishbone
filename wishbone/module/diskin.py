@@ -78,8 +78,20 @@ class DiskIn(Actor):
         self.pool.createQueue("outbox")
 
     def preHook(self):
+        self.createDir()
         spawn(self.monitorDirectory)
         spawn(self.diskMonitor)
+
+    def createDir(self):
+
+        if os.path.exists(self.directory):
+            if not os.path.isdir(self.directory):
+                raise Exception("%s exists but is not a directory" % (self.directory))
+            else:
+                self.logging.info("Directory %s exists so I'm using it." % (self.directory))
+        else:
+            self.logging.info("Directory %s does not exist so I'm creating it." % (self.directory))
+            os.makedirs(self.directory)
 
     def monitorDirectory(self):
         while self.loop:
