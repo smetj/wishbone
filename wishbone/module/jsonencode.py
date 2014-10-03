@@ -28,7 +28,7 @@ from json import dumps
 
 class JSONEncode(Actor):
 
-    '''**Encodes Python data structures to JSON strings.**
+    '''**Encodes Python data objects to JSON strings.**
 
     Encodes Python data structures to JSON.
 
