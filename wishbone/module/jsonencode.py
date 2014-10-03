@@ -68,7 +68,7 @@ class JSONEncode(Actor):
         try:
             event["data"] = dumps(event["data"])
         except Exception as err:
-            self.logging.warn("Unable to convert incoming data.  Reason: %s" % (err))
+            self.logging.warn("Unable to encode data to JSON.  Reason: %s" % (err))
             raise
 
         self.submit(event, self.pool.queue.outbox)
