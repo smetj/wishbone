@@ -192,6 +192,10 @@ wishbone.function.template
 --------------------------
 .. autoclass:: wishbone.module.Template
 
+wishbone.funtion.validatejson
+-----------------------------
+.. autoclass:: wishbone.module.JSONValidate
+
 
 Encode modules
 **************

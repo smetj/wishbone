@@ -24,8 +24,6 @@
 
 from wishbone import Actor
 from json import loads
-from jsonschema import Draft3Validator as Validator
-from jsonschema import ValidationError
 
 
 class JSONDecode(Actor):
@@ -69,7 +67,7 @@ class JSONDecode(Actor):
         try:
             event["data"] = self.convert(event["data"])
         except Exception as err:
-            self.logging.warn("Unable to convert incoming data.  Reason: %s" % (err))
+            self.logging.warn("Unable to decode JSON data.  Reason: %s" % (err))
             raise
 
         self.submit(event, self.pool.queue.outbox)
