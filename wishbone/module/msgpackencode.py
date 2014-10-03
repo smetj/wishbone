@@ -28,7 +28,7 @@ import msgpack
 
 class MSGPackEncode(Actor):
     '''
-    **Encodes events to MSGPack format.**
+    **Encodes Python objects to MSGPack format.**
 
     Encodes the payload or complete events to MSGPack format.
 
@@ -72,7 +72,7 @@ class MSGPackEncode(Actor):
 
     def consume(self, event):
         event = self.encode(event)
-        self.pool.queue.outbox.put(event)
+        self.submit(event, self.pool.queue.outbox)
 
     def __encodeComplete(self, event):
         event["data"] = msgpack.packb(event)

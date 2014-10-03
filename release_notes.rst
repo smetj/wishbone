@@ -1,6 +1,21 @@
 Wishbone changelog
 ==================
 
+Version 1.0.2
+~~~~~~~~~~~~~
+
+- Fixed bug in slow amqpin consumption.
+- Added wishbone.output.email module.
+- diskin and diskout autocreate buffer directory if missing.
+- Fixed bug which prevented bootstrapping multiple processes.
+- Added more sanity checks on bootstrap file.
+- Added wishbone.flow.match module, derived from (and replacement of) PySeps.
+- Added wishbone.output.file module.
+- Removed incremental number from wishbone.output.disk.
+- Fix bug in wishbone.flow.funnel where queuefull was not taken into account.
+- Added more bootstrap file verification tests.
+- Added wishbone.function.jsonvalidate as a separate daemon.
+
 Version 1.0.1
 ~~~~~~~~~~~~~
 
@@ -11,7 +26,7 @@ Version 1.0.1
 - Added Gearman input module
 - Added SSE (server sent events) output module
 - Added LogLevelFilter module
-- Fixed bug where --group parameter is ignore with
+- Fixed bug where --group parameter is ignored by
   list command.
 - Fix dependency versions.
 - Adding first tests

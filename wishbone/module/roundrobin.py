@@ -47,7 +47,7 @@ class RoundRobin(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
-        - randomize(bool)
+        - randomize(bool)(False)
             |  Randomizes the queue selection instead of going round-robin
             |  over all queues.
 
@@ -80,7 +80,7 @@ class RoundRobin(Actor):
 
     def consume(self, event):
         queue = self.chooseQueue()
-        queue.put(event)
+        self.submit(event, queue)
 
     def __chooseNextQueue(self):
         return self.cycle.next()

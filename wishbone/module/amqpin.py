@@ -175,9 +175,9 @@ class AMQPIn(Actor):
                 self.connection.drain_events()
             except Exception as err:
                 self.logging.error("Problem connecting to broker.  Reason: %s" % (err))
+                sleep(1)
                 spawn(self.setupConnectivity)
                 break
-            sleep(0.1)
 
     def handleAcknowledgements(self):
         while self.loop():
