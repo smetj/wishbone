@@ -44,7 +44,7 @@ MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "g
                 "python-daemon", "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
                 "gevent.pool", "wishbone.tools", "gevent.fileobject", "gevent.server",
                 "amqp", "amqp.connection", "gevent.hub", "gevent.wsgi", "gevent.queue",
-                "flask"]
+                "flask", "inotifyx"]
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
