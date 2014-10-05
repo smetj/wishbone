@@ -48,7 +48,8 @@ install_requires = ['gevent>=1.1',
                     'gevent_inotifyx==0.1.1']
 
 try:
-    long_description = open('README.rst', 'rt').read()
+    with open('README.rst', 'rt') as f:
+        long_description = f.read()
 except IOError:
     long_description = ''
 
