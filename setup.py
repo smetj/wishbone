@@ -27,12 +27,11 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '1.0.2'
+VERSION = '1.0.3'
 
 install_requires = ['gevent>=1.1',
                     'greenlet>=0.3.2',
                     'argparse==1.2.1',
-                    'jsonschema==2.3.0',
                     'prettytable==0.7.2',
                     'python-daemon==1.6',
                     'pyyaml==3.11',
@@ -41,7 +40,7 @@ install_requires = ['gevent>=1.1',
                     'amqp==1.4.5',
                     'grequests==0.2.0',
                     'jinja2==2.7.3',
-                    'jsonschema==2.3.0',
+                    'jsonschema==2.4.0',
                     'gearman==2.0.2',
                     'pycrypto==2.6.1',
                     'flask==0.10.1',
