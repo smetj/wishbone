@@ -23,6 +23,7 @@
 #
 
 from wishbone import Actor
+from copy import deepcopy
 
 
 class Fanout(Actor):
@@ -42,26 +43,45 @@ class Fanout(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
+        - deepcopy(bool)(True)
+           |  make sure that each incoming event is submitted
+           |  to the outgoing queues as a seperate event and not a
+           |  reference.
+
 
     Queues:
 
-        outbox
+        inbox
          |  Outgoing events.
 
     '''
 
-    def __init__(self, name, size=100, frequency=1):
+    def __init__(self, name, size=100, frequency=1, deepcopy=True):
 
         Actor.__init__(self, name, size, frequency)
         self.name = name
-        self.pool.createQueue("outbox")
+        self.deepcopy = dee
+        self.pool.createQueue("inbox")
+        self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
+        self.destinations = []
+        for queue in self.pool.listQueues(names=True, default=False):
+            if queue != "inbox":
+                self.destinations.append(self.pool.getQueue(queue))
 
-        for queue in self.pool.listQueues(name=True, default=False):
-            if queue != "outbox":
-                self.registerConsumer(self.consume, queue)
+        if self.deepcopy:
+            self.copy = self.__doDeepCopy
+        else:
+            self.copy = self.__doNoDeepCopy
 
     def consume(self, event):
 
-        self.submit(event, self.pool.queue.outbox)
+        for queue in self.destinations:
+            self.submit(self.copy(event), queue)
+
+    def __doDeepCopy(self, event):
+        return deepcopy(event)
+
+    def __doNoDeepCopy(self, event):
+        return event
