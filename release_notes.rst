@@ -1,6 +1,11 @@
 Wishbone changelog
 ==================
 
+Version 1.0.3
+~~~~~~~~~~~~~
+
+- Fixed dysfunctional wishbone.flow.fanout module.
+
 Version 1.0.2
 ~~~~~~~~~~~~~
 
