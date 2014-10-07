@@ -5,6 +5,9 @@ Version 1.0.3
 ~~~~~~~~~~~~~
 
 - Fixed dysfunctional wishbone.flow.fanout module.
+- Additional queue creation reserved name checking.
+- Added deepcopy to wishbone.flow.match module.
+
 
 Version 1.0.2
 ~~~~~~~~~~~~~
