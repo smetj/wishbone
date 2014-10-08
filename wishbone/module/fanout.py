@@ -43,7 +43,7 @@ class Fanout(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
-        - deepcopy(bool)(True)
+        - deep_copy(bool)(True)
            |  make sure that each incoming event is submitted
            |  to the outgoing queues as a seperate event and not a
            |  reference.
@@ -56,11 +56,11 @@ class Fanout(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, deepcopy=True):
+    def __init__(self, name, size=100, frequency=1, deep_copy=True):
 
         Actor.__init__(self, name, size, frequency)
         self.name = name
-        self.deepcopy = dee
+        self.deep_copy = deep_copy
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
@@ -70,7 +70,7 @@ class Fanout(Actor):
             if queue != "inbox":
                 self.destinations.append(self.pool.getQueue(queue))
 
-        if self.deepcopy:
+        if self.deep_copy:
             self.copy = self.__doDeepCopy
         else:
             self.copy = self.__doNoDeepCopy
