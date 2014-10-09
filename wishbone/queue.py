@@ -54,7 +54,7 @@ class QueuePool():
         if default:
             blacklist = []
         else:
-            blacklist = ['failed', 'success', 'logs', 'metrics']
+            blacklist = ['failed', 'success', 'logs', 'metrics', 'admin_in', 'admin_out']
 
         for m in self.queue.__dict__.keys():
             if m not in blacklist:
@@ -66,7 +66,7 @@ class QueuePool():
     def createQueue(self, name):
         '''Creates a Queue.'''
 
-        if name in ["metrics", "logs", "success", "failed"]:
+        if name in ["metrics", "logs", "success", "failed", "admin_in", "admin_out"]:
             raise ReservedName
 
         setattr(self.queue, name, Queue(self.__size))
@@ -92,11 +92,6 @@ class QueuePool():
         '''Blocks untill all queues in the pool are empty.'''
         for queue in self.listQueues():
             queue.waitUntilEmpty()
-            # while True:
-            #     if queue.size() > 0:
-            #         sleep(0.1)
-            #     else:
-            #         break
 
 
 class Queue():
