@@ -205,5 +205,8 @@ class Match(Actor):
     def evaluateCondition(self, conditions, fields):
         for condition in conditions:
             if condition in fields:
-                return self.match.do(conditions[condition], fields[condition])
-        return False
+                if not self.match.do(conditions[condition], fields[condition]):
+                    return False
+            else:
+                return False
+        return True
