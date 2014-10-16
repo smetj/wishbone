@@ -84,4 +84,7 @@ class MatchRules():
         return float(data) != float(value)
 
     def hasMember(self, value, data):
-        return str(value) in data
+        if isinstance(data, list):
+            return str(value) in data
+        else:
+            return False
