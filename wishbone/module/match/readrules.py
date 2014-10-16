@@ -40,13 +40,16 @@ class ReadRulesDisk():
 
         directory(string):   The directory to load rules from.
                             default: rules/
+
+        logger_object(class): A wishbone logger object.
     '''
 
-    def __init__(self, directory="rules/"):
+    def __init__(self, logger_object, directory="rules/"):
         self.directory = directory
         self.wait = event.Event()
         self.wait.clear()
         self.__rules = {}
+        self.logger = logger_object
 
         if os.access(self.directory, os.R_OK):
             spawn(self.monitorDirectory)
@@ -77,13 +80,23 @@ class ReadRulesDisk():
 
         rules = {}
         for filename in glob("%s/*.yaml" % (self.directory)):
-            f = open(filename, 'r')
-            rules[os.path.basename(filename).rstrip(".yaml")] = yaml.load(
-                "\n".join(f.readlines()))
-            f.close()
-
+            with open(filename, 'r') as f:
+                key_name = os.path.basename(filename).rstrip(".yaml")
+                rule = yaml.load("".join(f.readlines()))
+                try:
+                    self.ruleCompliant(rule)
+                except Exception as err:
+                    self.logger.warning("Rule %s not valid. Skipped. Reason: %s" % (filename, err))
+                rules[key_name] = rule
         return rules
 
     def get(self):
         self.wait.wait()
         return self.__rules
+
+    def ruleCompliant(self, rule):
+        assert isinstance(rule["condition"], list), "Condition needs to be of type list."
+        for c in rule["condition"]:
+            assert isinstance(c, dict), "An individual condition needs to be of type dict."
+        assert isinstance(rule["queue"], list), "Queue needs to be of type list."
+
