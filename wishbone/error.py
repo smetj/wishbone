@@ -68,3 +68,9 @@ class ModuleInitFailure(Exception):
 
 class NoSuchModule(Exception):
     pass
+
+class MissingKey(Exception):
+    pass
+
+class MissingNamespace(Exception):
+    pass
