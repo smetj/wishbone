@@ -195,10 +195,11 @@ class Match(Actor):
                 self.logging.debug("Match for rule %s." % (rule))
                 e["header"].update({self.name: {"rule": rule}})
                 for queue in self.__active_rules[rule]["queue"]:
+                    event_copy = deepcopy(e)
                     for name in queue:
                         if queue[name] is not None:
-                            e["header"][self.name].update(queue[name])
-                        self.submit(e, self.pool.getQueue(name))
+                            event_copy["header"][self.name].update(queue[name])
+                        self.submit(event_copy, self.pool.getQueue(name))
             else:
                 pass
                 self.logging.debug("No match for rule %s." % (rule))
