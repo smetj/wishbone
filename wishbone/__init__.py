@@ -27,3 +27,4 @@ from queue import Queue
 from queue import QueuePool
 from logging import Logging
 from modulemanager import ModuleManager
+from event import Event
