@@ -55,7 +55,6 @@ class Event():
         self.data = None
         self.__data = None
         self.time = int(time.time())
-        self.uuid = str(uuid4())
         self.setHeaderNamespace(namespace)
 
     def getData(self):
@@ -101,7 +100,7 @@ class Event():
         for n in self.header.__dict__:
             header[n] = self.header.__dict__[n].__dict__
 
-        return {"header": header, "data": self.data, "time": self.time, "uuid": self.uuid}
+        return {"header": header, "data": self.data}
 
     def setData(self, data):
 
