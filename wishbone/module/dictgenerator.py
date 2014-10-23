@@ -140,7 +140,8 @@ class DictGenerator(Actor):
 
         d = {}
         for x in xrange(0, randint(self.min_elements, self.max_elements)):
-            data[self.generateKey()] = self.generateValue()
+            d[self.generateKey()] = self.generateValue()
+        return d
 
     def pickWord(self):
         '''Returns a word as string from the wordlist.'''
