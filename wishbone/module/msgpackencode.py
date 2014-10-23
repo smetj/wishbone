@@ -75,11 +75,11 @@ class MSGPackEncode(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def __encodeComplete(self, event):
-        event["data"] = msgpack.packb(event)
+        event.data = msgpack.packb(event)
         return event
 
     def __encodeData(self, event):
-        event["data"] = msgpack.packb(event["data"])
+        event.data = msgpack.packb(event.data)
         return event
 
 

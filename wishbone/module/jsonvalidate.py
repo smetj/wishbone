@@ -83,7 +83,7 @@ class JSONValidate(Actor):
     def consume(self, event):
 
         try:
-            self.validate(event["data"])
+            self.validate(event.data)
         except Exception as err:
             self.logging.warn("JSON data does not pass the validation schema.  Reason: %s" % (
                 str(err).replace("\n", " > ")))

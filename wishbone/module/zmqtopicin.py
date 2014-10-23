@@ -27,6 +27,7 @@ from wishbone import Actor
 import zmq.green as zmq
 from gevent import spawn
 
+
 class ZMQTopicIn(Actor):
 
     '''**Subscribes to one or more ZeroMQ Topic publish modules.**
@@ -85,4 +86,6 @@ class ZMQTopicIn(Actor):
             string = self.socket.recv()
             messagedata = string.split(" ")[1:]
             messagedata = " ".join(messagedata)
-            self.submit({"header": {}, "data": messagedata}, self.pool.queue.outbox)
+            event = self.createEvent()
+            event.data = messagedata
+            self.submit(event, self.pool.queue.outbox)

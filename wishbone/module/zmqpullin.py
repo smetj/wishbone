@@ -96,4 +96,6 @@ class ZMQPullIn(Actor):
 
         while self.loop():
             data = self.socket.recv()
-            self.submit({"header":{}, "data": data}, self.pool.queue.outbox)
+            event = self.createEvent()
+            event.data = data
+            self.submit(event, self.pool.queue.outbox)

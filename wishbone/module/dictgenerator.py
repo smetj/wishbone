@@ -28,7 +28,6 @@ from wishbone import Actor
 import os
 
 
-
 class DictGenerator(Actor):
 
     '''**Generates random dictionaries.**
@@ -123,8 +122,9 @@ class DictGenerator(Actor):
     def generateDicts(self):
 
         while self.loop():
-            d = self.getDict()
-            self.submit({"header": {}, "data": d}, self.pool.queue.outbox)
+            event = self.createEvent()
+            event.data = self.getDict()
+            self.submit(event, self.pool.queue.outbox)
             self.key_number = +1
             self.sleep()
 

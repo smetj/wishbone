@@ -49,10 +49,10 @@ class Format():
         return self.pid(self.counter(self.complete(event)))
 
     def __returnComplete(self, event):
-        return event
+        return event.raw()
 
     def __returnIncomplete(self, event):
-        return event["data"]
+        return event.data
 
     def __returnCounter(self, event):
         self.countervalue += 1

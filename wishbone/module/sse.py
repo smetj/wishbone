@@ -58,8 +58,8 @@ class ServerSentEvents(Actor):
 
     When the event header contains:
 
-    event["header"][<self.name>]["destination"] then the event
-    can be consumed from http://host/<value>
+    event.header.<self.name>.destination then the event
+    can be consumed from http://host/<destination>
 
     When the event header does not contain this value then
     the event can be consumed from http://host/
@@ -163,13 +163,13 @@ class ServerSentEvents(Actor):
 
     def consume(self, event):
         try:
-            destination = event["header"][self.name]["destination"]
+            destination = event.getHeaderValue(self.name, "destination")
         except:
             destination = ''
 
         try:
             for q in self.session_queues[destination]:
-                self.session_queues[destination][q].put(str(event["data"]))
+                self.session_queues[destination][q].put(str(event.data))
         except KeyError:
             if destination == '':
                 destination = '/'

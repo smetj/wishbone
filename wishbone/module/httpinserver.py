@@ -93,13 +93,16 @@ class HTTPInServer(Actor):
         spawn(self.__serve)
 
     def consume(self, env, start_response):
+        event = self.createEvent()
         try:
             for line in self.delimit(env["wsgi.input"]):
                 if env['PATH_INFO'] == '/':
-                    self.submit({"header": {}, "data": line}, self.pool.queue.outbox)
+                    event.data = line
+                    self.submit(event, self.pool.queue.outbox)
                 else:
                     q = self.pool.getQueue(env['PATH_INFO'].lstrip('/'))
-                    self.submit({"header": {}, "data": line}, q)
+                    event.data = line
+                    self.submit(event, q)
             start_response('200 OK', [('Content-Type', 'text/plain')])
             return "OK"
         except Exception as err:

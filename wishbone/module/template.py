@@ -52,8 +52,8 @@ class Template(Actor):
         - location(str)("./")
            |  The directory containing templates.
 
-        - key(str)(self.name)
-           |  The header key storing configuration.
+        - namespace(str)(self.name)
+           |  The header namespace storing configuration.
 
         - header_templates(list)([])
            |  An optional list of keys containing templates.
@@ -70,14 +70,14 @@ class Template(Actor):
 
     '''
 
-    def __init__(self, name, size, frequency, location="./", key=None, header_templates=[]):
+    def __init__(self, name, size, frequency, location="./", namespace=None, header_templates=[]):
         Actor.__init__(self, name, size, frequency)
 
         self.location = location
-        if key is None:
-            self.key = self.name
+        if namespace is None:
+            self.namespace = self.name
         else:
-            self.key = key
+            self.namespace = namespace
 
         self.header_templates = header_templates
         self.templates = Environment(loader=FileSystemLoader(location))
@@ -92,30 +92,28 @@ class Template(Actor):
 
     def construct(self, event):
 
-        try:
-            event["header"][self.key]["template"]
-        except KeyError:
+        if not event.hasHeaderKey(self.namespace, "template"):
             self.logging.error(
-                'Header information event["header"]["%s"]["template"] was expected but not found. Event purged.' % (self.key))
+                'Header information event.header.%s.template was expected but not found. Event purged.' % (self.namespace))
             raise
 
         for key in self.header_templates:
             try:
-                template = JinjaTemplate(event["header"][self.key][key])
-                event["header"][self.key][key] = template.render(**event["data"])
+                template = JinjaTemplate(event.getHeaderValue(self.namespace, key))
+                event.setHeaderValue(self.namespace, key, template.render(**event.data))
             except Exception as err:
                 self.logging.warning(
                     "Failed to convert header key %s.  Reason: %s" % (key))
                 raise
 
         try:
-            template = self.templates.get_template(event["header"][self.key]["template"])
+            template = self.templates.get_template(event.getHeaderValue(self.namespace, "template"))
         except Exception as err:
-            self.logging.error("Template %s does not exist as a file in directory %s." % (event["header"][self.key]["template"], self.location))
+            self.logging.error("Template %s does not exist as a file in directory %s." % (event.getHeaderValue(self.namespace, "template"), self.location))
             raise
         else:
             try:
-                event["data"] = template.render(**event["data"])
+                event.data = template.render(**event.data)
             except Exception as err:
                 self.logging.error('There was an error processing the template. Reason: %s' % (err))
                 raise
