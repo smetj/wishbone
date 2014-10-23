@@ -86,7 +86,8 @@ class Header(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def __doHeader(self, event):
-        event.__dict__["header"].__dict__[self.namespace] = self.header
+        event.setHeaderNamespace(self.namespace)
+        event.header.__dict__[self.namespace].__dict__.update(self.header)
         return event
 
     def __doPrintf(self, event):
