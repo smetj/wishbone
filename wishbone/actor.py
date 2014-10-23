@@ -213,7 +213,9 @@ class Actor():
                 for item in stats:
                     while self.loop():
                         try:
-                            self.pool.queue.metrics.put({"header": {}, "data": (time(), "wishbone", socket.gethostname(), "queue.%s.%s.%s" % (self.name, queue, item), stats[item], '', ())})
+                            event = Wishbone_Event("metric:%s" % self.name)
+                            event.data = (time(), "wishbone", socket.gethostname(), "queue.%s.%s.%s" % (self.name, queue, item), stats[item], '', ())
+                            self.pool.queue.metrics.put(event)
                             break
                         except QueueFull:
                             self.pool.queue.metrics.waitUntilEmpty()
