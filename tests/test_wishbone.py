@@ -23,9 +23,18 @@
 #
 
 import pytest
+from gevent import spawn
 from wishbone import QueuePool
 from wishbone import Queue
 
+from wishbone.module import Fanout
+from wishbone.event import Event
+
+from wishbone.router import Default
+from wishbone.module import TestEvent
+from wishbone.module import Fanout
+
+from gevent import sleep
 
 def test_listQueues():
     q = QueuePool(1)
@@ -49,3 +58,16 @@ def test_getQueue():
     q = QueuePool(1)
     q.createQueue("test")
     assert isinstance(q.getQueue("test"), Queue)
+
+
+def test_wishbone_flow_fanout():
+
+    router = Default()
+    router.registerModule(TestEvent, "input", interval=1)
+    router.registerModule(Fanout, "fanout")
+    router.connect("input.outbox", "fanout.inbox")
+    router.pool.getModule("fanout").pool.createQueue("one")
+    router.pool.getModule("fanout").pool.createQueue("two")
+    router.start()
+    sleep
+    router.pool.getModule("fanout").pool.getQueue("one").get()

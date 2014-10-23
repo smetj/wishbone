@@ -73,7 +73,9 @@ class UDPIn(Actor):
     def handle(self, data, address):
         '''Is called upon each incoming message'''
 
-        self.submit({'header': {}, 'data': data}, self.pool.queue.outbox)
+        event = self.createEvent()
+        event.data = data
+        self.submit(event, self.pool.queue.outbox)
 
     def preHook(self):
         self.logging.info('Started listening on %s:%s' % (self._address, self.port))

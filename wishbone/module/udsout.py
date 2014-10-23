@@ -68,12 +68,12 @@ class UDSOut(Actor):
         spawn(self.setupConnection)
 
     def consume(self, event):
-        if isinstance(event["data"],list):
-            data = self.delimiter.join(event["data"])
+        if isinstance(event.data, list):
+            data = self.delimiter.join(event.data)
         else:
-            data = event["data"]
+            data = event.data
 
-        self.socket.send(str(data)+self.delimiter)
+        self.socket.send(str(data) + self.delimiter)
 
     def setupConnection(self):
         while self.loop():

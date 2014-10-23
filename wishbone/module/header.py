@@ -42,15 +42,15 @@ class Header(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
-        - key(str)(self.name)
-           |  The header key to store the information.
+        - namespace(str)(self.name)
+           |  The header namespace to store the information.
 
         - header(dict)({})
            |  The data to store.
 
         - expr(str)(None)
            |  printf-style String Formatting.
-           |  Expects event["data"] to be a dictionary.
+           |  Expects event.data to be a dictionary.
 
 
     Queues:
@@ -62,12 +62,12 @@ class Header(Actor):
            |  Outgoing events.
     '''
 
-    def __init__(self, name, size=100, frequency=1, key=None, header={}, expr=None):
+    def __init__(self, name, size=100, frequency=1, namespace=None, header={}, expr=None):
         Actor.__init__(self, name, size, frequency)
-        if key is None:
-            self.key = name
+        if namespace is None:
+            self.namespace = name
         else:
-            self.key = key
+            self.namespace = namespace
 
         self.header = header
         self.expr = expr
@@ -86,12 +86,12 @@ class Header(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def __doHeader(self, event):
-        event["header"][self.key] = self.header
+        event.__dict__["header"].__dict__[self.namespace] = self.header
         return event
 
     def __doPrintf(self, event):
         try:
-            return self.expr % event["data"]
+            return self.expr % event.data
         except Exception as err:
             self.logging.error("String replace failed.  Reason: %s" % (err))
             return event

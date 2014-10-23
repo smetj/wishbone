@@ -69,5 +69,5 @@ class LogLevelFilter(Actor):
 
     def consumer(self, event):
 
-        if event["data"][0] <= self.loglevel:
+        if event.data[0] <= self.loglevel:
             self.submit(event, self.pool.queue.outbox)

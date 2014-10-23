@@ -69,14 +69,14 @@ class UDPOut(Actor):
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
-        self.name=name
-        self.host=host
-        self.port=port
-        self.socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.name = name
+        self.host = host
+        self.port = port
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def consume(self, event):
-        if isinstance(event["data"],list):
-            data = ''.join(event["data"])
+        if isinstance(event.data, list):
+            data = ''.join(event.data)
         else:
-            data = event["data"]
+            data = event.data
         self.socket.sendto(str(data), (self.host, self.port))

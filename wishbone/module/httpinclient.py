@@ -88,7 +88,8 @@ class HTTPInClient(Actor):
 
     def scheduler(self, url):
         while self.loop():
-            event = {"header": {self.name: {}}, "data": None}
+            event = self.createEvent()
+            event.data = None
             try:
                 r = grequests.get(url, auth=(self.username, self.password))
                 response = r.send()
@@ -96,8 +97,8 @@ class HTTPInClient(Actor):
                 self.logging.warn("Problem requesting resource.  Reason: %s" % (err))
                 sleep(1)
             else:
-                event["header"][self.name]["status_code"] = response.status_code
-                event["header"][self.name]["url"] = url
-                event["data"] = response.text
+                event.setHeaderValue(self.name, "status_code", response.status_code)
+                event.setHeaderValue(self.name, "url", url)
+                event.data = response.text
                 self.submit(event, self.pool.queue.outbox)
                 sleep(self.interval)

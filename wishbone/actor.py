@@ -24,6 +24,7 @@
 
 from wishbone.queue import QueuePool
 from wishbone.logging import Logging
+from wishbone.event import Event as Wishbone_Event
 from wishbone.error import QueueEmpty, QueueFull, QueueConnected
 from gevent.pool import Group
 from gevent import spawn
@@ -80,6 +81,13 @@ class Actor():
 
         setattr(instance.pool.queue, destination, self.pool.getQueue(source))
         self.pool.getQueue(source).disableFallThrough()
+
+    def createEvent(self):
+
+        '''Convenience function which returns an empty     Wishbone event with the
+        current namespace already set.'''
+
+        return Wishbone_Event(self.name)
 
     def flushQueuesToDisk(self):
         '''Writes whatever event in the queue to disk for later retrieval.'''
@@ -181,14 +189,13 @@ class Actor():
         while self.loop():
             try:
                 event = self.pool.queue.__dict__[queue].get()
-                original_data = copy(event["data"])
             except QueueEmpty as err:
                 err.waitUntilContent()
             else:
                 try:
+                    event.setHeaderNamespace(self.name)
                     function(event)
                 except QueueFull as err:
-                    event["data"] = original_data
                     self.pool.queue.__dict__[queue].rescue(event)
                     err.waitUntilFree()
                 except Exception as err:

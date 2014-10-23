@@ -95,7 +95,10 @@ class GearmanIn(Actor):
 
     def consume(self, gearman_worker, gearman_job):
         decrypted = self.decrypt(gearman_job.data)
-        self.submit({"header": {}, "data": decrypted}, self.pool.queue.outbox)
+        event = self.createEvent()
+        event.setHeaderNamespace(self.name)
+        event.data = decrypted
+        self.submit(event, self.pool.queue.outbox)
         return decrypted
 
     def __encryptedJob(self, data):

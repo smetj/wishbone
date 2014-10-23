@@ -24,6 +24,7 @@
 #
 
 from wishbone.error import QueueFull
+from wishbone.event import Event
 from time import time
 from os import getpid
 
@@ -43,7 +44,9 @@ class Logging():
 
         while True:
             try:
-                self.logs.put({"header": {}, "data": (level, time(), getpid(), self.name, message)})
+                event = Event(self.name)
+                event.data = (level, time(), getpid(), self.name, message)
+                self.logs.put(event)
                 break
             except QueueFull:
                 self.logs.waitUntilFree()
