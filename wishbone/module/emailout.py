@@ -34,9 +34,9 @@ class EmailOut(Actor):
 
     '''**Sends out incoming events as email.**
 
-    Treats event["data"] as the body of an email.
+    Treats event.data as the body of an email.
 
-    The event["header"][self.name] is supposed to have following keys:
+    The event.header.<self.name> is supposed to have following keys:
         - subject(str)
         - from(str)
         - to(list)
@@ -57,8 +57,8 @@ class EmailOut(Actor):
            |  The address:port of the MTA to submit the
            |  mail to.
 
-        - key(string)(None)
-           |  The header key containing the address information.
+        - namespace(string)(None)
+           |  The header namespace containing the address information.
 
 
     Queues:
@@ -68,7 +68,7 @@ class EmailOut(Actor):
 
     '''
 
-    def __init__(self, name, size, frequency, mta="localhost:25", key=None):
+    def __init__(self, name, size, frequency, mta="localhost:25", namespace=None):
 
         Actor.__init__(self, name)
         self.name = name
@@ -77,35 +77,35 @@ class EmailOut(Actor):
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
-        if key is None:
-            self.key = self.name
+        if namespace is None:
+            self.namespace = self.name
         else:
-            self.key = key
+            self.namespace = namespace
 
     def consume(self, event):
 
-        if self.key not in event["header"]:
-            self.logging.error("Event received without <%s> header key. Purged" % (self.key))
-            raise Exception("Event received without <%s> header key. Purged" % (self.key))
+        if not event.header.hasNamespace(self.namespace):
+            self.logging.error("Event received without <%s> header namespace. Purged" % (self.namespace))
+            raise Exception("Event received without <%s> header namespace. Purged" % (self.namespace))
 
         for item in ["from", "to", "subject"]:
-            if item not in event["header"][self.key]:
+            if not event.hasHeaderKey(self.namespace, item):
                 self.logging.error("Event received without <%s> header key. Purged" % (item))
                 raise Exception("Event received without <%s> header key. Purged" % (item))
 
-        if not isinstance(event["header"][self.key]["to"], list):
+        if not isinstance(event.getHeaderValue(self.namespace, "to"), list):
             self.logging.error("the \"to\" header key should be of type list.")
             raise Exception("the \"to\" header key should be of type list.")
 
         try:
-            message = msg = MIMEText(str(event["data"]))
-            message["Subject"] = event["header"][self.key]["subject"]
-            message["From"] = event["header"][self.key]["from"]
-            message["To"] = ",".join(event["header"][self.key]["to"])
+            message = msg = MIMEText(str(event.data))
+            message["Subject"] = event.getHeaderValue(self.namespace, "subject")
+            message["From"] = event.getHeaderValue(self.namespace, "from")
+            message["To"] = ",".join(event.getHeaderValue(self.namespace, "to"))
 
             mta = smtplib.SMTP(self.mta)
-            mta.sendmail(event["header"][self.key]["from"],
-                         event["header"][self.key]["to"],
+            mta.sendmail(event.getHeaderValue(self.namespace, "from"),
+                         event.getHeaderValue(self.namespace, "to"),
                          message.as_string()
                          )
         except Exception as err:

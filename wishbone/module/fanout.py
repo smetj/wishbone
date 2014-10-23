@@ -23,7 +23,6 @@
 #
 
 from wishbone import Actor
-from copy import deepcopy
 
 
 class Fanout(Actor):
@@ -81,7 +80,7 @@ class Fanout(Actor):
             self.submit(self.copy(event), queue)
 
     def __doDeepCopy(self, event):
-        return deepcopy(event)
+        return event.clone()
 
     def __doNoDeepCopy(self, event):
         return event

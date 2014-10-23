@@ -70,7 +70,7 @@ class FileOut(Actor):
         self.file = open(self.location, "a")
 
     def consume(self, event):
-        self.file.write(str(event["data"]) + "\n")
+        self.file.write(str(event.data) + "\n")
         self.file.flush()
 
     def postHook(self):

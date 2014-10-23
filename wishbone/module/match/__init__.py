@@ -28,7 +28,6 @@ from gevent import spawn, sleep
 from .matchrules import MatchRules
 from .readrules import ReadRulesDisk
 import os
-from copy import deepcopy
 
 
 class Match(Actor):
@@ -190,15 +189,15 @@ class Match(Actor):
         the defined header.'''
 
         for rule in self.__active_rules:
-            e = deepcopy(event)
-            if self.evaluateCondition(self.__active_rules[rule]["condition"], e["data"]):
+            e = event.clone()
+            if self.evaluateCondition(self.__active_rules[rule]["condition"], e.data):
                 self.logging.debug("Match for rule %s." % (rule))
-                e["header"].update({self.name: {"rule": rule}})
+                e.setHeaderValue(self.name, "rule", rule)
                 for queue in self.__active_rules[rule]["queue"]:
-                    event_copy = deepcopy(e)
+                    event_copy = e.clone()
                     for name in queue:
                         if queue[name] is not None:
-                            event_copy["header"][self.name].update(queue[name])
+                            event_copy.setHeaderValue(self.name, "queue", queue[name])
                         self.submit(event_copy, self.pool.getQueue(name))
             else:
                 pass

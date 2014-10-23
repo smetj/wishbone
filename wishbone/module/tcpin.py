@@ -128,7 +128,9 @@ class TCPIn(Actor):
     def __handleNoDelimiter(self, sock, address):
         sfile = sock.makefile()
         chunk = sfile.readlines()
-        self.submit({'header': {}, 'data': ''.join(chunk)}, self.pool.queue.outbox)
+        event = self.createEvent()
+        event.data = ''.join(chunk)
+        self.submit(event, self.pool.queue.outbox)
         sfile.close()
         sock.close()
 
@@ -147,7 +149,10 @@ class TCPIn(Actor):
                 self.logging.debug("Client %s disconnected." % (str(address[0])))
                 break
             else:
-                self.submit({'header': {}, 'data': chunk.rstrip('\r\n')}, self.pool.queue.outbox)
+                event = Event()
+                event.setHeaderNamespace(self.name)
+                event.data = chunk.rstrip('\r\n')
+                self.submit(event, self.pool.queue.outbox)
 
     def __handleDelimiter(self, sock, address):
         self.logging.debug("Connection from %s." % (str(address[0])))
@@ -156,10 +161,12 @@ class TCPIn(Actor):
 
         while self.loop():
             chunk = sfile.readline()
-
+            event = Event()
+            event.setHeaderNamespace(self.name)
             if not chunk:
                 if len(data) > 0:
-                    self.submit({'header': {}, 'data': ''.join(data)}, self.pool.queue.outbox)
+                    event.data = ''.join(data)
+                    self.submit(event, self.pool.queue.outbox)
                 self.logging.debug("Client %s disconnected." % (str(address[0])))
                 break
 
@@ -167,7 +174,8 @@ class TCPIn(Actor):
                 chunk = chunk.rstrip(self.delimiter)
                 if chunk != '':
                     data.append(chunk)
-                    self.submit({'header': {}, 'data': ''.join(data)}, self.pool.queue.outbox)
+                    event.data = ''.join(data)
+                    self.submit(event, self.pool.queue.outbox)
                     data = []
             else:
                 data.append(chunk)

@@ -30,10 +30,8 @@ class TestEvent(Actor):
 
     '''**Generates a test event at the chosen interval.**
 
+    The data field of the test event contains the string "test".
 
-    Events have following format:
-
-        { "header":{}, "data":"test" }
 
     Parameters:
 
@@ -89,7 +87,8 @@ class TestEvent(Actor):
     def produce(self):
 
         while self.loop():
-            event = {"header": {}, "data": "%s%s" % (self.message, self.number())}
+            event = self.createEvent()
+            event.data = "%s%s" % (self.message, self.number())
             self.submit(event, self.pool.queue.outbox)
             self.sleep()
 

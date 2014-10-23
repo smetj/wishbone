@@ -27,7 +27,8 @@ import cPickle as pickle
 from gevent.fileobject import FileObjectThread
 from gevent import spawn, sleep, event
 from os import remove
-import glob, os
+import glob
+import os
 from time import time
 
 
@@ -111,6 +112,7 @@ class DiskIn(Actor):
                 while self.loop():
                     try:
                         event = pickle.load(f)
+                        event.setHeaderNamespace(self.name)
                         self.submit(event, self.pool.queue.outbox)
                     except EOFError:
                         break

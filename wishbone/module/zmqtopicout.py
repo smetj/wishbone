@@ -24,6 +24,8 @@
 
 
 from wishbone import Actor
+from wishbone import Event
+from wishbone.error import MissingKey, MissingNamespace
 import zmq.green as zmq
 
 
@@ -65,7 +67,7 @@ class ZMQTopicOut(Actor):
         - inbox
            |  Incoming events submitted to the outside.
 
-    Expects the "topic" to use in event["header"][self.name]["topic"].
+    Expects the "topic" to use in event.header.<self.name>.topic.
     If that's doesn't exist, the value of <topic> is used.
 
     '''
@@ -87,12 +89,12 @@ class ZMQTopicOut(Actor):
     def consume(self, event):
 
         try:
-            topic = event["header"][self.name]["topic"]
-        except KeyError:
+            topic = event.getHeaderValue(self.name, "topic")
+        except MissingNamespace, MissingKey:
             topic = self.topic
 
         try:
-            self.socket.send("%s %s" % (topic, event["data"]))
+            self.socket.send("%s %s" % (topic, event.data))
         except Exception as err:
             self.logging.error("Failed to submit message.  Reason %s" % (err))
             raise  # reraise the exception.
