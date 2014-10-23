@@ -37,11 +37,11 @@ class AMQPOut(Actor):
     <queue> will be bound to each other.
 
     If no exchange name is provided, no exchange will be created. If
-    event["header"][<name>]["exchange"] exists it will override whatever is
+    event.header.<self.name>.exchange exists it will override whatever is
     defined in <exchange>.
 
     If no queue name is provided, no queue will be create. if
-    event["header"][<name>]["queue"] exists it will override whatever is
+    event.header.<self.name>.queue exists it will override whatever is
     defined in <queue>.
 
 
@@ -128,11 +128,7 @@ class AMQPOut(Actor):
 
     def consume(self, event):
 
-        # self.channel.basic_publish(str(event["data"]),
-        #     exchange=event["header"][self.name].get("exchange", self.exchange),
-        #     routing_key=event["header"][self.name].get("routing_key", self.routing_key))
-
-        message = basic_message.Message(body=str(event["data"]))
+        message = basic_message.Message(body=str(event.data))
         self.channel.basic_publish(message,
                                    exchange=self.exchange,
                                    routing_key=self.routing_key)

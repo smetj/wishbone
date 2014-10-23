@@ -50,11 +50,13 @@ class NameSpace():
 
 class Event():
 
-    def __init__(self):
+    def __init__(self, namespace):
         self.header = Header()
         self.data = None
+        self.__data = None
         self.time = int(time.time())
         self.uuid = str(uuid4())
+        self.setHeaderNamespace(namespace)
 
     def getData(self):
 
@@ -68,6 +70,19 @@ class Event():
             raise MissingKey("No key %s in namespace %s" % (key, namespace))
 
         return self.header.__dict__[namespace].__dict__[key]
+
+    def hasHeaderNamespace(self, namespace):
+
+        return self.header.hasNamespace(namespace)
+
+    def hasHeaderKey(self, namespace, key):
+
+        if not self.header.hasNamespace(namespace):
+            return False
+        if not getattr(self.header, namespace).hasKey(key):
+            return False
+
+        return True
 
     def clone(self, reference=False):
 
@@ -88,7 +103,11 @@ class Event():
 
         return {"header": header, "data": self.data, "time": self.time, "uuid": self.uuid}
 
-    def setHeaderKey(self, namespace, key, value):
+    def setData(self, data):
+
+        self.data = data
+
+    def setHeaderValue(self, namespace, key, value):
 
         if not self.header.hasNamespace(namespace):
             self.setHeaderNamespace()

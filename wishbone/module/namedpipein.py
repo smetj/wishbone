@@ -71,7 +71,9 @@ class NamedPipeIn(Actor):
 
     def consume(self, event):
         for line in event:
-            self.submit({"header": {}, "data": line}, self.pool.queue.outbox)
+            e = self.createEvent()
+            e.data = line
+            self.submit(e, self.pool.queue.outbox)
 
     def drain(self):
         '''Reads the named pipe.'''

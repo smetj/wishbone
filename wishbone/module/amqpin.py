@@ -140,8 +140,10 @@ class AMQPIn(Actor):
         spawn(self.handleAcknowledgements)
 
     def consume(self, message):
-        msg = {"header": {self.name: {"delivery_tag": message.delivery_info["delivery_tag"]}}, "data": str(message.body)}
-        self.submit(msg, self.pool.queue.outbox)
+        event = self.createEvent()
+        event.setHeaderValue(self.name, delivery_tag, message.delivery_info["delivery_tag"])
+        event.data = str(message.body)
+        self.submit(event, self.pool.queue.outbox)
 
     def setupConnectivity(self):
 
@@ -187,7 +189,7 @@ class AMQPIn(Actor):
                 err.waitUntilContent()
             else:
                 try:
-                    self.channel.basic_ack(event["header"][self.name]["delivery_tag"])
+                    self.channel.basic_ack(event.getHeaderValue(self.name, "delivery_tag"))
                 except Exception as err:
                     self.pool.queue.ack.rescue(event)
                     self.logging.error("Failed to acknowledge message.  Reason: %s." % (err))
