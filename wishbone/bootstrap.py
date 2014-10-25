@@ -134,7 +134,7 @@ Build event pipeline servers with minimal effort.
             while multiprocessing.active_children():
                 sleep(1)
 
-        sys.exit(0)
+        # sys.exit(0)
 
     def list(self, command, group, category=None, include_groups=[]):
 
