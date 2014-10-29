@@ -28,30 +28,29 @@ from wishbone.error import MissingNamespace
 from wishbone.error import MissingKey
 
 
-class Header():
+class Container():
 
-    def hasNamespace(self, namespace):
+    def hasEntry(self, entry):
 
-        if namespace in self.__dict__:
+        if entry in self.__dict__:
             return True
         else:
             return False
 
+    def getEntry(self, name):
 
-class NameSpace():
+        return self.__dict__[name]
 
-    def hasKey(self, key):
+    def setEntry(self, name, value):
 
-        if key in self.__dict__:
-            return True
-        else:
-            return False
+        self.__dict__[name] = value
 
 
 class Event():
 
     def __init__(self, namespace):
-        self.header = Header()
+        self.header = Container()
+        self.error = Container()
         self.data = None
         self.__data = None
         self.time = int(time.time())
@@ -61,24 +60,31 @@ class Event():
 
         return self.data
 
+    def getErrorValue(self, namespace):
+
+        if not self.error.hasEntry(namespace):
+            raise MissingNamespace("No namespace %s in errors." % (namespace))
+        if not getattr(self.header, namespace).hasEntry(key):
+            raise MissingKey("No error %s in errors %s" % (key, namespace))
+
     def getHeaderValue(self, namespace, key):
 
-        if not self.header.hasNamespace(namespace):
+        if not self.header.hasEntry(namespace):
             raise MissingNamespace("No namespace %s in event header." % (namespace))
-        if not getattr(self.header, namespace).hasKey(key):
+        if not getattr(self.header, namespace).hasEntry(key):
             raise MissingKey("No key %s in namespace %s" % (key, namespace))
 
         return self.header.__dict__[namespace].__dict__[key]
 
     def hasHeaderNamespace(self, namespace):
 
-        return self.header.hasNamespace(namespace)
+        return self.header.hasEntry(namespace)
 
     def hasHeaderKey(self, namespace, key):
 
-        if not self.header.hasNamespace(namespace):
+        if not self.header.hasEntry(namespace):
             return False
-        if not getattr(self.header, namespace).hasKey(key):
+        if not getattr(self.header, namespace).hasEntry(key):
             return False
 
         return True
@@ -97,22 +103,32 @@ class Event():
         '''Returns a dictionary structure of the event.'''
 
         header = {}
+        error = {}
+
         for n in self.header.__dict__:
             header[n] = self.header.__dict__[n].__dict__
 
-        return {"header": header, "data": self.data}
+        for n in self.error.__dict__:
+            error[n] = self.error.__dict__[n].__dict__
+
+        return {"header": header, "error": error, "data": self.data}
 
     def setData(self, data):
 
         self.data = data
 
+    def setErrorValue(self, namespace, line, t, error):
+
+        self.error.__dict__[namespace] = Container()
+        self.error.__dict__[namespace].__dict__["line"] = line
+        self.error.__dict__[namespace].__dict__["type"] = t
+        self.error.__dict__[namespace].__dict__["error"] = error
+
     def setHeaderValue(self, namespace, key, value):
 
-        if not self.header.hasNamespace(namespace):
-            self.setHeaderNamespace()
         self.header.__dict__[namespace].__dict__[key] = value
 
     def setHeaderNamespace(self, namespace):
 
-        if not self.header.hasNamespace(namespace):
-            self.header.__dict__[namespace] = NameSpace()
+        if not self.header.hasEntry(namespace):
+            self.header.__dict__[namespace] = Container()
