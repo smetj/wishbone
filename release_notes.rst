@@ -6,6 +6,8 @@ Version 1.0.4
 
 - Changed matchrule format wishbone.flow.match to allow multiple
   evals on the same key.
+- Added module wishbone.output.http
+
 
 Version 1.0.3
 ~~~~~~~~~~~~~
