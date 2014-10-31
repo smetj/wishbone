@@ -145,6 +145,7 @@ setup(
             'disk = wishbone.module.diskout:DiskOut',
             'email = wishbone.module.emailout:EmailOut',
             'file = wishbone.module.fileout:FileOut',
+            'http = wishbone.module.httpoutclient:HTTPOutClient',
             'null = wishbone.module.null:Null',
             'topic = wishbone.module.zmqtopicout:ZMQTopicOut',
             'stdout = wishbone.module.stdout:STDOUT',
