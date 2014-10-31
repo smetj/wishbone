@@ -210,6 +210,7 @@ class Actor():
     def __metricEmitter(self):
         '''A greenthread which collects the queue metrics at the defined interval.'''
 
+        hostname = socket.gethostname()
         self.__run.wait()
         while self.loop():
             for queue in self.pool.listQueues(names=True):
@@ -218,7 +219,7 @@ class Actor():
                     while self.loop():
                         try:
                             event = Wishbone_Event("metric:%s" % self.name)
-                            event.data = (time(), "wishbone", socket.gethostname(), "queue.%s.%s.%s" % (self.name, queue, item), stats[item], '', ())
+                            event.data = (time(), "wishbone", hostname, "queue.%s.%s.%s" % (self.name, queue, item), stats[item], '', ())
                             self.pool.queue.metrics.put(event)
                             break
                         except QueueFull as err:
