@@ -221,6 +221,6 @@ class Actor():
                             event.data = (time(), "wishbone", socket.gethostname(), "queue.%s.%s.%s" % (self.name, queue, item), stats[item], '', ())
                             self.pool.queue.metrics.put(event)
                             break
-                        except QueueFull:
-                            self.pool.queue.metrics.waitUntilEmpty()
+                        except QueueFull as err:
+                            err.waitUntilFree()
             sleep(self.frequency)

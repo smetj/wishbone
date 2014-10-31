@@ -95,7 +95,6 @@ class Event():
             return self
         else:
             e = deepcopy(self)
-            e.uuid = str(uuid4())
             return e
 
     def raw(self):
