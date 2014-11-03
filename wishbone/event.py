@@ -46,6 +46,11 @@ class Container():
         self.__dict__[name] = value
 
 
+class Namespace():
+
+    pass
+
+
 class Event():
 
     def __init__(self, namespace):
@@ -55,6 +60,9 @@ class Event():
         self.__data = None
         self.time = int(time.time())
         self.setHeaderNamespace(namespace)
+
+    def initNamespace(self, namespace):
+        self.__dict__[namespace] = Namespace()
 
     def getData(self):
 
