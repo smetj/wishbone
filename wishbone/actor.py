@@ -194,7 +194,7 @@ class Actor():
             except QueueEmpty as err:
                 err.waitUntilContent()
             else:
-                event.setHeaderNamespace(self.name)
+                event.initNamespace(self.name)
                 try:
                     function(event)
                 except QueueFull as err:
