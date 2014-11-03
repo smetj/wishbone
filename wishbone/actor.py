@@ -31,6 +31,8 @@ from gevent import sleep, socket
 from gevent.event import Event
 from time import time
 from copy import copy
+from sys import exc_info
+import traceback
 
 
 class Actor():
@@ -192,6 +194,8 @@ class Actor():
                     self.pool.queue.__dict__[queue].rescue(event)
                     err.waitUntilFree()
                 except Exception as err:
+                    exc_type, exc_value, exc_traceback = exc_info()
+                    self.logging.error("Exception occured on line %s.  Type: %s. Reason: %s." % (traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value)))
                     self.submit(event, self.pool.queue.failed)
                 else:
                     self.submit(event, self.pool.queue.success)
