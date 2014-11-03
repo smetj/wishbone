@@ -22,8 +22,6 @@
 #
 #
 import time
-from uuid import uuid4
-from copy import deepcopy
 from wishbone.error import MissingNamespace
 from wishbone.error import MissingKey
 
@@ -48,94 +46,80 @@ class Container():
 
 class Namespace():
 
-    pass
+    def __init__(self):
+        pass
+
+    def addEntry(self, name):
+        self.__dict__[name] = Entry()
 
 
-class Event():
+class Module():
+
+    header = Container()
+    data = None
+    error = Container()
+
+    def __init__(self, name):
+        self.name = name
+
+
+class Event(object):
 
     def __init__(self, namespace):
-        self.header = Container()
-        self.error = Container()
-        self.data = None
-        self.__data = None
-        self.time = int(time.time())
-        self.setHeaderNamespace(namespace)
+        self.module = Namespace()
+        self.last = None
+        self.initNamespace(namespace)
 
     def initNamespace(self, namespace):
-        self.__dict__[namespace] = Namespace()
+        '''Initializes an empty namespace.'''
 
-    def getData(self):
+        self.module.__dict__[namespace] = Module(namespace)
 
-        return self.data
+    def listNamespace(self):
+        '''Returns a generator iterating over all registered namespaces.'''
 
-    def getErrorValue(self, namespace):
+        for module in self.module.__dict__:
+            yield self.module.__dict__[module]
 
-        if not self.error.hasEntry(namespace):
-            raise MissingNamespace("No namespace %s in errors." % (namespace))
-        if not getattr(self.header, namespace).hasEntry(key):
-            raise MissingKey("No error %s in errors %s" % (key, namespace))
+    def getData(self, namespace):
+
+        '''Returns the data of the requested namespace.'''
+
+        return self.module.__dict__[namespace].data
+
+    def setData(self, namespace, data):
+        '''Sets the data field of the requested namespacec.'''
+
+        self.module.__dict__[namespace].data = data
+        self.last = self.module.__dict__[namespace]
 
     def getHeaderValue(self, namespace, key):
+        '''Returns the header value of the requested namespace.'''
 
-        if not self.header.hasEntry(namespace):
-            raise MissingNamespace("No namespace %s in event header." % (namespace))
-        if not getattr(self.header, namespace).hasEntry(key):
-            raise MissingKey("No key %s in namespace %s" % (key, namespace))
+        self.module.__dict__[namespace].header.__dict__[key]
 
-        return self.header.__dict__[namespace].__dict__[key]
+    def lookupHeaderValue(self, name):
+        '''Returns the header value using dotted format.'''
 
-    def hasHeaderNamespace(self, namespace):
-
-        return self.header.hasEntry(namespace)
-
-    def hasHeaderKey(self, namespace, key):
-
-        if not self.header.hasEntry(namespace):
-            return False
-        if not getattr(self.header, namespace).hasEntry(key):
-            return False
-
-        return True
-
-    def clone(self, reference=False):
-
-        if reference:
-            return self
-        else:
-            e = deepcopy(self)
-            return e
+        (namespace, key) = name.split('.')
+        return self.module.__dict__[namespace].header.__dict__[key]
 
     def raw(self):
+        '''returns a dictionary representation of the event.'''
 
-        '''Returns a dictionary structure of the event.'''
-
-        header = {}
-        error = {}
-
-        for n in self.header.__dict__:
-            header[n] = self.header.__dict__[n].__dict__
-
-        for n in self.error.__dict__:
-            error[n] = self.error.__dict__[n].__dict__
-
-        return {"header": header, "error": error, "data": self.data}
-
-    def setData(self, data):
-
-        self.data = data
-
-    def setErrorValue(self, namespace, line, t, error):
-
-        self.error.__dict__[namespace] = Container()
-        self.error.__dict__[namespace].__dict__["line"] = line
-        self.error.__dict__[namespace].__dict__["type"] = t
-        self.error.__dict__[namespace].__dict__["error"] = error
+        data = {}
+        for module in self.listNamespace():
+            data[module.name] = {"header": module.header.__dict__, "data": module.data, "error": module.error.__dict__}
+        return data
 
     def setHeaderValue(self, namespace, key, value):
+        '''Sets a header value of the requested namespace.'''
 
-        self.header.__dict__[namespace].__dict__[key] = value
+        self.module.__dict__[namespace].header.__dict__[key] = value
 
-    def setHeaderNamespace(self, namespace):
+    def setErrorValue(self, namespace, line, error_type, error_value):
+        '''Sets the error value for namespace.'''
 
-        if not self.header.hasEntry(namespace):
-            self.header.__dict__[namespace] = Container()
+        self.module.__dict__[namespace].error.line = line
+        self.module.__dict__[namespace].error.type = error_type
+        self.module.__dict__[namespace].error.type = error_value
