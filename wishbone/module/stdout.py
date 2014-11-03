@@ -52,7 +52,7 @@ class Format():
         return event.raw()
 
     def __returnIncomplete(self, event):
-        return event.data
+        return event.last.data
 
     def __returnCounter(self, event):
         self.countervalue += 1

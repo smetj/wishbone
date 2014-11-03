@@ -88,7 +88,7 @@ class TestEvent(Actor):
 
         while self.loop():
             event = self.createEvent()
-            event.data = "%s%s" % (self.message, self.number())
+            event.setData(self.name, "%s%s" % (self.message, self.number()))
             self.submit(event, self.pool.queue.outbox)
             self.sleep()
 
