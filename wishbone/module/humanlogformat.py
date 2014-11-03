@@ -108,12 +108,12 @@ class HumanLogFormat(Actor):
 
     def consume(self, event):
         log = ("%s %s %s %s: %s" % (
-            strftime("%Y-%m-%dT%H:%M:%S", localtime(event.data[1])),
-            "%s[%s]:" % (self.ident, event.data[2]),
-            self.levels[event.data[0]],
-            event.data[3],
-            event.data[4]))
-        event.data = self.colorize(log, event.data[0])
+            strftime("%Y-%m-%dT%H:%M:%S", localtime(event.last.data[1])),
+            "%s[%s]:" % (self.ident, event.last.data[2]),
+            self.levels[event.last.data[0]],
+            event.last.data[3],
+            event.last.data[4]))
+        event.last.data = self.colorize(log, event.last.data[0])
         self.submit(event, self.pool.queue.outbox)
 
     def doColorize(self, message, level):
