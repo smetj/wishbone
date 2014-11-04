@@ -124,7 +124,8 @@ setup(
             'header = wishbone.module.header:Header',
             'template = wishbone.module.template:Template',
             'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
-            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate'
+            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate',
+            'lookup = wishbone.module.lookup:Lookup'
         ],
         'wishbone.input': [
             'amqp = wishbone.module.amqpin:AMQPIn',
