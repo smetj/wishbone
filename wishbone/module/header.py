@@ -42,9 +42,6 @@ class Header(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
-        - namespace(str)(self.name)
-           |  The header namespace to store the information.
-
         - header(dict)({})
            |  The data to store.
 
@@ -62,12 +59,8 @@ class Header(Actor):
            |  Outgoing events.
     '''
 
-    def __init__(self, name, size=100, frequency=1, namespace=None, header={}, expr=None):
+    def __init__(self, name, size=100, frequency=1, header={}, expr=None):
         Actor.__init__(self, name, size, frequency)
-        if namespace is None:
-            self.namespace = name
-        else:
-            self.namespace = namespace
 
         self.header = header
         self.expr = expr
@@ -86,8 +79,8 @@ class Header(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def __doHeader(self, event):
-        event.setHeaderNamespace(self.namespace)
-        event.header.__dict__[self.namespace].__dict__.update(self.header)
+        for key in self.header:
+            event.setHeaderValue(key, self.header[key])
         return event
 
     def __doPrintf(self, event):
