@@ -192,7 +192,7 @@ class Match(Actor):
         for rule in self.__active_rules:
             e = deepcopy(event)
             if self.evaluateCondition(self.__active_rules[rule]["condition"], e["data"]):
-                self.logging.debug("Match for rule %s." % (rule))
+                # self.logging.debug("Match for rule %s." % (rule))
                 e["header"].update({self.name: {"rule": rule}})
                 for queue in self.__active_rules[rule]["queue"]:
                     event_copy = deepcopy(e)
@@ -202,7 +202,7 @@ class Match(Actor):
                         self.submit(event_copy, self.pool.getQueue(name))
             else:
                 pass
-                self.logging.debug("No match for rule %s." % (rule))
+                #  self.logging.debug("No match for rule %s." % (rule))
 
     def evaluateCondition(self, conditions, fields):
         for condition in conditions:
