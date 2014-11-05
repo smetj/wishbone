@@ -107,8 +107,8 @@ class TCPOut(Actor):
             pass
 
     def consume(self, event):
-        if isinstance(event.data, list):
-            data = self.delimiter.join(event.data)
+        if isinstance(event.last.data, list):
+            data = self.delimiter.join(event.last.data)
         else:
-            data = event.data
+            data = event.last.data
         self.socket.sendall(str(data) + self.delimiter)
