@@ -46,8 +46,8 @@ class Event(object):
 
     def __init__(self, namespace):
         self.module = Namespace()
-        self.last = None
         self.initNamespace(namespace)
+        self.last = self.module.__dict__[namespace]
 
     def clone(self):
         '''returns a deep copy instance of the event.'''
