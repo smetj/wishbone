@@ -44,7 +44,7 @@ class Logging():
 
         while True:
             try:
-                event = Event("log:%s" % self.name)
+                event = Event("%s:log" % self.name)
                 event.setData((level, time(), getpid(), self.name, message))
                 self.logs.put(event)
                 break
