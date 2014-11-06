@@ -34,6 +34,7 @@ import sys
 from daemon import DaemonContext
 from gevent import sleep, signal
 from pkg_resources import get_distribution
+from jinja2 import Template
 
 
 class BootStrap():
@@ -101,19 +102,12 @@ class Dispatch():
         self.module_manager = ModuleManager()
 
     def generateHeader(self):
-        '''
-        Prints a header.
-        '''
+        '''Generates the Wishbone ascii header.'''
 
-        return """          __       __    __
-.--.--.--|__.-----|  |--|  |--.-----.-----.-----.
-|  |  |  |  |__ --|     |  _  |  _  |     |  -__|
-|________|__|_____|__|__|_____|_____|__|__|_____|
-                                   version %s
+        with open("%s/data/banner.tmpl" % (os.path.dirname(__file__))) as f:
+            template= Template(''.join(f.readlines()))
 
-Build event pipeline servers with minimal effort.
-
-""" % (get_distribution('wishbone').version)
+        return template.render(version=get_distribution('wishbone').version)
 
     def debug(self, command, config, instances, queue_size, frequency, identification):
         '''
