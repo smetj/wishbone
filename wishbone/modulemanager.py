@@ -57,6 +57,11 @@ class ModuleManager():
             if module.name == name:
                 return module.load()
 
+    def getModuleByName(self, name):
+
+        (category, group, name) = name.split('.')
+        return self.getModule(category, group, name)
+
     def getModuleDoc(self, category, group, name):
 
         try:
