@@ -287,20 +287,13 @@ class RouterBootstrap():
         self.router = Default(size=queue_size, frequency=frequency)
         self.module = ModuleManager()
 
-    def loadModule(self, name):
-        '''
-        Loads a module using the entrypoint name.
-        '''
-
-        return self.module.getModuleByName(name)
-
     def setupModules(self, modules):
         '''
         Loads and initialzes the modules from the bootstrap file.
         '''
 
         for module in modules:
-            m = self.loadModule(modules[module]["module"])
+            m = self.module.getModuleByName(modules[module]["module"])
             if "arguments" in modules[module]:
                 self.router.registerModule(m, module, **modules[module]["arguments"])
             else:
@@ -327,7 +320,7 @@ class RouterBootstrap():
             self.__debug()
 
         try:
-            syslog = self.loadModule("wishbone.output.syslog")
+            syslog = self.module.getModuleByName("wishbone.output.syslog")
             self.router.registerModule(syslog, "syslog", ident=self.identification)
             self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("syslog"), "inbox")
         except QueueConnected:
@@ -350,8 +343,8 @@ class RouterBootstrap():
         '''
 
         # In debug mode we write our logs to STDOUT
-        log_stdout = self.loadModule("wishbone.output.stdout")
-        log_human = self.loadModule("wishbone.encode.humanlogformat")
+        log_stdout = self.module.getModuleByName("wishbone.output.stdout")
+        log_human = self.module.getModuleByName("wishbone.encode.humanlogformat")
         self.router.registerModule(log_stdout, "log_stdout")
         self.router.registerModule(log_human, "log_format", ident=self.identification)
         self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("log_format"), "inbox")

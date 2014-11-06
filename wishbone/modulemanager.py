@@ -34,7 +34,13 @@ class ModuleManager():
         self.categories = ["wishbone", "wishbone.contrib"]
         self.groups = ["flow", "encode", "decode", "function", "input", "output"]
 
-    def listNames(self, category=None):
+    def getModule(self, category, group, name):
+
+        for module in pkg_resources.iter_entry_points("%s.%s" % (category, group)):
+            if module.name == name:
+                return module.load()
+
+    def getModulesList(self, category=None):
 
         modules = []
 
@@ -50,12 +56,6 @@ class ModuleManager():
             for m in sorted(groups):
                 (c, g) = (category.split('.'))
                 yield (c, g, m)
-
-    def getModule(self, category, group, name):
-
-        for module in pkg_resources.iter_entry_points("%s.%s" % (category, group)):
-            if module.name == name:
-                return module.load()
 
     def getModuleByName(self, name):
 
@@ -86,10 +86,10 @@ class ModuleManager():
 
         category_header = None
         group_header = None
-        all_items = list(self.listNames())
+        all_items = list(self.getModulesList())
 
         for g in include_groups:
-            all_items += list(self.listNames(g))
+            all_items += list(self.getModulesList(g))
 
         for (category, group, module) in all_items:
             title = self.getModuleTitle(category, group, module)
