@@ -24,7 +24,7 @@
 
 from wishbone.router import Default
 from wishbone.error import QueueConnected
-from wishbone.utils import BootstrapFile, Module, PIDFile
+from wishbone.utils import BootstrapFile, PIDFile
 from wishbone import ModuleManager
 
 import argparse
@@ -285,14 +285,14 @@ class RouterBootstrap():
         self.identification = identification
         self.debug = debug
         self.router = Default(size=queue_size, frequency=frequency)
-        self.module = Module()
+        self.module = ModuleManager()
 
     def loadModule(self, name):
         '''
         Loads a module using the entrypoint name.
         '''
 
-        return self.module.load(name)
+        return self.module.getModuleByName(name)
 
     def setupModules(self, modules):
         '''

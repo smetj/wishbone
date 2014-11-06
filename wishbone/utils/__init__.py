@@ -68,51 +68,6 @@ class BootstrapFile():
 
         return content
 
-
-class Module():
-
-    '''
-    Handles all Wishbone module interaction.
-    '''
-
-    def __init__(self):
-        pass
-
-    def getVersion(self, entrypoint):
-        '''
-        Extracts and returns a module's version.
-        '''
-
-        modulename = vars(entrypoint)["module_name"].split('.')[0]
-
-        try:
-            return pkg_resources.get_distribution(modulename).version
-        except Exception:
-            return "Unknown"
-
-    def load(self, entrypoint):
-        '''
-        Loads a module from an entrypoint string and returns it.
-        '''
-
-        e = entrypoint.split('.')
-        name = e[-1]
-        del(e[-1])
-        group = ".".join(e)
-        module_instance = None
-
-        for module in pkg_resources.iter_entry_points(group=group, name=name):
-            try:
-                module_instance = module.load()
-            except Exception as err:
-                raise Exception("Problem loading module %s  Reason: %s" % (module, err))
-
-        if module_instance is not None:
-            return module_instance
-        else:
-            raise Exception("Failed to load module %s  Reason: Not found" % (entrypoint))
-
-
 class PIDFile():
 
     '''
