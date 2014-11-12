@@ -30,9 +30,11 @@ from operator import itemgetter
 
 class ModuleManager():
 
-    def __init__(self):
-        self.categories = ["wishbone", "wishbone.contrib"]
-        self.groups = ["flow", "encode", "decode", "function", "input", "output"]
+    def __init__(self,
+                 categories=["wishbone", "wishbone.contrib"],
+                 groups=["flow", "encode", "decode", "function", "input", "output"]):
+        self.categories = categories
+        self.groups = groups
 
     def getModule(self, category, group, name):
 
