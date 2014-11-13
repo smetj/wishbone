@@ -28,10 +28,12 @@ class Config():
     def __init__(self, username=None, password=None):
         pass
 
-    def factory(self, variable):
+    def generateLookup(self, variable):
 
-        def lookup():
-            return variable
+        def lookupVariable():
+            return "looked up variable %s " % variable
+
+        return lookupVariable
 
     def lookup(self, variable):
         return variable
