@@ -22,7 +22,7 @@
 #
 #
 
-
+from collections import namedtuple
 import importlib
 import re
 
@@ -40,6 +40,10 @@ class ListContainer(list):
 
 class Arguments(object):
 
+    def __getattr__(self, name):
+
+        return self.__dict__["__%s" % name]()
+
     def list(self):
         for item in self.__dict__:
             yield item
@@ -49,6 +53,7 @@ class Arguments(object):
 
     def set(self, name, value):
         self.__dict__[name] = value
+
 
 
 class Source(object):
@@ -66,8 +71,11 @@ class Module(object):
         self.name = name
         self.module = module
         self.arguments = Arguments()
-        self.arguments.__dict__.update(arguments)
-
+        for argument in arguments:
+            if hasattr(arguments[argument], '__call__'):
+                self.arguments.__dict__["__%s" % argument] = arguments[argument]
+            else:
+                self.arguments.__dict__[argument] = arguments[argument]
 
 class Route(object):
 
@@ -82,57 +90,51 @@ class Route(object):
         self.destination.queue = destination_queue
 
 
-class Config(object):
+class WishboneConfig(namedtuple('WishboneConfig', 'modules routes')):
+    pass
 
-    def __init__(self, source):
 
-        self.source = source
-        self.modules = Container()
-        self.routes = ListContainer()
-        self.lookups = Container()
-        self.__buildModules()
-        self.__buildRoutes()
-        self.__buildLookups()
+class ConfigurationFactory(object):
 
-    def __buildModules(self):
+    def __init__(self):
 
+        self.lookup_methods = {}
+
+    def factory(self, name, *args, **kwargs):
+
+        m = importlib.import_module(name)
+        self.source = m.Config(*args, **kwargs)
+
+        self.initializeLookupModules()
+
+        modules = Container()
         for (name, module, arguments) in self.source.listModules():
-            setattr(self.modules, name, Module(name, module, arguments))
+            for argument in arguments:
+                arguments[argument] = self.replaceLookups(arguments[argument])
+            setattr(modules, name, Module(name, module, arguments))
 
-    def __buildRoutes(self):
-
+        routes = ListContainer()
         for source_module, source_queue, destination_module, destination_queue in self.source.listRoutes():
-            self.routes.append(Route(source_module, source_queue, destination_module, destination_queue))
+            routes.append(Route(source_module, source_queue, destination_module, destination_queue))
 
-    def __buildLookups(self):
+        return WishboneConfig(modules, routes)
+
+    def initializeLookupModules(self):
 
         for (name, module, arguments) in self.source.listLookups():
             m = importlib.import_module(module)
-            setattr(self.lookups, name, m.Config(**arguments))
+            self.lookup_methods[name] = m.Config(**arguments)
 
-        for m in self.listModules():
-            for argument in m.arguments.list():
-                if isinstance(m.arguments.get(argument), str) and m.arguments.get(argument).startswith("~"):
-                    technique, var = self.__extractLookupDef(m.arguments.get(argument))
+    def replaceLookups(self, argument):
 
-    def listModules(self):
-
-        for m in self.modules.__dict__:
-            yield self.modules.__dict__[m]
-
-    def listRoutes(self):
-        pass
+        if isinstance(argument, str) and argument.startswith('~'):
+            (lookup, var) = self.__extractLookupDef(argument)
+            return self.lookup_methods[lookup].generateLookup(var)
+        else:
+            argument
 
     def __extractLookupDef(self, e):
 
         m = re.match('~(.*?)\([\"|\'](.*)?[\"|\']\)', e)
         return (m.groups()[0], m.groups()[1])
 
-
-class ConfigurationFactory(object):
-
-    @staticmethod
-    def factory(name, *args, **kwargs):
-        m = importlib.import_module(name)
-        cfg = Config(m.Config(*args, **kwargs))
-        return cfg
