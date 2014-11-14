@@ -31,7 +31,7 @@ class Container(object):
 
     def list(self):
         for item in self.__dict__:
-            yield item
+            yield self.__dict__[item]
 
 
 class ListContainer(list):
@@ -40,20 +40,27 @@ class ListContainer(list):
 
 class Arguments(object):
 
-    def __getattr__(self, name):
+    def __init__(self, **kwargs):
+        self.__values = kwargs
+        self.__setattr__ = self.__readOnly
 
-        return self.__dict__["__%s" % name]()
+    def __readOnly(self, obj, value):
+        raise Exception("Arguments is a read only object")
 
-    def list(self):
-        for item in self.__dict__:
-            yield item
+    def __getattr__(self, obj, objtype=None):
 
-    def get(self, name):
-        return self.__dict__[name]
+        if hasattr(self.__values[obj], '__call__'):
+            return self.__values[obj]()
+        else:
+            return self.__values[obj]
 
-    def set(self, name, value):
-        self.__dict__[name] = value
+    def __repr__(self):
+        a = ["%s='%s'" % (item, self.__values[item]) for item in sorted(self.__values)]
+        return "Arguments(%s)" % ", ".join(a)
 
+    def __iter__(self):
+        for x in self.__values:
+            yield x
 
 
 class Source(object):
@@ -70,24 +77,11 @@ class Module(object):
 
         self.name = name
         self.module = module
-        self.arguments = Arguments()
-        for argument in arguments:
-            if hasattr(arguments[argument], '__call__'):
-                self.arguments.__dict__["__%s" % argument] = arguments[argument]
-            else:
-                self.arguments.__dict__[argument] = arguments[argument]
+        self.arguments = Arguments(**arguments)
 
-class Route(object):
 
-    def __init__(self, source_module, source_queue, destination_module, destination_queue):
-
-        self.source = Source()
-        self.source.module = source_module
-        self.source.queue = source_queue
-
-        self.destination = Destination()
-        self.destination.module = destination_module
-        self.destination.queue = destination_queue
+class Route(namedtuple('Route', 'source_module source_queue destination_module destination_queue'), object):
+    pass
 
 
 class WishboneConfig(namedtuple('WishboneConfig', 'modules routes')):
@@ -102,16 +96,18 @@ class ConfigurationFactory(object):
 
     def factory(self, name, *args, **kwargs):
 
+        # import the requested factory and initialize
         m = importlib.import_module(name)
         self.source = m.Config(*args, **kwargs)
 
+        # initialize all defined lookup modules
         self.initializeLookupModules()
 
         modules = Container()
         for (name, module, arguments) in self.source.listModules():
-            for argument in arguments:
-                arguments[argument] = self.replaceLookups(arguments[argument])
-            setattr(modules, name, Module(name, module, arguments))
+
+            args_incl_lookups = self.replaceLookupDefsWithFunctions(arguments)
+            setattr(modules, name, Module(name, module, args_incl_lookups))
 
         routes = ListContainer()
         for source_module, source_queue, destination_module, destination_queue in self.source.listRoutes():
@@ -125,13 +121,14 @@ class ConfigurationFactory(object):
             m = importlib.import_module(module)
             self.lookup_methods[name] = m.Config(**arguments)
 
-    def replaceLookups(self, argument):
+    def replaceLookupDefsWithFunctions(self, args):
 
-        if isinstance(argument, str) and argument.startswith('~'):
-            (lookup, var) = self.__extractLookupDef(argument)
-            return self.lookup_methods[lookup].generateLookup(var)
-        else:
-            argument
+        for arg in args:
+            if isinstance(args[arg], str) and args[arg].startswith('~'):
+                (lookup, var) = self.__extractLookupDef(args[arg])
+                args[arg] = self.lookup_methods[lookup].generateLookup(var)
+
+        return args
 
     def __extractLookupDef(self, e):
 
