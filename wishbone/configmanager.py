@@ -34,10 +34,6 @@ class Container(object):
             yield self.__dict__[item]
 
 
-class ListContainer(list):
-    pass
-
-
 class Arguments(object):
 
     def __init__(self, **kwargs):
@@ -73,18 +69,20 @@ class Destination(object):
 
 class Module(object):
 
-    def __init__(self, name, module, arguments):
+    def __init__(self, name, module, arguments, outgoing_routes, incoming_routes):
 
         self.name = name
         self.module = module
         self.arguments = Arguments(**arguments)
+        self.outgoing_routes = outgoing_routes
+        self.incoming_routes = incoming_routes
 
 
 class Route(namedtuple('Route', 'source_module source_queue destination_module destination_queue'), object):
     pass
 
 
-class WishboneConfig(namedtuple('WishboneConfig', 'modules routes')):
+class WishboneConfig(namedtuple('WishboneConfig', 'modules')):
     pass
 
 
@@ -106,14 +104,15 @@ class ConfigurationFactory(object):
         modules = Container()
         for (name, module, arguments) in self.source.listModules():
 
+            # find and replace lookup definitions
             args_incl_lookups = self.replaceLookupDefsWithFunctions(arguments)
-            setattr(modules, name, Module(name, module, args_incl_lookups))
 
-        routes = ListContainer()
-        for source_module, source_queue, destination_module, destination_queue in self.source.listRoutes():
-            routes.append(Route(source_module, source_queue, destination_module, destination_queue))
+            outgoing = [Route(*x) for x in self.source.listRoutes() if x[0] == name]
+            incoming = [Route(*x) for x in self.source.listRoutes() if x[2] == name]
 
-        return WishboneConfig(modules, routes)
+            setattr(modules, name, Module(name, module, args_incl_lookups, outgoing, incoming))
+
+        return WishboneConfig(listModules)
 
     def initializeLookupModules(self):
 
