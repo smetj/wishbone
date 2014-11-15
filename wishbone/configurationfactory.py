@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  configmanager.py
+#  configurationfactory.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -27,11 +27,23 @@ import importlib
 import re
 
 
-class Container(object):
+class Modules(object):
 
     def list(self):
         for item in self.__dict__:
             yield self.__dict__[item]
+
+    def listChildren(self, module):
+        children = []
+
+        def crawl(module, children):
+            for child in getattr(self, module).outgoing_routes:
+                children.append(child.destination_module)
+                crawl(child.destination_module, children)
+
+        crawl(module, children)
+        for item in children:
+            yield item
 
 
 class Arguments(object):
@@ -101,7 +113,7 @@ class ConfigurationFactory(object):
         # initialize all defined lookup modules
         self.initializeLookupModules()
 
-        modules = Container()
+        modules = Modules()
         for (name, module, arguments) in self.source.listModules():
 
             # find and replace lookup definitions
@@ -112,7 +124,7 @@ class ConfigurationFactory(object):
 
             setattr(modules, name, Module(name, module, args_incl_lookups, outgoing, incoming))
 
-        return WishboneConfig(listModules)
+        return WishboneConfig(modules)
 
     def initializeLookupModules(self):
 
