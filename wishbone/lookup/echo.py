@@ -25,13 +25,13 @@
 
 class Config():
 
-    def __init__(self, username=None, password=None):
+    def __init__(self):
         pass
 
     def generateLookup(self, variable):
 
         def lookupVariable():
-            return "looked up variable %s " % variable
+            return variable
 
         return lookupVariable
 
