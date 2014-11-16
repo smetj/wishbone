@@ -1,11 +1,16 @@
 Wishbone changelog
 ==================
 
-Version 1.0.4
+Version 1.1.0
 ~~~~~~~~~~~~~
 
 - Changed matchrule format wishbone.flow.match to allow multiple
   evals on the same key.
+- Rewrite new internal event format.
+- Introduction of ConfigurationFactory to produce ConfigurationManager.
+- Refactoring of default router to use ConfigurationManager.
+- Introducing support of of external variable value lookups.
+- Small fix to reduce excessive gethostbyname() lookups in logging.
 
 Version 1.0.3
 ~~~~~~~~~~~~~

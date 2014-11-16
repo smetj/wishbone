@@ -26,7 +26,7 @@ from wishbone.router import Default
 from wishbone.error import QueueConnected
 from wishbone.utils import BootstrapFile, PIDFile
 from wishbone import ModuleManager
-
+from wishbone import ConfigurationFactory
 import argparse
 import multiprocessing
 import os
@@ -105,7 +105,7 @@ class Dispatch():
         '''Generates the Wishbone ascii header.'''
 
         with open("%s/data/banner.tmpl" % (os.path.dirname(__file__))) as f:
-            template= Template(''.join(f.readlines()))
+            template = Template(''.join(f.readlines()))
 
         return template.render(version=get_distribution('wishbone').version)
 
@@ -113,8 +113,6 @@ class Dispatch():
         '''
         Handles the Wishbone debug command.
         '''
-
-        config = self.config.load(config)
 
         if instances == 1:
             self.routers.append(RouterBootstrap(config, debug=True, queue_size=queue_size, frequency=frequency, identification=identification))
@@ -282,10 +280,14 @@ class RouterBootstrap():
 
     def __init__(self, config, debug=False, queue_size=100, frequency=1, identification=None):
         self.config = config
-        self.identification = identification
         self.debug = debug
-        self.router = Default(size=queue_size, frequency=frequency)
-        self.module = ModuleManager()
+        self.queue = queue_size
+        self.frequency = frequency
+        self.identification = identification
+
+        self.module_manager = ModuleManager()
+        self.configuration_manager = ConfigurationFactory().factory("wishbone.config.bootstrapfile", config)
+        self.router = Default(self.configuration_manager, self.module_manager, size=queue_size, frequency=frequency)
 
     def setupModules(self, modules):
         '''
@@ -313,18 +315,18 @@ class RouterBootstrap():
         Calls the router's start() function.
         '''
 
-        self.setupModules(self.config["modules"])
-        self.setupRoutes(self.config["routingtable"])
+        # self.setupModules(self.config["modules"])
+        # self.setupRoutes(self.config["routingtable"])
 
-        if self.debug:
-            self.__debug()
+        # if self.debug:
+        #     self.__debug()
 
-        try:
-            syslog = self.module.getModuleByName("wishbone.output.syslog")
-            self.router.registerModule(syslog, "syslog", ident=self.identification)
-            self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("syslog"), "inbox")
-        except QueueConnected:
-            pass
+        # try:
+        #     syslog = self.module.getModuleByName("wishbone.output.syslog")
+        #     self.router.registerModule(syslog, "syslog", ident=self.identification)
+        #     self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("syslog"), "inbox")
+        # except QueueConnected:
+        #     pass
 
         self.router.start()
         while self.router.isRunning():
@@ -362,6 +364,7 @@ class RouterBootstrap():
 
 
 def main():
+    BootStrap()
     try:
         BootStrap()
     except Exception as err:
