@@ -54,23 +54,87 @@ class ModulePool():
 
 class Default():
 
-    def __init__(self, size=100, frequency=1):
-        signal(2, self.stop)
-        signal(15, self.stop)
-        self.pool = ModulePool()
+    '''The default Wishbone router.
+
+    Holds all Wishbone modules and connections.
+
+    Arguments:
+
+        - configuration_manager(obj)    : A Wishbone ConfigManager object instance.
+
+        - module_manager(obj)           : A Wishbone ModuleManager object instance.
+
+        - size(int)(100)                : The size of all queues.
+
+        - frequency(int)(1)             : The frequency at which metrics are produced.
+
+        - identification                : A string identifying this instance in logging.
+
+        - stdout_logging(bool)(False)   : When True all logs are written to STDOUT.
+
+
+    '''
+
+    def __init__(self, configuration_manager, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True):
+
+        self.configuration_manager = configuration_manager
+        self.module_manager = module_manager
         self.size = size
         self.frequency = frequency
-        self.registerModule(Funnel, "metrics_funnel")
-        self.registerModule(Funnel, "logs_funnel")
+        self.identification = identification
+        self.stdout_logging = stdout_logging
+
+        signal(2, self.stop)
+        signal(15, self.stop)
+
+        self.pool = ModulePool()
+
         self.__running = False
         self.__block = event.Event()
         self.__block.clear()
+        self.__initConfig()
 
     def block(self):
         '''Blocks until stop() is called.'''
         self.__block.wait()
 
-    def connect(self, source, destination):
+
+
+    def getChildren(self, module):
+        children = []
+
+        def lookupChildren(module, children):
+            for module in self.pool.getModule(module).getChildren():
+                name = module.split(".")[0]
+                if name not in children:
+                    children.append(name)
+                    lookupChildren(name, children)
+
+        lookupChildren(module, children)
+        return children
+
+    def isRunning(self):
+        return self.__running
+
+    def start(self):
+        '''Starts all registered modules.'''
+        self.__running = True
+
+        for module in self.pool.list():
+            module.start()
+
+    def stop(self):
+        '''Stops all input modules.'''
+
+        for module in self.pool.list():
+            if module.name not in self.getChildren("logs_funnel"):
+                module.stop()
+
+        self.pool.module.logs_funnel.stop()
+        self.__running = False
+        self.__block.set()
+
+    def __connect(self, source, destination):
         '''Connects one queue to the other.
 
         For convenience, the syntax of the queues is <modulename>.<queuename>
@@ -87,20 +151,22 @@ class Default():
 
         source.connect(source_queue, destination, destination_queue)
 
-    def getChildren(self, module):
-        children = []
+    def __initConfig(self):
+        '''Setup all modules and routes.'''
 
-        def lookupChildren(module, children):
-            for module in self.pool.getModule(module).getChildren():
-                name = module.split(".")[0]
-                if name not in children:
-                    children.append(name)
-                    lookupChildren(name, children)
+        for module in self.configuration_manager.modules:
+            arguments = {x: getattr(module.arguments, x) for x in module.arguments}
+            pmodule = self.module_manager.getModuleByName(module.module)
+            self.__registerModule(pmodule, module.instance, **arguments)
 
-        lookupChildren(module, children)
-        return children
+        self.__setupConnections()
+        self.__setupMetricConnections()
+        self.__setupLogConnections()
 
-    def registerModule(self, module, name, *args, **kwargs):
+        if self.stdout_logging:
+            self.__setupSTDOUTLogging()
+
+    def __registerModule(self, module, name, *args, **kwargs):
         '''Initializes the mdoule using the provided <args> and <kwargs>
         arguments.'''
 
@@ -109,37 +175,33 @@ class Default():
         except Exception as err:
             raise ModuleInitFailure(err)
 
-    def isRunning(self):
-        return self.__running
+    def __setupConnections(self):
+        '''Setup all connections as defined by configuration_manager'''
 
-    def setupMetricConnections(self):
-        '''Connects all metric queues to a Funnel module'''
+        for module in self.configuration_manager.modules:
+            for route in module.outgoing:
+                self.__connect("%s.%s" % (route.source_module, route.source_queue), "%s.%s" % (route.destination_module, route.destination_queue))
 
-        for module in self.pool.list():
-            module.connect("metrics", self.pool.module.metrics_funnel, module.name)
-
-    def setupLogConnections(self):
+    def __setupLogConnections(self):
         '''Connect all log queues to a Funnel module'''
 
+        self.__registerModule(Funnel, "logs_funnel")
         for module in self.pool.list():
             module.connect("logs", self.pool.module.logs_funnel, module.name)
 
-    def start(self):
-        '''Starts all registered modules.'''
-        self.__running = True
-        self.setupMetricConnections()
-        self.setupLogConnections()
+    def __setupMetricConnections(self):
+        '''Connects all metric queues to a Funnel module'''
 
+        self.__registerModule(Funnel, "metrics_funnel")
         for module in self.pool.list():
-            module.start()
+            module.connect("metrics", self.pool.module.metrics_funnel, module.name)
 
-    def stop(self):
-        '''Stops all input modules.'''
+    def __setupSTDOUTLogging(self):
 
-        for module in self.pool.list():
-            if module.name not in self.getChildren("logs_funnel"):
-                module.stop()
+        log_stdout = self.module_manager.getModuleByName("wishbone.output.stdout")
+        log_human = self.module_manager.getModuleByName("wishbone.encode.humanlogformat")
+        self.__registerModule(log_stdout, "log_stdout")
+        self.__registerModule(log_human, "log_format", ident=self.identification)
+        self.__connect("logs_funnel.outbox", "log_format.inbox")
+        self.__connect("log_format.outbox", "log_stdout.inbox")
 
-        self.pool.module.logs_funnel.stop()
-        self.__running = False
-        self.__block.set()
