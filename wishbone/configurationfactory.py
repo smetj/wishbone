@@ -27,25 +27,6 @@ import importlib
 import re
 
 
-class Modules(object):
-
-    def list(self):
-        for item in self.__dict__:
-            yield self.__dict__[item]
-
-    def listChildren(self, module):
-        children = []
-
-        def crawl(module, children):
-            for child in getattr(self, module).outgoing_routes:
-                children.append(child.destination_module)
-                crawl(child.destination_module, children)
-
-        crawl(module, children)
-        for item in children:
-            yield item
-
-
 class Arguments(object):
 
     def __init__(self, **kwargs):
@@ -71,30 +52,59 @@ class Arguments(object):
             yield x
 
 
-class Source(object):
-    pass
-
-
-class Destination(object):
-    pass
-
-
 class Module(object):
 
-    def __init__(self, name, module, arguments, outgoing_routes, incoming_routes):
+    def __init__(self, instance, module, arguments, outgoing, incoming):
 
-        self.name = name
+        '''Wishbone configuration representation of a Module.
+
+        Parameters:
+
+            - instance(str)     : module instance name.
+
+            - module(str)       : module type name in dotted format.
+
+            - arguments(obj)    : Arguments object
+
+            - outgoing(obj)     : A  list of outoing Route objects.
+
+            - incoming(ojb)     : A list of incoming Route objects.
+
+        Properties:
+
+            - instance(str)     : module instance name.
+
+            - module(str)       : module type name in dotted format.
+
+            - arguments(obj)    : Arguments object
+
+            - outgoing(obj)     : A  list of outoing Route objects.
+
+            - incoming(ojb)     : A list of incoming Route objects.
+
+            - category(str)     : The module type category.
+
+            - group(str)        : The module type group.
+
+            - name(str)         : The module type name.
+        '''
+
+        self.instance = instance
         self.module = module
         self.arguments = Arguments(**arguments)
-        self.outgoing_routes = outgoing_routes
-        self.incoming_routes = incoming_routes
+        self.outgoing = outgoing
+        self.incoming = incoming
+        (self.category, self.group, self.name) = module.split('.')
+
+    def __repr__(self):
+        return "Module(%s)" % (self.module)
 
 
 class Route(namedtuple('Route', 'source_module source_queue destination_module destination_queue'), object):
     pass
 
 
-class WishboneConfig(namedtuple('WishboneConfig', 'modules')):
+class ConfigManager(namedtuple('ConfigManager', 'modules')):
     pass
 
 
@@ -113,7 +123,7 @@ class ConfigurationFactory(object):
         # initialize all defined lookup modules
         self.initializeLookupModules()
 
-        modules = Modules()
+        modules = []
         for (name, module, arguments) in self.source.listModules():
 
             # find and replace lookup definitions
@@ -122,9 +132,29 @@ class ConfigurationFactory(object):
             outgoing = [Route(*x) for x in self.source.listRoutes() if x[0] == name]
             incoming = [Route(*x) for x in self.source.listRoutes() if x[2] == name]
 
-            setattr(modules, name, Module(name, module, args_incl_lookups, outgoing, incoming))
+            modules.append(Module(name, module, args_incl_lookups, outgoing, incoming))
 
-        return WishboneConfig(modules)
+        m = [x.instance for x in modules]
+
+        class Modules(namedtuple('Modules', ' '.join(m))):
+            pass
+
+            # def fubar(self):
+            #     return "fubar"
+
+            # def listChildren(self, module):
+            #     children = []
+
+            #     def crawl(module, children):
+            #         for child in getattr(self, module).outgoing:
+            #             children.append(child.destination_module)
+            #             crawl(child.destination_module, children)
+
+            #     crawl(module, children)
+            #     for item in children:
+            #         yield item
+
+        return ConfigManager(Modules(*modules))
 
     def initializeLookupModules(self):
 
