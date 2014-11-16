@@ -69,7 +69,7 @@ class Actor():
         In fact, the source queue overwrites the destination queue.'''
 
         if source in self.__children:
-            raise QueueConnected("Queue %s is already connected to %s." % (source, self.__children[source]))
+            raise QueueConnected("Queue %s.%s is already connected to %s." % (self.name, source, self.__children[source]))
         else:
             self.__children[source] = "%s.%s" % (instance.name, destination)
 
