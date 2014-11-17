@@ -26,27 +26,30 @@ from wishbone.queue import QueuePool
 from wishbone.logging import Logging
 from wishbone.event import Event as Wishbone_Event
 from wishbone.error import QueueEmpty, QueueFull, QueueConnected
+from collections import namedtuple
 from gevent.pool import Group
 from gevent import spawn
 from gevent import sleep, socket
 from gevent.event import Event
 from time import time
 from sys import exc_info
-import weakref
 import traceback
 
+class ActorConfig(namedtuple('ActorConfig', 'name size frequency')):
+    pass
 
 class Actor():
 
-    def __init__(self, name, size=100, frequency=1):
+    def __init__(self, config):
 
-        self.name = name
-        self.size = size
-        self.frequency = frequency
+        self.config = config
+        self.name = config.name
+        self.size = config.size
+        self.frequency = config.frequency
 
-        self.pool = QueuePool(size)
+        self.pool = QueuePool(config.size)
 
-        self.logging = Logging(name, self.pool.queue.logs)
+        self.logging = Logging(config.name, self.pool.queue.logs)
 
         self.__loop = True
         self.threads = Group()

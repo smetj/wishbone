@@ -35,15 +35,6 @@ class HTTPInServer(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - address(str)("0.0.0.0")
            |  The address to bind to.
 
@@ -73,9 +64,9 @@ class HTTPInServer(Actor):
     The root resource "/" is mapped the <outbox> queue.
     '''
 
-    def __init__(self, name, size, frequency, address="0.0.0.0", port=19283, keyfile=None, certfile=None, delimiter=None):
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
+    def __init__(self, actor_config, address="0.0.0.0", port=19283, keyfile=None, certfile=None, delimiter=None):
+        Actor.__init__(self, actor_config)
+
         self.address = address
         self.port = port
         self.keyfile = keyfile

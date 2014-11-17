@@ -41,15 +41,6 @@ class Graphite(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - prefix(str)
            |  Some prefix to put in front of the metric name.
 
@@ -72,9 +63,8 @@ class Graphite(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size=100, frequency=1, prefix='', script=True, pid=False, source=True):
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
+    def __init__(self, actor_config, prefix='', script=True, pid=False, source=True):
+        Actor.__init__(self, actor_config)
         self.prefix = prefix
         if script:
             self.script_name = '.%s' % (basename(argv[0]).replace(".py", ""))

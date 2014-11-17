@@ -33,15 +33,6 @@ class Header(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - header(dict)({})
            |  The data to store.
 
@@ -59,8 +50,8 @@ class Header(Actor):
            |  Outgoing events.
     '''
 
-    def __init__(self, name, size=100, frequency=1, header={}, expr=None):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, header={}, expr=None):
+        Actor.__init__(self, actor_config)
 
         self.header = header
         self.expr = expr

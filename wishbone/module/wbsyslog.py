@@ -40,15 +40,8 @@ class Syslog(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
+        - ident(str)
+           |  The syslog id string.
 
     Queues:
 
@@ -56,9 +49,8 @@ class Syslog(Actor):
            |  incoming events
     '''
 
-    def __init__(self, name, size=100, frequency=1, ident=None):
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
+    def __init__(self, actor_config, ident=None):
+        Actor.__init__(self, actor_config)
         if ident is None:
             self.ident = os.path.basename(sys.argv[0])
         else:

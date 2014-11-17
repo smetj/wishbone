@@ -40,15 +40,6 @@ class Template(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - location(str)("./")
            |  The directory containing templates.
 
@@ -70,8 +61,8 @@ class Template(Actor):
 
     '''
 
-    def __init__(self, name, size, frequency, location="./", namespace=None, header_templates=[]):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, location="./", namespace=None, header_templates=[]):
+        Actor.__init__(self, actor_config)
 
         self.location = location
         if namespace is None:

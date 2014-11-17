@@ -22,6 +22,7 @@
 #
 #
 
+from wishbone.actor import ActorConfig
 from wishbone.module import Funnel
 from wishbone.error import ModuleInitFailure, NoSuchModule
 from gevent import signal, event
@@ -98,8 +99,6 @@ class Default():
         '''Blocks until stop() is called.'''
         self.__block.wait()
 
-
-
     def getChildren(self, module):
         children = []
 
@@ -171,7 +170,8 @@ class Default():
         arguments.'''
 
         try:
-            setattr(self.pool.module, name, module(name, self.size, self.frequency, *args, **kwargs))
+            actor_config = ActorConfig(name, self.size, self.frequency)
+            setattr(self.pool.module, name, module(actor_config, *args, **kwargs))
         except Exception as err:
             raise ModuleInitFailure(err)
 

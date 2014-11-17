@@ -38,15 +38,6 @@ class NamedPipeIn(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - path(str)("/tmp/wishbone")
            |  The the location of the named pipe.
 
@@ -56,12 +47,12 @@ class NamedPipeIn(Actor):
            |  Data coming from the outside world.
     '''
 
-    def __init__(self, name, size=100, frequency=1, path="/tmp/wishbone"):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, path="/tmp/wishbone"):
+        Actor.__init__(self, actor_config)
+
+        self.path = path
 
         self.pool.createQueue("outbox")
-        self.name = name
-        self.path = path
 
     def preHook(self):
 

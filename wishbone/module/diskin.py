@@ -39,15 +39,6 @@ class DiskIn(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - directory(str)
            |  The directory to write data to.
 
@@ -68,9 +59,9 @@ class DiskIn(Actor):
            |  Incoming events.
     '''
 
-    def __init__(self, name, size=100, frequency=1, directory="./", idle_trigger=False, idle_time=10):
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
+    def __init__(self, actor_config, directory="./", idle_trigger=False, idle_time=10):
+        Actor.__init__(self, actor_config)
+
         self.directory = directory
         self.idle_trigger = idle_trigger
         self.idle_time = idle_time

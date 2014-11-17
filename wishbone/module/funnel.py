@@ -33,14 +33,7 @@ class Funnel(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
+        n/a
 
     Queues:
 
@@ -48,10 +41,9 @@ class Funnel(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1):
+    def __init__(self, actor_config):
 
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
 
     def preHook(self):

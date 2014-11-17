@@ -35,15 +35,7 @@ class Lookup(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
+        n/a
 
     Queues:
 
@@ -54,10 +46,9 @@ class Lookup(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size, frequency, from_email, to_email):
+    def __init__(self, actor_config, from_email, to_email):
 
-        Actor.__init__(self, name)
-        self.name = name
+        Actor.__init__(self, actor_config)
         self.from_email = from_email
         self.to_email = to_email
 

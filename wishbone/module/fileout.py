@@ -37,15 +37,6 @@ class FileOut(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - location(str)("./wishbone.out")
            |  The location of the output file.
 
@@ -56,10 +47,9 @@ class FileOut(Actor):
 
     '''
 
-    def __init__(self, name, size, frequency, location="./wishbone.out"):
+    def __init__(self, actor_config, location="./wishbone.out"):
+        Actor.__init__(self, actor_config)
 
-        Actor.__init__(self, name)
-        self.name = name
         self.location = location
 
         self.pool.createQueue("inbox")
