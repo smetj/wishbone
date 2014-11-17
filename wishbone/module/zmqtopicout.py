@@ -39,20 +39,8 @@ class ZMQTopicOut(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
-        - host(string)("localhost")
-           |  The host to submit to.
-
         - port(int)(19283)
-           |  The port to submit to.
+           |  The port to bind to.
 
         - timeout(int)(1)
            |  The time in seconds to timeout when connecting.
@@ -71,8 +59,8 @@ class ZMQTopicOut(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, port=19283, timeout=10, topic=""):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, port=19283, timeout=10, topic=""):
+        Actor.__init__(self, actor_config)
         self.port = port
         self.timeout = timeout
         self.topic = topic

@@ -36,15 +36,6 @@ class HTTPInClient(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - url(str/list)("http://localhost")
            |  The URL to fetch (including port).
            |  When a list, will process all urls defined.
@@ -71,8 +62,8 @@ class HTTPInClient(Actor):
 
     '''
 
-    def __init__(self, name, size, frequency, url="http://localhost", username=None, password=None, interval=60):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, url="http://localhost", username=None, password=None, interval=60):
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
         self.url = url
         self.username = username

@@ -39,15 +39,6 @@ class ZMQPushOut(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - mode(str)("server")
            |  The mode to run in.  Possible options are:
            |  - server: Binds to a port and listens.
@@ -71,8 +62,8 @@ class ZMQPushOut(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, mode="server", interface="0.0.0.0", port=19283, clients=[]):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, mode="server", interface="0.0.0.0", port=19283, clients=[]):
+        Actor.__init__(self, actor_config)
         self.mode = mode
         self.interface = interface
         self.port = port

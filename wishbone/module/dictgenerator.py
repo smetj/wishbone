@@ -36,15 +36,6 @@ class DictGenerator(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - keys(list)([])
            |  If provided, documents are created using the provided
            |  keys to which random values will be assigned.
@@ -74,10 +65,9 @@ class DictGenerator(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size, frequency, keys=[], randomize_keys=True, num_values=False, num_values_min=0, num_values_max=1, min_elements=1, max_elements=1, interval=1):
-        Actor.__init__(self, name, size, frequency)
-        self.pool.createQueue("outbox")
-        self.name = name
+    def __init__(self, actor_config, keys=[], randomize_keys=True, num_values=False, num_values_min=0, num_values_max=1, min_elements=1, max_elements=1, interval=1):
+        Actor.__init__(self, actor_config)
+
         self.keys = keys
         self.randomize_keys = randomize_keys
         self.num_values = num_values
@@ -87,6 +77,7 @@ class DictGenerator(Actor):
         self.max_elements = max_elements
         self.wordlist = self.readWordlist()
         self.interval = interval
+
         self._total = 0
 
         self.key_number = -1
@@ -100,6 +91,8 @@ class DictGenerator(Actor):
             self.generateValue = self.generateValueNumber
         else:
             self.generateValue = self.pickWord
+
+        self.pool.createQueue("outbox")
 
     def readWordlist(self):
         with open("%s/../data/wordlist.txt" % (os.path.dirname(__file__))) as f:

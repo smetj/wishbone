@@ -38,15 +38,6 @@ class JSONValidate(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - schema(str)(None)
            |  The filename of the JSON validation schema to load.  When no
            |  schema is defined no validation is done.
@@ -61,10 +52,9 @@ class JSONValidate(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size, frequency, schema=None):
+    def __init__(self, actor_config, schema=None):
 
-        Actor.__init__(self, name)
-        self.name = name
+        Actor.__init__(self, actor_config)
         self.schema = schema
 
         self.pool.createQueue("inbox")
