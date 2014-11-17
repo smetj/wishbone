@@ -42,15 +42,6 @@ class GearmanIn(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - hostlist(list)(["localhost:4730"])
            |  A list of gearmand servers.  Each entry should have
            |  format host:port.
@@ -71,14 +62,15 @@ class GearmanIn(Actor):
 
     '''
 
-    def __init__(self, name, size, frequency, hostlist=["localhost:4730"], secret=None, workers=1, queue="wishbone"):
-        Actor.__init__(self, name, size, frequency)
-        self.pool.createQueue("outbox")
-        self.name = name
+    def __init__(self, actor_config, hostlist=["localhost:4730"], secret=None, workers=1, queue="wishbone"):
+        Actor.__init__(self, actor_config)
+
         self.hostlist = hostlist
         self.secret = secret
         self.workers = workers
         self.queue = queue
+
+        self.pool.createQueue("outbox")
 
         self.background_instances = []
 

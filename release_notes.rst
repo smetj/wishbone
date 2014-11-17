@@ -11,6 +11,7 @@ Version 1.1.0
 - Refactoring of default router to use ConfigurationManager.
 - Introducing support of of external variable value lookups.
 - Small fix to reduce excessive gethostbyname() lookups in logging.
+- Using ActorConfig object to configure actor modules.
 
 Version 1.0.3
 ~~~~~~~~~~~~~

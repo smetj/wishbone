@@ -36,15 +36,6 @@ class TCPIn(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - address(str)("0.0.0.0")
            |  The address to bind to.
 
@@ -89,22 +80,23 @@ class TCPIn(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, port=19283, address='0.0.0.0', delimiter="\n", max_connections=0, reuse_port=False):
-        Actor.__init__(self, name, size, frequency)
-        self.pool.createQueue("outbox")
+    def __init__(self, actor_config, port=19283, address='0.0.0.0', delimiter="\n", max_connections=0, reuse_port=False):
+        Actor.__init__(self, actor_config)
 
-        self.name = name
         self.port = port
         self.address = address
         self.delimiter = delimiter
         self.max_connections = max_connections
         self.reuse_port = reuse_port
+
         if self.delimiter is None:
             self.handle = self.__handleNoDelimiter
         elif self.delimiter == "\n":
             self.handle = self.__handleNextLine
         else:
             self.handle = self.__handleDelimiter
+
+        self.pool.createQueue("outbox")
 
     def preHook(self):
         self.sock = self.__setupSocket(self.address, self.port)

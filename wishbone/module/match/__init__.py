@@ -111,15 +111,6 @@ class Match(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - location(str)(None)
            |  The directory containing rules.
            |  If none, no rules are read from disk.
@@ -138,8 +129,8 @@ class Match(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, location=None, rules={}):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, location=None, rules={}):
+        Actor.__init__(self, actor_config)
         self.location = location
         self.rules = rules
         self.__active_rules = {}

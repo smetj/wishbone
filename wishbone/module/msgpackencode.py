@@ -34,15 +34,6 @@ class MSGPackEncode(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - complete(bool)(False)
            |  When True encodes the complete event.  If False only
            |  encodes the data part.
@@ -56,8 +47,8 @@ class MSGPackEncode(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size, frequency, complete=False):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, complete=False):
+        Actor.__init__(self, actor_config)
 
         self.complete = complete
         self.pool.createQueue("inbox")

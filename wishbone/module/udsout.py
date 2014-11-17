@@ -34,15 +34,6 @@ class UDSOut(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - path(str)("/tmp/wishbone")
            |  The unix domain socket to write events to.
 
@@ -56,8 +47,8 @@ class UDSOut(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, path="/tmp/wishbone", delimiter=""):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, path="/tmp/wishbone", delimiter=""):
+        Actor.__init__(self, actor_config)
 
         self.path = path
         self.delimiter = delimiter
