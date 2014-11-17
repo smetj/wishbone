@@ -70,14 +70,6 @@ class ServerSentEvents(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
 
         - bind(string)("0.0.0.0")
            |  The address to bind to.
@@ -105,9 +97,9 @@ class ServerSentEvents(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, bind="0.0.0.0", port=19283, show_last=False, keepalive=False, keepalive_interval=5):
+    def __init__(self, actor_config, bind="0.0.0.0", port=19283, show_last=False, keepalive=False, keepalive_interval=5):
 
-        Actor.__init__(self, name, size, frequency)
+        Actor.__init__(self, actor_config)
         self.bind = bind
         self.port = port
         self.show_last = show_last

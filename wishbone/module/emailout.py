@@ -44,15 +44,6 @@ class EmailOut(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - mta(string)("localhost:25)
            |  The address:port of the MTA to submit the
            |  mail to.
@@ -68,10 +59,9 @@ class EmailOut(Actor):
 
     '''
 
-    def __init__(self, name, size, frequency, mta="localhost:25", namespace=None):
+    def __init__(self, actor_config, mta="localhost:25", namespace=None):
+        Actor.__init__(self, actor_config)
 
-        Actor.__init__(self, name)
-        self.name = name
         self.mta = mta
 
         self.pool.createQueue("inbox")

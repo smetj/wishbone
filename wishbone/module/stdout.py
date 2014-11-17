@@ -77,15 +77,6 @@ class STDOUT(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - complete(bool)(False)
            |  When True, print the complete event including headers.
 
@@ -109,8 +100,8 @@ class STDOUT(Actor):
            |  Incoming events.
     '''
 
-    def __init__(self, name, size=100, frequency=1, complete=False, counter=False, prefix="", pid=False, flush=1):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, complete=False, counter=False, prefix="", pid=False, flush=1):
+        Actor.__init__(self, actor_config)
 
         self.complete = complete
         self.counter = counter
