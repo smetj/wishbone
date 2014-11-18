@@ -13,6 +13,7 @@ Version 1.1.0
 - Small fix to reduce excessive gethostbyname() lookups in logging.
 - Using ActorConfig object to configure actor modules for framework
   specific settings
+- Added wishbone.output.http module
 
 Version 1.0.3
 ~~~~~~~~~~~~~

@@ -85,8 +85,8 @@ class Default():
         self.identification = identification
         self.stdout_logging = stdout_logging
 
-        signal(2, self.stop)
-        signal(15, self.stop)
+        # signal(2, self.stop)
+        # signal(15, self.stop)
 
         self.pool = ModulePool()
 
