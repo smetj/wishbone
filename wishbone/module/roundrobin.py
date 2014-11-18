@@ -60,7 +60,7 @@ class RoundRobin(Actor):
 
         self.destination_queues = []
         for queue in self.pool.listQueues(names=True):
-            if queue not in ["admin_in", "admin_out", "failed", "success", "metrics", "logs"]:
+            if queue not in ["failed", "success", "metrics", "logs"]:
                 self.destination_queues.append(self.pool.getQueue(queue))
 
         if not self.randomize:
