@@ -126,8 +126,6 @@ class Dispatch():
             while multiprocessing.active_children():
                 sleep(1)
 
-        # sys.exit(0)
-
     def list(self, command, group, category=None, include_groups=[]):
 
         print self.generateHeader()
@@ -289,44 +287,10 @@ class RouterBootstrap():
         self.configuration_manager = ConfigurationFactory().factory("wishbone.config.bootstrapfile", config)
         self.router = Default(self.configuration_manager, self.module_manager, size=queue_size, frequency=frequency)
 
-    def setupModules(self, modules):
-        '''
-        Loads and initialzes the modules from the bootstrap file.
-        '''
-
-        for module in modules:
-            m = self.module.getModuleByName(modules[module]["module"])
-            if "arguments" in modules[module]:
-                self.router.registerModule(m, module, **modules[module]["arguments"])
-            else:
-                self.router.registerModule(m, module)
-
-    def setupRoutes(self, table):
-        '''
-        Connects the modules from the bootstrap file.
-        '''
-
-        for route in table:
-            sm, sq, dm, dq = self.__splitRoute(route)
-            self.router.pool.getModule(sm).connect(sq, self.router.pool.getModule(dm), dq)
-
     def start(self):
         '''
         Calls the router's start() function.
         '''
-
-        # self.setupModules(self.config["modules"])
-        # self.setupRoutes(self.config["routingtable"])
-
-        # if self.debug:
-        #     self.__debug()
-
-        # try:
-        #     syslog = self.module.getModuleByName("wishbone.output.syslog")
-        #     self.router.registerModule(syslog, "syslog", ident=self.identification)
-        #     self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("syslog"), "inbox")
-        # except QueueConnected:
-        #     pass
 
         self.router.start()
         while self.router.isRunning():
@@ -365,10 +329,10 @@ class RouterBootstrap():
 
 def main():
     BootStrap()
-    try:
-        BootStrap()
-    except Exception as err:
-        print "Failed to bootstrap instance.  Reason: %s" % (err)
+    # try:
+    #     BootStrap()
+    # except Exception as err:
+    #     print "Failed to bootstrap instance.  Reason: %s" % (err)
 
 if __name__ == '__main__':
     main()
