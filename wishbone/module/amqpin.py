@@ -98,7 +98,7 @@ class AMQPIn(Actor):
            |  Messages to acknowledge (requires the delivery_tag)
     '''
 
-    def __init__(self, actor_config host="localhost", port=5672, vhost="/", user="guest", password="guest",
+    def __init__(self, actor_config, host="localhost", port=5672, vhost="/", user="guest", password="guest",
                  exchange="", exchange_type="direct", exchange_durable=False,
                  queue="wishbone", queue_durable=False, queue_exclusive=False, queue_auto_delete=True, queue_declare=True,
                  routing_key="", prefetch_count=1, no_ack=False):
