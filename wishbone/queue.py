@@ -44,8 +44,6 @@ class QueuePool():
         self.queue.logs = Queue(size)
         self.queue.success = Queue(size)
         self.queue.failed = Queue(size)
-        self.queue.admin_in = Queue(size)
-        self.queue.admin_out = Queue(size)
 
     def listQueues(self, names=False, default=True):
         '''returns the list of queue names from the queuepool.
@@ -54,7 +52,7 @@ class QueuePool():
         if default:
             blacklist = []
         else:
-            blacklist = ['failed', 'success', 'logs', 'metrics', 'admin_in', 'admin_out']
+            blacklist = ['failed', 'success', 'logs', 'metrics']
 
         for m in self.queue.__dict__.keys():
             if m not in blacklist:
@@ -66,7 +64,7 @@ class QueuePool():
     def createQueue(self, name):
         '''Creates a Queue.'''
 
-        if name in ["metrics", "logs", "success", "failed", "admin_in", "admin_out"]:
+        if name in ["metrics", "logs", "success", "failed"]:
             raise ReservedName
 
         setattr(self.queue, name, Queue(self.__size))
