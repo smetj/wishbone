@@ -64,9 +64,6 @@ class Actor():
         self.__children = {}
         self.__parents = {}
 
-        self.__adminConsumer_active = False
-        self.__adminConsumers = {}
-
     def connect(self, source, instance, destination):
         '''Connects the <source> queue to the <destination> queue.
         In fact, the source queue overwrites the destination queue.'''
@@ -132,12 +129,6 @@ class Actor():
         consumer.function = function.__name__
         consumer.queue = queue
 
-    def registerAdminCallback(self, function):
-        '''Registers <function> to respond to the incoming admin messages.'''
-
-        if not self.__adminConsumer_active:
-            spawn(self.__adminConsumer)
-
     def start(self):
         '''Starts the module.'''
 
@@ -170,20 +161,6 @@ class Actor():
                 break
             except QueueFull as err:
                 err.waitUntilEmpty()
-
-    def __adminConsumer(self):
-        '''Greenthread which consumes the admin queue.'''
-
-        self.__adminConsumer_active = True
-        self.__run.wait()
-        self.logging.debug("adminConsumer started.")
-        while self.loop():
-            try:
-                command = self.pool.queue.admin.get()
-            except QueueEmpty as err:
-                err.waitUntilContent()
-            else:
-                print command
 
     def __consumer(self, function, queue):
         '''Greenthread which applies <function> to each element from <queue>
