@@ -72,7 +72,10 @@ class Default(multiprocessing.Process):
 
         - identification                : A string identifying this instance in logging.
 
-        - stdout_logging(bool)(False)   : When True all logs are written to STDOUT.
+        - stdout_logging(bool)(True)    : When True all logs are written to STDOUT.
+
+        - background(bool)(False)       : When True, sends the router to background in a
+                                          separate process.
 
 
     '''
