@@ -108,6 +108,10 @@ class Actor():
 
         self.logging.debug("Exit.")
 
+    def preHook(self):
+
+        self.logging.debug("Initialized.")
+
     def registerConsumer(self, function, queue):
         '''Registers <function> to process all events in <queue>
 
