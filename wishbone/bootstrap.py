@@ -32,10 +32,10 @@ import multiprocessing
 import os
 import sys
 from daemon import DaemonContext
-from gevent import sleep, signal
+from gevent import signal
 from pkg_resources import get_distribution
 from jinja2 import Template
-
+from time import sleep
 
 class BootStrap():
 
@@ -114,15 +114,16 @@ class Dispatch():
         Handles the Wishbone debug command.
         '''
 
-        if instances == 1:
-            self.routers.append(RouterBootstrap(config, debug=True, queue_size=queue_size, frequency=frequency, identification=identification))
-            self.routers[-1].start()
+        self.module_manager = ModuleManager()
+        self.configuration_manager = ConfigurationFactory().factory("wishbone.config.bootstrapfile", config)
 
+        if instances == 1:
+            self.routers.append(Default(self.configuration_manager, self.module_manager, size=queue_size, frequency=frequency, identification=identification))
+            self.routers[-1].start()
         else:
             for x in xrange(instances):
-                self.routers.append(RouterBootstrapProcess(config, debug=True, queue_size=queue_size, frequency=frequency, identification=identification))
+                self.routers.append(Default(self.configuration_manager, self.module_manager, size=queue_size, frequency=frequency, identification=identification, background=True))
                 self.routers[-1].start()
-
             while multiprocessing.active_children():
                 sleep(1)
 
@@ -244,88 +245,6 @@ class Dispatch():
             return True
         except:
             False
-
-
-class RouterBootstrapProcess(multiprocessing.Process):
-
-    '''
-    Wraps RouterBootstrap into a Process class.
-    '''
-
-    def __init__(self, config, debug=False, queue_size=100, frequency=1, identification=None):
-        multiprocessing.Process.__init__(self)
-        self.config = config
-        self.debug = debug
-        self.queue_size = queue_size
-        self.frequency = frequency
-        self.identification = identification
-        self.daemon = True
-
-    def run(self):
-        '''
-        Executed by Process when started.
-        '''
-
-        router = RouterBootstrap(self.config, self.debug, self.queue_size, self.frequency, self.identification)
-        router.start()
-
-
-class RouterBootstrap():
-
-    '''
-    Setup, configure and a router process.
-    '''
-
-    def __init__(self, config, debug=False, queue_size=100, frequency=1, identification=None):
-        self.config = config
-        self.debug = debug
-        self.queue = queue_size
-        self.frequency = frequency
-        self.identification = identification
-
-        self.module_manager = ModuleManager()
-        self.configuration_manager = ConfigurationFactory().factory("wishbone.config.bootstrapfile", config)
-        self.router = Default(self.configuration_manager, self.module_manager, size=queue_size, frequency=frequency)
-
-    def start(self):
-        '''
-        Calls the router's start() function.
-        '''
-
-        self.router.start()
-        while self.router.isRunning():
-            sleep(1)
-
-    def stop(self):
-        '''
-        Calls the router's stop() function.
-        '''
-
-        self.router.stop()
-
-    def __debug(self):
-        '''
-        In debug mode we route all logging to SDOUT.
-        '''
-
-        # In debug mode we write our logs to STDOUT
-        log_stdout = self.module.getModuleByName("wishbone.output.stdout")
-        log_human = self.module.getModuleByName("wishbone.encode.humanlogformat")
-        self.router.registerModule(log_stdout, "log_stdout")
-        self.router.registerModule(log_human, "log_format", ident=self.identification)
-        self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("log_format"), "inbox")
-        self.router.pool.getModule("log_format").connect("outbox", self.router.pool.getModule("log_stdout"), "inbox")
-
-    def __splitRoute(self, definition):
-        '''
-        Splits the route definition string into 4 separate string.
-        '''
-
-        (source, destination) = definition.split('->')
-        (sm, sq) = source.rstrip().lstrip().split('.')
-        (dm, dq) = destination.rstrip().lstrip().split('.')
-        return sm, sq, dm, dq
-
 
 def main():
     BootStrap()
