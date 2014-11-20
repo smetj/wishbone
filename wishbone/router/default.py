@@ -25,7 +25,7 @@
 from wishbone.actor import ActorConfig
 from wishbone.module import Funnel
 from wishbone.error import ModuleInitFailure, NoSuchModule
-from gevent import signal, event
+from gevent import signal, event, sleep
 
 
 class Container():
@@ -129,9 +129,21 @@ class Default():
             if module.name not in self.getChildren("logs_funnel"):
                 module.stop()
 
+        while not self.__logsEmpty():
+            sleep(0.5)
+
         self.pool.module.logs_funnel.stop()
         self.__running = False
         self.__block.set()
+
+    def __logsEmpty(self):
+        '''Checks each module whether any logs have stayed behind.'''
+
+        for module in self.pool.list():
+            if not module.pool.queue.logs.size() == 0:
+                return False
+        else:
+            return True
 
     def __connect(self, source, destination):
         '''Connects one queue to the other.
