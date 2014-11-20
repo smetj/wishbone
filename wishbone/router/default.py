@@ -26,6 +26,7 @@ from wishbone.actor import ActorConfig
 from wishbone.module import Funnel
 from wishbone.error import ModuleInitFailure, NoSuchModule
 from gevent import signal, event, sleep
+import multiprocessing
 
 
 class Container():
@@ -53,7 +54,7 @@ class ModulePool():
             raise NoSuchModule("Could not find module %s" % name)
 
 
-class Default():
+class Default(multiprocessing.Process):
 
     '''The default Wishbone router.
 
@@ -76,7 +77,11 @@ class Default():
 
     '''
 
-    def __init__(self, configuration_manager, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True):
+    def __init__(self, configuration_manager, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, background=False):
+
+        if background:
+            signal(15, self.stop)
+            multiprocessing.Process.__init__(self)
 
         self.configuration_manager = configuration_manager
         self.module_manager = module_manager
@@ -84,16 +89,13 @@ class Default():
         self.frequency = frequency
         self.identification = identification
         self.stdout_logging = stdout_logging
-
-        # signal(2, self.stop)
-        # signal(15, self.stop)
+        self.background = background
 
         self.pool = ModulePool()
 
         self.__running = False
         self.__block = event.Event()
         self.__block.clear()
-        self.__initConfig()
 
     def block(self):
         '''Blocks until stop() is called.'''
@@ -117,10 +119,12 @@ class Default():
 
     def start(self):
         '''Starts all registered modules.'''
-        self.__running = True
 
-        for module in self.pool.list():
-            module.start()
+        if self.background:
+            self.run = self.__start
+            multiprocessing.Process.start(self)
+        else:
+            self.__start()
 
     def stop(self):
         '''Stops all input modules.'''
@@ -132,7 +136,9 @@ class Default():
         while not self.__logsEmpty():
             sleep(0.5)
 
-        self.pool.module.logs_funnel.stop()
+        # This gives an error when starting in background, no idea why
+        # self.pool.module.logs_funnel.stop()
+
         self.__running = False
         self.__block.set()
 
@@ -216,4 +222,15 @@ class Default():
         self.__registerModule(log_human, "log_format", ident=self.identification)
         self.__connect("logs_funnel.outbox", "log_format.inbox")
         self.__connect("log_format.outbox", "log_stdout.inbox")
+
+    def __start(self):
+
+        self.__initConfig()
+        self.__running = True
+
+        for module in self.pool.list():
+            module.start()
+
+        self.block()
+
 
