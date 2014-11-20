@@ -91,7 +91,6 @@ class Actor():
 
         return Wishbone_Event(self.name)
 
-
     def getChildren(self, queue=None):
         '''Returns the queue name <queue> is connected to.'''
 
@@ -104,6 +103,10 @@ class Actor():
         '''The global lock for this module'''
 
         return self.__loop
+
+    def postHook(self):
+
+        self.logging.debug("Exit.")
 
     def registerConsumer(self, function, queue):
         '''Registers <function> to process all events in <queue>
