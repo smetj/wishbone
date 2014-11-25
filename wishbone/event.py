@@ -72,6 +72,9 @@ class Event(object):
 
         return self.module.__dict__[namespace].data
 
+    def __getLastData(self):
+        return self.last.data
+
     def setData(self, data):
         '''Sets the data field of the requested namespacec.'''
 
@@ -108,3 +111,5 @@ class Event(object):
         self.module.__dict__[self.current_namespace].error.line = line
         self.module.__dict__[self.current_namespace].error.type = error_type
         self.module.__dict__[self.current_namespace].error.type = error_value
+
+    data = property(__getLastData, setData)
