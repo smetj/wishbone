@@ -23,50 +23,10 @@
 #
 
 import sys
-import yaml
 import os
 import pkg_resources
 from gevent import sleep
 
-
-class BootstrapFile():
-
-    '''
-    Handles bootstrap file interaction.
-    '''
-
-    def __init__(self):
-        pass
-
-    def load(self, filename):
-        '''Loads and returns the yaml bootstrap file.'''
-
-        try:
-            with open(filename, 'r') as f:
-                config = yaml.load(f)
-        except Exception as err:
-            print ("Failed to load config file.  Reason: %s" % (err))
-            sys.exit(1)
-
-        try:
-            return self.verify(config)
-        except Exception as err:
-            print ("Syntax error in bootstrap file. Reason: %s" % (err))
-            sys.exit(1)
-
-    def verify(self, content):
-        assert "routingtable" in content, "'routingtable' section not found in bootstrap file."
-        assert "modules" in content, "'modules' section not found in bootstrap file."
-        for module in content["modules"]:
-            assert "module" in content["modules"][module], "Cannot find the 'module' keyword in the '%s' module definition." % (module)
-        # assert any([False for m in content.keys() if m not in ["routingtable","modules"]]), "Unknown content in bootstrap file."
-
-        for route in content["routingtable"]:
-            (left, right) = route.split("->")
-            assert "." in left.lstrip().rstrip(), "routingtable rule \"%s\" does not have the right format. Missing a dot." % (route)
-            assert "." in right.lstrip().rstrip(), "routingtable rule \"%s\" does not have the right format. Missing a dot." % (route)
-
-        return content
 
 class PIDFile():
 
