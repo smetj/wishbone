@@ -81,8 +81,8 @@ class Default(multiprocessing.Process):
     '''
 
     def __init__(self, configuration_manager, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False):
+
         if process:
-            signal(15, self.stopp)
             multiprocessing.Process.__init__(self)
             self.daemon = True
         self.configuration_manager = configuration_manager
@@ -99,12 +99,13 @@ class Default(multiprocessing.Process):
         self.__block = event.Event()
         self.__block.clear()
 
+        signal(2, self.stop)
+        signal(15, self.__noop)
+
+
     def block(self):
         '''Blocks until stop() is called.'''
         self.__block.wait()
-
-    def stopp(self):
-        pass
 
     def getChildren(self, module):
         children = []
@@ -130,7 +131,6 @@ class Default(multiprocessing.Process):
             multiprocessing.Process.start(self)
             return self
         else:
-
             self.__start()
 
     def stop(self):
@@ -148,15 +148,6 @@ class Default(multiprocessing.Process):
 
         self.__running = False
         self.__block.set()
-
-    def __logsEmpty(self):
-        '''Checks each module whether any logs have stayed behind.'''
-
-        for module in self.pool.list():
-            if not module.pool.queue.logs.size() == 0:
-                return False
-        else:
-            return True
 
     def __connect(self, source, destination):
         '''Connects one queue to the other.
@@ -191,6 +182,18 @@ class Default(multiprocessing.Process):
             self.__setupSTDOUTLogging()
         else:
             self.__setupSyslogLogging()
+
+    def __logsEmpty(self):
+        '''Checks each module whether any logs have stayed behind.'''
+
+        for module in self.pool.list():
+            if not module.pool.queue.logs.size() == 0:
+                return False
+        else:
+            return True
+
+    def __noop(self):
+        pass
 
     def __registerModule(self, module, name, *args, **kwargs):
         '''Initializes the mdoule using the provided <args> and <kwargs>
@@ -247,4 +250,5 @@ class Default(multiprocessing.Process):
             module.start()
 
         self.block()
+
 
