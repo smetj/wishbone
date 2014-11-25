@@ -80,19 +80,18 @@ class Default(multiprocessing.Process):
 
     '''
 
-    def __init__(self, configuration_manager, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, background=False):
-
-        if background:
-            signal(15, self.stop)
+    def __init__(self, configuration_manager, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False):
+        if process:
+            signal(15, self.stopp)
             multiprocessing.Process.__init__(self)
-
+            self.daemon = True
         self.configuration_manager = configuration_manager
         self.module_manager = module_manager
         self.size = size
         self.frequency = frequency
         self.identification = identification
         self.stdout_logging = stdout_logging
-        self.background = background
+        self.process = process
 
         self.pool = ModulePool()
 
@@ -103,6 +102,9 @@ class Default(multiprocessing.Process):
     def block(self):
         '''Blocks until stop() is called.'''
         self.__block.wait()
+
+    def stopp(self):
+        pass
 
     def getChildren(self, module):
         children = []
@@ -123,10 +125,12 @@ class Default(multiprocessing.Process):
     def start(self):
         '''Starts all registered modules.'''
 
-        if self.background:
+        if self.process:
             self.run = self.__start
             multiprocessing.Process.start(self)
+            return self
         else:
+
             self.__start()
 
     def stop(self):
@@ -185,6 +189,8 @@ class Default(multiprocessing.Process):
 
         if self.stdout_logging:
             self.__setupSTDOUTLogging()
+        else:
+            self.__setupSyslogLogging()
 
     def __registerModule(self, module, name, *args, **kwargs):
         '''Initializes the mdoule using the provided <args> and <kwargs>
@@ -206,7 +212,7 @@ class Default(multiprocessing.Process):
     def __setupLogConnections(self):
         '''Connect all log queues to a Funnel module'''
 
-        self.__registerModule(Funnel, "logs_funnel")
+        self.__registerModule(Funnel, "logs_funnel", )
         for module in self.pool.list():
             module.connect("logs", self.pool.module.logs_funnel, module.name)
 
@@ -226,6 +232,12 @@ class Default(multiprocessing.Process):
         self.__connect("logs_funnel.outbox", "log_format.inbox")
         self.__connect("log_format.outbox", "log_stdout.inbox")
 
+    def __setupSyslogLogging(self):
+
+        log_syslog = self.module_manager.getModuleByName("wishbone.output.syslog")
+        self.__registerModule(log_syslog, "log_syslog")
+        self.__connect("logs_funnel.outbox", "log_syslog.inbox")
+
     def __start(self):
 
         self.__initConfig()
@@ -235,5 +247,4 @@ class Default(multiprocessing.Process):
             module.start()
 
         self.block()
-
 
