@@ -34,7 +34,6 @@ from gevent import signal
 from daemon import DaemonContext
 from pkg_resources import get_distribution
 from jinja2 import Template
-from time import sleep
 
 
 class BootStrap():
