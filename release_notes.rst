@@ -9,10 +9,10 @@ Version 1.1.0
 - Rewrite new internal event format.
 - Introduction of ConfigurationFactory to produce ConfigurationManager.
 - Refactoring of default router to use ConfigurationManager.
+- Refactoring of bootstrap code.
 - Introducing support of of external variable value lookups.
 - Small fix to reduce excessive gethostbyname() lookups in logging.
-- Using ActorConfig object to configure actor modules for framework
-  specific settings
+- Using ActorConfig object to encapsulate framework specific settings
 - Added wishbone.output.http module
 
 Version 1.0.3
