@@ -26,7 +26,6 @@
 from uuid import uuid4
 from collections import deque
 from wishbone.error import QueueEmpty, QueueFull, ReservedName, QueueMissing
-from gevent import sleep
 from gevent.event import Event
 from time import time
 

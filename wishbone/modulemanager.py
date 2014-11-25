@@ -25,7 +25,6 @@
 import pkg_resources
 import re
 from prettytable import PrettyTable
-from operator import itemgetter
 
 
 class ModuleManager():
@@ -43,8 +42,6 @@ class ModuleManager():
                 return module.load()
 
     def getModulesList(self, category=None):
-
-        modules = []
 
         if category is None:
             for category in self.categories:

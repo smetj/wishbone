@@ -21,9 +21,7 @@
 #  MA 02110-1301, USA.
 #
 #
-import time
-from wishbone.error import MissingNamespace
-from wishbone.error import MissingKey
+
 from copy import deepcopy
 
 
