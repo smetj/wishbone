@@ -45,7 +45,7 @@ class Logging():
         while True:
             try:
                 event = Event("%s:log" % self.name)
-                event.setData((level, time(), getpid(), self.name, message))
+                event.data = (level, time(), getpid(), self.name, message)
                 self.logs.put(event)
                 break
             except QueueFull:
