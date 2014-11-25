@@ -22,20 +22,16 @@
 #
 #
 
+import argparse
+import os
+import sys
 
-# from wishbone.utils import BootstrapFile, PIDFile
-# from wishbone import ModuleManager
-# from wishbone import ConfigurationFactory
-from daemon import DaemonContext
 from wishbone.router import Default
 from wishbone import ModuleManager
 from wishbone import ConfigurationFactory
-import argparse
-
-
-import os
-import sys
-# from gevent import signal
+from wishbone.utils import PIDFile
+from gevent import signal
+from daemon import DaemonContext
 from pkg_resources import get_distribution
 from jinja2 import Template
 from time import sleep
@@ -100,7 +96,6 @@ class Dispatch():
     def __init__(self):
 
         self.routers = []
-        # signal(2, self.__stopSequence)
         self.__stopping = False
 
     def generateHeader(self):
@@ -116,18 +111,26 @@ class Dispatch():
         Handles the Wishbone debug command.
         '''
 
+        processes = []
+        def stopSequence():
+            for proc in processes:
+                proc.stop()
+
+        signal(2, stopSequence)
+
         module_manager = ModuleManager()
         configuration_manager = ConfigurationFactory().factory("wishbone.config.bootstrapfile", config)
 
         if instances == 1:
-            self.routers.append(Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification))
-            self.routers[-1].start()
+            sys.stdout.write("\nInstance started in foreground with pid %s\n" % (os.getpid()))
+            Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True).start()
         else:
-            for x in xrange(instances):
-                self.routers.append(Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, background=True))
-                self.routers[-1].start()
-            while multiprocessing.active_children():
-                sleep(1)
+            for instance in range(instances):
+                processes.append(Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, process=True).start())
+            pids = [str(p.pid) for p in processes]
+            print ("\nInstances started in foreground with pid %s\n" % (", ".join(pids)))
+            for proc in processes:
+                proc.join()
 
     def list(self, command, group, category=None, include_groups=[]):
 
@@ -171,14 +174,20 @@ class Dispatch():
 
         module_manager = ModuleManager()
         configuration_manager = ConfigurationFactory().factory("wishbone.config.bootstrapfile", config)
+        pid_file = PIDFile(pid)
 
         with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
             if instances == 1:
-                Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, process=False).start()
+                sys.stdout.write("\nWishbone instance started with pid %s\n" % (os.getpid()))
+                pid_file.create([os.getpid()])
+                Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False).start()
             else:
                 processes = []
                 for instance in range(instances):
                     processes.append(Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, process=True).start())
+                pids = [str(p.pid) for p in processes]
+                print ("\n%s Wishbone instances started in background with pid %s\n" % (len(pids), ", ".join(pids)))
+                pid_file.create(pids)
                 for proc in processes:
                     proc.join()
 
