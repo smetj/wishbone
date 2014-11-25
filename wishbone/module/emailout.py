@@ -26,7 +26,6 @@
 from wishbone import Actor
 from gevent import monkey; monkey.patch_socket()
 from email.mime.text import MIMEText
-from gevent import sleep
 import smtplib
 
 
@@ -88,7 +87,7 @@ class EmailOut(Actor):
             raise Exception("the \"to\" header key should be of type list.")
 
         try:
-            message = msg = MIMEText(str(event.data))
+            message = MIMEText(str(event.data))
             message["Subject"] = event.getHeaderValue(self.namespace, "subject")
             message["From"] = event.getHeaderValue(self.namespace, "from")
             message["To"] = ",".join(event.getHeaderValue(self.namespace, "to"))
