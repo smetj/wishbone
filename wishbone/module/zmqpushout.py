@@ -24,7 +24,6 @@
 
 
 from wishbone import Actor
-from wishbone import Event
 import zmq.green as zmq
 
 

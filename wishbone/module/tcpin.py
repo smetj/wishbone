@@ -141,8 +141,7 @@ class TCPIn(Actor):
                 self.logging.debug("Client %s disconnected." % (str(address[0])))
                 break
             else:
-                event = Event()
-                event.setHeaderNamespace(self.name)
+                event = self.createEvent()
                 event.data = chunk.rstrip('\r\n')
                 self.submit(event, self.pool.queue.outbox)
 
@@ -153,8 +152,7 @@ class TCPIn(Actor):
 
         while self.loop():
             chunk = sfile.readline()
-            event = Event()
-            event.setHeaderNamespace(self.name)
+            event = self.createEvent()
             if not chunk:
                 if len(data) > 0:
                     event.data = ''.join(data)

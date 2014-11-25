@@ -109,7 +109,7 @@ class DiskOut(Actor):
                     f = FileObjectThread(output_file)
                     for event in self.pool.queue.disk.dump():
                         pickle.dump(event, f)
-            except Exception as err:
+            except Exception:
                 os.rename("%s/%s.%s.writing" % (self.directory, self.name, i), "%s/%s.%s.failed" % (self.directory, self.name, i))
             else:
                 os.rename("%s/%s.%s.writing" % (self.directory, self.name, i), "%s/%s.%s.ready" % (self.directory, self.name, i))
