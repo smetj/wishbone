@@ -62,7 +62,7 @@ class Syslog(Actor):
         syslog.openlog("%s[%s]" % (self.ident, os.getpid()))
 
     def consume(self, event):
-        syslog.syslog(event.data[0], "%s: %s" % (event.data[3], event.data[4]))
+        syslog.syslog(event.last.data[0], "%s: %s" % (event.last.data[3], event.last.data[4]))
 
     def postHook(self):
         syslog.closelog()
