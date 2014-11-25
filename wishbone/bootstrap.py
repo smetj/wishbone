@@ -22,20 +22,24 @@
 #
 #
 
+
+# from wishbone.utils import BootstrapFile, PIDFile
+# from wishbone import ModuleManager
+# from wishbone import ConfigurationFactory
+from daemon import DaemonContext
 from wishbone.router import Default
-from wishbone.error import QueueConnected
-from wishbone.utils import BootstrapFile, PIDFile
 from wishbone import ModuleManager
 from wishbone import ConfigurationFactory
 import argparse
-import multiprocessing
+
+
 import os
 import sys
-from daemon import DaemonContext
-from gevent import signal
+# from gevent import signal
 from pkg_resources import get_distribution
 from jinja2 import Template
 from time import sleep
+
 
 class BootStrap():
 
@@ -95,11 +99,9 @@ class Dispatch():
 
     def __init__(self):
 
-        self.config = BootstrapFile()
         self.routers = []
-        signal(2, self.__stopSequence)
+        # signal(2, self.__stopSequence)
         self.__stopping = False
-        self.module_manager = ModuleManager()
 
     def generateHeader(self):
         '''Generates the Wishbone ascii header.'''
@@ -114,15 +116,15 @@ class Dispatch():
         Handles the Wishbone debug command.
         '''
 
-        self.module_manager = ModuleManager()
-        self.configuration_manager = ConfigurationFactory().factory("wishbone.config.bootstrapfile", config)
+        module_manager = ModuleManager()
+        configuration_manager = ConfigurationFactory().factory("wishbone.config.bootstrapfile", config)
 
         if instances == 1:
-            self.routers.append(Default(self.configuration_manager, self.module_manager, size=queue_size, frequency=frequency, identification=identification))
+            self.routers.append(Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification))
             self.routers[-1].start()
         else:
             for x in xrange(instances):
-                self.routers.append(Default(self.configuration_manager, self.module_manager, size=queue_size, frequency=frequency, identification=identification, background=True))
+                self.routers.append(Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, background=True))
                 self.routers[-1].start()
             while multiprocessing.active_children():
                 sleep(1)
@@ -167,34 +169,18 @@ class Dispatch():
         Handles the Wishbone start command.
         '''
 
-        config = self.config.load(config)
-        self.pid = PIDFile(pid)
+        module_manager = ModuleManager()
+        configuration_manager = ConfigurationFactory().factory("wishbone.config.bootstrapfile", config)
 
-        if instances == 1:
-            print ("Starting 1 instance to background with pid %s." % (os.getpid()))
-            try:
-                with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
-                    self.pid.create([os.getpid()])
-                    instance = RouterBootstrap(config, debug=False, queue_size=queue_size, frequency=frequency, identification=identification)
-                    instance.start()
-            except Exception as err:
-                sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
-        else:
-            try:
-                print "Starting %s instances in background." % (instances)
-                with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
-                    pids = []
-                    processes = []
-                    for counter in xrange(instances):
-                        processes.append(RouterBootstrapProcess(config, debug=False, queue_size=queue_size, frequency=frequency, identification=identification))
-                        processes[-1].start()
-                        pids.append(processes[-1].pid)
-                    self.pid.create(pids)
-                    for process in processes:
-                        process.join()
-
-            except Exception as err:
-                sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
+        with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
+            if instances == 1:
+                Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, process=False).start()
+            else:
+                processes = []
+                for instance in range(instances):
+                    processes.append(Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, process=True).start())
+                for proc in processes:
+                    proc.join()
 
     def stop(self, command, pid):
         '''
