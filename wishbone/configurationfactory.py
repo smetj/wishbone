@@ -139,21 +139,6 @@ class ConfigurationFactory(object):
         class Modules(namedtuple('Modules', ' '.join(m))):
             pass
 
-            # def fubar(self):
-            #     return "fubar"
-
-            # def listChildren(self, module):
-            #     children = []
-
-            #     def crawl(module, children):
-            #         for child in getattr(self, module).outgoing:
-            #             children.append(child.destination_module)
-            #             crawl(child.destination_module, children)
-
-            #     crawl(module, children)
-            #     for item in children:
-            #         yield item
-
         return ConfigManager(Modules(*modules))
 
     def initializeLookupModules(self):
