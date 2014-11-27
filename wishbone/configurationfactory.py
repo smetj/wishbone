@@ -54,7 +54,7 @@ class Arguments(object):
 
 class Module(object):
 
-    def __init__(self, instance, module, arguments, outgoing, incoming):
+    def __init__(self, instance, module, arguments):
 
         '''Wishbone configuration representation of a Module.
 
@@ -66,10 +66,6 @@ class Module(object):
 
             - arguments(obj)    : Arguments object
 
-            - outgoing(obj)     : A  list of outoing Route objects.
-
-            - incoming(ojb)     : A list of incoming Route objects.
-
         Properties:
 
             - instance(str)     : module instance name.
@@ -77,10 +73,6 @@ class Module(object):
             - module(str)       : module type name in dotted format.
 
             - arguments(obj)    : Arguments object
-
-            - outgoing(obj)     : A  list of outoing Route objects.
-
-            - incoming(ojb)     : A list of incoming Route objects.
 
             - category(str)     : The module type category.
 
@@ -92,8 +84,6 @@ class Module(object):
         self.instance = instance
         self.module = module
         self.arguments = Arguments(**arguments)
-        self.outgoing = outgoing
-        self.incoming = incoming
         (self.category, self.group, self.name) = module.split('.')
 
     def __repr__(self):
@@ -104,7 +94,7 @@ class Route(namedtuple('Route', 'source_module source_queue destination_module d
     pass
 
 
-class ConfigManager(namedtuple('ConfigManager', 'modules')):
+class ConfigManager(namedtuple('ConfigManager', 'modules routes')):
     pass
 
 
@@ -129,17 +119,22 @@ class ConfigurationFactory(object):
             # find and replace lookup definitions
             args_incl_lookups = self.replaceLookupDefsWithFunctions(arguments)
 
-            outgoing = [Route(*x) for x in self.source.listRoutes() if x[0] == name]
-            incoming = [Route(*x) for x in self.source.listRoutes() if x[2] == name]
+            # outgoing = [Route(*x) for x in self.source.listRoutes() if x[0] == name]
+            # incoming = [Route(*x) for x in self.source.listRoutes() if x[2] == name]
 
-            modules.append(Module(name, module, args_incl_lookups, outgoing, incoming))
+            modules.append(Module(name, module, args_incl_lookups))
 
-        m = [x.instance for x in modules]
+        routes = []
+        for (sm, sq, dm, dq) in self.source.listRoutes():
+            routes.append(Route(sm, sq, dm, dq))
 
-        class Modules(namedtuple('Modules', ' '.join(m))):
+        class Modules(namedtuple('Modules', ' '.join([x.instance for x in modules]))):
             pass
 
-        return ConfigManager(Modules(*modules))
+        class Routes(set):
+            pass
+
+        return ConfigManager(Modules(*modules), Routes(routes))
 
     def initializeLookupModules(self):
 
