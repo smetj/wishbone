@@ -174,9 +174,9 @@ class Default(multiprocessing.Process):
             pmodule = self.module_manager.getModuleByName(module.module)
             self.__registerModule(pmodule, module.instance, **arguments)
 
-        self.__setupConnections()
         self.__setupMetricConnections()
         self.__setupLogConnections()
+        self.__setupConnections()
 
         if self.stdout_logging:
             self.__setupSTDOUTLogging()
@@ -208,14 +208,13 @@ class Default(multiprocessing.Process):
     def __setupConnections(self):
         '''Setup all connections as defined by configuration_manager'''
 
-        for module in self.configuration_manager.modules:
-            for route in module.outgoing:
-                self.__connect("%s.%s" % (route.source_module, route.source_queue), "%s.%s" % (route.destination_module, route.destination_queue))
+        for route in self.configuration_manager.routes:
+            self.__connect("%s.%s" % (route.source_module, route.source_queue), "%s.%s" % (route.destination_module, route.destination_queue))
 
     def __setupLogConnections(self):
         '''Connect all log queues to a Funnel module'''
 
-        self.__registerModule(Funnel, "logs_funnel", )
+        self.__registerModule(Funnel, "logs_funnel")
         for module in self.pool.list():
             module.connect("logs", self.pool.module.logs_funnel, module.name)
 
