@@ -69,7 +69,7 @@ class QueuePool():
         setattr(self.queue, name, Queue(self.__size))
 
     def hasQueue(self, name):
-        '''Returns trie when queue with <name> exists.'''
+        '''Returns <True> when queue with <name> exists.'''
 
         try:
             getattr(self.queue, name)
