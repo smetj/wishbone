@@ -89,9 +89,6 @@ class STDOUT(Actor):
         - pid(bool)(False)
            |  Includes the pid of the process producing the output.
 
-        - flush(int)(1)
-           |  The interval at which data needs to be flushed.
-
 
     Queues:
 
@@ -99,7 +96,7 @@ class STDOUT(Actor):
            |  Incoming events.
     '''
 
-    def __init__(self, actor_config, complete=False, counter=False, prefix="", pid=False, flush=1):
+    def __init__(self, actor_config, complete=False, counter=False, prefix="", pid=False):
         Actor.__init__(self, actor_config)
 
         self.complete = complete
