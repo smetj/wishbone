@@ -92,12 +92,10 @@ class Graphite(Actor):
 
     def __consumeSource(self, event):
 
-        new_event = self.createEvent()
-        new_event.data = "%s%s%s%s.%s %s %s" % (self.prefix, event.last.data[2], self.script_name, self.pid, event.last.data[3], event.last.data[4], event.last.data[0])
-        self.submit(new_event, self.pool.queue.outbox)
+        event.data = "%s%s%s%s.%s %s %s" % (self.prefix, event.last.data[2], self.script_name, self.pid, event.last.data[3], event.last.data[4], event.last.data[0])
+        self.submit(event, self.pool.queue.outbox)
 
     def __consumeNoSource(self, event):
 
-        new_event = self.createEvent()
-        new_event.data = "%s%s%s.%s %s %s" % (self.prefix, self.script_name, self.pid, event.last.data[3], event.last.data[4], event.last.data[0])
+        event.data = "%s%s%s.%s %s %s" % (self.prefix, self.script_name, self.pid, event.last.data[3], event.last.data[4], event.last.data[0])
         self.submit(event, self.pool.queue.outbox)
