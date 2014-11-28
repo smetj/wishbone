@@ -83,6 +83,7 @@ class Actor():
 
         setattr(instance.pool.queue, destination, self.pool.getQueue(source))
         self.pool.getQueue(source).disableFallThrough()
+        self.logging.debug("Connected queue %s.%s to %s.%s" % (self.name, source, instance.name, destination))
 
     def createEvent(self):
 
