@@ -59,8 +59,11 @@ class Config(object):
     def __load(self):
         '''Loads and returns the yaml bootstrap file.'''
 
-        with open(self.filename, 'r') as f:
-            self.__config = yaml.load(f)
+        try:
+            with open(self.filename, 'r') as f:
+                self.__config = yaml.load(f)
+        except Exception as err:
+            raise Exception("Failed to load bootstrap file.  Reason: %s" % (err))
 
     def __verify(self):
         assert "routingtable" in self.__config, "'routingtable' section not found in bootstrap file."
