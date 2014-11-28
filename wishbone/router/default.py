@@ -102,7 +102,6 @@ class Default(multiprocessing.Process):
         signal(2, self.stop)
         signal(15, self.__noop)
 
-
     def block(self):
         '''Blocks until stop() is called.'''
         self.__block.wait()
@@ -249,5 +248,4 @@ class Default(multiprocessing.Process):
             module.start()
 
         self.block()
-
 
