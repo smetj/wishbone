@@ -27,6 +27,21 @@ import importlib
 import re
 
 
+class Lookup(object):
+
+    def __init__(self, fn):
+
+        self.__fn = fn
+
+    def __str__(self):
+
+        return self.__fn()
+
+    def __repr__(self):
+
+        return self.__fn()
+
+
 class Arguments(object):
 
     def __init__(self, **kwargs):
@@ -37,11 +52,7 @@ class Arguments(object):
         raise Exception("Arguments is a read only object")
 
     def __getattr__(self, obj, objtype=None):
-
-        if hasattr(self.__values[obj], '__call__'):
-            return self.__values[obj]()
-        else:
-            return self.__values[obj]
+        return self.__values[obj]
 
     def __repr__(self):
         a = ["%s='%s'" % (item, self.__values[item]) for item in sorted(self.__values)]
@@ -119,9 +130,6 @@ class ConfigurationFactory(object):
             # find and replace lookup definitions
             args_incl_lookups = self.replaceLookupDefsWithFunctions(arguments)
 
-            # outgoing = [Route(*x) for x in self.source.listRoutes() if x[0] == name]
-            # incoming = [Route(*x) for x in self.source.listRoutes() if x[2] == name]
-
             modules.append(Module(name, module, args_incl_lookups))
 
         routes = []
@@ -146,13 +154,22 @@ class ConfigurationFactory(object):
 
         for arg in args:
             if isinstance(args[arg], str) and args[arg].startswith('~'):
-                (lookup, var) = self.__extractLookupDef(args[arg])
-                args[arg] = self.lookup_methods[lookup].generateLookup(var)
+                (t, lookup, var) = self.__extractLookupDef(args[arg])
+                if t == 'dynamic':
+                    args[arg] = Lookup(self.lookup_methods[lookup].generateLookup(var))
+                else:
+                    args[arg] = self.lookup_methods[lookup].generateLookup(var)()
 
         return args
 
     def __extractLookupDef(self, e):
 
-        m = re.match('~(.*?)\([\"|\'](.*)?[\"|\']\)', e)
-        return (m.groups()[0], m.groups()[1])
+        m = re.match('(~*)(.*?)\([\"|\'](.*)?[\"|\']\)', e)
+        if m is None:
+            raise Exception("Invalid lookup definition: %s." % (e))
+        if m.groups()[0] == '~':
+            t = 'static'
+        elif m.groups()[0] == '~~':
+            t = 'dynamic'
 
+        return (t, m.groups()[1], m.groups()[2])
