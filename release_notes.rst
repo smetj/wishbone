@@ -14,6 +14,9 @@ Version 1.1.0
 - Small fix to reduce excessive gethostbyname() lookups in logging.
 - Using ActorConfig object to encapsulate framework specific settings
 - Added wishbone.output.http module
+- Renamed "metrics_funnel" and "logs_funnel" to "wishbone_metrics"
+  and "wishbone_logs" respectively.
+
 
 Version 1.0.3
 ~~~~~~~~~~~~~
