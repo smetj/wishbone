@@ -153,8 +153,8 @@ class ConfigurationFactory(object):
     def replaceLookupDefsWithFunctions(self, args):
 
         for arg in args:
-            if isinstance(args[arg], str) and args[arg].startswith('~'):
-                (t, lookup, var) = self.__extractLookupDef(args[arg])
+            if isinstance(args[arg], str) and args[arg].startswith('~') and not re.match('^~event\(.*', args[arg]):
+                (t, lookup, var) = self.extractLookupDef(args[arg])
                 if t == 'dynamic':
                     args[arg] = Lookup(self.lookup_methods[lookup].generateLookup(var))
                 else:
@@ -162,7 +162,7 @@ class ConfigurationFactory(object):
 
         return args
 
-    def __extractLookupDef(self, e):
+    def extractLookupDef(self, e):
 
         m = re.match('(~*)(.*?)\([\"|\'](.*)?[\"|\']\)', e)
         if m is None:
