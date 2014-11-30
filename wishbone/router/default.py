@@ -136,14 +136,14 @@ class Default(multiprocessing.Process):
         '''Stops all input modules.'''
 
         for module in self.pool.list():
-            if module.name not in self.getChildren("logs_funnel"):
+            if module.name not in self.getChildren("wishbone_logs"):
                 module.stop()
 
         while not self.__logsEmpty():
             sleep(0.5)
 
         # This gives an error when starting in background, no idea why
-        # self.pool.module.logs_funnel.stop()
+        # self.pool.module.wishbone_logs.stop()
 
         self.__running = False
         self.__block.set()
@@ -213,16 +213,16 @@ class Default(multiprocessing.Process):
     def __setupLogConnections(self):
         '''Connect all log queues to a Funnel module'''
 
-        self.__registerModule(Funnel, "logs_funnel")
+        self.__registerModule(Funnel, "wishbone_logs")
         for module in self.pool.list():
-            module.connect("logs", self.pool.module.logs_funnel, module.name)
+            module.connect("logs", self.pool.module.wishbone_logs, module.name)
 
     def __setupMetricConnections(self):
         '''Connects all metric queues to a Funnel module'''
 
-        self.__registerModule(Funnel, "metrics_funnel")
+        self.__registerModule(Funnel, "wishbone_metrics")
         for module in self.pool.list():
-            module.connect("metrics", self.pool.module.metrics_funnel, module.name)
+            module.connect("metrics", self.pool.module.wishbone_metrics, module.name)
 
     def __setupSTDOUTLogging(self):
 
@@ -230,14 +230,14 @@ class Default(multiprocessing.Process):
         log_human = self.module_manager.getModuleByName("wishbone.encode.humanlogformat")
         self.__registerModule(log_stdout, "log_stdout")
         self.__registerModule(log_human, "log_format", ident=self.identification)
-        self.__connect("logs_funnel.outbox", "log_format.inbox")
+        self.__connect("wishbone_logs.outbox", "log_format.inbox")
         self.__connect("log_format.outbox", "log_stdout.inbox")
 
     def __setupSyslogLogging(self):
 
         log_syslog = self.module_manager.getModuleByName("wishbone.output.syslog")
         self.__registerModule(log_syslog, "log_syslog")
-        self.__connect("logs_funnel.outbox", "log_syslog.inbox")
+        self.__connect("wishbone_logs.outbox", "log_syslog.inbox")
 
     def __start(self):
 
