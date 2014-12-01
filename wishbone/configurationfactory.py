@@ -150,10 +150,13 @@ class ConfigurationFactory(object):
             m = importlib.import_module(module)
             self.lookup_methods[name] = m.Config(**arguments)
 
+        m = importlib.import_module("wishbone.lookup.event")
+        self.lookup_methods["event"] = m.Config()
+
     def replaceLookupDefsWithFunctions(self, args):
 
         for arg in args:
-            if isinstance(args[arg], str) and args[arg].startswith('~') and not re.match('^~event\(.*', args[arg]):
+            if isinstance(args[arg], str) and args[arg].startswith('~'):
                 (t, lookup, var) = self.extractLookupDef(args[arg])
                 if t == 'dynamic':
                     args[arg] = Lookup(self.lookup_methods[lookup].generateLookup(var))
