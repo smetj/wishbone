@@ -91,7 +91,7 @@ class Template(Actor):
         for key in self.header_templates:
             try:
                 template = JinjaTemplate(event.getHeaderValue(self.namespace, key))
-                event.setHeaderValue(self.namespace, key, template.render(**event.data))
+                event.setHeaderValue(key, template.render(**event.data), self.namespace)
             except Exception as err:
                 self.logging.warning(
                     "Failed to convert header key %s.  Reason: %s" % (key))

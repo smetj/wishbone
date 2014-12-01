@@ -22,6 +22,7 @@
 #
 #
 
+from wishbone.error import ModuleInitFailure
 import os
 from random import choice
 
@@ -39,6 +40,15 @@ class Config():
 
         if variable == "word":
             return GenerateWord().pickWord
+
+        elif variable == "bool":
+            from random import getrandbits
+            def randomBool():
+                return bool(getrandbits(1))
+            return randomBool
+
+        else:
+            raise ModuleInitFailure('"%s" is an unknown value for lookup module "random".')
 
 
 class GenerateWord():
