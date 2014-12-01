@@ -183,12 +183,12 @@ class Match(Actor):
             e = event.clone()
             if self.evaluateCondition(self.__active_rules[rule]["condition"], e.data):
                 self.logging.debug("Match for rule %s." % (rule))
-                e.setHeaderValue(self.name, "rule", rule)
+                e.setHeaderValue("rule", rule)
                 for queue in self.__active_rules[rule]["queue"]:
                     event_copy = e.clone()
                     for name in queue:
                         if queue[name] is not None:
-                            event_copy.setHeaderValue(self.name, "queue", queue[name])
+                            event_copy.setHeaderValue("queue", queue[name])
                         self.submit(event_copy, self.pool.getQueue(name))
             else:
                 pass

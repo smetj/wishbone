@@ -22,6 +22,7 @@
 #
 #
 
+from wishbone.error import ModuleInitFailure
 from collections import namedtuple
 import importlib
 import re
@@ -158,10 +159,13 @@ class ConfigurationFactory(object):
         for arg in args:
             if isinstance(args[arg], str) and args[arg].startswith('~'):
                 (t, lookup, var) = self.extractLookupDef(args[arg])
-                if t == 'dynamic':
-                    args[arg] = Lookup(self.lookup_methods[lookup].generateLookup(var))
-                else:
-                    args[arg] = self.lookup_methods[lookup].generateLookup(var)()
+                try:
+                    if t == 'dynamic':
+                        args[arg] = Lookup(self.lookup_methods[lookup].generateLookup(var))
+                    else:
+                        args[arg] = self.lookup_methods[lookup].generateLookup(var)()
+                except KeyError:
+                    raise ModuleInitFailure('"%s" is an unknown lookup instance name.' % (lookup))
 
         return args
 

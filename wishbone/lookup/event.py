@@ -25,7 +25,7 @@
 from collections import namedtuple
 
 
-class EventLookup(namedtuple('EventLookup', 'type namespace key')):
+class EventLookup(namedtuple('EventLookup', 'namespace type key')):
     pass
 
 
@@ -41,7 +41,7 @@ class Config():
     def generateLookup(self, variable):
 
         def generate():
-            (t, m, k) = variable.split('.')
-            return EventLookup(t, m, k)
+            (n, t, k) = variable.split('.')
+            return EventLookup(n, t, k)
 
         return generate

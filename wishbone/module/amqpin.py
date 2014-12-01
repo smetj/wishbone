@@ -130,7 +130,7 @@ class AMQPIn(Actor):
 
     def consume(self, message):
         event = self.createEvent()
-        event.setHeaderValue(self.name, "delivery_tag", message.delivery_info["delivery_tag"])
+        event.setHeaderValue("delivery_tag", message.delivery_info["delivery_tag"])
         event.data = str(message.body)
         self.submit(event, self.pool.queue.outbox)
 

@@ -88,8 +88,8 @@ class HTTPInClient(Actor):
                 self.logging.warn("Problem requesting resource.  Reason: %s" % (err))
                 sleep(1)
             else:
-                event.setHeaderValue(self.name, "status_code", response.status_code)
-                event.setHeaderValue(self.name, "url", url)
+                event.setHeaderValue("status_code", response.status_code)
+                event.setHeaderValue("url", url)
                 event.data = response.text
                 self.submit(event, self.pool.queue.outbox)
                 sleep(self.interval)
