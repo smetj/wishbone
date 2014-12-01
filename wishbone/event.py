@@ -82,7 +82,7 @@ class Event(object):
     def getHeaderValue(self, namespace, key):
         '''Returns the header value of the requested namespace.'''
 
-        self.module.__dict__[namespace].header.__dict__[key]
+        return self.module.__dict__[namespace].header.__dict__[key]
 
     def lookupHeaderValue(self, name):
         '''Returns the header value using dotted format.'''

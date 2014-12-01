@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  echo.py
+#  event.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -22,18 +22,26 @@
 #
 #
 
+from collections import namedtuple
+
+
+class EventLookup(namedtuple('EventLookup', 'type namespace key')):
+    pass
+
 
 class Config():
 
-    def __init__(self):
-        pass
+    """
+    Accepted types:
+
+        - word: Returns a random word from a dictionary
+
+    """
 
     def generateLookup(self, variable):
 
-        def lookupVariable():
-            return variable
+        def generate():
+            (t, m, k) = variable.split('.')
+            return EventLookup(t, m, k)
 
-        return lookupVariable
-
-    def lookup(self, variable):
-        return variable
+        return generate
