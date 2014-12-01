@@ -23,6 +23,7 @@
 #
 
 from wishbone import Actor
+from wishbone.lookup import EventLookup
 from os import getpid
 
 
@@ -74,6 +75,7 @@ class STDOUT(Actor):
     Prints incoming events to STDOUT. When <complete> is True,
     the complete event including headers is printed to STDOUT.
 
+
     Parameters:
 
         - complete(bool)(False)
@@ -83,7 +85,7 @@ class STDOUT(Actor):
            |  Puts an incremental number for each event in front
            |  of each event.
 
-        - prefix(str)("")
+        - prefix(str)("")*
            |  Puts the prefix in front of each printed event.
 
         - pid(bool)(False)
@@ -97,15 +99,12 @@ class STDOUT(Actor):
     '''
 
     def __init__(self, actor_config, complete=False, counter=False, prefix="", pid=False):
-        Actor.__init__(self, actor_config)
+        Actor.__init__(self, actor_config, ["prefix"])
 
-        self.complete = complete
-        self.counter = counter
-        self.prefix = prefix
         self.format = Format(complete, counter, pid)
-
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
+
         print ("%s%s" % (self.prefix, self.format.do(event)))
