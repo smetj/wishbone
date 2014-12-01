@@ -25,7 +25,8 @@
 from wishbone.queue import QueuePool
 from wishbone.logging import Logging
 from wishbone.event import Event as Wishbone_Event
-from wishbone.error import QueueEmpty, QueueFull, QueueConnected
+from wishbone.error import QueueEmpty, QueueFull, QueueConnected, ModuleInitFailure
+from wishbone.lookup import EventLookup
 from collections import namedtuple
 from gevent.pool import Group
 from gevent import spawn
@@ -34,13 +35,17 @@ from gevent.event import Event
 from time import time
 from sys import exc_info
 import traceback
+import inspect
+
+
 
 class ActorConfig(namedtuple('ActorConfig', 'name size frequency')):
     pass
 
+
 class Actor():
 
-    def __init__(self, config):
+    def __init__(self, config, allowed_lookup_variables=[]):
 
         self.config = config
         self.name = config.name
@@ -63,6 +68,9 @@ class Actor():
 
         self.__children = {}
         self.__parents = {}
+
+        self.__lookups = {}
+        self.__mapClassVariables(allowed_lookup_variables)
 
     def connect(self, source, instance, destination):
         '''Connects the <source> queue to the <destination> queue.
@@ -170,7 +178,11 @@ class Actor():
                 err.waitUntilContent()
             else:
                 event.initNamespace(self.name)
+
                 try:
+                    for key, value in self.__lookups.iteritems():
+                        v = event.getHeaderValue(value.namespace, value.key)
+                        setattr(self, key, v)
                     function(event)
                 except QueueFull as err:
                     self.pool.queue.__dict__[queue].rescue(event)
@@ -181,6 +193,25 @@ class Actor():
                     self.submit(event, self.pool.queue.failed)
                 else:
                     self.submit(event, self.pool.queue.success)
+
+    def __mapClassVariables(self, whitelist):
+        '''Find all parent's local variables and maps these to self.
+        If any variable of type EventLookup is found then an event lookup is
+        performed for that key and if a value is returned it will be set as
+        self.<variable> to be used by the parent class
+        '''
+
+        for key, value in inspect.currentframe(2).f_locals.iteritems():
+            if key == "self" or isinstance(value, ActorConfig):
+                next
+            elif isinstance(value, EventLookup):
+                if key in whitelist:
+                    self.__lookups[key] = value
+                    setattr(self, key, None)
+                else:
+                    raise ModuleInitFailure('Module parameter "%s" for instance "%s" is not allowed to be an EventLookup type.' % (key, self.name))
+            else:
+                setattr(self, key, value)
 
     def __metricEmitter(self):
         '''A greenthread which collects the queue metrics at the defined interval.'''
