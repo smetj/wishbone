@@ -194,7 +194,7 @@ class Actor():
                 else:
                     self.submit(event, self.pool.queue.success)
 
-    def __mapClassVariables(self, whitelist):
+    def __mapClassVariables(self, whitelist=[]):
         '''Find all parent's local variables and maps these to self.
         If any variable of type EventLookup is found then an event lookup is
         performed for that key and if a value is returned it will be set as

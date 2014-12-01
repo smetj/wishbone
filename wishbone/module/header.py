@@ -33,6 +33,10 @@ class Header(Actor):
 
     Parameters:
 
+        - namespace(str)(None)
+           |  The namespace to write the header to.
+           |  <None> means self.name
+
         - header(dict)({})
            |  The data to store.
 
@@ -50,8 +54,13 @@ class Header(Actor):
            |  Outgoing events.
     '''
 
-    def __init__(self, actor_config, header={}, expr=None):
+    def __init__(self, actor_config, namespace=None, header={}, expr=None):
         Actor.__init__(self, actor_config)
+
+        if namespace == None:
+            self.namespace = self.name
+        else:
+            self.namespace = namespace
 
         self.header = header
         self.expr = expr
@@ -71,7 +80,7 @@ class Header(Actor):
 
     def __doHeader(self, event):
         for key in self.header:
-            event.setHeaderValue(key, self.header[key])
+            event.setHeaderValue(key, self.header[key], self.namespace)
         return event
 
     def __doPrintf(self, event):

@@ -55,7 +55,8 @@ class Event(object):
     def initNamespace(self, namespace):
         '''Initializes an empty namespace.'''
 
-        self.module.__dict__[namespace] = Module(namespace)
+        if namespace not in self.module.__dict__:
+            self.module.__dict__[namespace] = Module(namespace)
         self.current_namespace = namespace
 
     def listNamespace(self):
@@ -98,10 +99,16 @@ class Event(object):
             data[module.name] = {"header": module.header.__dict__, "data": module.data, "error": module.error.__dict__}
         return data
 
-    def setHeaderValue(self, key, value):
-        '''Sets a header value of in the current namespace.'''
+    def setHeaderValue(self, key, value, namespace=None):
+        '''Sets a header value of the requested namespace.'''
 
-        self.module.__dict__[self.current_namespace].header.__dict__[key] = value
+        if namespace == None:
+            namespace = self.current_namespace
+        else:
+            if namespace not in self.module.__dict__:
+                self.module.__dict__[namespace] = Module(namespace)
+
+        self.module.__dict__[namespace].header.__dict__[key] = value
 
     def setErrorValue(self, line, error_type, error_value):
         '''Sets the error value for namespace.'''
