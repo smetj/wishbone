@@ -200,7 +200,7 @@ class Queue():
         '''Blocks until the queue is completely empty.'''
 
         try:
-            self.__empty.wait(timeout=0.1)
+            self.__empty.wait(timeout=0.5)
         except:
             pass
 
@@ -208,7 +208,7 @@ class Queue():
         '''Blocks until the queue is completely full.'''
 
         try:
-            self.__full.wait(timeout=0.1)
+            self.__full.wait(timeout=0.5)
         except:
             pass
 
@@ -216,7 +216,7 @@ class Queue():
         '''Blocks until at least 1 slot it free.'''
 
         try:
-            self.__free.wait(timeout=0.1)
+            self.__free.wait(timeout=0.5)
         except:
             pass
 
@@ -224,7 +224,7 @@ class Queue():
         '''Blocks until at least 1 slot is taken.'''
 
         try:
-            self.__content.wait(timeout=0.1)
+            self.__content.wait(timeout=0.5)
         except:
             pass
 
