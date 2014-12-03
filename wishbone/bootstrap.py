@@ -135,7 +135,7 @@ class Dispatch():
 
         print self.generateHeader()
         print "Available modules:"
-        print self.module_manager.getModuleTable(category, group, include_groups)
+        print ModuleManager().getModuleTable(category, group, include_groups)
 
     def show(self, command, module):
         '''
