@@ -111,6 +111,7 @@ class Dispatch():
         '''
 
         processes = []
+
         def stopSequence():
             for proc in processes:
                 proc.stop()
@@ -149,9 +150,10 @@ class Dispatch():
             (category, sub, group, module) = module.split('.')
             category = "%s.%s" % (category, sub)
 
+        module_manager = ModuleManager()
         try:
-            title = self.module_manager.getModuleTitle(category, group, module)
-            version = self.module_manager.getModuleVersion(category, group, module)
+            title = module_manager.getModuleTitle(category, group, module)
+            version = module_manager.getModuleVersion(category, group, module)
             header = "%s.%s.%s" % (category, group, module)
             print
             print "="*len(header)
@@ -162,9 +164,9 @@ class Dispatch():
             print
             print title
             print "-"*len(title)
-            print self.module_manager.getModuleDoc(category, group, module)
-        except Exception:
-            print "Failed to load module %s.%s.%s." % (category, group, module)
+            print module_manager.getModuleDoc(category, group, module)
+        except Exception as err:
+            print "Failed to load module %s.%s.%s. Reason: %s" % (category, group, module, err)
 
     def start(self, command, config, instances, pid, queue_size, frequency, identification):
         '''
