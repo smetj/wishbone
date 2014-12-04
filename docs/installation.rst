@@ -20,13 +20,19 @@ Pypi
 '''''
 
 To install the latest stable release from
-https://pypi.python.org/pypi/wishbone use *pip*.
+https://pypi.python.org/pypi/wishbone use *pip*:
 
 .. code-block:: sh
 
-    $ pip install wishbone
+    $ pip install wishbone --process-dependency-links
 
 
+or with *easy_install*:
+
+
+.. code-block:: sh
+
+    $ easy_install wishbone
 
 
 From source
