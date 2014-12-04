@@ -76,7 +76,6 @@ setup(
     author_email='development@smetj.net',
 
     url='https://github.com/smetj/wishbone',
-    download_url='https://github.com/smetj/wishbone/tarball/master',
 
     classifiers=['Development Status :: 5 - Production/Stable',
                  'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
@@ -102,7 +101,7 @@ setup(
     package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/sse.html']},
     zip_safe=False,
     dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.1'],
-    download_url="https://github.com/gevent/gevent/tarball/master#egg=gevent-1.1",
+    download_url=["https://github.com/smetj/wishbone/tarball/master", "https://github.com/gevent/gevent/tarball/master#egg=gevent-1.1"],
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
         'wishbone.flow': [
