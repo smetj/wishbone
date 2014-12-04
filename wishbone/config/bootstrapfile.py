@@ -37,8 +37,9 @@ class Config(object):
 
     def listLookups(self):
 
-        for lookup in self.__config["lookups"]:
-            yield lookup, self.__config["lookups"][lookup]["module"], self.__config["lookups"][lookup].get("arguments", {})
+        if "lookups" in self.__config:
+            for lookup in self.__config["lookups"]:
+                yield lookup, self.__config["lookups"][lookup]["module"], self.__config["lookups"][lookup].get("arguments", {})
 
     def listModules(self):
         for module in self.__config["modules"]:
