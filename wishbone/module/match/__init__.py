@@ -184,14 +184,13 @@ class Match(Actor):
             if self.evaluateCondition(self.__active_rules[rule]["condition"], e.data):
                 self.logging.debug("Match for rule %s." % (rule))
                 e.setHeaderValue("rule", rule)
-                for queue in self.__active_rules[rule]["queue"]:
-                    event_copy = e.clone()
-                    for name in queue:
-                        if queue[name] is not None:
-                            event_copy.setHeaderValue("queue", queue[name])
-                        self.submit(event_copy, self.pool.getQueue(name))
+                for destination in self.__active_rules[rule]["queue"]:
+                    for queue, header in destination.iteritems():
+                        event_copy = e.clone()
+                        for key, value in header.iteritems():
+                            event_copy.setHeaderValue(key, value)
+                        self.submit(event_copy, self.pool.getQueue(queue))
             else:
-                pass
                 self.logging.debug("No match for rule %s." % (rule))
 
     def evaluateCondition(self, conditions, fields):
