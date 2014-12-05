@@ -44,10 +44,7 @@ class Template(Actor):
            |  The directory containing templates.
 
         - template(str)()*
-           |  The template name located in <location>
-
-        - namespace(str)(self.name)
-           |  The header namespace storing configuration.
+           |  The template filename stored in directory <location>.
 
         - header_templates(list)([])
            |  An optional list of keys containing templates.
