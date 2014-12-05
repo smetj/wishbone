@@ -35,11 +35,6 @@ class EmailOut(Actor):
 
     Treats event.data as the body of an email.
 
-    The event.header.<self.name> is supposed to have following keys:
-        - subject(str)
-        - from(str)
-        - to(list)
-
 
     Parameters:
 
@@ -47,8 +42,14 @@ class EmailOut(Actor):
            |  The address:port of the MTA to submit the
            |  mail to.
 
-        - namespace(string)(None)
-           |  The header namespace containing the address information.
+        - to(list)([])*
+           |  A list of destinations.
+
+        - subject(str)("Wishbone")*
+           |  The subject of the email.
+
+        - from_address(str)("wishbone@localhost")*
+           |  The form email address.
 
 
     Queues:
@@ -58,43 +59,22 @@ class EmailOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, mta="localhost:25", namespace=None):
-        Actor.__init__(self, actor_config)
-
-        self.mta = mta
-
+    def __init__(self, actor_config, mta="localhost:25", subject="Wishbone", to=None, from_address=None):
+        Actor.__init__(self, actor_config, ["to", "from_address", "subject"])
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
-        if namespace is None:
-            self.namespace = self.name
-        else:
-            self.namespace = namespace
-
     def consume(self, event):
-
-        if not event.header.hasNamespace(self.namespace):
-            self.logging.error("Event received without <%s> header namespace. Purged" % (self.namespace))
-            raise Exception("Event received without <%s> header namespace. Purged" % (self.namespace))
-
-        for item in ["from", "to", "subject"]:
-            if not event.hasHeaderKey(self.namespace, item):
-                self.logging.error("Event received without <%s> header key. Purged" % (item))
-                raise Exception("Event received without <%s> header key. Purged" % (item))
-
-        if not isinstance(event.getHeaderValue(self.namespace, "to"), list):
-            self.logging.error("the \"to\" header key should be of type list.")
-            raise Exception("the \"to\" header key should be of type list.")
 
         try:
             message = MIMEText(str(event.data))
-            message["Subject"] = event.getHeaderValue(self.namespace, "subject")
-            message["From"] = event.getHeaderValue(self.namespace, "from")
-            message["To"] = ",".join(event.getHeaderValue(self.namespace, "to"))
+            message["Subject"] = self.subject
+            message["From"] = self.from_address
+            message["To"] = ",".join(self.to)
 
             mta = smtplib.SMTP(self.mta)
-            mta.sendmail(event.getHeaderValue(self.namespace, "from"),
-                         event.getHeaderValue(self.namespace, "to"),
+            mta.sendmail(self.from_address,
+                         self.to,
                          message.as_string()
                          )
         except Exception as err:
