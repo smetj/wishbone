@@ -187,10 +187,10 @@ class Actor():
                 except QueueFull as err:
                     self.pool.queue.__dict__[queue].rescue(event)
                     err.waitUntilFree()
-                # except Exception as err:
-                #     exc_type, exc_value, exc_traceback = exc_info()
-                #     event.setErrorValue(traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value))
-                #     self.submit(event, self.pool.queue.failed)
+                except Exception as err:
+                    exc_type, exc_value, exc_traceback = exc_info()
+                    event.setErrorValue(traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value))
+                    self.submit(event, self.pool.queue.failed)
                 else:
                     self.submit(event, self.pool.queue.success)
 

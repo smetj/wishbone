@@ -43,6 +43,9 @@ class Template(Actor):
         - location(str)("./")
            |  The directory containing templates.
 
+        - template(str)()*
+           |  The template name located in <location>
+
         - namespace(str)(self.name)
            |  The header namespace storing configuration.
 
@@ -61,18 +64,10 @@ class Template(Actor):
 
     '''
 
-    def __init__(self, actor_config, location="./", namespace=None, header_templates=[]):
-        Actor.__init__(self, actor_config)
+    def __init__(self, actor_config, location="./", template=None, header_templates=[]):
+        Actor.__init__(self, actor_config, ["template"])
 
-        self.location = location
-        if namespace is None:
-            self.namespace = self.name
-        else:
-            self.namespace = namespace
-
-        self.header_templates = header_templates
         self.templates = Environment(loader=FileSystemLoader(location))
-
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
@@ -82,11 +77,6 @@ class Template(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def construct(self, event):
-
-        if not event.hasHeaderKey(self.namespace, "template"):
-            self.logging.error(
-                'Header information event.header.%s.template was expected but not found. Event purged.' % (self.namespace))
-            raise
 
         for key in self.header_templates:
             try:
@@ -98,9 +88,9 @@ class Template(Actor):
                 raise
 
         try:
-            template = self.templates.get_template(event.getHeaderValue(self.namespace, "template"))
+            template = self.templates.get_template(self.template)
         except Exception as err:
-            self.logging.error("Template %s does not exist as a file in directory %s." % (event.getHeaderValue(self.namespace, "template"), self.location))
+            self.logging.error('No template found with filename "%s%s".' % (self.location, self.template))
             raise
         else:
             try:
