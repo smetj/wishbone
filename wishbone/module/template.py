@@ -46,8 +46,10 @@ class Template(Actor):
         - template(str)()*
            |  The template filename stored in directory <location>.
 
-        - header_templates(list)([])
-           |  An optional list of keys containing templates.
+        - header_templates(list)([])*
+           |  An optional list of strings with header references
+           | containing templates.
+           | <module_instance>.header.<key>
 
 
 
@@ -75,13 +77,15 @@ class Template(Actor):
 
     def construct(self, event):
 
-        for key in self.header_templates:
+        for template_ref in self.header_templates:
             try:
-                template = JinjaTemplate(event.getHeaderValue(self.namespace, key))
-                event.setHeaderValue(key, template.render(**event.data), self.namespace)
+                (namespace, part, variable) = template_ref.split('.')
+                template = event.getHeaderValue(namespace, variable)
+                template_r = JinjaTemplate(template)
+                event.setHeaderValue(variable, template_r.render(**event.data), namespace)
             except Exception as err:
                 self.logging.warning(
-                    "Failed to convert header key %s.  Reason: %s" % (key))
+                    "Failed to convert header key '%s'.  Reason: %s" % (variable, err))
                 raise
 
         try:
