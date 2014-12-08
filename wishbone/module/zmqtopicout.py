@@ -45,7 +45,7 @@ class ZMQTopicOut(Actor):
         - timeout(int)(1)
            |  The time in seconds to timeout when connecting.
 
-        - topic(str)("")
+        - topic(str)("")*
            |  The default topic to use when none is set in the header.
 
 
@@ -54,16 +54,10 @@ class ZMQTopicOut(Actor):
         - inbox
            |  Incoming events submitted to the outside.
 
-    Expects the "topic" to use in event.header.<self.name>.topic.
-    If that's doesn't exist, the value of <topic> is used.
-
     '''
 
     def __init__(self, actor_config, port=19283, timeout=10, topic=""):
-        Actor.__init__(self, actor_config)
-        self.port = port
-        self.timeout = timeout
-        self.topic = topic
+        Actor.__init__(self, actor_config, ["topic"])
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
@@ -76,12 +70,7 @@ class ZMQTopicOut(Actor):
     def consume(self, event):
 
         try:
-            topic = event.getHeaderValue(self.name, "topic")
-        except MissingNamespace, MissingKey:
-            topic = self.topic
-
-        try:
-            self.socket.send("%s %s" % (topic, event.data))
+            self.socket.send("%s %s" % (self.topic, event.data))
         except Exception as err:
             self.logging.error("Failed to submit message.  Reason %s" % (err))
             raise  # reraise the exception.
