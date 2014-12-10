@@ -52,10 +52,10 @@ class Match(Actor):
         re:     Regex matching
         !re:    Negative regex matching
         >:      Bigger than
-        >=:     Bigger or equal than
+        >=:     Bigger than or equal to
         <:      Smaller than
-        <=:     Smaller or equal than
-        =:      Equal than
+        <=:     Smaller than or equal to
+        =:      Equal to
         in:     Evaluate list membership
 
         - queue:
@@ -131,8 +131,7 @@ class Match(Actor):
 
     def __init__(self, actor_config, location=None, rules={}):
         Actor.__init__(self, actor_config)
-        self.location = location
-        self.rules = rules
+
         self.__active_rules = {}
         self.match = MatchRules()
         self.pool.createQueue("inbox")
@@ -140,9 +139,9 @@ class Match(Actor):
 
     def preHook(self):
 
-        self.createDir()
         self.__active_rules = self.rules
         if self.location is not None:
+            self.createDir()
             self.logging.info("Rules directoy '%s' defined." % (self.location))
             spawn(self.getRules)
 
