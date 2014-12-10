@@ -49,7 +49,6 @@ class Fanout(Actor):
     def __init__(self, actor_config, deep_copy=True):
         Actor.__init__(self, actor_config)
 
-        self.deep_copy = deep_copy
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
