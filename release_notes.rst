@@ -16,6 +16,7 @@ Features:
 - Added wishbone.output.http module
 - Renamed "metrics_funnel" and "logs_funnel" to "wishbone_metrics"
   and "wishbone_logs" respectively.
+- Added tests for each module.
 
 Bugfixes:
 

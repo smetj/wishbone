@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_wishbone.py
+#  utils.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -22,38 +22,7 @@
 #
 #
 
-import pytest
-
-from wishbone import QueuePool
-from wishbone import Queue
 from wishbone.error import QueueEmpty
-
-def test_listQueues():
-    q = QueuePool(1)
-    q.createQueue("hello")
-    assert list(q.listQueues(names=True)) == ['hello', 'failed', 'success', 'logs', 'metrics']
-
-
-def test_createQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.queue.test)
-
-
-def test_hasQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.hasQueue("test"))
-
-
-def test_getQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert isinstance(q.getQueue("test"), Queue)
-
-
-
-
 
 def getter(queue):
     counter = 0
