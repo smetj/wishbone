@@ -24,45 +24,39 @@
 
 import pytest
 
-from wishbone import QueuePool
-from wishbone import Queue
+from wishbone.event import Event
+from wishbone.module import Fanout
+from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 
-def test_listQueues():
-    q = QueuePool(1)
-    q.createQueue("hello")
-    assert list(q.listQueues(names=True)) == ['hello', 'failed', 'success', 'logs', 'metrics']
+from utils import getter
+
+def test_module_fanout():
+
+    actor_config = ActorConfig('fanout', 100, 1)
+    fanout = Fanout(actor_config, deep_copy=True)
+    fanout.pool.queue.inbox.disableFallThrough()
+
+    fanout.pool.createQueue("one")
+    fanout.pool.queue.one.disableFallThrough()
+
+    fanout.pool.createQueue("two")
+    fanout.pool.queue.two.disableFallThrough()
+
+    fanout.start()
+
+    e = Event('test')
+    e.setData("hello")
+
+    fanout.pool.queue.inbox.put(e)
+    one=getter(fanout.pool.queue.one)
+    two=getter(fanout.pool.queue.two)
+
+    fanout.stop()
+
+    assert one.raw()["test"]["data"] == "hello"
+    assert two.raw()["test"]["data"] == "hello"
+    assert id(one) != id(two)
 
 
-def test_createQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.queue.test)
 
-
-def test_hasQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.hasQueue("test"))
-
-
-def test_getQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert isinstance(q.getQueue("test"), Queue)
-
-
-
-
-
-def getter(queue):
-    counter = 0
-    while True:
-        counter += 1
-        if counter >= 5:
-            return None
-        else:
-            try:
-                return queue.get()
-            except QueueEmpty as err:
-                err.waitUntilContent()

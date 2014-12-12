@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_wishbone.py
+#  test_module_graphite.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -24,45 +24,27 @@
 
 import pytest
 
-from wishbone import QueuePool
-from wishbone import Queue
+from wishbone.event import Event
+from wishbone.module import Graphite
+from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 
-def test_listQueues():
-    q = QueuePool(1)
-    q.createQueue("hello")
-    assert list(q.listQueues(names=True)) == ['hello', 'failed', 'success', 'logs', 'metrics']
+from utils import getter
+
+def test_module_graphite():
+
+    actor_config = ActorConfig('graphite', 100, 1)
+    graphite = Graphite(actor_config)
+    graphite.pool.queue.inbox.disableFallThrough()
+    graphite.pool.queue.outbox.disableFallThrough()
+    graphite.start()
+
+    e = Event('test')
+    e.setData((1381002603.726132, 'wishbone', 'hostname', 'queue.outbox.in_rate', 0, '', ()))
+
+    graphite.pool.queue.inbox.put(e)
+    one=getter(graphite.pool.queue.outbox)
+
+    assert one.last.data == "hostname.setup.queue.outbox.in_rate 0 1381002603.73"
 
 
-def test_createQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.queue.test)
-
-
-def test_hasQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.hasQueue("test"))
-
-
-def test_getQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert isinstance(q.getQueue("test"), Queue)
-
-
-
-
-
-def getter(queue):
-    counter = 0
-    while True:
-        counter += 1
-        if counter >= 5:
-            return None
-        else:
-            try:
-                return queue.get()
-            except QueueEmpty as err:
-                err.waitUntilContent()
