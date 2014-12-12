@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_wishbone.py
+#  test_module_humanlogformat.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -24,45 +24,24 @@
 
 import pytest
 
-from wishbone import QueuePool
-from wishbone import Queue
+from wishbone.event import Event
+from wishbone.module import HumanLogFormat
+from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 
-def test_listQueues():
-    q = QueuePool(1)
-    q.createQueue("hello")
-    assert list(q.listQueues(names=True)) == ['hello', 'failed', 'success', 'logs', 'metrics']
+from utils import getter
 
+def test_module_humanlogformat():
 
-def test_createQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.queue.test)
+    actor_config = ActorConfig('humanlogformat', 100, 1)
+    humanlogformat = HumanLogFormat(actor_config, colorize=False)
+    humanlogformat.pool.queue.inbox.disableFallThrough()
+    humanlogformat.pool.queue.outbox.disableFallThrough()
+    humanlogformat.start()
 
+    e = Event('test')
+    e.setData((6, 1367682301.430527, 3342, 'Router', 'Received SIGINT. Shutting down.'))
 
-def test_hasQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.hasQueue("test"))
-
-
-def test_getQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert isinstance(q.getQueue("test"), Queue)
-
-
-
-
-
-def getter(queue):
-    counter = 0
-    while True:
-        counter += 1
-        if counter >= 5:
-            return None
-        else:
-            try:
-                return queue.get()
-            except QueueEmpty as err:
-                err.waitUntilContent()
+    humanlogformat.pool.queue.inbox.put(e)
+    one=getter(humanlogformat.pool.queue.outbox)
+    assert one.data == "2013-05-04T17:45:01 setup.py[3342]: informational Router: Received SIGINT. Shutting down."

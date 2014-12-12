@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_wishbone.py
+#  test_module_funnel.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -24,45 +24,38 @@
 
 import pytest
 
-from wishbone import QueuePool
-from wishbone import Queue
+from wishbone.event import Event
+from wishbone.module import Funnel
+from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 
-def test_listQueues():
-    q = QueuePool(1)
-    q.createQueue("hello")
-    assert list(q.listQueues(names=True)) == ['hello', 'failed', 'success', 'logs', 'metrics']
+from utils import getter
 
 
-def test_createQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.queue.test)
+def test_module_funnel():
 
+    actor_config = ActorConfig('funnel', 100, 1)
+    funnel = Funnel(actor_config)
+    funnel.pool.queue.outbox.disableFallThrough()
 
-def test_hasQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.hasQueue("test"))
+    funnel.pool.createQueue("one")
+    funnel.pool.queue.one.disableFallThrough()
 
+    funnel.pool.createQueue("two")
+    funnel.pool.queue.two.disableFallThrough()
 
-def test_getQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert isinstance(q.getQueue("test"), Queue)
+    funnel.start()
 
+    event_one = Event("test")
+    event_one.setData("one")
 
+    event_two = Event("test")
+    event_two.setData("two")
 
+    funnel.pool.queue.one.put(event_one)
+    funnel.pool.queue.two.put(event_two)
 
+    assert getter(funnel.pool.queue.outbox).raw()["test"]["data"] == "one"
+    assert getter(funnel.pool.queue.outbox).raw()["test"]["data"] == "two"
 
-def getter(queue):
-    counter = 0
-    while True:
-        counter += 1
-        if counter >= 5:
-            return None
-        else:
-            try:
-                return queue.get()
-            except QueueEmpty as err:
-                err.waitUntilContent()
+    funnel.stop()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_wishbone.py
+#  test_module_msgpackencode.py
 #
 #  Copyright 2014 Jelle Smet <development@smetj.net>
 #
@@ -24,45 +24,25 @@
 
 import pytest
 
-from wishbone import QueuePool
-from wishbone import Queue
+from wishbone.event import Event
+from wishbone.module import MSGPackEncode
+from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 
-def test_listQueues():
-    q = QueuePool(1)
-    q.createQueue("hello")
-    assert list(q.listQueues(names=True)) == ['hello', 'failed', 'success', 'logs', 'metrics']
+from utils import getter
 
+def test_module_msgpackencode():
 
-def test_createQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.queue.test)
+    actor_config = ActorConfig('msgpackencode', 100, 1)
+    msgpackencode = MSGPackEncode(actor_config)
 
+    msgpackencode.pool.queue.inbox.disableFallThrough()
+    msgpackencode.pool.queue.outbox.disableFallThrough()
+    msgpackencode.start()
 
-def test_hasQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.hasQueue("test"))
+    e = Event('test')
+    e.setData([1, 2, 3])
 
-
-def test_getQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert isinstance(q.getQueue("test"), Queue)
-
-
-
-
-
-def getter(queue):
-    counter = 0
-    while True:
-        counter += 1
-        if counter >= 5:
-            return None
-        else:
-            try:
-                return queue.get()
-            except QueueEmpty as err:
-                err.waitUntilContent()
+    msgpackencode.pool.queue.inbox.put(e)
+    one=getter(msgpackencode.pool.queue.outbox)
+    assert one.data == '\x93\x01\x02\x03'
