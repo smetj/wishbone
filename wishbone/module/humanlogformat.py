@@ -39,7 +39,7 @@ class HumanLogFormat(Actor):
 
     Internal Wishbone format:
 
-    (6, 1367682301.430527, 'Router', 'Received SIGINT. Shutting down.')
+    (6, 1367682301.430527, 3342, 'Router', 'Received SIGINT. Shutting down.')
 
     Sample output format:
 
@@ -98,6 +98,7 @@ class HumanLogFormat(Actor):
             self.ident = ident
 
     def consume(self, event):
+
         log = ("%s %s %s %s: %s" % (
             strftime("%Y-%m-%dT%H:%M:%S", localtime(event.last.data[1])),
             "%s[%s]:" % (self.ident, event.last.data[2]),
