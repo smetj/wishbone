@@ -40,7 +40,6 @@ class ModuleManager():
 
         '''Returns True when module exists otherwise False'''
 
-        print self.getModuleByName(name)
         if self.getModuleByName(name) == None:
             return True
         else:
