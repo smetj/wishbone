@@ -72,7 +72,7 @@ class BootStrap():
         llist.add_argument('--group', type=str, dest='group', default=None, help='List the modules of this group type.')
 
         show = subparsers.add_parser('show', description="Shows the details of a module.")
-        show.add_argument('--module', type=str, help='Shows the documentation of the module. ')
+        show.add_argument('--module', type=str, required=True, help='Shows the documentation of the module. ')
 
         arguments = vars(parser.parse_args())
 
