@@ -143,6 +143,10 @@ class Dispatch():
         Shows the help message of a module.
         '''
 
+        module_manager = ModuleManager()
+        module_manager.validateModuleName(module)
+        module_manager.exists(module)
+
         print self.generateHeader()
         try:
             (category, group, module) = module.split('.')
@@ -150,7 +154,7 @@ class Dispatch():
             (category, sub, group, module) = module.split('.')
             category = "%s.%s" % (category, sub)
 
-        module_manager = ModuleManager()
+
         try:
             title = module_manager.getModuleTitle(category, group, module)
             version = module_manager.getModuleVersion(category, group, module)

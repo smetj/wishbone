@@ -25,6 +25,7 @@
 import pkg_resources
 import re
 from prettytable import PrettyTable
+from wishbone.error import ModuleInitFailure, NoSuchModule
 
 
 class ModuleManager():
@@ -35,11 +36,27 @@ class ModuleManager():
         self.categories = categories
         self.groups = groups
 
+    def exists(self, name):
+
+        '''Returns True when module exists otherwise False'''
+
+        print self.getModuleByName(name)
+        if self.getModuleByName(name) == None:
+            return True
+        else:
+            return False
+
     def getModule(self, category, group, name):
 
+        m = None
         for module in pkg_resources.iter_entry_points("%s.%s" % (category, group)):
             if module.name == name:
-                return module.load()
+                m = module.load()
+
+        if m == None:
+            raise NoSuchModule("Module %s.%s.%s is unknown." % (category, group, name))
+        else:
+            return m
 
     def getModulesList(self, category=None):
 
@@ -115,6 +132,14 @@ class ModuleManager():
                     return module.dist.version
         except:
             return "?"
+
+    def validateModuleName(self, name):
+
+        '''Validates a module reference name.'''
+
+        if len(name.split('.')) != 3:
+
+            raise ModuleInitFailure('%s is not a valid name structure.  Should be x.x.x' % name)
 
     def __getTable(self):
 
