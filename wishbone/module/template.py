@@ -73,7 +73,7 @@ class Template(Actor):
     def preHook(self):
 
         if self.template is not None:
-            self.templates = Environment(loader=FileSystemLoader(location))
+            self.templates = Environment(loader=FileSystemLoader(self.location))
 
     def consume(self, event):
         event = self.construct(event)
