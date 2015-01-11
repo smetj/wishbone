@@ -28,10 +28,13 @@ import pytest
 from wishbone.event import Event
 from wishbone.module import Template
 from wishbone.actor import ActorConfig
+from os import unlink
 
 from utils import getter
 
-def test_module_header():
+def test_module_template_header():
+
+    '''Tests template defined in header.'''
 
     actor_config = ActorConfig('template', 100, 1)
     template = Template(actor_config, header_templates=["test.header.hello"])
@@ -47,3 +50,28 @@ def test_module_header():
     template.pool.queue.inbox.put(e)
     one=getter(template.pool.queue.outbox)
     assert one.getHeaderValue('test', "hello") == "The numerical representation of one is 1"
+
+def test_module_template_file():
+
+    '''Tests template defined in file.'''
+
+    with open ("template.tmpl", "w") as f:
+        f.write("The numerical representation of one is {{one}}")
+
+    actor_config = ActorConfig('template', 100, 1)
+    template = Template(actor_config, template="template.tmpl")
+
+    template.pool.queue.inbox.disableFallThrough()
+    template.pool.queue.outbox.disableFallThrough()
+    template.start()
+
+    e = Event('test')
+    e.setHeaderValue("hello", "The numerical representation of one is {{one}}", "test")
+    e.setData({"one": 1})
+
+    template.pool.queue.inbox.put(e)
+    one=getter(template.pool.queue.outbox)
+    unlink('template.tmpl')
+
+    assert one.data == "The numerical representation of one is 1"
+
