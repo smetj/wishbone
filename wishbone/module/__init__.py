@@ -22,6 +22,7 @@
 #
 #
 
+from loglevelfilter import LogLevelFilter
 from testevent import TestEvent
 from null import Null
 from stdout import STDOUT
