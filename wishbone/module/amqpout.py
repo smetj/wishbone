@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  amqpout.py
@@ -136,7 +136,7 @@ class AMQPOut(Actor):
                     self.channel.queue_declare(self.queue, durable=self.queue_durable, exclusive=self.queue_exclusive, auto_delete=self.queue_auto_delete)
                     self.logging.debug("Declared queue %s." % (self.queue))
                 if self.exchange != "" and self.queue != "":
-                    self.channel.queue.bind(self.queue, self.exchange, routing_key=self.routing_key)
+                    self.channel.queue_bind(self.queue, self.exchange, routing_key=self.routing_key)
                     self.logging.debug("Bound queue %s to exchange %s." % (self.queue, self.exchange))
 
                 self.logging.info("Connected to broker.")
