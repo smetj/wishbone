@@ -23,7 +23,6 @@
 #
 
 from wishbone import Actor
-from wishbone.lookup import EventLookup
 from os import getpid
 
 
