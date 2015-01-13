@@ -62,6 +62,13 @@ class AMQPIn(Actor):
         - exchange_durable(bool)(false)
            |  Declare a durable exchange.
 
+        - exchange_auto_delete(bool)(true)
+           |  If set, the exchange is deleted when all queues have finished using it.
+
+        - exchange_passive(bool)(false)
+           |  If set, the server will not create the exchange. The client can use
+           |  this to check whether an exchange exists without modifying the server state.
+
         - queue(str)("wishbone")
            |  The queue to declare and ultimately consume.
 
@@ -99,26 +106,26 @@ class AMQPIn(Actor):
     '''
 
     def __init__(self, actor_config, host="localhost", port=5672, vhost="/", user="guest", password="guest",
-                 exchange="", exchange_type="direct", exchange_durable=False,
+                 exchange="", exchange_type="direct", exchange_durable=False, exchange_auto_delete=True, exchange_passive=False,
                  queue="wishbone", queue_durable=False, queue_exclusive=False, queue_auto_delete=True, queue_declare=True,
                  routing_key="", prefetch_count=1, no_ack=False):
         Actor.__init__(self, actor_config)
-        self.host = host
-        self.port = port
-        self.vhost = vhost
-        self.user = user
-        self.password = password
-        self.exchange = exchange
-        self.exchange_type = exchange_type
-        self.exchange_durable = exchange_durable
-        self.queue = queue
-        self.queue_durable = queue_durable
-        self.queue_exclusive = queue_exclusive
-        self.queue_auto_delete = queue_auto_delete
-        self.queue_declare = queue_declare
-        self.routing_key = routing_key
-        self.prefetch_count = prefetch_count
-        self.no_ack = no_ack
+        # self.host = host
+        # self.port = port
+        # self.vhost = vhost
+        # self.user = user
+        # self.password = password
+        # self.exchange = exchange
+        # self.exchange_type = exchange_type
+        # self.exchange_durable = exchange_durable
+        # self.queue = queue
+        # self.queue_durable = queue_durable
+        # self.queue_exclusive = queue_exclusive
+        # self.queue_auto_delete = queue_auto_delete
+        # self.queue_declare = queue_declare
+        # self.routing_key = routing_key
+        # self.prefetch_count = prefetch_count
+        # self.no_ack = no_ack
 
         self.pool.createQueue("outbox")
         self.pool.createQueue("ack")
@@ -141,15 +148,16 @@ class AMQPIn(Actor):
                 self.connection = amqp_connection(host=self.host, port=self.port, virtual_host=self.vhost, userid=self.user, password=self.password)
                 self.channel = self.connection.channel()
                 if self.exchange != "":
-                    self.channel.exchange_declare(self.exchange, self.exchange_type, durable=self.exchange_durable)
+                    self.channel.exchange_declare(self.exchange, self.exchange_type, durable=self.exchange_durable, auto_delete=self.exchange_auto_delete, passive=self.exchange_passive)
                     self.logging.debug("Declared exchange %s." % (self.exchange))
 
                 if self.queue_declare:
                     self.channel.queue_declare(self.queue, durable=self.queue_durable, exclusive=self.queue_exclusive, auto_delete=self.queue_auto_delete)
                     self.logging.debug("Declared queue %s." % (self.queue))
                 if self.exchange != "":
-                    self.channel.queue.bind(self.queue, self.exchange, routing_key=self.routing_key)
+                    self.channel.queue_bind(self.queue, self.exchange, routing_key=self.routing_key)
                     self.logging.debug("Bound queue %s to exchange %s." % (self.queue, self.exchange))
+
                 self.channel.basic_qos(prefetch_size=0, prefetch_count=self.prefetch_count, a_global=False)
                 self.channel.basic_consume(self.queue, callback=self.consume, no_ack=self.no_ack)
                 self.logging.info("Connected to broker.")
