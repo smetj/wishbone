@@ -202,7 +202,7 @@ class Default(multiprocessing.Process):
             actor_config = ActorConfig(name, self.size, self.frequency)
             setattr(self.pool.module, name, module(actor_config, *args, **kwargs))
         except Exception as err:
-            raise ModuleInitFailure(err)
+            raise ModuleInitFailure("Problem loading module %s.  Reason: %s" % (name, err))
 
     def __setupConnections(self):
         '''Setup all connections as defined by configuration_manager'''
