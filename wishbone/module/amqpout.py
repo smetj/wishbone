@@ -95,19 +95,6 @@ class AMQPOut(Actor):
                  queue="", queue_durable=False, queue_exclusive=False, queue_auto_delete=True,
                  routing_key=""):
         Actor.__init__(self, actor_config)
-        self.host = host
-        self.port = port
-        self.vhost = vhost
-        self.user = user
-        self.password = password
-        self.exchange = exchange
-        self.exchange_type = exchange_type
-        self.exchange_durable = exchange_durable
-        self.queue = queue
-        self.queue_durable = queue_durable
-        self.queue_exclusive = queue_exclusive
-        self.queue_auto_delete = queue_auto_delete
-        self.routing_key = routing_key
 
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
