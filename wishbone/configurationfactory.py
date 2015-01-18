@@ -68,7 +68,7 @@ class Module(object):
 
     def __init__(self, instance, module, arguments):
 
-        '''Wishbone configuration representation of a Module.
+        '''Module data type
 
         Parameters:
 
@@ -103,10 +103,16 @@ class Module(object):
 
 
 class Route(namedtuple('Route', 'source_module source_queue destination_module destination_queue'), object):
+
+    '''Route data type'''
+
     pass
 
 
 class ConfigManager(namedtuple('ConfigManager', 'modules routes')):
+
+    '''ConfigManager data type'''
+
     pass
 
 
@@ -151,23 +157,49 @@ class ConfigurationFactory(object):
             m = importlib.import_module(module)
             self.lookup_methods[name] = m.Config(**arguments)
 
-        # m = importlib.import_module("wishbone.lookup.event")
-        # self.lookup_methods["event"] = m.Config()
+        m = importlib.import_module("wishbone.lookup.event")
+        self.lookup_methods["event"] = m.Config()
+
 
     def replaceLookupDefsWithFunctions(self, args):
 
-        for arg in args:
-            if isinstance(args[arg], str) and args[arg].startswith('~'):
-                (t, lookup, var) = self.extractLookupDef(args[arg])
+        def do(data):
+            if isinstance(data, str) and data.startswith('~'):
+                (t, lookup, var) = self.extractLookupDef(data)
                 try:
                     if t == 'dynamic':
-                        args[arg] = Lookup(self.lookup_methods[lookup].generateLookup(var))
+                        return Lookup(self.lookup_methods[lookup].generateLookup(var))
                     else:
-                        args[arg] = self.lookup_methods[lookup].generateLookup(var)()
+                        return self.lookup_methods[lookup].generateLookup(var)()
                 except KeyError:
                     raise ModuleInitFailure('"%s" is an unknown lookup instance name.' % (lookup))
+            elif isinstance(data, dict):
+                for key, value in data.iteritems():
+                    data[key] = do(value)
+                return data
+            elif isinstance(data, list):
+                for (index, value) in enumerate(data):
+                    data[index] = do(value)
+                return data
+            else:
+                return data
 
-        return args
+        return do(args)
+
+    # def replaceLookupDefsWithFunctions(self, args):
+
+    #     for arg in args:
+    #         if isinstance(args[arg], str) and args[arg].startswith('~'):
+    #             (t, lookup, var) = self.extractLookupDef(args[arg])
+    #             try:
+    #                 if t == 'dynamic':
+    #                     args[arg] = Lookup(self.lookup_methods[lookup].generateLookup(var))
+    #                 else:
+    #                     args[arg] = self.lookup_methods[lookup].generateLookup(var)()
+    #             except KeyError:
+    #                 raise ModuleInitFailure('"%s" is an unknown lookup instance name.' % (lookup))
+
+    #     return args
 
     def extractLookupDef(self, e):
 
