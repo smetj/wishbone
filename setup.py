@@ -3,7 +3,7 @@
 #
 #  setup.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -122,9 +122,10 @@ setup(
         ],
         'wishbone.function': [
             'header = wishbone.module.header:Header',
-            'template = wishbone.module.template:Template',
+            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate',
+            'keyvalue = wishbone.module.keyvalue:KeyValue',
             'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
-            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate'
+            'template = wishbone.module.template:Template'
         ],
         'wishbone.input': [
             'amqp = wishbone.module.amqpin:AMQPIn',
@@ -143,6 +144,7 @@ setup(
         'wishbone.output': [
             'amqp = wishbone.module.amqpout:AMQPOut',
             'disk = wishbone.module.diskout:DiskOut',
+            'elasticsearch = wishbone.module.elasticsearchout:ElasticSearchOut',
             'email = wishbone.module.emailout:EmailOut',
             'file = wishbone.module.fileout:FileOut',
             'http = wishbone.module.httpoutclient:HTTPOutClient',
