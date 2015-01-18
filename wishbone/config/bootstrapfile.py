@@ -71,7 +71,6 @@ class Config(object):
         assert "modules" in self.__config, "'modules' section not found in bootstrap file."
         for module in self.__config["modules"]:
             assert "module" in self.__config["modules"][module], "Cannot find the 'module' keyword in the '%s' module definition." % (module)
-        # assert any([False for m in self.__config.keys() if m not in ["routingtable","modules"]]), "Unknown self.__config in bootstrap file."
 
         for route in self.__config["routingtable"]:
             (left, right) = route.split("->")
