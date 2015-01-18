@@ -16,6 +16,8 @@ Features:
 - Added wishbone.output.http module
 - Renamed "metrics_funnel" and "logs_funnel" to "wishbone_metrics"
   and "wishbone_logs" respectively.
+- Added function module KeyValue
+- Added output module Elasticsearch
 - Added tests for each module.
 
 Bugfixes:
@@ -23,6 +25,8 @@ Bugfixes:
 - Changed matchrule format wishbone.flow.match to allow multiple
   evals on the same key.
 - Fix to minimize gethostbyname() lookups in logging.
+- Fixed bugs in wishbone.input.amqp
+- Fixed bugs in wishbone.output.amqp
 
 
 Version 1.0.3
