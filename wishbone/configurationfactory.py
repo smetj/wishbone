@@ -3,7 +3,7 @@
 #
 #  configurationfactory.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -151,8 +151,8 @@ class ConfigurationFactory(object):
             m = importlib.import_module(module)
             self.lookup_methods[name] = m.Config(**arguments)
 
-        m = importlib.import_module("wishbone.lookup.event")
-        self.lookup_methods["event"] = m.Config()
+        # m = importlib.import_module("wishbone.lookup.event")
+        # self.lookup_methods["event"] = m.Config()
 
     def replaceLookupDefsWithFunctions(self, args):
 
