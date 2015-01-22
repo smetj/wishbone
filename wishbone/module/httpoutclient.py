@@ -23,8 +23,9 @@
 #
 
 
+from gevent import monkey; monkey.patch_socket()
 from wishbone import Actor
-import grequests
+import requests
 
 
 class HTTPOutClient(Actor):
@@ -64,20 +65,13 @@ class HTTPOutClient(Actor):
     def __init__(self, config, content_type="application/json", accept="text/plain", url="https://localhost", username=None, password=None):
 
         Actor.__init__(self, config)
-
-        self.content_type = content_type
-        self.accept = accept
-        self.url = url
-        self.username = username
-        self.password = password
-
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
 
         try:
-            response = grequests.put(self.url, data=event["data"], auth=(self.username, self.password), headers ={'Content-type': self.content_type, 'Accept': self.accept}).send()
+            response = requests.put(self.url, data=event["data"], auth=(self.username, self.password), headers ={'Content-type': self.content_type, 'Accept': self.accept})
             response.raise_for_status()
         except Exception as err:
             self.logging.error("Failed to submit data.  Reason: %s" % (err))
