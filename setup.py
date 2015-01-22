@@ -29,7 +29,7 @@ import sys
 PROJECT = 'wishbone'
 VERSION = '1.1.0'
 
-install_requires = ['gevent>=1.1',
+install_requires = ['gevent>=1.0',
                     'greenlet>=0.3.2',
                     'argparse==1.2.1',
                     'prettytable==0.7.2',
@@ -44,7 +44,8 @@ install_requires = ['gevent>=1.1',
                     'gearman==2.0.2',
                     'pycrypto==2.6.1',
                     'flask==0.10.1',
-                    'gevent_inotifyx==0.1.1']
+                    'gevent_inotifyx==0.1.1',
+                    'requests==2.5.1']
 
 try:
     with open('README.rst', 'rt') as f:
