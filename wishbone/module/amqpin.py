@@ -26,6 +26,7 @@ from gevent import monkey;monkey.patch_socket()
 from wishbone import Actor
 from wishbone.error import QueueEmpty
 from amqp.connection import Connection as amqp_connection
+from amqp.exceptions import PreconditionFailed
 from gevent import sleep, spawn
 
 
@@ -172,6 +173,8 @@ class AMQPIn(Actor):
         while self.loop():
             try:
                 self.connection.drain_events()
+            except PreconditionFailed as err:
+                self.logging.warning("Precondition failed. Reason: %s" % (err))
             except Exception as err:
                 self.logging.error("Problem connecting to broker.  Reason: %s" % (err))
                 sleep(1)
