@@ -131,6 +131,7 @@ class AMQPIn(Actor):
         self.pool.createQueue("outbox")
         self.pool.createQueue("ack")
         self.pool.queue.ack.disableFallThrough()
+        self.connection = None
 
     def preHook(self):
         spawn(self.setupConnectivity)
@@ -146,7 +147,8 @@ class AMQPIn(Actor):
 
         while self.loop():
             try:
-                self.connection = amqp_connection(host=self.host, port=self.port, virtual_host=self.vhost, userid=self.user, password=self.password)
+                if not hasattr(self.connection, 'is_alive') or (hasattr(self.connection, 'is_alive') and not self.connection.is_alive()):
+                    self.connection = amqp_connection(host=self.host, port=self.port, virtual_host=self.vhost, userid=self.user, password=self.password)
                 self.channel = self.connection.channel()
                 if self.exchange != "":
                     self.channel.exchange_declare(self.exchange, self.exchange_type, durable=self.exchange_durable, auto_delete=self.exchange_auto_delete, passive=self.exchange_passive)
@@ -173,8 +175,6 @@ class AMQPIn(Actor):
         while self.loop():
             try:
                 self.connection.drain_events()
-            except PreconditionFailed as err:
-                self.logging.warning("Precondition failed. Reason: %s" % (err))
             except Exception as err:
                 self.logging.error("Problem connecting to broker.  Reason: %s" % (err))
                 sleep(1)
