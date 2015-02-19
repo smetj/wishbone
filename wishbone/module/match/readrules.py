@@ -28,6 +28,7 @@ from gevent import event
 from glob import glob
 import os
 import yaml
+from yaml.parser import ParserError
 
 
 class ReadRulesDisk():
@@ -54,15 +55,14 @@ class ReadRulesDisk():
         if os.access(self.directory, os.R_OK):
             spawn(self.monitorDirectory)
         else:
-            raise Exception(
-                "Directory '%s' is not readable. Please verify." % (self.directory))
+            raise Exception("Directory '%s' is not readable. Please verify." % (self.directory))
 
     def monitorDirectory(self):
         '''Monitors the given directory for changes.'''
 
         fd = inotify.init()
         wb = inotify.add_watch(
-            fd, self.directory, inotify.IN_CLOSE_WRITE + inotify.IN_DELETE)
+            fd, self.directory, inotify.IN_CLOSE_WRITE + inotify.IN_CREATE + inotify.IN_DELETE + inotify.IN_MODIFY + inotify.IN_MOVE)
         self.__rules = self.readDirectory()
 
         while True:
@@ -71,6 +71,7 @@ class ReadRulesDisk():
             current_rules = self.readDirectory()
 
             if cmp(current_rules, self.__rules) != 0:
+                self.logger.info("New set of rules loaded from disk")
                 self.__rules = current_rules
                 self.wait.set()
 
@@ -80,14 +81,19 @@ class ReadRulesDisk():
 
         rules = {}
         for filename in glob("%s/*.yaml" % (self.directory)):
-            with open(filename, 'r') as f:
-                key_name = os.path.basename(filename).rstrip(".yaml")
-                rule = yaml.load("".join(f.readlines()))
-                try:
-                    self.ruleCompliant(rule)
-                except Exception as err:
-                    self.logger.warning("Rule %s not valid. Skipped. Reason: %s" % (filename, err))
-                rules[key_name] = rule
+            try:
+                with open(filename, 'r') as f:
+                    key_name = os.path.basename(filename).rstrip(".yaml")
+                    rule = yaml.load("".join(f.readlines()))
+                    try:
+                        self.ruleCompliant(rule)
+                    except Exception as err:
+                        self.logger.warning("Rule %s not valid. Skipped. Reason: %s" % (filename, err))
+                    rules[key_name] = rule
+            except ParserError as err:
+                self.logger.warning("Failed to parse file %s.  Please validate the YAML syntax in a parser." % (filename))
+            except IOError as err:
+                self.logger.warning("Failed to read %s.  Reason: %s" % (filename, err))
         return rules
 
     def get(self):
