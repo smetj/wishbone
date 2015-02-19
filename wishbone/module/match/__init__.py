@@ -174,13 +174,15 @@ class Match(Actor):
 
         while self.loop():
             try:
-                while self.loop():
-                    self.__active_rules = dict(self.read.readDirectory().items() + self.rules.items())
-                    self.logging.info("New set of rules loaded from disk")
-                    break
-                while self.loop():
-                    self.__active_rules = dict(self.read.get().items() + self.rules.items())
-                    self.logging.info("New set of rules loaded from disk")
+                self.__active_rules = dict(self.read.readDirectory().items() + self.rules.items())
+                break
+            except Exception as err:
+                self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
+                sleep(1)
+
+        while self.loop():
+            try:
+                self.__active_rules = dict(self.read.get().items() + self.rules.items())
             except Exception as err:
                 self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
                 sleep(1)
