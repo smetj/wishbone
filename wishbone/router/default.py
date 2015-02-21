@@ -24,7 +24,7 @@
 
 from wishbone.actor import ActorConfig
 from wishbone.module import Funnel
-from wishbone.error import ModuleInitFailure, NoSuchModule
+from wishbone.error import ModuleInitFailure, NoSuchModule, QueueConnected
 from gevent import signal, event, sleep
 import multiprocessing
 
@@ -230,8 +230,12 @@ class Default(multiprocessing.Process):
         log_human = self.module_manager.getModuleByName("wishbone.encode.humanlogformat")
         self.__registerModule(log_stdout, "log_stdout")
         self.__registerModule(log_human, "log_format", ident=self.identification)
-        self.__connect("wishbone_logs.outbox", "log_format.inbox")
-        self.__connect("log_format.outbox", "log_stdout.inbox")
+        try:
+            self.__connect("wishbone_logs.outbox", "log_format.inbox")
+            self.__connect("log_format.outbox", "log_stdout.inbox")
+        except QueueConnected:
+            pass
+
 
     def __setupSyslogLogging(self):
 
