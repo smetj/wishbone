@@ -37,6 +37,9 @@ class HTTPOutClient(Actor):
 
     Parameters:
 
+        - method(str)("PUT")
+           |  The http method to use. PUT/POST
+
         - content_type(str)("application/json")
            |  The content type to use.
 
@@ -62,17 +65,34 @@ class HTTPOutClient(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, config, content_type="application/json", accept="text/plain", url="https://localhost", username=None, password=None):
+    def __init__(self, config, method="PUT", content_type="application/json", accept="text/plain", url="https://localhost", username=None, password=None):
 
         Actor.__init__(self, config)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
+    def preHook(self):
+
+        if self.method == "PUT":
+            self.submitToResource = self.__put
+        elif self.method == "POST":
+            self.submitToResource = self.__post
+        else:
+            raise Exception("Invalid http method defined: '%s'." % self.method)
+
     def consume(self, event):
 
         try:
-            response = requests.put(self.url, data=event["data"], auth=(self.username, self.password), headers ={'Content-type': self.content_type, 'Accept': self.accept})
+            response = self.submitToResource(event["data"])
             response.raise_for_status()
         except Exception as err:
             self.logging.error("Failed to submit data.  Reason: %s" % (err))
             raise
+
+    def __put(self, data):
+
+        return requests.put(self.url, data=data, auth=(self.username, self.password), headers={'Content-type': self.content_type, 'Accept': self.accept}).send()
+
+    def __post(self, data):
+
+        return requests.post(self.url, data=data, auth=(self.username, self.password), headers={'Content-type': self.content_type, 'Accept': self.accept}).send()
