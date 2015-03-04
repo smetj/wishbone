@@ -45,6 +45,9 @@ class HTTPOutClient(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
+        - method(str)("PUT")
+           |  The http method to use. PUT/POST
+
         - content_type(str)("application/json")
            |  The content type to use.
 
@@ -70,10 +73,11 @@ class HTTPOutClient(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size, frequency, content_type="application/json", accept="text/plain", url="https://localhost", username=None, password=None):
+    def __init__(self, name, size, frequency, method="PUT", content_type="application/json", accept="text/plain", url="https://localhost", username=None, password=None):
 
         Actor.__init__(self, name)
         self.name = name
+        self.method = method
         self.content_type = content_type
         self.accept = accept
         self.url = url
@@ -83,11 +87,28 @@ class HTTPOutClient(Actor):
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
+    def preHook(self):
+
+        if self.method == "PUT":
+            self.submitToResource = self.__put
+        elif self.method == "POST":
+            self.submitToResource = self.__post
+        else:
+            raise Exception("Invalid http method defined: '%s'." % self.method)
+
     def consume(self, event):
 
         try:
-            response = grequests.put(self.url, data=event["data"], auth=(self.username, self.password), headers ={'Content-type': self.content_type, 'Accept': self.accept}).send()
+            response = self.submitToResource(event["data"])
             response.raise_for_status()
         except Exception as err:
             self.logging.error("Failed to submit data.  Reason: %s" % (err))
             raise
+
+    def __put(self, data):
+
+        return grequests.put(self.url, data=data, auth=(self.username, self.password), headers={'Content-type': self.content_type, 'Accept': self.accept}).send()
+
+    def __post(self, data):
+
+        return grequests.post(self.url, data=data, auth=(self.username, self.password), headers={'Content-type': self.content_type, 'Accept': self.accept}).send()
