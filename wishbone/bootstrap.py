@@ -128,7 +128,7 @@ class Dispatch():
             for instance in range(instances):
                 processes.append(Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, process=True).start())
             pids = [str(p.pid) for p in processes]
-            print ("\nInstances started in foreground with pid %s\n" % (", ".join(pids)))
+            print("\nInstances started in foreground with pid %s\n" % (", ".join(pids)))
             for proc in processes:
                 proc.join()
 
