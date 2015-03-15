@@ -30,21 +30,6 @@ import re
 import sys
 
 
-class Lookup(object):
-
-    def __init__(self, fn):
-
-        self.__fn = fn
-
-    def __str__(self):
-
-        return self.__fn()
-
-    def __repr__(self):
-
-        return self.__fn()
-
-
 class Arguments(object):
 
     def __init__(self, **kwargs):
