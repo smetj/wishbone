@@ -29,19 +29,6 @@ class EventLookup(namedtuple('EventLookup', 'namespace type key')):
     pass
 
 
-class Config():
-
-    """
-    Accepted types:
-
-        - word: Returns a random word from a dictionary
-
-    """
-
-    def generateLookup(self, variable):
-
-        def generate():
-            (n, t, k) = variable.split('.')
-            return EventLookup(n, t, k)
-
-        return generate
+def generate(header):
+    (n, t, k) = header.split('.')
+    return EventLookup(n, t, k)
