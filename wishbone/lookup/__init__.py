@@ -22,4 +22,21 @@
 #
 #
 
-from event import EventLookup
+from .event import EventLookup
+
+
+def event():
+    from .event import generate
+    return generate
+
+
+def randomword(filename=None):
+
+    from .randomword import RandomWord
+    r = RandomWord()
+    return r.pickWord
+
+
+def randombool():
+    from randombool import randomBool
+    return randomBool
