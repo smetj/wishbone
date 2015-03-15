@@ -44,7 +44,8 @@ install_requires = ['gevent>=1.0.1',
                     'pycrypto==2.6.1',
                     'flask==0.10.1',
                     'gevent_inotifyx==0.1.1',
-                    'requests==2.5.1']
+                    'requests==2.5.1',
+                    'uplook']
 
 try:
     with open('README.rst', 'rt') as f:
