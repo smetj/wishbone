@@ -24,8 +24,10 @@
 
 from wishbone.error import ModuleInitFailure
 from collections import namedtuple
+from uplook import UpLook
 import importlib
 import re
+import sys
 
 
 class Lookup(object):
@@ -95,7 +97,7 @@ class Module(object):
 
         self.instance = instance
         self.module = module
-        self.arguments = Arguments(**arguments)
+        self.arguments = Arguments(**arguments.dump())
         (self.category, self.group, self.name) = module.split('.')
 
     def __repr__(self):
@@ -132,12 +134,15 @@ class ConfigurationFactory(object):
         self.initializeLookupModules()
 
         modules = []
+
         for (name, module, arguments) in self.source.listModules():
 
-            # find and replace lookup definitions
-            args_incl_lookups = self.replaceLookupDefsWithFunctions(arguments)
+            uplook = UpLook(**arguments)
 
-            modules.append(Module(name, module, args_incl_lookups))
+            for f in uplook.listFunctions():
+                uplook.registerLookup(f, self.lookup_methods[f])
+            uplook.parseArguments()
+            modules.append(Module(name, module, uplook))
 
         routes = []
         for (sm, sq, dm, dq) in self.source.listRoutes():
@@ -154,47 +159,10 @@ class ConfigurationFactory(object):
     def initializeLookupModules(self):
 
         for (name, module, arguments) in self.source.listLookups():
-            m = importlib.import_module(module)
-            self.lookup_methods[name] = m.Config(**arguments)
 
-        m = importlib.import_module("wishbone.lookup.event")
-        self.lookup_methods["event"] = m.Config()
+            base = ".".join(module.split('.')[0:-1])
+            function = module.split('.')[-1]
+            m = importlib.import_module(base)
+            self.lookup_methods[name] = getattr(m, function)(**arguments)
 
-
-    def replaceLookupDefsWithFunctions(self, args):
-
-        def do(data):
-            if isinstance(data, str) and data.startswith('~'):
-                (t, lookup, var) = self.extractLookupDef(data)
-                try:
-                    if t == 'dynamic':
-                        return Lookup(self.lookup_methods[lookup].generateLookup(var))
-                    else:
-                        return self.lookup_methods[lookup].generateLookup(var)()
-                except KeyError:
-                    raise ModuleInitFailure('"%s" is an unknown lookup instance name.' % (lookup))
-            elif isinstance(data, dict):
-                for key, value in data.iteritems():
-                    data[key] = do(value)
-                return data
-            elif isinstance(data, list):
-                for (index, value) in enumerate(data):
-                    data[index] = do(value)
-                return data
-            else:
-                return data
-
-        return do(args)
-
-
-    def extractLookupDef(self, e):
-
-        m = re.match('(~*)(.*?)\([\"|\'](.*)?[\"|\']\)', e)
-        if m is None:
-            raise Exception("Invalid lookup definition: %s." % (e))
-        if m.groups()[0] == '~':
-            t = 'static'
-        elif m.groups()[0] == '~~':
-            t = 'dynamic'
-
-        return (t, m.groups()[1], m.groups()[2])
+        self.lookup_methods["event"] = getattr(importlib.import_module("wishbone.lookup"), "event")()
