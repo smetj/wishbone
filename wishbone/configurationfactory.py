@@ -126,7 +126,6 @@ class ConfigurationFactory(object):
 
             for f in uplook.listFunctions():
                 uplook.registerLookup(f, self.lookup_methods[f])
-            uplook.parseArguments()
             modules.append(Module(name, module, uplook))
 
         routes = []
