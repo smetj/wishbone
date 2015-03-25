@@ -34,18 +34,18 @@ from gevent import sleep, socket
 from gevent.event import Event
 from time import time
 from sys import exc_info
+from uplook import UpLook
 import traceback
 import inspect
 
 
-
-class ActorConfig(namedtuple('ActorConfig', 'name size frequency')):
+class ActorConfig(namedtuple('ActorConfig', 'name size frequency lookup')):
     pass
 
 
 class Actor():
 
-    def __init__(self, config, allowed_lookup_variables=[]):
+    def __init__(self, config):
 
         self.config = config
         self.name = config.name
@@ -70,7 +70,8 @@ class Actor():
         self.__parents = {}
 
         self.__lookups = {}
-        self.__mapClassVariables(allowed_lookup_variables)
+
+        self.__buildUplook()
 
     def connect(self, source, instance, destination):
         '''Connects the <source> queue to the <destination> queue.
@@ -193,6 +194,20 @@ class Actor():
                     self.submit(event, self.pool.queue.failed)
                 else:
                     self.submit(event, self.pool.queue.success)
+
+    def __buildUplook(self):
+
+        args = {}
+
+        for key, value in inspect.currentframe(2).f_locals.iteritems():
+            if key == "self" or isinstance(value, ActorConfig):
+                next
+            else:
+                args[key] = value
+
+        self.uplook = UpLook(**args)
+        for name, module in self.config.lookup.iteritems():
+            self.uplook.registerLookup(name, module)
 
     def __mapClassVariables(self, whitelist=[]):
         '''Find all parent's local variables and maps these to self.
