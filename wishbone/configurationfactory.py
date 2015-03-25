@@ -24,7 +24,6 @@
 
 from wishbone.error import ModuleInitFailure
 from collections import namedtuple
-from uplook import UpLook
 import importlib
 import re
 import sys
@@ -82,7 +81,8 @@ class Module(object):
 
         self.instance = instance
         self.module = module
-        self.arguments = Arguments(**arguments.dump())
+        # self.arguments = Arguments(**arguments.dump())
+        self.arguments = arguments
         (self.category, self.group, self.name) = module.split('.')
 
     def __repr__(self):
@@ -96,7 +96,7 @@ class Route(namedtuple('Route', 'source_module source_queue destination_module d
     pass
 
 
-class ConfigManager(namedtuple('ConfigManager', 'modules routes')):
+class ConfigManager(namedtuple('ConfigManager', 'modules routes lookup')):
 
     '''ConfigManager data type'''
 
@@ -116,17 +116,13 @@ class ConfigurationFactory(object):
         self.source = m.Config(*args, **kwargs)
 
         # initialize all defined lookup modules
-        self.initializeLookupModules()
+
+        lookup_modules = self.initializeLookupModules()
 
         modules = []
 
         for (name, module, arguments) in self.source.listModules():
-
-            uplook = UpLook(**arguments)
-
-            for f in uplook.listFunctions():
-                uplook.registerLookup(f, self.lookup_methods[f])
-            modules.append(Module(name, module, uplook))
+            modules.append(Module(name, module, arguments))
 
         routes = []
         for (sm, sq, dm, dq) in self.source.listRoutes():
@@ -138,15 +134,19 @@ class ConfigurationFactory(object):
         class Routes(set):
             pass
 
-        return ConfigManager(Modules(*modules), Routes(routes))
+        return ConfigManager(Modules(*modules), Routes(routes), lookup_modules)
 
     def initializeLookupModules(self):
+
+        modules = {}
 
         for (name, module, arguments) in self.source.listLookups():
 
             base = ".".join(module.split('.')[0:-1])
             function = module.split('.')[-1]
             m = importlib.import_module(base)
-            self.lookup_methods[name] = getattr(m, function)(**arguments)
+            modules[name] = getattr(m, function)(**arguments)
 
-        self.lookup_methods["event"] = getattr(importlib.import_module("wishbone.lookup"), "event")()
+        modules["event"] = getattr(importlib.import_module("wishbone.lookup"), "event")()
+
+        return modules
