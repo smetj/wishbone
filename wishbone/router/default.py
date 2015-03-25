@@ -169,9 +169,9 @@ class Default(multiprocessing.Process):
         '''Setup all modules and routes.'''
 
         for module in self.configuration_manager.modules:
-            arguments = {x: getattr(module.arguments, x) for x in module.arguments}
             pmodule = self.module_manager.getModuleByName(module.module)
-            self.__registerModule(pmodule, module.instance, **arguments)
+            actor_config = ActorConfig(module.instance, self.size, self.frequency, self.configuration_manager.lookup)
+            self.__registerModule(pmodule, actor_config, module.arguments)
 
         self.__setupMetricConnections()
         self.__setupLogConnections()
@@ -194,15 +194,13 @@ class Default(multiprocessing.Process):
     def __noop(self):
         pass
 
-    def __registerModule(self, module, name, *args, **kwargs):
-        '''Initializes the mdoule using the provided <args> and <kwargs>
-        arguments.'''
+    def __registerModule(self, module, actor_config, arguments={}):
+        '''Initializes the wishbone module module.'''
 
-        try:
-            actor_config = ActorConfig(name, self.size, self.frequency)
-            setattr(self.pool.module, name, module(actor_config, *args, **kwargs))
-        except Exception as err:
-            raise ModuleInitFailure("Problem loading module %s.  Reason: %s" % (name, err))
+        # try:
+        setattr(self.pool.module, actor_config.name, module(actor_config, **arguments))
+        # except Exception as err:
+        #     raise ModuleInitFailure("Problem loading module %s.  Reason: %s" % (actor_config.name, err))
 
     def __setupConnections(self):
         '''Setup all connections as defined by configuration_manager'''
@@ -213,34 +211,40 @@ class Default(multiprocessing.Process):
     def __setupLogConnections(self):
         '''Connect all log queues to a Funnel module'''
 
-        self.__registerModule(Funnel, "wishbone_logs")
+        actor_config = ActorConfig("wishbone_logs", self.size, self.frequency, self.configuration_manager.lookup)
+        self.__registerModule(Funnel, actor_config)
         for module in self.pool.list():
             module.connect("logs", self.pool.module.wishbone_logs, module.name)
 
     def __setupMetricConnections(self):
         '''Connects all metric queues to a Funnel module'''
 
-        self.__registerModule(Funnel, "wishbone_metrics")
+        actor_config = ActorConfig("wishbone_metrics", self.size, self.frequency, self.configuration_manager.lookup)
+        self.__registerModule(Funnel, actor_config)
         for module in self.pool.list():
             module.connect("metrics", self.pool.module.wishbone_metrics, module.name)
 
     def __setupSTDOUTLogging(self):
 
         log_stdout = self.module_manager.getModuleByName("wishbone.output.stdout")
+        stdout_actor_config = ActorConfig("log_stdout", self.size, self.frequency, self.configuration_manager.lookup)
+
         log_human = self.module_manager.getModuleByName("wishbone.encode.humanlogformat")
-        self.__registerModule(log_stdout, "log_stdout")
-        self.__registerModule(log_human, "log_format", ident=self.identification)
+        human_actor_config = ActorConfig("log_format", self.size, self.frequency, self.configuration_manager.lookup)
+
+        self.__registerModule(log_stdout, stdout_actor_config)
+        self.__registerModule(log_human, human_actor_config)
         try:
             self.__connect("wishbone_logs.outbox", "log_format.inbox")
             self.__connect("log_format.outbox", "log_stdout.inbox")
         except QueueConnected:
             pass
 
-
     def __setupSyslogLogging(self):
 
+        actor_config = ActorConfig("log_syslog", self.size, self.frequency, self.configuration_manager.lookup)
         log_syslog = self.module_manager.getModuleByName("wishbone.output.syslog")
-        self.__registerModule(log_syslog, "log_syslog")
+        self.__registerModule(log_syslog, actor_config)
         self.__connect("wishbone_logs.outbox", "log_syslog.inbox")
 
     def __start(self):

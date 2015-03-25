@@ -54,9 +54,6 @@ class TestEvent(Actor):
 
     def __init__(self, actor_config, interval=1, message="test", numbered=False):
         Actor.__init__(self, actor_config)
-        self.interval = interval
-        self.message = message
-        self.numbered = numbered
 
         self.pool.createQueue("outbox")
 
@@ -78,14 +75,14 @@ class TestEvent(Actor):
 
         while self.loop():
             event = self.createEvent()
-            event.data = "%s%s" % (self.message, self.number())
+            event.data = "%s%s" % (self.uplook.value.message, self.number())
             self.submit(event, self.pool.queue.outbox)
             self.sleep()
 
         self.logging.info("Stopped producing events.")
 
     def __doSleep(self):
-        sleep(self.interval)
+        sleep(self.uplook.value.interval)
 
     def __doNoSleep(self):
         pass
