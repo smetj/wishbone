@@ -29,7 +29,6 @@ from os import getpid
 class Format():
 
     def __init__(self, complete, counter, pid):
-        self.countervalue = -1
         if complete:
             self.complete = self.__returnComplete
         else:
@@ -98,12 +97,12 @@ class STDOUT(Actor):
     '''
 
     def __init__(self, actor_config, complete=False, counter=False, prefix="", pid=False):
-        Actor.__init__(self, actor_config, ["prefix"])
+        Actor.__init__(self, actor_config)
 
-        self.format = Format(complete, counter, pid)
+        self.format = Format(self.uplook.value.complete, self.uplook.value.counter, self.uplook.value.pid)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
 
-        print ("%s%s" % (self.prefix, self.format.do(event)))
+        print ("%s%s" % (self.uplook.value.prefix, self.format.do(event)))
