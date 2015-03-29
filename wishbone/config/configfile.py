@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  bootstrapfile.py
+#  configfile.py
 #
 #  Copyright 2015 Jelle Smet <development@smetj.net>
 #
@@ -23,32 +23,33 @@
 #
 
 import yaml
+from wishbone.external.attrdict import AttrDict
 
 
-class Config(object):
+class ConfigFile(object):
 
-    def __init__(self, filename):
+    def __init__(self):
 
-        self.filename = filename
-        self.__config = None
+        pass
 
-        self.__load()
-        self.__verify()
+    def load(self, filename):
 
-    def listLookups(self):
+        return AttrDict(self.__processConfig(filename), recursive=True)
 
-        if "lookups" in self.__config:
-            for lookup in self.__config["lookups"]:
-                yield lookup, self.__config["lookups"][lookup]["module"], self.__config["lookups"][lookup].get("arguments", {})
+    def __processConfig(self, filename):
 
-    def listModules(self):
-        for module in self.__config["modules"]:
-            yield module, self.__config["modules"][module]["module"], self.__config["modules"][module].get("arguments", {})
+        config = self.__load(filename)
+        if self.__verify(config):
+            config["routingtable"] = self.__processRoutes(config["routingtable"])
+        return config
 
-    def listRoutes(self):
-        for route in self.__config["routingtable"]:
-            a, b, c, d = self.__splitRoute(route)
-            yield a, b, c, d
+    def __processRoutes(self, routes):
+
+        r = []
+        for route in routes:
+            sm, sq, dm, dq = self.__splitRoute(route)
+            r.append({"source_module": sm, "source_queue": sq, "destination_module": dm, "destination_queue": dq})
+        return r
 
     def __splitRoute(self, route):
 
@@ -57,23 +58,27 @@ class Config(object):
         (destination_module, destination_queue) = destination.rstrip().lstrip().split('.')
         return source_module, source_queue, destination_module, destination_queue
 
-    def __load(self):
+    def __load(self, filename):
         '''Loads and returns the yaml bootstrap file.'''
 
         try:
-            with open(self.filename, 'r') as f:
-                self.__config = yaml.load(f)
+            with open(filename, 'r') as f:
+                config = yaml.load(f)
         except Exception as err:
             raise Exception("Failed to load bootstrap file.  Reason: %s" % (err))
+        else:
+            return config
 
-    def __verify(self):
-        assert "routingtable" in self.__config, "'routingtable' section not found in bootstrap file."
-        assert "modules" in self.__config, "'modules' section not found in bootstrap file."
-        for module in self.__config["modules"]:
-            assert "module" in self.__config["modules"][module], "Cannot find the 'module' keyword in the '%s' module definition." % (module)
+    def __verify(self, config):
+        assert "routingtable" in config, "'routingtable' section not found in bootstrap file."
+        assert "module" in config, "'module' section not found in bootstrap file."
+        for module in config["module"]:
+            assert "module" in config["module"][module], "Cannot find the 'module' keyword in the '%s' module definition." % (module)
 
-        for route in self.__config["routingtable"]:
+        for route in config["routingtable"]:
             (left, right) = route.split("->")
             assert "." in left.lstrip().rstrip(), "routingtable rule \"%s\" does not have the right format. Missing a dot." % (route)
             assert "." in right.lstrip().rstrip(), "routingtable rule \"%s\" does not have the right format. Missing a dot." % (route)
+
+        return True
 
