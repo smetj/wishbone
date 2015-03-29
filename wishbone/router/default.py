@@ -27,6 +27,7 @@ from wishbone.module import Funnel
 from wishbone.error import ModuleInitFailure, NoSuchModule, QueueConnected
 from gevent import signal, event, sleep
 import multiprocessing
+import importlib
 
 
 class Container():
@@ -62,7 +63,7 @@ class Default(multiprocessing.Process):
 
     Arguments:
 
-        - configuration_manager(obj)    : A Wishbone ConfigManager object instance.
+        - router_config(obj)            : The router setup configuration.
 
         - module_manager(obj)           : A Wishbone ModuleManager object instance.
 
@@ -80,12 +81,13 @@ class Default(multiprocessing.Process):
 
     '''
 
-    def __init__(self, configuration_manager, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False):
+    def __init__(self, router_config, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False):
 
         if process:
             multiprocessing.Process.__init__(self)
             self.daemon = True
-        self.configuration_manager = configuration_manager
+        # self.configuration_manager = configuration_manager
+        self.config = router_config
         self.module_manager = module_manager
         self.size = size
         self.frequency = frequency
@@ -168,10 +170,14 @@ class Default(multiprocessing.Process):
     def __initConfig(self):
         '''Setup all modules and routes.'''
 
-        for module in self.configuration_manager.modules:
-            pmodule = self.module_manager.getModuleByName(module.module)
-            actor_config = ActorConfig(module.instance, self.size, self.frequency, self.configuration_manager.lookup)
-            self.__registerModule(pmodule, actor_config, module.arguments)
+        lookup_modules = {}
+        for name, config in self.config.lookup.iteritems():
+            lookup_modules[name] = self.__registerLookupModule(config.module, config.get('arguments', {}))
+
+        for name, instance in self.config.module.iteritems():
+            pmodule = self.module_manager.getModuleByName(instance.module)
+            actor_config = ActorConfig(name, self.size, self.frequency, lookup_modules)
+            self.__registerModule(pmodule, actor_config, instance.get("arguments", {}))
 
         self.__setupMetricConnections()
         self.__setupLogConnections()
@@ -194,6 +200,13 @@ class Default(multiprocessing.Process):
     def __noop(self):
         pass
 
+    def __registerLookupModule(self, name, arguments):
+
+        base = ".".join(name.split('.')[0:-1])
+        function = name.split('.')[-1]
+        m = importlib.import_module(base)
+        return getattr(m, function)(**arguments)
+
     def __registerModule(self, module, actor_config, arguments={}):
         '''Initializes the wishbone module module.'''
 
@@ -205,13 +218,13 @@ class Default(multiprocessing.Process):
     def __setupConnections(self):
         '''Setup all connections as defined by configuration_manager'''
 
-        for route in self.configuration_manager.routes:
+        for route in self.config.routingtable:
             self.__connect("%s.%s" % (route.source_module, route.source_queue), "%s.%s" % (route.destination_module, route.destination_queue))
 
     def __setupLogConnections(self):
         '''Connect all log queues to a Funnel module'''
 
-        actor_config = ActorConfig("wishbone_logs", self.size, self.frequency, self.configuration_manager.lookup)
+        actor_config = ActorConfig("wishbone_logs", self.size, self.frequency, self.config.lookup)
         self.__registerModule(Funnel, actor_config)
         for module in self.pool.list():
             module.connect("logs", self.pool.module.wishbone_logs, module.name)
@@ -219,7 +232,7 @@ class Default(multiprocessing.Process):
     def __setupMetricConnections(self):
         '''Connects all metric queues to a Funnel module'''
 
-        actor_config = ActorConfig("wishbone_metrics", self.size, self.frequency, self.configuration_manager.lookup)
+        actor_config = ActorConfig("wishbone_metrics", self.size, self.frequency, self.config.lookup)
         self.__registerModule(Funnel, actor_config)
         for module in self.pool.list():
             module.connect("metrics", self.pool.module.wishbone_metrics, module.name)
@@ -227,10 +240,10 @@ class Default(multiprocessing.Process):
     def __setupSTDOUTLogging(self):
 
         log_stdout = self.module_manager.getModuleByName("wishbone.output.stdout")
-        stdout_actor_config = ActorConfig("log_stdout", self.size, self.frequency, self.configuration_manager.lookup)
+        stdout_actor_config = ActorConfig("log_stdout", self.size, self.frequency, self.config.lookup)
 
         log_human = self.module_manager.getModuleByName("wishbone.encode.humanlogformat")
-        human_actor_config = ActorConfig("log_format", self.size, self.frequency, self.configuration_manager.lookup)
+        human_actor_config = ActorConfig("log_format", self.size, self.frequency, self.config.lookup)
 
         self.__registerModule(log_stdout, stdout_actor_config)
         self.__registerModule(log_human, human_actor_config)
@@ -242,7 +255,7 @@ class Default(multiprocessing.Process):
 
     def __setupSyslogLogging(self):
 
-        actor_config = ActorConfig("log_syslog", self.size, self.frequency, self.configuration_manager.lookup)
+        actor_config = ActorConfig("log_syslog", self.size, self.frequency, self.config.lookup)
         log_syslog = self.module_manager.getModuleByName("wishbone.output.syslog")
         self.__registerModule(log_syslog, actor_config)
         self.__connect("wishbone_logs.outbox", "log_syslog.inbox")
