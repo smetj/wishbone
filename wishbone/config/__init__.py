@@ -1,1 +1,1 @@
-from bootstrapfile import Config
+from configfile import ConfigFile

@@ -29,6 +29,7 @@ import sys
 from wishbone.router import Default
 from wishbone import ModuleManager
 from wishbone import ConfigurationFactory
+from wishbone.config import ConfigFile
 from wishbone.utils import PIDFile
 from gevent import signal
 from daemon import DaemonContext
@@ -119,14 +120,14 @@ class Dispatch():
         signal(2, stopSequence)
 
         module_manager = ModuleManager()
-        configuration_manager = ConfigurationFactory().factory("wishbone.config.bootstrapfile", config)
+        router_config = ConfigFile().load(config)
 
         if instances == 1:
             sys.stdout.write("\nInstance started in foreground with pid %s\n" % (os.getpid()))
-            Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True).start()
+            Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True).start()
         else:
             for instance in range(instances):
-                processes.append(Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, process=True).start())
+                processes.append(Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, process=True).start())
             pids = [str(p.pid) for p in processes]
             print("\nInstances started in foreground with pid %s\n" % (", ".join(pids)))
             for proc in processes:
