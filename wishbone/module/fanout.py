@@ -58,7 +58,7 @@ class Fanout(Actor):
             if queue != "inbox":
                 self.destinations.append(self.pool.getQueue(queue))
 
-        if self.deep_copy:
+        if self.kwargs.deep_copy:
             self.copy = self.__doDeepCopy
         else:
             self.copy = self.__doNoDeepCopy

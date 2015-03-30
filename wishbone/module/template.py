@@ -64,7 +64,7 @@ class Template(Actor):
     '''
 
     def __init__(self, actor_config, location="./", template=None, header_templates=[]):
-        Actor.__init__(self, actor_config, ["template"])
+        Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
@@ -72,8 +72,8 @@ class Template(Actor):
 
     def preHook(self):
 
-        if self.template is not None:
-            self.templates = Environment(loader=FileSystemLoader(self.location))
+        if self.kwargs.template is not None:
+            self.kwargs.templates = Environment(loader=FileSystemLoader(self.kwargs.location))
 
     def consume(self, event):
         event = self.construct(event)
@@ -81,7 +81,7 @@ class Template(Actor):
 
     def construct(self, event):
 
-        for template_ref in self.header_templates:
+        for template_ref in self.kwargs.header_templates:
             try:
                 (namespace, part, variable) = template_ref.split('.')
                 template = event.getHeaderValue(namespace, variable)
@@ -92,11 +92,11 @@ class Template(Actor):
                     "Failed to convert header key '%s'.  Reason: %s" % (variable, err))
                 raise
 
-        if self.template is not None:
+        if self.kwargs.template is not None:
             try:
-                template = self.templates.get_template(self.template)
+                template = self.kwargs.templates.get_template(self.kwargs.template)
             except Exception as err:
-                self.logging.error('No template found with filename "%s%s".' % (self.location, self.template))
+                self.logging.error('No template found with filename "%s%s".' % (self.kwargs.location, self.kwargs.template))
                 raise
             else:
                 try:

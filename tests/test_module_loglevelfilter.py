@@ -28,12 +28,12 @@ from wishbone.event import Event
 from wishbone.module import LogLevelFilter
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
-
 from utils import getter
+
 
 def test_module_loglevelfilter():
 
-    actor_config = ActorConfig('loglevelfilter', 100, 1)
+    actor_config = ActorConfig('loglevelfilter', 100, 1, {})
     loglevelfilter = LogLevelFilter(actor_config)
     loglevelfilter.pool.queue.inbox.disableFallThrough()
     loglevelfilter.pool.queue.outbox.disableFallThrough()
@@ -44,7 +44,6 @@ def test_module_loglevelfilter():
 
     e_two = Event('test')
     e_two.setData((1, 1367682301.430527, 3342, 'Router', 'Received SIGINT. Shutting down.'))
-
 
     loglevelfilter.pool.queue.inbox.put(e_one)
     loglevelfilter.pool.queue.inbox.put(e_two)
