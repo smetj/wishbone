@@ -28,12 +28,12 @@ from wishbone.event import Event
 from wishbone.module import JSONEncode
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
-
 from utils import getter
+
 
 def test_module_jsonencode():
 
-    actor_config = ActorConfig('jsonencode', 100, 1)
+    actor_config = ActorConfig('jsonencode', 100, 1, {})
     jsonencode = JSONEncode(actor_config)
 
     jsonencode.pool.queue.inbox.disableFallThrough()
@@ -44,5 +44,5 @@ def test_module_jsonencode():
     e.setData(["one", "two", "three"])
 
     jsonencode.pool.queue.inbox.put(e)
-    one=getter(jsonencode.pool.queue.outbox)
+    one = getter(jsonencode.pool.queue.outbox)
     assert one.data == '["one", "two", "three"]'

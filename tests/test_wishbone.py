@@ -27,6 +27,8 @@ import pytest
 from wishbone import QueuePool
 from wishbone import Queue
 from wishbone.error import QueueEmpty
+from utils import getter
+
 
 def test_listQueues():
     q = QueuePool(1)
@@ -50,19 +52,3 @@ def test_getQueue():
     q = QueuePool(1)
     q.createQueue("test")
     assert isinstance(q.getQueue("test"), Queue)
-
-
-
-
-
-def getter(queue):
-    counter = 0
-    while True:
-        counter += 1
-        if counter >= 5:
-            return None
-        else:
-            try:
-                return queue.get()
-            except QueueEmpty as err:
-                err.waitUntilContent()
