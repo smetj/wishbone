@@ -28,12 +28,12 @@ from wishbone.event import Event
 from wishbone.module import MSGPackDecode
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
-
 from utils import getter
+
 
 def test_module_msgpackdecode():
 
-    actor_config = ActorConfig('msgpackdecode', 100, 1)
+    actor_config = ActorConfig('msgpackdecode', 100, 1, {})
     msgpackdecode = MSGPackDecode(actor_config)
 
     msgpackdecode.pool.queue.inbox.disableFallThrough()
@@ -44,5 +44,5 @@ def test_module_msgpackdecode():
     e.setData('\x93\x01\x02\x03')
 
     msgpackdecode.pool.queue.inbox.put(e)
-    one=getter(msgpackdecode.pool.queue.outbox)
+    one = getter(msgpackdecode.pool.queue.outbox)
     assert one.data == [1, 2, 3]

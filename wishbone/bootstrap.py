@@ -28,7 +28,6 @@ import sys
 
 from wishbone.router import Default
 from wishbone import ModuleManager
-from wishbone import ConfigurationFactory
 from wishbone.config import ConfigFile
 from wishbone.utils import PIDFile
 from gevent import signal
@@ -179,20 +178,20 @@ class Dispatch():
         '''
 
         module_manager = ModuleManager()
-        configuration_manager = ConfigurationFactory().factory("wishbone.config.bootstrapfile", config)
+        router_config = ConfigFile().load(config)
         pid_file = PIDFile(pid)
 
         with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
             if instances == 1:
                 sys.stdout.write("\nWishbone instance started with pid %s\n" % (os.getpid()))
                 pid_file.create([os.getpid()])
-                Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False).start()
+                Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False).start()
             else:
                 processes = []
                 for instance in range(instances):
-                    processes.append(Default(configuration_manager, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, process=True).start())
+                    processes.append(Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, process=True).start())
                 pids = [str(p.pid) for p in processes]
-                print ("\n%s Wishbone instances started in background with pid %s\n" % (len(pids), ", ".join(pids)))
+                print("\n%s Wishbone instances started in background with pid %s\n" % (len(pids), ", ".join(pids)))
                 pid_file.create(pids)
                 for proc in processes:
                     proc.join()
@@ -246,6 +245,7 @@ class Dispatch():
             return True
         except:
             False
+
 
 def main():
     BootStrap()

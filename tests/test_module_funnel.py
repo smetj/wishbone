@@ -34,7 +34,7 @@ from utils import getter
 
 def test_module_funnel():
 
-    actor_config = ActorConfig('funnel', 100, 1)
+    actor_config = ActorConfig('funnel', 100, 1, {})
     funnel = Funnel(actor_config)
     funnel.pool.queue.outbox.disableFallThrough()
 

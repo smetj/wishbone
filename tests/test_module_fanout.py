@@ -28,12 +28,12 @@ from wishbone.event import Event
 from wishbone.module import Fanout
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
-
 from utils import getter
+
 
 def test_module_fanout():
 
-    actor_config = ActorConfig('fanout', 100, 1)
+    actor_config = ActorConfig('fanout', 100, 1, {})
     fanout = Fanout(actor_config, deep_copy=True)
     fanout.pool.queue.inbox.disableFallThrough()
 
@@ -49,8 +49,8 @@ def test_module_fanout():
     e.setData("hello")
 
     fanout.pool.queue.inbox.put(e)
-    one=getter(fanout.pool.queue.one)
-    two=getter(fanout.pool.queue.two)
+    one = getter(fanout.pool.queue.one)
+    two = getter(fanout.pool.queue.two)
 
     fanout.stop()
 

@@ -34,7 +34,7 @@ from utils import getter
 
 def test_module_roundrobin():
 
-    actor_config = ActorConfig('roundrobin', 100, 1)
+    actor_config = ActorConfig('roundrobin', 100, 1, {})
     roundrobin = RoundRobin(actor_config)
 
     roundrobin.pool.queue.inbox.disableFallThrough()

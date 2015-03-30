@@ -28,12 +28,12 @@ from wishbone.event import Event
 from wishbone.module import Graphite
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
-
 from utils import getter
+
 
 def test_module_graphite():
 
-    actor_config = ActorConfig('graphite', 100, 1)
+    actor_config = ActorConfig('graphite', 100, 1, {})
     graphite = Graphite(actor_config)
     graphite.pool.queue.inbox.disableFallThrough()
     graphite.pool.queue.outbox.disableFallThrough()
@@ -43,7 +43,7 @@ def test_module_graphite():
     e.setData((1381002603.726132, 'wishbone', 'hostname', 'queue.outbox.in_rate', 0, '', ()))
 
     graphite.pool.queue.inbox.put(e)
-    one=getter(graphite.pool.queue.outbox)
+    one = getter(graphite.pool.queue.outbox)
 
     assert one.last.data == "hostname.setup.queue.outbox.in_rate 0 1381002603.73"
 
