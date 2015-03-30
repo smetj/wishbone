@@ -75,14 +75,14 @@ class TestEvent(Actor):
 
         while self.loop():
             event = self.createEvent()
-            event.data = "%s%s" % (self.uplook.value.message, self.number())
+            event.data = "%s%s" % (self.kwargs.message, self.number())
             self.submit(event, self.pool.queue.outbox)
             self.sleep()
 
         self.logging.info("Stopped producing events.")
 
     def __doSleep(self):
-        sleep(self.uplook.value.interval)
+        sleep(self.kwargs.interval)
 
     def __doNoSleep(self):
         pass

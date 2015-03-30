@@ -205,9 +205,10 @@ class Actor():
             else:
                 args[key] = value
 
-        self.uplook = UpLook(**args)
+        uplook = UpLook(**args)
         for name, module in self.config.lookup.iteritems():
-            self.uplook.registerLookup(name, module)
+            uplook.registerLookup(name, module)
+        self.kwargs = uplook.get()
 
     def __mapClassVariables(self, whitelist=[]):
         '''Find all parent's local variables and maps these to self.

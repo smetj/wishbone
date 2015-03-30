@@ -28,12 +28,12 @@ from wishbone.event import Event
 from wishbone.module import Header
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
-
 from utils import getter
+
 
 def test_module_header():
 
-    actor_config = ActorConfig('header', 100, 1)
+    actor_config = ActorConfig('header', 100, 1, {})
     header = Header(actor_config, header={"greeting": "hello"})
 
     header.pool.queue.inbox.disableFallThrough()
@@ -44,5 +44,5 @@ def test_module_header():
     e.setData('hello')
 
     header.pool.queue.inbox.put(e)
-    one=getter(header.pool.queue.outbox)
+    one = getter(header.pool.queue.outbox)
     assert one.getHeaderValue("header", "greeting") == "hello"

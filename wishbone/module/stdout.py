@@ -99,10 +99,10 @@ class STDOUT(Actor):
     def __init__(self, actor_config, complete=False, counter=False, prefix="", pid=False):
         Actor.__init__(self, actor_config)
 
-        self.format = Format(self.uplook.value.complete, self.uplook.value.counter, self.uplook.value.pid)
+        self.format = Format(self.kwargs.complete, self.kwargs.counter, self.kwargs.pid)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
 
-        print ("%s%s" % (self.uplook.value.prefix, self.format.do(event)))
+        print ("%s%s" % (self.kwargs.prefix, self.format.do(event)))

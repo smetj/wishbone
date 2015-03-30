@@ -29,14 +29,14 @@ from wishbone.module import JSONValidate
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 import os
-
 from utils import getter
+
 
 def test_module_jsonvalidate():
 
-    actor_config = ActorConfig('jsonvalidate', 100, 1)
+    actor_config = ActorConfig('jsonvalidate', 100, 1, {})
 
-    with open ("jsonvalidate.jsonschema", "w") as j:
+    with open("jsonvalidate.jsonschema", "w") as j:
         j.write('{"type": "object", "properties": {"one": { "type": "integer"}}}')
 
     jsonvalidate = JSONValidate(actor_config, "jsonvalidate.jsonschema")
@@ -61,4 +61,3 @@ def test_module_jsonvalidate():
     os.remove("jsonvalidate.jsonschema")
     assert valid_event.data == {"one": 1}
     assert invalid_event.data == {"one": "one"}
-

@@ -37,71 +37,71 @@ def test_module_match():
     rules = {
         "regex": {
             "condition": [
-                { "regex": "re:.*?two.*" }
+                {"regex": "re:.*?two.*"}
             ],
             "queue": [
-                {"regex":{}}
+                {"regex": {}}
             ]
         },
         "neg_regex": {
             "condition": [
-                { "neg_regex": "!re:.*?two.*" }
+                {"neg_regex": "!re:.*?two.*"}
             ],
             "queue": [
-                {"neg_regex":{}}
+                {"neg_regex": {}}
             ]
         },
         "bigger": {
             "condition": [
-                { "bigger": ">:10" }
+                {"bigger": ">:10"}
             ],
             "queue": [
-                {"bigger":{}}
+                {"bigger": {}}
             ]
         },
         "bigger_equal": {
             "condition": [
-                { "bigger_equal": ">=:10" }
+                {"bigger_equal": ">=:10"}
             ],
             "queue": [
-                {"bigger_equal":{}}
+                {"bigger_equal": {}}
             ]
         },
         "smaller": {
             "condition": [
-                { "smaller": "<:100" }
+                {"smaller": "<:100"}
             ],
             "queue": [
-                {"smaller":{}}
+                {"smaller": {}}
             ]
         },
         "smaller_equal": {
             "condition": [
-                { "smaller_equal": "<=:100" }
+                {"smaller_equal": "<=:100"}
             ],
             "queue": [
-                {"smaller_equal":{}}
+                {"smaller_equal": {}}
             ]
         },
         "equal": {
             "condition": [
-                { "equal": "=:100" }
+                {"equal": "=:100"}
             ],
             "queue": [
-                {"equal":{}}
+                {"equal": {}}
             ]
         },
         "list_membership": {
             "condition": [
-                { "list_membership": "in:test" }
+                {"list_membership": "in:test"}
             ],
             "queue": [
-                {"list_membership":{}}
+                {"list_membership": {}}
             ]
         }
     }
 
-    actor_config = ActorConfig('match', 100, 1)
+    actor_config = ActorConfig('match', 100, 1, {})
     match = Match(actor_config, rules=rules)
 
     match.pool.queue.inbox.disableFallThrough()
@@ -111,25 +111,25 @@ def test_module_match():
 
     match.start()
 
-    #regex
+    # regex
     e = Event("test")
     e.setData({"regex": "one two three"})
     match.pool.queue.inbox.put(e)
     assert getter(match.pool.queue.regex).data["regex"] == "one two three"
 
-    #neg_regex
+    # neg_regex
     e = Event("test")
     e.setData({"neg_regex": "one twwo three"})
     match.pool.queue.inbox.put(e)
     assert getter(match.pool.queue.neg_regex).data["neg_regex"] == "one twwo three"
 
-    #bigger
+    # bigger
     e = Event("test")
     e.setData({"bigger": "100"})
     match.pool.queue.inbox.put(e)
     assert getter(match.pool.queue.bigger).data["bigger"] == "100"
 
-    #bigger_equal
+    # bigger_equal
     one = Event("test")
     one.setData({"bigger_equal": "100"})
     two = Event("test")
@@ -139,14 +139,14 @@ def test_module_match():
     assert int(getter(match.pool.queue.bigger_equal).data["bigger_equal"]) == 100
     assert int(getter(match.pool.queue.bigger_equal).data["bigger_equal"]) > 100
 
-    #smaller
+    # smaller
     one = Event("test")
     one.setData({"smaller": "99"})
     match.pool.queue.inbox.put(one)
     match.pool.queue.inbox.put(two)
     assert int(getter(match.pool.queue.smaller).data["smaller"]) < 100
 
-    #smaller_equal
+    # smaller_equal
     one = Event("test")
     one.setData({"smaller_equal": "100"})
     two = Event("test")
@@ -156,13 +156,13 @@ def test_module_match():
     assert int(getter(match.pool.queue.smaller_equal).data["smaller_equal"]) == 100
     assert int(getter(match.pool.queue.smaller_equal).data["smaller_equal"]) < 100
 
-    #equal
+    # equal
     one = Event("test")
     one.setData({"equal": "100"})
     match.pool.queue.inbox.put(one)
     assert int(getter(match.pool.queue.equal).data["equal"]) == 100
 
-    #list_membership
+    # list_membership
     one = Event("test")
     one.setData({"list_membership": ["one", "test", "two"]})
     match.pool.queue.inbox.put(one)
