@@ -171,10 +171,10 @@ class Default(multiprocessing.Process):
         '''Setup all modules and routes.'''
 
         lookup_modules = {}
-        for name, config in self.config.lookup.iteritems():
+        for name, config in self.config.lookups.iteritems():
             lookup_modules[name] = self.__registerLookupModule(config.module, config.get('arguments', {}))
 
-        for name, instance in self.config.module.iteritems():
+        for name, instance in self.config.modules.iteritems():
             pmodule = self.module_manager.getModuleByName(instance.module)
             actor_config = ActorConfig(name, self.size, self.frequency, lookup_modules)
             self.__registerModule(pmodule, actor_config, instance.get("arguments", {}))
@@ -224,7 +224,7 @@ class Default(multiprocessing.Process):
     def __setupLogConnections(self):
         '''Connect all log queues to a Funnel module'''
 
-        actor_config = ActorConfig("wishbone_logs", self.size, self.frequency, self.config.lookup)
+        actor_config = ActorConfig("wishbone_logs", self.size, self.frequency, self.config.lookups)
         self.__registerModule(Funnel, actor_config)
         for module in self.pool.list():
             module.connect("logs", self.pool.module.wishbone_logs, module.name)
@@ -232,7 +232,7 @@ class Default(multiprocessing.Process):
     def __setupMetricConnections(self):
         '''Connects all metric queues to a Funnel module'''
 
-        actor_config = ActorConfig("wishbone_metrics", self.size, self.frequency, self.config.lookup)
+        actor_config = ActorConfig("wishbone_metrics", self.size, self.frequency, self.config.lookups)
         self.__registerModule(Funnel, actor_config)
         for module in self.pool.list():
             module.connect("metrics", self.pool.module.wishbone_metrics, module.name)
@@ -240,10 +240,10 @@ class Default(multiprocessing.Process):
     def __setupSTDOUTLogging(self):
 
         log_stdout = self.module_manager.getModuleByName("wishbone.output.stdout")
-        stdout_actor_config = ActorConfig("log_stdout", self.size, self.frequency, self.config.lookup)
+        stdout_actor_config = ActorConfig("log_stdout", self.size, self.frequency, self.config.lookups)
 
         log_human = self.module_manager.getModuleByName("wishbone.encode.humanlogformat")
-        human_actor_config = ActorConfig("log_format", self.size, self.frequency, self.config.lookup)
+        human_actor_config = ActorConfig("log_format", self.size, self.frequency, self.config.lookups)
 
         self.__registerModule(log_stdout, stdout_actor_config)
         self.__registerModule(log_human, human_actor_config)
@@ -255,7 +255,7 @@ class Default(multiprocessing.Process):
 
     def __setupSyslogLogging(self):
 
-        actor_config = ActorConfig("log_syslog", self.size, self.frequency, self.config.lookup)
+        actor_config = ActorConfig("log_syslog", self.size, self.frequency, self.config.lookups)
         log_syslog = self.module_manager.getModuleByName("wishbone.output.syslog")
         self.__registerModule(log_syslog, actor_config)
         self.__connect("wishbone_logs.outbox", "log_syslog.inbox")

@@ -71,9 +71,9 @@ class ConfigFile(object):
 
     def __verify(self, config):
         assert "routingtable" in config, "'routingtable' section not found in bootstrap file."
-        assert "module" in config, "'module' section not found in bootstrap file."
-        for module in config["module"]:
-            assert "module" in config["module"][module], "Cannot find the 'module' keyword in the '%s' module definition." % (module)
+        assert "modules" in config, "'module' section not found in bootstrap file."
+        for module in config["modules"]:
+            assert "module" in config["modules"][module], "Cannot find the 'module' keyword in the '%s' module definition." % (module)
 
         for route in config["routingtable"]:
             (left, right) = route.split("->")
