@@ -68,26 +68,17 @@ class DictGenerator(Actor):
     def __init__(self, actor_config, keys=[], randomize_keys=True, num_values=False, num_values_min=0, num_values_max=1, min_elements=1, max_elements=1, interval=1):
         Actor.__init__(self, actor_config)
 
-        self.keys = keys
-        self.randomize_keys = randomize_keys
-        self.num_values = num_values
-        self.num_values_min = num_values_min
-        self.num_values_max = num_values_max
-        self.min_elements = min_elements
-        self.max_elements = max_elements
         self.wordlist = self.readWordlist()
-        self.interval = interval
-
         self._total = 0
 
         self.key_number = -1
 
-        if self.randomize_keys:
+        if self.kwargs.randomize_keys:
             self.generateKey = self.pickWord
         else:
             self.generateKey = self.generateKeyNumber
 
-        if self.num_values:
+        if self.kwargs.num_values:
             self.generateValue = self.generateValueNumber
         else:
             self.generateValue = self.pickWord
@@ -100,12 +91,12 @@ class DictGenerator(Actor):
 
     def preHook(self):
 
-        if self.interval > 0:
+        if self.kwargs.interval > 0:
             self.sleep = self.__doSleep
         else:
             self.sleep = self.__doNoSleep
 
-        if self.keys != []:
+        if self.kwargs.keys != []:
             self.getDict = self.getDictPredefinedKeys
         else:
             self.getDict = self.getDictGeneratedKeys
@@ -124,7 +115,7 @@ class DictGenerator(Actor):
     def getDictPredefinedKeys(self):
 
         d = {}
-        for key in self.keys:
+        for key in self.kwargs.keys:
             d[key] = self.pickWord()
 
         return d
@@ -132,7 +123,7 @@ class DictGenerator(Actor):
     def getDictGeneratedKeys(self):
 
         d = {}
-        for x in xrange(0, randint(self.min_elements, self.max_elements)):
+        for x in xrange(0, randint(self.kwargs.min_elements, self.kwargs.max_elements)):
             d[self.generateKey()] = self.generateValue()
         return d
 
@@ -148,7 +139,7 @@ class DictGenerator(Actor):
 
     def generateValueInteger(self):
         '''Returns a random number.'''
-        return randint(self.num_values_min, self.num_values_max)
+        return randint(self.kwargs.num_values_min, self.kwargs.num_values_max)
 
     def generateKeyNumber(self):
         '''Generates a key by incrementing integer.'''
@@ -156,7 +147,7 @@ class DictGenerator(Actor):
         return str(self.key_number)
 
     def __doSleep(self):
-        sleep(self.interval)
+        sleep(self.kwargs.interval)
 
     def __doNoSleep(self):
         pass
