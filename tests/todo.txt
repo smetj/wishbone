@@ -11,7 +11,7 @@
     gearmanin.py
 *   graphite.py
 *   header.py
-    httpinclient.py
+*   httpinclient.py
     httpinserver.py
     httpoutclient.py
 *   humanlogformat.py
