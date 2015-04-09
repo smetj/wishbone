@@ -28,6 +28,9 @@ Bugfixes:
 - Fix to minimize gethostbyname() lookups in logging.
 - Fixed bugs in wishbone.input.amqp
 - Fixed bugs in wishbone.output.amqp
+- Added module wishbone.output.http
+- Exceptions are now *always* logged with line number, type, and message.
+- Match module now support negative list membership testing.
 
 
 Version 1.0.3
