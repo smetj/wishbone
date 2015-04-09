@@ -18,6 +18,7 @@ Features:
   and "wishbone_logs" respectively.
 - Added function module KeyValue
 - Added output module Elasticsearch
+- Match module now support negative list membership testing.
 - Added tests for each module.
 
 Bugfixes:
