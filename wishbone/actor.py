@@ -210,25 +210,6 @@ class Actor():
             uplook.registerLookup(name, module)
         self.kwargs = uplook.get()
 
-    def __mapClassVariables(self, whitelist=[]):
-        '''Find all parent's local variables and maps these to self.
-        If any variable of type EventLookup is found then an event lookup is
-        performed for that key and if a value is returned it will be set as
-        self.<variable> to be used by the parent class
-        '''
-
-        for key, value in inspect.currentframe(2).f_locals.iteritems():
-            if key == "self" or isinstance(value, ActorConfig):
-                next
-            elif isinstance(value, EventLookup):
-                if key in whitelist:
-                    self.__lookups[key] = value
-                    setattr(self, key, None)
-                else:
-                    raise ModuleInitFailure('Module parameter "%s" for instance "%s" is not allowed to be an EventLookup type.' % (key, self.name))
-            else:
-                setattr(self, key, value)
-
     def __metricEmitter(self):
         '''A greenthread which collects the queue metrics at the defined interval.'''
 
