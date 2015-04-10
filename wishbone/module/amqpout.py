@@ -1,4 +1,4 @@
-    #!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  amqpout.py
@@ -106,25 +106,25 @@ class AMQPOut(Actor):
 
         message = basic_message.Message(body=str(event.data))
         self.channel.basic_publish(message,
-                                   exchange=self.exchange,
-                                   routing_key=self.routing_key)
+                                   exchange=self.kwargs.exchange,
+                                   routing_key=self.kwargs.routing_key)
 
     def setupConnectivity(self):
 
         while self.loop():
             try:
-                self.connection = amqp_connection(host=self.host, port=self.port, virtual_host=self.vhost, userid=self.user, password=self.password)
+                self.connection = amqp_connection(host=self.kwargs.host, port=self.kwargs.port, virtual_host=self.kwargs.vhost, userid=self.kwargs.user, password=self.kwargs.password)
                 self.channel = self.connection.channel()
 
-                if self.exchange != "":
-                    self.channel.exchange_declare(self.exchange, self.exchange_type, durable=self.exchange_durable)
-                    self.logging.debug("Declared exchange %s." % (self.exchange))
-                if self.queue != "":
-                    self.channel.queue_declare(self.queue, durable=self.queue_durable, exclusive=self.queue_exclusive, auto_delete=self.queue_auto_delete)
-                    self.logging.debug("Declared queue %s." % (self.queue))
-                if self.exchange != "" and self.queue != "":
-                    self.channel.queue_bind(self.queue, self.exchange, routing_key=self.routing_key)
-                    self.logging.debug("Bound queue %s to exchange %s." % (self.queue, self.exchange))
+                if self.kwargs.exchange != "":
+                    self.channel.exchange_declare(self.kwargs.exchange, self.kwargs.exchange_type, durable=self.kwargs.exchange_durable)
+                    self.logging.debug("Declared exchange %s." % (self.kwargs.exchange))
+                if self.kwargs.queue != "":
+                    self.channel.queue_declare(self.kwargs.queue, durable=self.kwargs.queue_durable, exclusive=self.kwargs.queue_exclusive, auto_delete=self.kwargs.queue_auto_delete)
+                    self.logging.debug("Declared queue %s." % (self.kwargs.queue))
+                if self.kwargs.exchange != "" and self.kwargs.queue != "":
+                    self.channel.queue_bind(self.kwargs.queue, self.kwargs.exchange, routing_key=self.kwargs.routing_key)
+                    self.logging.debug("Bound queue %s to exchange %s." % (self.kwargs.queue, self.kwargs.exchange))
 
                 self.logging.info("Connected to broker.")
                 break
