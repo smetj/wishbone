@@ -28,8 +28,10 @@ from copy import deepcopy
 class Container():
     pass
 
+
 class Namespace():
     pass
+
 
 class Module():
 
