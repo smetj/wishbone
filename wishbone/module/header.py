@@ -57,15 +57,10 @@ class Header(Actor):
     def __init__(self, actor_config, namespace=None, header={}, expr=None):
         Actor.__init__(self, actor_config)
 
-        if namespace == None:
-            self.namespace = self.name
-        else:
-            self.namespace = namespace
+        if namespace is None:
+            self.kwargs.namespace = self.name
 
-        self.header = header
-        self.expr = expr
-
-        if expr is None:
+        if self.kwargs.expr is None:
             self.addHeader = self.__doHeader
         else:
             self.addHeader = self.__doPrintf
@@ -79,13 +74,13 @@ class Header(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def __doHeader(self, event):
-        for key in self.header:
-            event.setHeaderValue(key, self.header[key], self.namespace)
+        for key in self.kwargs.header:
+            event.setHeaderValue(key, self.kwargs.header[key], self.kwargs.namespace)
         return event
 
     def __doPrintf(self, event):
         try:
-            return self.expr % event.data
+            return self.kwargs.expr % event.data
         except Exception as err:
             self.logging.error("String replace failed.  Reason: %s" % (err))
             return event
