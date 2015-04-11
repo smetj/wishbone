@@ -22,6 +22,7 @@
 #
 #
 
+
 from wishbone import Actor
 from gevent import spawn, sleep
 from gevent import monkey
@@ -65,24 +66,18 @@ class GearmanIn(Actor):
     def __init__(self, actor_config, hostlist=["localhost:4730"], secret=None, workers=1, queue="wishbone"):
         Actor.__init__(self, actor_config)
 
-        self.hostlist = hostlist
-        self.secret = secret
-        self.workers = workers
-        self.queue = queue
-
         self.pool.createQueue("outbox")
-
         self.background_instances = []
 
-        if self.secret is None:
+        if self.kwargs.secret is None:
             self.decrypt = self.__plainTextJob
         else:
-            key = self.secret[0:32]
+            key = self.kwargs.secret[0:32]
             self.cipher = AES.new(key + chr(0) * (32 - len(key)))
             self.decrypt = self.__encryptedJob
 
     def preHook(self):
-        for _ in range(self.workers):
+        for _ in range(self.kwargs.workers):
             spawn(self.gearmanWorker)
 
     def consume(self, gearman_worker, gearman_job):
@@ -104,8 +99,8 @@ class GearmanIn(Actor):
         self.logging.info("Gearmand worker instance started")
         while self.loop():
             try:
-                worker_instance = GearmanWorker(self.hostlist)
-                worker_instance.register_task(self.queue, self.consume)
+                worker_instance = GearmanWorker(self.kwargs.hostlist)
+                worker_instance.register_task(self.kwargs.queue, self.consume)
                 worker_instance.work()
             except Exception as err:
                 self.logging.warn('Connection to gearmand failed. Reason: %s. Retry in 1 second.' % err)
