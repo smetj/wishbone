@@ -73,12 +73,12 @@ class HTTPOutClient(Actor):
 
     def preHook(self):
 
-        if self.method == "PUT":
+        if self.kwargs.method == "PUT":
             self.submitToResource = self.__put
-        elif self.method == "POST":
+        elif self.kwargs.method == "POST":
             self.submitToResource = self.__post
         else:
-            raise Exception("Invalid http method defined: '%s'." % self.method)
+            raise Exception("Invalid http method defined: '%s'." % self.kwargs.method)
 
     def consume(self, event):
 
@@ -91,8 +91,8 @@ class HTTPOutClient(Actor):
 
     def __put(self, data):
 
-        return requests.put(self.url, data=data, auth=(self.username, self.password), headers={'Content-type': self.content_type, 'Accept': self.accept}).send()
+        return requests.put(self.kwargs.url, data=data, auth=(self.kwargs.username, self.kwargs.password), headers={'Content-type': self.kwargs.content_type, 'Accept': self.kwargs.accept}).send()
 
     def __post(self, data):
 
-        return requests.post(self.url, data=data, auth=(self.username, self.password), headers={'Content-type': self.content_type, 'Accept': self.accept}).send()
+        return requests.post(self.kwargs.url, data=data, auth=(self.kwargs.username, self.kwargs.password), headers={'Content-type': self.kwargs.content_type, 'Accept': self.kwargs.accept}).send()
