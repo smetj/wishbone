@@ -57,9 +57,6 @@ class DiskOut(Actor):
     def __init__(self, actor_config, directory="./", interval=10):
         Actor.__init__(self, actor_config)
 
-        self.directory = directory
-        self.interval = interval
-
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
         self.pool.createQueue("disk")
@@ -75,14 +72,14 @@ class DiskOut(Actor):
 
     def createDir(self):
 
-        if os.path.exists(self.directory):
-            if not os.path.isdir(self.directory):
-                raise Exception("%s exists but is not a directory" % (self.directory))
+        if os.path.exists(self.kwargs.directory):
+            if not os.path.isdir(self.kwargs.directory):
+                raise Exception("%s exists but is not a directory" % (self.kwargs.directory))
             else:
-                self.logging.info("Directory %s exists so I'm using it." % (self.directory))
+                self.logging.info("Directory %s exists so I'm using it." % (self.kwargs.directory))
         else:
-            self.logging.info("Directory %s does not exist so I'm creating it." % (self.directory))
-            os.makedirs(self.directory)
+            self.logging.info("Directory %s does not exist so I'm creating it." % (self.kwargs.directory))
+            os.makedirs(self.kwargs.directory)
 
     def consume(self, event):
 
@@ -101,23 +98,23 @@ class DiskOut(Actor):
         if self.pool.queue.disk.size() > 0:
 
             i = str(uuid4())
-            filename = "%s/%s.%s.writing" % (self.directory, self.name, i)
+            filename = "%s/%s.%s.writing" % (self.kwargs.directory, self.name, i)
             self.logging.debug("Flusing %s messages to %s." % (self.pool.queue.disk.size(), filename))
 
             try:
-                with open(r"%s/%s.%s.writing" % (self.directory, self.name, i), "wb") as output_file:
+                with open(r"%s/%s.%s.writing" % (self.kwargs.directory, self.name, i), "wb") as output_file:
                     f = FileObjectThread(output_file)
                     for event in self.pool.queue.disk.dump():
                         pickle.dump(event, f)
             except Exception:
-                os.rename("%s/%s.%s.writing" % (self.directory, self.name, i), "%s/%s.%s.failed" % (self.directory, self.name, i))
+                os.rename("%s/%s.%s.writing" % (self.kwargs.directory, self.name, i), "%s/%s.%s.failed" % (self.kwargs.directory, self.name, i))
             else:
-                os.rename("%s/%s.%s.writing" % (self.directory, self.name, i), "%s/%s.%s.ready" % (self.directory, self.name, i))
+                os.rename("%s/%s.%s.writing" % (self.kwargs.directory, self.name, i), "%s/%s.%s.ready" % (self.kwargs.directory, self.name, i))
         self.__flush_lock.set()
 
     def __flushTimer(self):
 
         while self.loop():
-            sleep(self.interval)
+            sleep(self.kwargs.interval)
             self.__flush_lock.wait()
             self.flushDisk()
