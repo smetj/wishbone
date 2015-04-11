@@ -68,13 +68,13 @@ class EmailOut(Actor):
 
         try:
             message = MIMEText(str(event.data))
-            message["Subject"] = self.subject
-            message["From"] = self.from_address
-            message["To"] = ",".join(self.to)
+            message["Subject"] = self.kwargs.subject
+            message["From"] = self.kwargs.from_address
+            message["To"] = ",".join(self.kwargs.to)
 
-            mta = smtplib.SMTP(self.mta)
-            mta.sendmail(self.from_address,
-                         self.to,
+            mta = smtplib.SMTP(self.kwargs.mta)
+            mta.sendmail(self.kwargs.from_address,
+                         self.kwargs.to,
                          message.as_string()
                          )
         except Exception as err:
