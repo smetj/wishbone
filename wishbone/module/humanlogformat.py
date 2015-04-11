@@ -83,7 +83,7 @@ class HumanLogFormat(Actor):
             7: "\x1B[1;37m"
         }
 
-        if colorize:
+        if self.kwargs.colorize:
             self.colorize = self.doColorize
         else:
             self.colorize = self.doNoColorize
@@ -92,16 +92,14 @@ class HumanLogFormat(Actor):
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
 
-        if ident is None:
-            self.ident = os.path.basename(sys.argv[0])
-        else:
-            self.ident = ident
+        if self.kwargs.ident is None:
+            self.kwargs.ident = os.path.basename(sys.argv[0])
 
     def consume(self, event):
 
         log = ("%s %s %s %s: %s" % (
             strftime("%Y-%m-%dT%H:%M:%S", localtime(event.last.data[1])),
-            "%s[%s]:" % (self.ident, event.last.data[2]),
+            "%s[%s]:" % (self.kwargs.ident, event.last.data[2]),
             self.levels[event.last.data[0]],
             event.last.data[3],
             event.last.data[4]))
