@@ -65,24 +65,20 @@ class HTTPInClient(Actor):
     def __init__(self, actor_config, url="http://localhost", username=None, password=None, interval=60):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
-        self.url = url
-        self.username = username
-        self.password = password
-        self.interval = interval
 
     def preHook(self):
-        if isinstance(self.url, list):
-            for url in self.url:
+        if isinstance(self.kwargs.url, list):
+            for url in self.kwargs.url:
                 spawn(self.scheduler, url)
         else:
-            spawn(self.scheduler, self.url)
+            spawn(self.scheduler, self.kwargs.url)
 
     def scheduler(self, url):
         while self.loop():
             event = self.createEvent()
             event.data = None
             try:
-                r = grequests.get(url, auth=(self.username, self.password))
+                r = grequests.get(url, auth=(self.kwargs.username, self.kwargs.password))
                 response = r.send()
             except Exception as err:
                 self.logging.warn("Problem requesting resource.  Reason: %s" % (err))
@@ -92,4 +88,4 @@ class HTTPInClient(Actor):
                 event.setHeaderValue("url", url)
                 event.data = response.text
                 self.submit(event, self.pool.queue.outbox)
-                sleep(self.interval)
+                sleep(self.kwargs.interval)
