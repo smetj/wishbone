@@ -67,15 +67,9 @@ class HTTPInServer(Actor):
     def __init__(self, actor_config, address="0.0.0.0", port=19283, keyfile=None, certfile=None, delimiter=None):
         Actor.__init__(self, actor_config)
 
-        self.address = address
-        self.port = port
-        self.keyfile = keyfile
-        self.certfile = certfile
-        self.delimiter = delimiter
-
-        if self.delimiter is None:
+        if self.kwargs.delimiter is None:
             self.delimit = self.__noDelimiter
-        elif self.delimiter == "\\n":
+        elif self.kwargs.delimiter == "\\n":
             self.delimit = self.__newLineDelimiter
         else:
             self.delimit = self.__otherDelimiter
@@ -110,8 +104,8 @@ class HTTPInServer(Actor):
     def __otherDelimiter(self, data):
         r = []
         for line in data.readlines():
-            if line.rstrip("\n").endswith(self.delimiter):
-                line = line.rstrip("\n")[:-len(self.delimiter)]
+            if line.rstrip("\n").endswith(self.kwargs.delimiter):
+                line = line.rstrip("\n")[:-len(self.kwargs.delimiter)]
                 if line != "\n":
                     r.append(line)
                 yield "".join(r)
@@ -130,14 +124,14 @@ class HTTPInServer(Actor):
             self.queue_mapping[path] = getattr(self.queuepool, queue)
 
     def __serve(self):
-        if self.keyfile is not None and self.certfile is not None:
+        if self.kwargs.keyfile is not None and self.kwargs.certfile is not None:
             self.__server = pywsgi.WSGIServer(
-                (self.address, self.port), self.consume, keyfile=self.keyfile, certfile=self.certfile)
+                (self.kwargs.address, self.kwargs.port), self.consume, keyfile=self.kwargs.keyfile, certfile=self.kwargs.certfile)
         else:
             self.__server = pywsgi.WSGIServer(
-                (self.address, self.port), self.consume, log=None)
+                (self.kwargs.address, self.kwargs.port), self.consume, log=None)
         self.__server.start()
-        self.logging.info("Serving on %s:%s" % (self.address, self.port))
+        self.logging.info("Serving on %s:%s" % (self.kwargs.address, self.kwargs.port))
 
     def postHook(self):
 
