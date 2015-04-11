@@ -58,17 +58,14 @@ class ZMQTopicIn(Actor):
 
     def __init__(self, actor_config, port=19283, timeout=10, topic=""):
         Actor.__init__(self, actor_config)
-        self.port = port
-        self.timeout = timeout
-        self.topic = topic
         self.pool.createQueue("outbox")
 
     def preHook(self):
 
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
-        self.socket.connect("tcp://localhost:%s" % self.port)
-        self.socket.setsockopt(zmq.SUBSCRIBE, self.topic)
+        self.socket.connect("tcp://localhost:%s" % self.kwargs.port)
+        self.socket.setsockopt(zmq.SUBSCRIBE, self.kwargs.topic)
         spawn(self.drain)
 
     def drain(self):
