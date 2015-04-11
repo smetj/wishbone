@@ -61,10 +61,6 @@ class DiskIn(Actor):
 
     def __init__(self, actor_config, directory="./", idle_trigger=False, idle_time=10):
         Actor.__init__(self, actor_config)
-
-        self.directory = directory
-        self.idle_trigger = idle_trigger
-        self.idle_time = idle_time
         self.reading = event.Event()
         self.reading.set()
         self.pool.createQueue("outbox")
@@ -76,14 +72,14 @@ class DiskIn(Actor):
 
     def createDir(self):
 
-        if os.path.exists(self.directory):
-            if not os.path.isdir(self.directory):
-                raise Exception("%s exists but is not a directory" % (self.directory))
+        if os.path.exists(self.kwargs.directory):
+            if not os.path.isdir(self.kwargs.directory):
+                raise Exception("%s exists but is not a directory" % (self.kwargs.directory))
             else:
-                self.logging.info("Directory %s exists so I'm using it." % (self.directory))
+                self.logging.info("Directory %s exists so I'm using it." % (self.kwargs.directory))
         else:
-            self.logging.info("Directory %s does not exist so I'm creating it." % (self.directory))
-            os.makedirs(self.directory)
+            self.logging.info("Directory %s does not exist so I'm creating it." % (self.kwargs.directory))
+            os.makedirs(self.kwargs.directory)
 
     def monitorDirectory(self):
         while self.loop:
@@ -91,7 +87,7 @@ class DiskIn(Actor):
             sleep(0.5)
 
     def processDirectory(self):
-        for filename in glob.glob("%s/*.ready" % (self.directory)):
+        for filename in glob.glob("%s/*.ready" % (self.kwargs.directory)):
             self.reading.wait()
             self.readFile(filename)
 
@@ -114,11 +110,11 @@ class DiskIn(Actor):
 
         while self.loop():
             try:
-                newest = max(glob.iglob("%s/*" % (self.directory)), key=os.path.getmtime)
+                newest = max(glob.iglob("%s/*" % (self.kwargs.directory)), key=os.path.getmtime)
             except:
                 pass
             else:
-                if time() - os.path.getctime(newest) >= self.idle_time:
+                if time() - os.path.getctime(newest) >= self.kwargs.idle_time:
                     self.reading.set()
                 else:
                     self.reading.clear()
