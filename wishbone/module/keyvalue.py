@@ -59,12 +59,11 @@ class KeyValue(Actor):
         data = event.data
 
         if isinstance(data, dict):
-            for key, value in self.overwrite.iteritems():
-                if isinstance(value, EventLookup):
-                    data[key] = event.getHeaderValue(value.namespace, value.key)
+            for item in self.kwargs.overwrite:
+                for key, value in item.iteritems():
+                    data[key] = value
 
             event.data = data
-
             self.submit(event, self.pool.queue.outbox)
         else:
             raise Exception("data should be type dictself.")
