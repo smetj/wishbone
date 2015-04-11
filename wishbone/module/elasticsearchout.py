@@ -27,6 +27,7 @@ from gevent import spawn, sleep
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
+
 class ElasticSearchOut(Actor):
 
     '''**Submit data to Elasticsearch.**
@@ -60,15 +61,17 @@ class ElasticSearchOut(Actor):
     def __init__(self, actor_config, hosts=[], use_ssl=False, verify_certs=False, index="wishbone", doc_type="wishbone"):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
-        self.elasticsearch = Elasticsearch(hosts, use_ssl=use_ssl, verify_certs=verify_certs)
         self.registerConsumer(self.consume, "inbox")
         self.__bulk = []
 
+    def preHook(self):
+        self.elasticsearch = Elasticsearch(self.kwargs.hosts, use_ssl=self.kwargs.use_ssl, verify_certs=self.kwargs.verify_certs)
+
     def consume(self, event):
 
+        # todo(smetj): when data is of type list do bulk otherwise a regular insert. Rely on tipping bucket module for gathering.
         self.__bulk.append(event)
 
         if len(self.__bulk) > 100:
-            bulk(self.elasticsearch, [{"_index": self.index, "_type": self.doc_type, "_source": event.data} for event in self.__bulk])
-            # print [{"_index": self.index, "_type": self.doc_type, "_source": event.data} for event in self.__bulk]
+            bulk(self.elasticsearch, [{"_index": self.kwargs.index, "_type": self.kwargs.doc_type, "_source": event.data} for event in self.__bulk])
             self.__bulk = []
