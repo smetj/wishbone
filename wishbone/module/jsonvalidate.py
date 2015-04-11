@@ -55,14 +55,13 @@ class JSONValidate(Actor):
     def __init__(self, actor_config, schema=None):
 
         Actor.__init__(self, actor_config)
-        self.schema = schema
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        if self.schema is not None:
+        if self.kwargs.schema is not None:
             self.logging.debug("Validation schema defined.  Doing validation.")
             self.schema_data = self.__loadValidationSchema(self.schema)
             self.validate = self.__validate
