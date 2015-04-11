@@ -57,7 +57,7 @@ class ZMQTopicOut(Actor):
     '''
 
     def __init__(self, actor_config, port=19283, timeout=10, topic=""):
-        Actor.__init__(self, actor_config, ["topic"])
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
@@ -65,12 +65,12 @@ class ZMQTopicOut(Actor):
 
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
-        self.socket.bind("tcp://*:%s" % self.port)
+        self.socket.bind("tcp://*:%s" % self.kwargs.port)
 
     def consume(self, event):
 
         try:
-            self.socket.send("%s %s" % (self.topic, event.data))
+            self.socket.send("%s %s" % (self.kwargs.topic, event.data))
         except Exception as err:
             self.logging.error("Failed to submit message.  Reason %s" % (err))
             raise  # reraise the exception.

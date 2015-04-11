@@ -54,8 +54,6 @@ class RoundRobin(Actor):
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
-        self.randomize = randomize
-
     def preHook(self):
 
         self.destination_queues = []
@@ -63,7 +61,7 @@ class RoundRobin(Actor):
             if queue not in ["failed", "success", "metrics", "logs"]:
                 self.destination_queues.append(self.pool.getQueue(queue))
 
-        if not self.randomize:
+        if not self.kwargs.randomize:
             self.cycle = cycle(self.destination_queues)
             self.chooseQueue = self.__chooseNextQueue
         else:

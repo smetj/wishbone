@@ -50,15 +50,13 @@ class NamedPipeIn(Actor):
     def __init__(self, actor_config, path="/tmp/wishbone"):
         Actor.__init__(self, actor_config)
 
-        self.path = path
-
         self.pool.createQueue("outbox")
 
     def preHook(self):
 
-        os.mkfifo(self.path)
-        self.logging.info('Named pipe %s created.' % (self.path))
-        spawn(self.drain)
+        os.mkfifo(self.kwargs.path)
+        self.logging.info('Named pipe %s created.' % (self.kwargs.path))
+        spawn(self.drain, self.kwargs.path)
 
     def consume(self, event):
         for line in event:
@@ -66,11 +64,11 @@ class NamedPipeIn(Actor):
             e.data = line
             self.submit(e, self.pool.queue.outbox)
 
-    def drain(self):
+    def drain(self, p):
         '''Reads the named pipe.'''
 
         self.logging.info('Started.')
-        fd = os.open(self.path, os.O_RDWR | os.O_NONBLOCK)
+        fd = os.open(p, os.O_RDWR | os.O_NONBLOCK)
         gevent_os.make_nonblocking(fd)
 
         while self.loop():
@@ -86,6 +84,6 @@ class NamedPipeIn(Actor):
     def postHook(self):
 
         try:
-            os.unlink(self.path)
+            os.unlink(self.kwargs.path)
         except:
             pass
