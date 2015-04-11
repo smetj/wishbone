@@ -50,14 +50,12 @@ class FileOut(Actor):
     def __init__(self, actor_config, location="./wishbone.out"):
         Actor.__init__(self, actor_config)
 
-        self.location = location
-
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
 
-        self.file = open(self.location, "a")
+        self.file = open(self.kwargs.location, "a")
 
     def consume(self, event):
         self.file.write(str(event.data) + "\n")
