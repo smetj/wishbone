@@ -65,26 +65,27 @@ class Graphite(Actor):
 
     def __init__(self, actor_config, prefix='', script=True, pid=False, source=True):
         Actor.__init__(self, actor_config)
-        self.prefix = prefix
-        if script:
-            self.script_name = '.%s' % (basename(argv[0]).replace(".py", ""))
-        else:
-            self.script_name = ''
-        if pid:
-            self.pid = "-%s" % (getpid())
-        else:
-            self.pid = ''
-
-        self.source = source
-
-        if self.source:
-            self.doConsume = self.__consumeSource
-        else:
-            self.doConsume = self.__consumeNoSource
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
+
+    def preHook(self):
+
+        if self.kwargs.script:
+            self.script_name = '.%s' % (basename(argv[0]).replace(".py", ""))
+        else:
+            self.script_name = ''
+
+        if self.kwargs.pid:
+            self.pid = "-%s" % (getpid())
+        else:
+            self.pid = ''
+
+        if self.kwargs.source:
+            self.doConsume = self.__consumeSource
+        else:
+            self.doConsume = self.__consumeNoSource
 
     def consume(self, event):
 
@@ -92,10 +93,10 @@ class Graphite(Actor):
 
     def __consumeSource(self, event):
 
-        event.data = "%s%s%s%s.%s %s %s" % (self.prefix, event.last.data[2], self.script_name, self.pid, event.last.data[3], event.last.data[4], event.last.data[0])
+        event.data = "%s%s%s%s.%s %s %s" % (self.kwargs.prefix, event.last.data[2], self.script_name, self.pid, event.last.data[3], event.last.data[4], event.last.data[0])
         self.submit(event, self.pool.queue.outbox)
 
     def __consumeNoSource(self, event):
 
-        event.data = "%s%s%s.%s %s %s" % (self.prefix, self.script_name, self.pid, event.last.data[3], event.last.data[4], event.last.data[0])
+        event.data = "%s%s%s.%s %s %s" % (self.kwargs.prefix, self.script_name, self.pid, event.last.data[3], event.last.data[4], event.last.data[0])
         self.submit(event, self.pool.queue.outbox)
