@@ -83,15 +83,9 @@ class TCPIn(Actor):
     def __init__(self, actor_config, port=19283, address='0.0.0.0', delimiter="\n", max_connections=0, reuse_port=False):
         Actor.__init__(self, actor_config)
 
-        self.port = port
-        self.address = address
-        self.delimiter = delimiter
-        self.max_connections = max_connections
-        self.reuse_port = reuse_port
-
-        if self.delimiter is None:
+        if self.kwargs.delimiter is None:
             self.handle = self.__handleNoDelimiter
-        elif self.delimiter == "\n":
+        elif self.kwargs.delimiter == "\n":
             self.handle = self.__handleNextLine
         else:
             self.handle = self.__handleDelimiter
@@ -99,14 +93,14 @@ class TCPIn(Actor):
         self.pool.createQueue("outbox")
 
     def preHook(self):
-        self.sock = self.__setupSocket(self.address, self.port)
-        self.logging.info("TCP server initialized on address %s and port %s." % (self.address, self.port))
+        self.sock = self.__setupSocket(self.kwargs.address, self.kwargs.port)
+        self.logging.info("TCP server initialized on address %s and port %s." % (self.kwargs.address, self.kwargs.port))
         spawn(self.serve)
 
     def __setupSocket(self, address, port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        if self.reuse_port:
+        if self.kwargs.reuse_port:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.setsockopt(socket.SOL_SOCKET, 15, 1)
         else:
@@ -160,8 +154,8 @@ class TCPIn(Actor):
                 self.logging.debug("Client %s disconnected." % (str(address[0])))
                 break
 
-            elif chunk.endswith(self.delimiter):
-                chunk = chunk.rstrip(self.delimiter)
+            elif chunk.endswith(self.kwargs.delimiter):
+                chunk = chunk.rstrip(self.kwargs.delimiter)
                 if chunk != '':
                     data.append(chunk)
                     event.data = ''.join(data)
@@ -174,9 +168,9 @@ class TCPIn(Actor):
         sock.close()
 
     def serve(self):
-        if self.max_connections > 0:
-            pool = Pool(self.max_connections)
-            self.logging.debug("Setting up a connection pool of %s connections." % (self.max_connections))
+        if self.kwargs.max_connections > 0:
+            pool = Pool(self.kwargs.max_connections)
+            self.logging.debug("Setting up a connection pool of %s connections." % (self.kwargs.max_connections))
             self.stream_server = StreamServer(self.sock, self.handle, spawn=pool)
             self.stream_server.start()
         else:

@@ -55,11 +55,8 @@ class UDPIn(Actor):
     def __init__(self, actor_config, address="0.0.0.0", port=19283):
         Actor.__init__(self, actor_config)
 
-        self._address = address
-        self.port = port
-
         self.pool.createQueue("outbox")
-        self.server = DatagramServer("%s:%s" % (address, port), self.handle)
+        self.server = DatagramServer("%s:%s" % (self.kwargs.address, self.kwargs.port), self.handle)
 
     def handle(self, data, address):
         '''Is called upon each incoming message'''
@@ -69,6 +66,6 @@ class UDPIn(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def preHook(self):
-        self.logging.info('Started listening on %s:%s' % (self._address, self.port))
+        self.logging.info('Started listening on %s:%s' % (self.kwargs.address, self.kwargs.port))
         self.server.start()
 
