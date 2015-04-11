@@ -63,10 +63,6 @@ class ZMQPushOut(Actor):
 
     def __init__(self, actor_config, mode="server", interface="0.0.0.0", port=19283, clients=[]):
         Actor.__init__(self, actor_config)
-        self.mode = mode
-        self.interface = interface
-        self.port = port
-        self.clients = clients
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
@@ -75,11 +71,11 @@ class ZMQPushOut(Actor):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUSH)
 
-        if self.mode == "server":
-            self.socket.bind("tcp://*:%s" % self.port)
-            self.logging.info("Listening on port %s" % (self.port))
+        if self.kwargs.mode == "server":
+            self.socket.bind("tcp://*:%s" % self.kwargs.port)
+            self.logging.info("Listening on port %s" % (self.kwargs.port))
         else:
-            self.socket.connect("tcp://%s" % self.clients[0])
+            self.socket.connect("tcp://%s" % self.kwargs.clients[0])
 
     def consume(self, event):
 

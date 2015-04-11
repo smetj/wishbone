@@ -63,11 +63,6 @@ class TCPOut(Actor):
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
-        self.host = host
-        self.port = port
-        self.timeout = timeout
-        self.delimiter = delimiter
-
     def preHook(self):
         spawn(self.setupConnection)
 
@@ -81,18 +76,18 @@ class TCPOut(Actor):
                 while self.loop():
                     try:
                         self.socket = socket.socket()
-                        self.socket.settimeout(self.timeout)
-                        self.socket.connect((self.host, self.port))
-                        self.logging.info("Connected to %s:%s." % (self.host, self.port))
+                        self.socket.settimeout(self.kwargs.timeout)
+                        self.socket.connect((self.kwargs.host, self.kwargs.port))
+                        self.logging.info("Connected to %s:%s." % (self.kwargs.host, self.kwargs.port))
                         break
                     except Exception as err:
-                        self.logging.error("Failed to connect to %s:%s. Reason: %s" % (self.host, self.port, err))
+                        self.logging.error("Failed to connect to %s:%s. Reason: %s" % (self.kwargs.host, self.kwargs.port, err))
                         sleep(1)
 
     def postHook(self):
         try:
             self.socket.close()
-            self.logging.info("Connection closed to %s:%s" % (self.host, self.port))
+            self.logging.info("Connection closed to %s:%s" % (self.kwargs.host, self.kwargs.port))
         except:
             pass
 

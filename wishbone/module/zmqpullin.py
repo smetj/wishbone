@@ -64,10 +64,6 @@ class ZMQPullIn(Actor):
 
     def __init__(self, actor_config, mode="server", interface="0.0.0.0", port=19283, servers=[]):
         Actor.__init__(self, actor_config)
-        self.mode = mode
-        self.interface = interface
-        self.port = port
-        self.servers = servers
         self.pool.createQueue("outbox")
 
     def preHook(self):
@@ -75,11 +71,11 @@ class ZMQPullIn(Actor):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PULL)
 
-        if self.mode == "server":
-            self.socket.bind("tcp://*:%s" % self.port)
-            self.logging.info("Listening on port %s" % (self.port))
+        if self.kwargs.mode == "server":
+            self.socket.bind("tcp://*:%s" % self.kwargs.port)
+            self.logging.info("Listening on port %s" % (self.kwargs.port))
         else:
-            self.socket.connect("tcp://%s" % self.servers[0])
+            self.socket.connect("tcp://%s" % self.kwargs.servers[0])
 
         spawn(self.drain)
 

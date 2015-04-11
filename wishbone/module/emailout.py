@@ -60,7 +60,7 @@ class EmailOut(Actor):
     '''
 
     def __init__(self, actor_config, mta="localhost:25", subject="Wishbone", to=None, from_address=None):
-        Actor.__init__(self, actor_config, ["to", "from_address", "subject"])
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 

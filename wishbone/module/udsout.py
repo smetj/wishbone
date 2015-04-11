@@ -50,8 +50,6 @@ class UDSOut(Actor):
     def __init__(self, actor_config, path="/tmp/wishbone", delimiter=""):
         Actor.__init__(self, actor_config)
 
-        self.path = path
-        self.delimiter = delimiter
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
@@ -60,11 +58,11 @@ class UDSOut(Actor):
 
     def consume(self, event):
         if isinstance(event.data, list):
-            data = self.delimiter.join(event.data)
+            data = self.kwargs.delimiter.join(event.data)
         else:
             data = event.data
 
-        self.socket.send(str(data) + self.delimiter)
+        self.socket.send(str(data) + self.kwargs.delimiter)
 
     def setupConnection(self):
         while self.loop():
@@ -76,9 +74,9 @@ class UDSOut(Actor):
                     try:
                         self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                        self.socket.connect(self.path)
-                        self.logging.info("Connected to %s." % (self.path))
+                        self.socket.connect(self.kwargs.path)
+                        self.logging.info("Connected to %s." % (self.kwargs.path))
                         break
                     except Exception as err:
-                        self.logging.error("Failed to connect to %s. Reason: %s" % (self.path, err))
+                        self.logging.error("Failed to connect to %s. Reason: %s" % (self.kwargs.path, err))
                         sleep(1)

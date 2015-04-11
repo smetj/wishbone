@@ -50,13 +50,12 @@ class MSGPackDecode(Actor):
     def __init__(self, actor_config, complete=False):
         Actor.__init__(self, actor_config)
 
-        self.complete = complete
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        if self.complete:
+        if self.kwargs.complete:
             self.decode = self.__decodeComplete
         else:
             self.decode = self.__decodeData
@@ -72,6 +71,3 @@ class MSGPackDecode(Actor):
 
         event.data = msgpack.unpackb(event.data)
         return event
-
-
-

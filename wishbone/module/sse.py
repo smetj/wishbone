@@ -100,11 +100,6 @@ class ServerSentEvents(Actor):
     def __init__(self, actor_config, bind="0.0.0.0", port=19283, show_last=False, keepalive=False, keepalive_interval=5):
 
         Actor.__init__(self, actor_config)
-        self.bind = bind
-        self.port = port
-        self.show_last = show_last
-        self.keepalive = keepalive
-        self.keepalive_interval = keepalive_interval
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
         self.session_queues = {}
@@ -119,9 +114,9 @@ class ServerSentEvents(Actor):
         self.app.add_url_rule('/subscribe/', 'subscribe', self.subscribe)
 
         p = pool.Pool(1000)
-        self.server = WSGIServer((self.bind, self.port), self.app, spawn=p, log=False)
+        self.server = WSGIServer((self.kwargs.bind, self.kwargs.port), self.app, spawn=p, log=False)
         spawn(self.server.serve_forever)
-        self.logging.info("Listening on http://%s:%s" % (self.bind, self.port))
+        self.logging.info("Listening on http://%s:%s" % (self.kwargs.bind, self.kwargs.port))
 
     def target(self, destination=""):
         return render_template_string(self.template, destination=destination)
@@ -132,9 +127,9 @@ class ServerSentEvents(Actor):
             try:
                 while self.loop():
                     try:
-                        result = self.session_queues[destination][queue_id].get(timeout=self.keepalive_interval)
+                        result = self.session_queues[destination][queue_id].get(timeout=self.kwargs.keepalive_interval)
                     except:
-                        if self.keepalive:
+                        if self.kwargs.keepalive:
                             ev = ServerSentEvent(":keep-alive")
                             yield ev.encode()
                     else:

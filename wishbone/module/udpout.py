@@ -43,7 +43,7 @@ class UDPOut(Actor):
         - port(int)(19283)
            |  The port to submit to.
 
-        - delimiter(str)("\\n")
+        - delimiter(str)("")
            |  A delimiter to add to each event.
 
 
@@ -54,12 +54,8 @@ class UDPOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, host="127.0.0.1", port=19283, delimiter="\n"):
+    def __init__(self, actor_config, host="127.0.0.1", port=19283, delimiter=""):
         Actor.__init__(self, actor_config)
-
-        self.host = host
-        self.port = port
-        self.delimiter = delimiter
 
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
@@ -68,7 +64,7 @@ class UDPOut(Actor):
 
     def consume(self, event):
         if isinstance(event.data, list):
-            data = ''.join(event.data)
+            data = self.kwargs.delimiter.join(event.data)
         else:
             data = event.data
-        self.socket.sendto(str(data), (self.host, self.port))
+        self.socket.sendto(str(data), (self.kwargs.host, self.kwargs.port))

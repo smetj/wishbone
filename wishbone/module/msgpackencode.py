@@ -50,16 +50,17 @@ class MSGPackEncode(Actor):
     def __init__(self, actor_config, complete=False):
         Actor.__init__(self, actor_config)
 
-        self.complete = complete
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
 
-        if self.complete:
+        self.registerConsumer(self.consume, "inbox")
+
+    def preHook(self):
+
+        if self.kwargs.complete:
             self.encode = self.__encodeComplete
         else:
             self.encode = self.__encodeData
-
-        self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
         event = self.encode(event)

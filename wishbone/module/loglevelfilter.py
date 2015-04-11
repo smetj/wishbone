@@ -53,12 +53,11 @@ class LogLevelFilter(Actor):
 
     def __init__(self, actor_config, loglevel=6):
         Actor.__init__(self, actor_config)
-        self.loglevel = loglevel
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consumer, "inbox")
 
     def consumer(self, event):
 
-        if event.data[0] <= self.loglevel:
+        if event.data[0] <= self.kwargs.loglevel:
             self.submit(event, self.pool.queue.outbox)
