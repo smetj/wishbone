@@ -63,7 +63,7 @@ class JSONValidate(Actor):
     def preHook(self):
         if self.kwargs.schema is not None:
             self.logging.debug("Validation schema defined.  Doing validation.")
-            self.schema_data = self.__loadValidationSchema(self.schema)
+            self.schema_data = self.__loadValidationSchema(self.kwargs.schema)
             self.validate = self.__validate
         else:
             self.logging.debug("No validation schema defined.  No validation.")
