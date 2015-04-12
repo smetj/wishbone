@@ -74,8 +74,8 @@ class Header(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def __doHeader(self, event):
-        for key in self.kwargs.header:
-            event.setHeaderValue(key, self.kwargs.header[key], self.kwargs.namespace)
+        for key, value in self.kwargs.header:
+            event.setHeaderValue(key, value, self.kwargs.namespace)
         return event
 
     def __doPrintf(self, event):
