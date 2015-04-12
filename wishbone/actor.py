@@ -208,7 +208,9 @@ class Actor():
         uplook = UpLook(**args)
         for name, module in self.config.lookup.iteritems():
             uplook.registerLookup(name, module)
+        self.uplook = uplook
         self.kwargs = uplook.get()
+
 
     def __metricEmitter(self):
         '''A greenthread which collects the queue metrics at the defined interval.'''
