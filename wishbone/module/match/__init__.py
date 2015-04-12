@@ -139,7 +139,7 @@ class Match(Actor):
 
     def preHook(self):
 
-        self.__active_rules = self.kwargs.rules
+        self.__active_rules = self.uplook.dump()["rules"]
         if self.kwargs.location is not None:
             self.createDir()
             self.logging.info("Rules directoy '%s' defined." % (self.kwargs.location))
@@ -163,7 +163,7 @@ class Match(Actor):
 
         while self.loop():
             try:
-                self.__active_rules = dict(self.read.readDirectory().items() + self.kwargs.rules.items())
+                self.__active_rules = dict(self.read.readDirectory().items() + self.uplook.dump()["rules"])
                 break
             except Exception as err:
                 self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
@@ -171,7 +171,7 @@ class Match(Actor):
 
         while self.loop():
             try:
-                self.__active_rules = dict(self.read.get().items() + self.kwargs.rules.items())
+                self.__active_rules = dict(self.read.get().items() + self.uplook.dump()["rules"])
             except Exception as err:
                 self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
                 sleep(1)
