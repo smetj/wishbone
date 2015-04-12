@@ -23,7 +23,6 @@
 #
 
 from wishbone import Actor
-from gevent import spawn, sleep
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
@@ -73,5 +72,5 @@ class ElasticSearchOut(Actor):
         self.__bulk.append(event)
 
         if len(self.__bulk) > 100:
-            bulk(self.elasticsearch, [{"_index": self.kwargs.index, "_type": self.kwargs.doc_type, "_source": event.data} for event in self.__bulk])
+            bulk(self.elasticsearch, [{"_index": self.kwargs.index, "_type": self.kwargs.doc_type, "_source": e.data} for e in self.__bulk])
             self.__bulk = []
