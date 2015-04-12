@@ -211,7 +211,6 @@ class Actor():
         self.uplook = uplook
         self.kwargs = uplook.get()
 
-
     def __metricEmitter(self):
         '''A greenthread which collects the queue metrics at the defined interval.'''
 
