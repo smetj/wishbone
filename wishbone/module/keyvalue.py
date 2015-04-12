@@ -23,7 +23,6 @@
 #
 
 from wishbone import Actor
-from wishbone.lookup import EventLookup
 
 
 class KeyValue(Actor):
