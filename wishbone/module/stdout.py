@@ -105,4 +105,4 @@ class STDOUT(Actor):
 
     def consume(self, event):
 
-        print ("%s%s" % (self.kwargs.prefix, self.format.do(event)))
+        print("%s%s" % (self.kwargs.prefix, self.format.do(event)))
