@@ -22,12 +22,14 @@
 #
 #
 
-from .event import EventLookup
+
+class EventLookup():
+    pass
 
 
 def event():
     from .event import generate
-    return generate
+    return EventLookup()
 
 
 def randomword(filename=None):
