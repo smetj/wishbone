@@ -24,7 +24,6 @@
 
 
 from wishbone import Actor
-from wishbone.error import MissingKey, MissingNamespace
 import zmq.green as zmq
 
 
