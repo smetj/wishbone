@@ -86,7 +86,6 @@ class Default(multiprocessing.Process):
         if process:
             multiprocessing.Process.__init__(self)
             self.daemon = True
-        # self.configuration_manager = configuration_manager
         self.config = router_config
         self.module_manager = module_manager
         self.size = size
