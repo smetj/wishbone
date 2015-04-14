@@ -175,15 +175,12 @@ class Actor():
         while self.loop():
             try:
                 event = self.pool.queue.__dict__[queue].get()
+                self.current_event = event
             except QueueEmpty as err:
                 err.waitUntilContent()
             else:
                 event.initNamespace(self.name)
-
                 try:
-                    for key, value in self.__lookups.iteritems():
-                        v = event.getHeaderValue(value.namespace, value.key)
-                        setattr(self, key, v)
                     function(event)
                 except QueueFull as err:
                     self.pool.queue.__dict__[queue].rescue(event)
@@ -197,6 +194,7 @@ class Actor():
 
     def __buildUplook(self):
 
+        self.__current_event = {}
         args = {}
 
         for key, value in inspect.currentframe(2).f_locals.iteritems():
@@ -206,8 +204,12 @@ class Actor():
                 args[key] = value
 
         uplook = UpLook(**args)
-        for name, module in self.config.lookup.iteritems():
-            uplook.registerLookup(name, module)
+        for name in uplook.listFunctions():
+            if isinstance(self.config.lookup[name], EventLookup):
+                uplook.registerLookup(name, self.doEventLookup)
+            else:
+                uplook.registerLookup(name, self.config.lookup[name])
+
         self.uplook = uplook
         self.kwargs = uplook.get()
 
@@ -229,3 +231,11 @@ class Actor():
                         except QueueFull as err:
                             err.waitUntilFree()
             sleep(self.frequency)
+
+    def doEventLookup(self, name):
+        (n, t, k) = name.split('.')
+        try:
+            return self.current_event.getHeaderValue(n, k)
+        except AttributeError:
+            return "You should use a dynamic lookup ~~ for header lookups. "
+
