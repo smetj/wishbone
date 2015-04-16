@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '1.0.3'
+VERSION = '1.0.4'
 
 install_requires = ['gevent>=1.1',
                     'greenlet>=0.3.2',
@@ -76,7 +76,7 @@ setup(
     author_email='development@smetj.net',
 
     url='https://github.com/smetj/wishbone',
-    download_url='https://github.com/smetj/wishbone/tarball/master',
+    download_url=["https://github.com/smetj/wishbone/tarball/master"],
 
     classifiers=['Development Status :: 5 - Production/Stable',
                  'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
@@ -101,7 +101,7 @@ setup(
     packages=find_packages(),
     package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/sse.html']},
     zip_safe=False,
-    dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.1'],
+    dependency_links=['https://github.com/surfly/gevent/tarball/72119c8c3e704b75a2d91d8555ca8673928ebabb#egg=gevent-1.1'],
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
         'wishbone.flow': [
@@ -145,6 +145,7 @@ setup(
             'disk = wishbone.module.diskout:DiskOut',
             'email = wishbone.module.emailout:EmailOut',
             'file = wishbone.module.fileout:FileOut',
+            'http = wishbone.module.httpoutclient:HTTPOutClient',
             'null = wishbone.module.null:Null',
             'topic = wishbone.module.zmqtopicout:ZMQTopicOut',
             'stdout = wishbone.module.stdout:STDOUT',
