@@ -43,12 +43,14 @@ class Match(Actor):
     bootstrap file.
 
 
-    A match rule consists out of 2 parts:
+    A match rule is written in YAML syntax and consists out of 2 parts:
 
-        - condition:
+    - condition:
 
-        The condition part contains the individual conditions which have to
-        match for the complete rule to match.
+        A list of dictionaries holding with the individual conditions which
+        ALL have to match for the complete rule to match.
+
+    ::
 
         re:     Regex matching
         !re:    Negative regex matching
@@ -58,8 +60,10 @@ class Match(Actor):
         <=:     Smaller or equal than
         =:      Equal than
         in:     Evaluate list membership
+        !in:    Evaluate negative list membership
 
-        - queue:
+
+    - queue:
 
         The queue section contains a list of dictionaries/maps each containing
         1 key with another dictionary/map as a value.  These key/value pairs
@@ -82,7 +86,8 @@ class Match(Actor):
     ::
 
         condition:
-            "greeting": re:^hello$
+            - greeting: re:^hello$
+
         queue:
             - outbox:
 
@@ -95,9 +100,9 @@ class Match(Actor):
     ::
 
         condition:
-            "check_command": re:check:host.alive
-            "hostproblemid": re:\d*
-            "hostgroupnames": in:tag:development
+            - check_command: re:check:host.alive
+            - hostproblemid: re:\d*
+            - hostgroupnames: in:tag:development
 
         queue:
             - email:
@@ -169,17 +174,19 @@ class Match(Actor):
     def getRules(self):
 
         self.logging.info("Monitoring directory '%s' for changes" % (self.location))
-        self.read = ReadRulesDisk(self.location)
+        self.read = ReadRulesDisk(self.logging, self.location)
 
         while self.loop():
             try:
-                while self.loop():
-                    self.__active_rules = dict(self.read.readDirectory().items() + self.rules.items())
-                    self.logging.info("New set of rules loaded from disk")
-                    break
-                while self.loop():
-                    self.__active_rules = dict(self.read.get().items() + self.rules.items())
-                    self.logging.info("New set of rules loaded from disk")
+                self.__active_rules = dict(self.read.readDirectory().items() + self.rules.items())
+                break
+            except Exception as err:
+                self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
+                sleep(1)
+
+        while self.loop():
+            try:
+                self.__active_rules = dict(self.read.get().items() + self.rules.items())
             except Exception as err:
                 self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
                 sleep(1)
@@ -191,22 +198,30 @@ class Match(Actor):
         for rule in self.__active_rules:
             e = deepcopy(event)
             if self.evaluateCondition(self.__active_rules[rule]["condition"], e["data"]):
-                # self.logging.debug("rule %s matches %s" % (rule, e["data"]))
+                # self.logging.debug("Match for rule %s." % (rule))
                 e["header"].update({self.name: {"rule": rule}})
                 for queue in self.__active_rules[rule]["queue"]:
+                    event_copy = deepcopy(e)
                     for name in queue:
                         if queue[name] is not None:
-                            e["header"][self.name].update(queue[name])
-                        self.submit(e, self.pool.getQueue(name))
+                            event_copy["header"][self.name].update(queue[name])
+                        self.submit(event_copy, self.pool.getQueue(name))
             else:
                 pass
-                # self.logging.debug("Rule %s does not match event: %s" % (rule, e["data"]))
+                #  self.logging.debug("No match for rule %s." % (rule))
 
     def evaluateCondition(self, conditions, fields):
         for condition in conditions:
-            if condition in fields:
-                if not self.match.do(conditions[condition], fields[condition]):
+            for field in condition:
+                if field in fields:
+                    if not self.match.do(condition[field], fields[field]):
+                        # self.logging.warning("field %s with condition %s DOES NOT MATCH field %s with value %s" % (field, condition[field], field, fields[field]))
+                        return False
+                    else:
+                        pass
+                        # self.logging.warning("field %s with condition %s MATCHES field %s with value %s" % (field, condition[field], field, fields[field]))
+                else:
+                    # self.logging.warning("field %s does not occur in document.")
                     return False
-            else:
-                return False
+
         return True

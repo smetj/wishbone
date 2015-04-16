@@ -1,6 +1,16 @@
 Wishbone changelog
 ==================
 
+Version 1.0.4
+~~~~~~~~~~~~~
+
+- Changed matchrule format wishbone.flow.match to allow multiple
+  evals on the same key.
+- Added module wishbone.output.http
+- Exceptions are now *always* logged with line number, type, and message.
+- Match module now support negative list membership testing.
+
+
 Version 1.0.3
 ~~~~~~~~~~~~~
 
