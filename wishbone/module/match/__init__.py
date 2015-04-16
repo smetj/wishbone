@@ -45,10 +45,12 @@ class Match(Actor):
 
     A match rule is written in YAML syntax and consists out of 2 parts:
 
-        - condition:
+    - condition:
 
         A list of dictionaries holding with the individual conditions which
         ALL have to match for the complete rule to match.
+
+    ::
 
         re:     Regex matching
         !re:    Negative regex matching
@@ -58,8 +60,10 @@ class Match(Actor):
         <=:     Smaller or equal than
         =:      Equal than
         in:     Evaluate list membership
+        !in:    Evaluate negative list membership
 
-        - queue:
+
+    - queue:
 
         The queue section contains a list of dictionaries/maps each containing
         1 key with another dictionary/map as a value.  These key/value pairs
