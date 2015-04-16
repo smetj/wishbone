@@ -3,7 +3,7 @@
 #
 #  msgpackencode.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,15 +34,6 @@ class MSGPackDecode(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - complete(bool)(False)
            |  When True encodes the complete event.  If False only
            |  encodes the data part.
@@ -56,16 +47,15 @@ class MSGPackDecode(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size, frequency, complete=False):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, complete=False):
+        Actor.__init__(self, actor_config)
 
-        self.complete = complete
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        if self.complete:
+        if self.kwargs.complete:
             self.decode = self.__decodeComplete
         else:
             self.decode = self.__decodeData
@@ -75,12 +65,9 @@ class MSGPackDecode(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def __decodeComplete(self, event):
-        return msgpack.unpackb(event["data"])
+        return msgpack.unpackb(event.data)
 
     def __decodeData(self, event):
 
-        event["data"] = msgpack.unpackb(event["data"])
+        event.data = msgpack.unpackb(event.data)
         return event
-
-
-

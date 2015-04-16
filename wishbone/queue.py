@@ -4,7 +4,7 @@
 #
 #
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@
 from uuid import uuid4
 from collections import deque
 from wishbone.error import QueueEmpty, QueueFull, ReservedName, QueueMissing
-from gevent import sleep
 from gevent.event import Event
 from time import time
 
@@ -44,8 +43,6 @@ class QueuePool():
         self.queue.logs = Queue(size)
         self.queue.success = Queue(size)
         self.queue.failed = Queue(size)
-        self.queue.admin_in = Queue(size)
-        self.queue.admin_out = Queue(size)
 
     def listQueues(self, names=False, default=True):
         '''returns the list of queue names from the queuepool.
@@ -54,7 +51,7 @@ class QueuePool():
         if default:
             blacklist = []
         else:
-            blacklist = ['failed', 'success', 'logs', 'metrics', 'admin_in', 'admin_out']
+            blacklist = ['failed', 'success', 'logs', 'metrics']
 
         for m in self.queue.__dict__.keys():
             if m not in blacklist:
@@ -66,13 +63,13 @@ class QueuePool():
     def createQueue(self, name):
         '''Creates a Queue.'''
 
-        if name in ["metrics", "logs", "success", "failed", "admin_in", "admin_out"]:
+        if name in ["metrics", "logs", "success", "failed"]:
             raise ReservedName
 
         setattr(self.queue, name, Queue(self.__size))
 
     def hasQueue(self, name):
-        '''Returns trie when queue with <name> exists.'''
+        '''Returns <True> when queue with <name> exists.'''
 
         try:
             getattr(self.queue, name)
@@ -203,7 +200,7 @@ class Queue():
         '''Blocks until the queue is completely empty.'''
 
         try:
-            self.__empty.wait(timeout=0.1)
+            self.__empty.wait(timeout=0.5)
         except:
             pass
 
@@ -211,7 +208,7 @@ class Queue():
         '''Blocks until the queue is completely full.'''
 
         try:
-            self.__full.wait(timeout=0.1)
+            self.__full.wait(timeout=0.5)
         except:
             pass
 
@@ -219,7 +216,7 @@ class Queue():
         '''Blocks until at least 1 slot it free.'''
 
         try:
-            self.__free.wait(timeout=0.1)
+            self.__free.wait(timeout=0.5)
         except:
             pass
 
@@ -227,7 +224,7 @@ class Queue():
         '''Blocks until at least 1 slot is taken.'''
 
         try:
-            self.__content.wait(timeout=0.1)
+            self.__content.wait(timeout=0.5)
         except:
             pass
 

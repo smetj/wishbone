@@ -3,7 +3,7 @@
 #
 #  msgpackencode.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,15 +34,6 @@ class MSGPackEncode(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - complete(bool)(False)
            |  When True encodes the complete event.  If False only
            |  encodes the data part.
@@ -56,30 +47,31 @@ class MSGPackEncode(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size, frequency, complete=False):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, complete=False):
+        Actor.__init__(self, actor_config)
 
-        self.complete = complete
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
 
-        if self.complete:
+        self.registerConsumer(self.consume, "inbox")
+
+    def preHook(self):
+
+        if self.kwargs.complete:
             self.encode = self.__encodeComplete
         else:
             self.encode = self.__encodeData
-
-        self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
         event = self.encode(event)
         self.submit(event, self.pool.queue.outbox)
 
     def __encodeComplete(self, event):
-        event["data"] = msgpack.packb(event)
+        event.data = msgpack.packb(event)
         return event
 
     def __encodeData(self, event):
-        event["data"] = msgpack.packb(event["data"])
+        event.data = msgpack.packb(event.data)
         return event
 
 

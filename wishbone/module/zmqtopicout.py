@@ -3,7 +3,7 @@
 #
 #  zmqtopicout.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,25 +38,13 @@ class ZMQTopicOut(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
-        - host(string)("localhost")
-           |  The host to submit to.
-
         - port(int)(19283)
-           |  The port to submit to.
+           |  The port to bind to.
 
         - timeout(int)(1)
            |  The time in seconds to timeout when connecting.
 
-        - topic(str)("")
+        - topic(str)("")*
            |  The default topic to use when none is set in the header.
 
 
@@ -65,16 +53,10 @@ class ZMQTopicOut(Actor):
         - inbox
            |  Incoming events submitted to the outside.
 
-    Expects the "topic" to use in event["header"][self.name]["topic"].
-    If that's doesn't exist, the value of <topic> is used.
-
     '''
 
-    def __init__(self, name, size=100, frequency=1, port=19283, timeout=10, topic=""):
-        Actor.__init__(self, name, size, frequency)
-        self.port = port
-        self.timeout = timeout
-        self.topic = topic
+    def __init__(self, actor_config, port=19283, timeout=10, topic=""):
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
@@ -82,17 +64,12 @@ class ZMQTopicOut(Actor):
 
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
-        self.socket.bind("tcp://*:%s" % self.port)
+        self.socket.bind("tcp://*:%s" % self.kwargs.port)
 
     def consume(self, event):
 
         try:
-            topic = event["header"][self.name]["topic"]
-        except KeyError:
-            topic = self.topic
-
-        try:
-            self.socket.send("%s %s" % (topic, event["data"]))
+            self.socket.send("%s %s" % (self.kwargs.topic, event.data))
         except Exception as err:
             self.logging.error("Failed to submit message.  Reason %s" % (err))
             raise  # reraise the exception.

@@ -3,7 +3,7 @@
 #
 #  fileout.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,15 +37,6 @@ class FileOut(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - location(str)("./wishbone.out")
            |  The location of the output file.
 
@@ -56,21 +47,18 @@ class FileOut(Actor):
 
     '''
 
-    def __init__(self, name, size, frequency, location="./wishbone.out"):
-
-        Actor.__init__(self, name)
-        self.name = name
-        self.location = location
+    def __init__(self, actor_config, location="./wishbone.out"):
+        Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
 
-        self.file = open(self.location, "a")
+        self.file = open(self.kwargs.location, "a")
 
     def consume(self, event):
-        self.file.write(str(event["data"]) + "\n")
+        self.file.write(str(event.data) + "\n")
         self.file.flush()
 
     def postHook(self):

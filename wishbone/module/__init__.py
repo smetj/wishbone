@@ -3,7 +3,7 @@
 #
 #  __init__.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #
 #
 
+from loglevelfilter import LogLevelFilter
 from testevent import TestEvent
 from null import Null
 from stdout import STDOUT

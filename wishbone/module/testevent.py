@@ -3,7 +3,7 @@
 #
 #  testevent.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,21 +30,10 @@ class TestEvent(Actor):
 
     '''**Generates a test event at the chosen interval.**
 
+    The data field of the test event contains the string "test".
 
-    Events have following format:
-
-        { "header":{}, "data":"test" }
 
     Parameters:
-
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
 
         - interval(float)(1)
            |  The interval in seconds between each generated event.
@@ -63,12 +52,8 @@ class TestEvent(Actor):
            |  Contains the generated events.
     '''
 
-    def __init__(self, name, size=100, frequency=1, interval=1, message="test", numbered=False):
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
-        self.interval = interval
-        self.message = message
-        self.numbered = numbered
+    def __init__(self, actor_config, interval=1, message="test", numbered=False):
+        Actor.__init__(self, actor_config)
 
         self.pool.createQueue("outbox")
 
@@ -89,14 +74,15 @@ class TestEvent(Actor):
     def produce(self):
 
         while self.loop():
-            event = {"header": {}, "data": "%s%s" % (self.message, self.number())}
+            event = self.createEvent()
+            event.data = "%s%s" % (self.kwargs.message, self.number())
             self.submit(event, self.pool.queue.outbox)
             self.sleep()
 
         self.logging.info("Stopped producing events.")
 
     def __doSleep(self):
-        sleep(self.interval)
+        sleep(self.kwargs.interval)
 
     def __doNoSleep(self):
         pass

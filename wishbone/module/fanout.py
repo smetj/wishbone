@@ -3,7 +3,7 @@
 #
 #  fanout.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 #
 
 from wishbone import Actor
-from copy import deepcopy
 
 
 class Fanout(Actor):
@@ -33,15 +32,6 @@ class Fanout(Actor):
     Forward each incoming message to all connected queues.
 
     Parameters:
-
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
 
         - deep_copy(bool)(True)
            |  make sure that each incoming event is submitted
@@ -56,11 +46,9 @@ class Fanout(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, deep_copy=True):
+    def __init__(self, actor_config, deep_copy=True):
+        Actor.__init__(self, actor_config)
 
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
-        self.deep_copy = deep_copy
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
@@ -70,7 +58,7 @@ class Fanout(Actor):
             if queue != "inbox":
                 self.destinations.append(self.pool.getQueue(queue))
 
-        if self.deep_copy:
+        if self.kwargs.deep_copy:
             self.copy = self.__doDeepCopy
         else:
             self.copy = self.__doNoDeepCopy
@@ -81,7 +69,7 @@ class Fanout(Actor):
             self.submit(self.copy(event), queue)
 
     def __doDeepCopy(self, event):
-        return deepcopy(event)
+        return event.clone()
 
     def __doNoDeepCopy(self, event):
         return event

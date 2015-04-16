@@ -4,7 +4,7 @@
 #
 #  logging.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #
 
 from wishbone.error import QueueFull
+from wishbone.event import Event
 from time import time
 from os import getpid
 
@@ -43,7 +44,9 @@ class Logging():
 
         while True:
             try:
-                self.logs.put({"header": {}, "data": (level, time(), getpid(), self.name, message)})
+                event = Event("%s:log" % self.name)
+                event.data = (level, time(), getpid(), self.name, message)
+                self.logs.put(event)
                 break
             except QueueFull:
                 self.logs.waitUntilFree()

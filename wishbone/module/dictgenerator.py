@@ -3,7 +3,7 @@
 #
 #       dictgenerator.py
 #
-#       Copyright 2014 Jelle Smet development@smetj.net
+#       Copyright 2015 Jelle Smet development@smetj.net
 #
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ from wishbone import Actor
 import os
 
 
-
 class DictGenerator(Actor):
 
     '''**Generates random dictionaries.**
@@ -36,15 +35,6 @@ class DictGenerator(Actor):
     This module allows you to generate an stream of dictionaries.
 
     Parameters:
-
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
 
         - keys(list)([])
            |  If provided, documents are created using the provided
@@ -75,32 +65,25 @@ class DictGenerator(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size, frequency, keys=[], randomize_keys=True, num_values=False, num_values_min=0, num_values_max=1, min_elements=1, max_elements=1, interval=1):
-        Actor.__init__(self, name, size, frequency)
-        self.pool.createQueue("outbox")
-        self.name = name
-        self.keys = keys
-        self.randomize_keys = randomize_keys
-        self.num_values = num_values
-        self.num_values_min = num_values_min
-        self.num_values_max = num_values_max
-        self.min_elements = min_elements
-        self.max_elements = max_elements
+    def __init__(self, actor_config, keys=[], randomize_keys=True, num_values=False, num_values_min=0, num_values_max=1, min_elements=1, max_elements=1, interval=1):
+        Actor.__init__(self, actor_config)
+
         self.wordlist = self.readWordlist()
-        self.interval = interval
         self._total = 0
 
         self.key_number = -1
 
-        if self.randomize_keys:
+        if self.kwargs.randomize_keys:
             self.generateKey = self.pickWord
         else:
             self.generateKey = self.generateKeyNumber
 
-        if self.num_values:
+        if self.kwargs.num_values:
             self.generateValue = self.generateValueNumber
         else:
             self.generateValue = self.pickWord
+
+        self.pool.createQueue("outbox")
 
     def readWordlist(self):
         with open("%s/../data/wordlist.txt" % (os.path.dirname(__file__))) as f:
@@ -108,12 +91,12 @@ class DictGenerator(Actor):
 
     def preHook(self):
 
-        if self.interval > 0:
+        if self.kwargs.interval > 0:
             self.sleep = self.__doSleep
         else:
             self.sleep = self.__doNoSleep
 
-        if self.keys != []:
+        if self.kwargs.keys != []:
             self.getDict = self.getDictPredefinedKeys
         else:
             self.getDict = self.getDictGeneratedKeys
@@ -123,15 +106,16 @@ class DictGenerator(Actor):
     def generateDicts(self):
 
         while self.loop():
-            d = self.getDict()
-            self.submit({"header": {}, "data": d}, self.pool.queue.outbox)
+            event = self.createEvent()
+            event.data = self.getDict()
+            self.submit(event, self.pool.queue.outbox)
             self.key_number = +1
             self.sleep()
 
     def getDictPredefinedKeys(self):
 
         d = {}
-        for key in self.keys:
+        for key in self.kwargs.keys:
             d[key] = self.pickWord()
 
         return d
@@ -139,8 +123,9 @@ class DictGenerator(Actor):
     def getDictGeneratedKeys(self):
 
         d = {}
-        for x in xrange(0, randint(self.min_elements, self.max_elements)):
-            data[self.generateKey()] = self.generateValue()
+        for x in xrange(0, randint(self.kwargs.min_elements, self.kwargs.max_elements)):
+            d[self.generateKey()] = self.generateValue()
+        return d
 
     def pickWord(self):
         '''Returns a word as string from the wordlist.'''
@@ -154,7 +139,7 @@ class DictGenerator(Actor):
 
     def generateValueInteger(self):
         '''Returns a random number.'''
-        return randint(self.num_values_min, self.num_values_max)
+        return randint(self.kwargs.num_values_min, self.kwargs.num_values_max)
 
     def generateKeyNumber(self):
         '''Generates a key by incrementing integer.'''
@@ -162,7 +147,7 @@ class DictGenerator(Actor):
         return str(self.key_number)
 
     def __doSleep(self):
-        sleep(self.interval)
+        sleep(self.kwargs.interval)
 
     def __doNoSleep(self):
         pass

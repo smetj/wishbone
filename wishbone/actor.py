@@ -3,7 +3,7 @@
 #
 #  setup.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,10 @@
 
 from wishbone.queue import QueuePool
 from wishbone.logging import Logging
-from wishbone.error import QueueEmpty, QueueFull, QueueConnected
+from wishbone.event import Event as Wishbone_Event
+from wishbone.error import QueueEmpty, QueueFull, QueueConnected, ModuleInitFailure
+from wishbone.lookup import EventLookup
+from collections import namedtuple
 from gevent.pool import Group
 from gevent import spawn
 from gevent import sleep, socket
@@ -37,15 +40,16 @@ import traceback
 
 class Actor():
 
-    def __init__(self, name, size=100, frequency=1):
+    def __init__(self, config):
 
-        self.name = name
-        self.size = size
-        self.frequency = frequency
+        self.config = config
+        self.name = config.name
+        self.size = config.size
+        self.frequency = config.frequency
 
-        self.pool = QueuePool(size)
+        self.pool = QueuePool(config.size)
 
-        self.logging = Logging(name, self.pool.queue.logs)
+        self.logging = Logging(config.name, self.pool.queue.logs)
 
         self.__loop = True
         self.threads = Group()
@@ -60,15 +64,16 @@ class Actor():
         self.__children = {}
         self.__parents = {}
 
-        self.__adminConsumer_active = False
-        self.__adminConsumers = {}
+        self.__lookups = {}
+
+        self.__buildUplook()
 
     def connect(self, source, instance, destination):
         '''Connects the <source> queue to the <destination> queue.
         In fact, the source queue overwrites the destination queue.'''
 
         if source in self.__children:
-            raise QueueConnected("Queue %s is already connected to %s." % (source, self.__children[source]))
+            raise QueueConnected("Queue %s.%s is already connected to %s." % (self.name, source, self.__children[source]))
         else:
             self.__children[source] = "%s.%s" % (instance.name, destination)
 
@@ -82,15 +87,14 @@ class Actor():
 
         setattr(instance.pool.queue, destination, self.pool.getQueue(source))
         self.pool.getQueue(source).disableFallThrough()
+        self.logging.debug("Connected queue %s.%s to %s.%s" % (self.name, source, instance.name, destination))
 
-    def flushQueuesToDisk(self):
-        '''Writes whatever event in the queue to disk for later retrieval.'''
+    def createEvent(self):
 
-        # for queue in self.pool.listQueues(names=True):
-        #     size = self.pool.getQueue(queue).size()
-        #     print "%s %s %s" % (self.name, queue, size)
+        '''Convenience function which returns an empty     Wishbone event with the
+        current namespace already set.'''
 
-        self.logging.debug("Writing queues to disk.")
+        return Wishbone_Event(self.name)
 
     def getChildren(self, queue=None):
         '''Returns the queue name <queue> is connected to.'''
@@ -105,10 +109,13 @@ class Actor():
 
         return self.__loop
 
-    def readQueuesFromDisk(self):
-        '''Reads events from disk into the queue.'''
+    def postHook(self):
 
-        self.logging.debug("Reading queues from disk.")
+        self.logging.debug("Exit.")
+
+    def preHook(self):
+
+        self.logging.debug("Initialized.")
 
     def registerConsumer(self, function, queue):
         '''Registers <function> to process all events in <queue>
@@ -120,12 +127,6 @@ class Actor():
         consumer = self.threads.spawn(self.__consumer, function, queue)
         consumer.function = function.__name__
         consumer.queue = queue
-
-    def registerAdminCallback(self, function):
-        '''Registers <function> to respond to the incoming admin messages.'''
-
-        if not self.__adminConsumer_active:
-            spawn(self.__adminConsumer)
 
     def start(self):
         '''Starts the module.'''
@@ -160,20 +161,6 @@ class Actor():
             except QueueFull as err:
                 err.waitUntilEmpty()
 
-    def __adminConsumer(self):
-        '''Greenthread which consumes the admin queue.'''
-
-        self.__adminConsumer_active = True
-        self.__run.wait()
-        self.logging.debug("adminConsumer started.")
-        while self.loop():
-            try:
-                command = self.pool.queue.admin.get()
-            except QueueEmpty as err:
-                err.waitUntilContent()
-            else:
-                print command
-
     def __consumer(self, function, queue):
         '''Greenthread which applies <function> to each element from <queue>
         '''
@@ -183,14 +170,14 @@ class Actor():
         while self.loop():
             try:
                 event = self.pool.queue.__dict__[queue].get()
-                original_data = copy(event["data"])
+                self.current_event = event
             except QueueEmpty as err:
                 err.waitUntilContent()
             else:
+                event.initNamespace(self.name)
                 try:
                     function(event)
                 except QueueFull as err:
-                    event["data"] = original_data
                     self.pool.queue.__dict__[queue].rescue(event)
                     err.waitUntilFree()
                 except Exception as err:
@@ -200,9 +187,31 @@ class Actor():
                 else:
                     self.submit(event, self.pool.queue.success)
 
+    def __buildUplook(self):
+
+        self.__current_event = {}
+        args = {}
+
+        for key, value in inspect.currentframe(2).f_locals.iteritems():
+            if key == "self" or isinstance(value, ActorConfig):
+                next
+            else:
+                args[key] = value
+
+        uplook = UpLook(**args)
+        for name in uplook.listFunctions():
+            if isinstance(self.config.lookup[name], EventLookup):
+                uplook.registerLookup(name, self.doEventLookup)
+            else:
+                uplook.registerLookup(name, self.config.lookup[name])
+
+        self.uplook = uplook
+        self.kwargs = uplook.get()
+
     def __metricEmitter(self):
         '''A greenthread which collects the queue metrics at the defined interval.'''
 
+        hostname = socket.gethostname()
         self.__run.wait()
         while self.loop():
             for queue in self.pool.listQueues(names=True):
@@ -210,8 +219,18 @@ class Actor():
                 for item in stats:
                     while self.loop():
                         try:
-                            self.pool.queue.metrics.put({"header": {}, "data": (time(), "wishbone", socket.gethostname(), "queue.%s.%s.%s" % (self.name, queue, item), stats[item], '', ())})
+                            event = Wishbone_Event("%s:metric" % self.name)
+                            event.data = (time(), "wishbone", hostname, "queue.%s.%s.%s" % (self.name, queue, item), stats[item], '', ())
+                            self.pool.queue.metrics.put(event)
                             break
-                        except QueueFull:
-                            self.pool.queue.metrics.waitUntilEmpty()
+                        except QueueFull as err:
+                            err.waitUntilFree()
             sleep(self.frequency)
+
+    def doEventLookup(self, name):
+        (n, t, k) = name.split('.')
+        try:
+            return self.current_event.getHeaderValue(n, k)
+        except AttributeError:
+            return "You should use a dynamic lookup ~~ for header lookups. "
+

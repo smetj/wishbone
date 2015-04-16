@@ -4,7 +4,7 @@
 #
 #  header.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -33,24 +33,16 @@ class Header(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
-        - key(str)(self.name)
-           |  The header key to store the information.
+        - namespace(str)(None)
+           |  The namespace to write the header to.
+           |  <None> means self.name
 
         - header(dict)({})
            |  The data to store.
 
         - expr(str)(None)
            |  printf-style String Formatting.
-           |  Expects event["data"] to be a dictionary.
+           |  Expects event.data to be a dictionary.
 
 
     Queues:
@@ -62,17 +54,13 @@ class Header(Actor):
            |  Outgoing events.
     '''
 
-    def __init__(self, name, size=100, frequency=1, key=None, header={}, expr=None):
-        Actor.__init__(self, name, size, frequency)
-        if key is None:
-            self.key = name
-        else:
-            self.key = key
+    def __init__(self, actor_config, namespace=None, header={}, expr=None):
+        Actor.__init__(self, actor_config)
 
-        self.header = header
-        self.expr = expr
+        if namespace is None:
+            self.kwargs.namespace = self.name
 
-        if expr is None:
+        if self.kwargs.expr is None:
             self.addHeader = self.__doHeader
         else:
             self.addHeader = self.__doPrintf
@@ -86,12 +74,13 @@ class Header(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def __doHeader(self, event):
-        event["header"][self.key] = self.header
+        for key, value in self.kwargs.header:
+            event.setHeaderValue(key, value, self.kwargs.namespace)
         return event
 
     def __doPrintf(self, event):
         try:
-            return self.expr % event["data"]
+            return self.kwargs.expr % event.data
         except Exception as err:
             self.logging.error("String replace failed.  Reason: %s" % (err))
             return event

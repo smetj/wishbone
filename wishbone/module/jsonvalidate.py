@@ -3,7 +3,7 @@
 #
 #  jsonvalidate.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,15 +38,6 @@ class JSONValidate(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - schema(str)(None)
            |  The filename of the JSON validation schema to load.  When no
            |  schema is defined no validation is done.
@@ -61,20 +52,18 @@ class JSONValidate(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size, frequency, schema=None):
+    def __init__(self, actor_config, schema=None):
 
-        Actor.__init__(self, name)
-        self.name = name
-        self.schema = schema
+        Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        if self.schema is not None:
+        if self.kwargs.schema is not None:
             self.logging.debug("Validation schema defined.  Doing validation.")
-            self.schema_data = self.__loadValidationSchema(self.schema)
+            self.schema_data = self.__loadValidationSchema(self.kwargs.schema)
             self.validate = self.__validate
         else:
             self.logging.debug("No validation schema defined.  No validation.")
@@ -83,7 +72,7 @@ class JSONValidate(Actor):
     def consume(self, event):
 
         try:
-            self.validate(event["data"])
+            self.validate(event.data)
         except Exception as err:
             self.logging.warn("JSON data does not pass the validation schema.  Reason: %s" % (
                 str(err).replace("\n", " > ")))

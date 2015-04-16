@@ -3,7 +3,7 @@
 #
 #  match.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ from gevent import spawn, sleep
 from .matchrules import MatchRules
 from .readrules import ReadRulesDisk
 import os
-from copy import deepcopy
 
 
 class Match(Actor):
@@ -55,10 +54,10 @@ class Match(Actor):
         re:     Regex matching
         !re:    Negative regex matching
         >:      Bigger than
-        >=:     Bigger or equal than
+        >=:     Bigger than or equal to
         <:      Smaller than
-        <=:     Smaller or equal than
-        =:      Equal than
+        <=:     Smaller than or equal to
+        =:      Equal to
         in:     Evaluate list membership
         !in:    Evaluate negative list membership
 
@@ -116,15 +115,6 @@ class Match(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - location(str)(None)
            |  The directory containing rules.
            |  If none, no rules are read from disk.
@@ -143,10 +133,9 @@ class Match(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, location=None, rules={}):
-        Actor.__init__(self, name, size, frequency)
-        self.location = location
-        self.rules = rules
+    def __init__(self, actor_config, location=None, rules={}):
+        Actor.__init__(self, actor_config)
+
         self.__active_rules = {}
         self.match = MatchRules()
         self.pool.createQueue("inbox")
@@ -154,27 +143,35 @@ class Match(Actor):
 
     def preHook(self):
 
-        self.createDir()
-        self.__active_rules = self.rules
-        if self.location is not None:
-            self.logging.info("Rules directoy '%s' defined." % (self.location))
+        self.__active_rules = self.uplook.dump()["rules"]
+        if self.kwargs.location is not None:
+            self.createDir()
+            self.logging.info("Rules directoy '%s' defined." % (self.kwargs.location))
             spawn(self.getRules)
 
     def createDir(self):
 
-        if os.path.exists(self.location):
-            if not os.path.isdir(self.location):
-                raise Exception("%s exists but is not a directory" % (self.location))
+        if os.path.exists(self.kwargs.location):
+            if not os.path.isdir(self.kwargs.location):
+                raise Exception("%s exists but is not a directory" % (self.kwargs.location))
             else:
-                self.logging.info("Directory %s exists so I'm using it." % (self.location))
+                self.logging.info("Directory %s exists so I'm using it." % (self.kwargs.location))
         else:
-            self.logging.info("Directory %s does not exist so I'm creating it." % (self.location))
-            os.makedirs(self.location)
+            self.logging.info("Directory %s does not exist so I'm creating it." % (self.kwargs.location))
+            os.makedirs(self.kwargs.location)
 
     def getRules(self):
 
-        self.logging.info("Monitoring directory '%s' for changes" % (self.location))
-        self.read = ReadRulesDisk(self.logging, self.location)
+        self.logging.info("Monitoring directory '%s' for changes" % (self.kwargs.location))
+        self.read = ReadRulesDisk(self.logging, self.kwargs.location)
+
+        while self.loop():
+            try:
+                self.__active_rules = dict(self.read.readDirectory().items() + self.uplook.dump()["rules"])
+                break
+            except Exception as err:
+                self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
+                sleep(1)
 
         while self.loop():
             try:
