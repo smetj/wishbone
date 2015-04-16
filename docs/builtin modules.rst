@@ -99,6 +99,12 @@ wishbone.output.file
 
 --------
 
+wishbone.output.http
+--------------------
+.. autoclass:: wishbone.module.HTTPOutClient
+
+--------
+
 wishbone.output.null
 --------------------
 .. autoclass:: wishbone.module.Null
