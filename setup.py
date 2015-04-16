@@ -101,7 +101,7 @@ setup(
     packages=find_packages(),
     package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/sse.html']},
     zip_safe=False,
-    dependency_links=['https://github.com/surfly/gevent/tarball/master#egg=gevent-1.1'],
+    dependency_links=['https://github.com/surfly/gevent/tarball/72119c8c3e704b75a2d91d8555ca8673928ebabb#egg=gevent-1.1'],
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
         'wishbone.flow': [
