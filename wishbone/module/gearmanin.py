@@ -3,7 +3,7 @@
 #
 #  gearmanin.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #  MA 02110-1301, USA.
 #
 #
+
 
 from wishbone import Actor
 from gevent import spawn, sleep
@@ -42,15 +43,6 @@ class GearmanIn(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - hostlist(list)(["localhost:4730"])
            |  A list of gearmand servers.  Each entry should have
            |  format host:port.
@@ -71,31 +63,29 @@ class GearmanIn(Actor):
 
     '''
 
-    def __init__(self, name, size, frequency, hostlist=["localhost:4730"], secret=None, workers=1, queue="wishbone"):
-        Actor.__init__(self, name, size, frequency)
-        self.pool.createQueue("outbox")
-        self.name = name
-        self.hostlist = hostlist
-        self.secret = secret
-        self.workers = workers
-        self.queue = queue
+    def __init__(self, actor_config, hostlist=["localhost:4730"], secret=None, workers=1, queue="wishbone"):
+        Actor.__init__(self, actor_config)
 
+        self.pool.createQueue("outbox")
         self.background_instances = []
 
-        if self.secret is None:
+        if self.kwargs.secret is None:
             self.decrypt = self.__plainTextJob
         else:
-            key = self.secret[0:32]
+            key = self.kwargs.secret[0:32]
             self.cipher = AES.new(key + chr(0) * (32 - len(key)))
             self.decrypt = self.__encryptedJob
 
     def preHook(self):
-        for _ in range(self.workers):
+        for _ in range(self.kwargs.workers):
             spawn(self.gearmanWorker)
 
     def consume(self, gearman_worker, gearman_job):
         decrypted = self.decrypt(gearman_job.data)
-        self.submit({"header": {}, "data": decrypted}, self.pool.queue.outbox)
+        event = self.createEvent()
+        event.setHeaderNamespace(self.name)
+        event.data = decrypted
+        self.submit(event, self.pool.queue.outbox)
         return decrypted
 
     def __encryptedJob(self, data):
@@ -109,8 +99,8 @@ class GearmanIn(Actor):
         self.logging.info("Gearmand worker instance started")
         while self.loop():
             try:
-                worker_instance = GearmanWorker(self.hostlist)
-                worker_instance.register_task(self.queue, self.consume)
+                worker_instance = GearmanWorker(self.kwargs.hostlist)
+                worker_instance.register_task(self.kwargs.queue, self.consume)
                 worker_instance.work()
             except Exception as err:
                 self.logging.warn('Connection to gearmand failed. Reason: %s. Retry in 1 second.' % err)

@@ -3,7 +3,7 @@
 #
 #  __init__.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,3 +27,5 @@ from queue import Queue
 from queue import QueuePool
 from logging import Logging
 from modulemanager import ModuleManager
+# from configurationfactory import ConfigurationFactory
+from event import Event

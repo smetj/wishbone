@@ -3,7 +3,7 @@
 #
 #       httpinclient.py
 #
-#       Copyright 2014 Jelle Smet development@smetj.net
+#       Copyright 2015 Jelle Smet development@smetj.net
 #
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -36,15 +36,6 @@ class HTTPInClient(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - url(str/list)("http://localhost")
            |  The URL to fetch (including port).
            |  When a list, will process all urls defined.
@@ -71,33 +62,30 @@ class HTTPInClient(Actor):
 
     '''
 
-    def __init__(self, name, size, frequency, url="http://localhost", username=None, password=None, interval=60):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, url="http://localhost", username=None, password=None, interval=60):
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
-        self.url = url
-        self.username = username
-        self.password = password
-        self.interval = interval
 
     def preHook(self):
-        if isinstance(self.url, list):
-            for url in self.url:
+        if isinstance(self.kwargs.url, list):
+            for url in self.kwargs.url:
                 spawn(self.scheduler, url)
         else:
-            spawn(self.scheduler, self.url)
+            spawn(self.scheduler, self.kwargs.url)
 
     def scheduler(self, url):
         while self.loop():
-            event = {"header": {self.name: {}}, "data": None}
+            event = self.createEvent()
+            event.data = None
             try:
-                r = grequests.get(url, auth=(self.username, self.password))
+                r = grequests.get(url, auth=(self.kwargs.username, self.kwargs.password))
                 response = r.send()
             except Exception as err:
                 self.logging.warn("Problem requesting resource.  Reason: %s" % (err))
                 sleep(1)
             else:
-                event["header"][self.name]["status_code"] = response.status_code
-                event["header"][self.name]["url"] = url
-                event["data"] = response.text
+                event.setHeaderValue("status_code", response.status_code)
+                event.setHeaderValue("url", url)
+                event.data = response.text
                 self.submit(event, self.pool.queue.outbox)
-                sleep(self.interval)
+                sleep(self.kwargs.interval)

@@ -3,7 +3,7 @@
 #
 #       httpinserver.py
 #
-#       Copyright 2014 Jelle Smet development@smetj.net
+#       Copyright 2015 Jelle Smet development@smetj.net
 #
 #       This program is free software; you can redistribute it and/or modify
 #       it under the terms of the GNU General Public License as published by
@@ -35,15 +35,6 @@ class HTTPInServer(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - address(str)("0.0.0.0")
            |  The address to bind to.
 
@@ -73,18 +64,12 @@ class HTTPInServer(Actor):
     The root resource "/" is mapped the <outbox> queue.
     '''
 
-    def __init__(self, name, size, frequency, address="0.0.0.0", port=19283, keyfile=None, certfile=None, delimiter=None):
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
-        self.address = address
-        self.port = port
-        self.keyfile = keyfile
-        self.certfile = certfile
-        self.delimiter = delimiter
+    def __init__(self, actor_config, address="0.0.0.0", port=19283, keyfile=None, certfile=None, delimiter=None):
+        Actor.__init__(self, actor_config)
 
-        if self.delimiter is None:
+        if self.kwargs.delimiter is None:
             self.delimit = self.__noDelimiter
-        elif self.delimiter == "\\n":
+        elif self.kwargs.delimiter == "\\n":
             self.delimit = self.__newLineDelimiter
         else:
             self.delimit = self.__otherDelimiter
@@ -93,13 +78,16 @@ class HTTPInServer(Actor):
         spawn(self.__serve)
 
     def consume(self, env, start_response):
+        event = self.createEvent()
         try:
             for line in self.delimit(env["wsgi.input"]):
                 if env['PATH_INFO'] == '/':
-                    self.submit({"header": {}, "data": line}, self.pool.queue.outbox)
+                    event.data = line
+                    self.submit(event, self.pool.queue.outbox)
                 else:
                     q = self.pool.getQueue(env['PATH_INFO'].lstrip('/'))
-                    self.submit({"header": {}, "data": line}, q)
+                    event.data = line
+                    self.submit(event, q)
             start_response('200 OK', [('Content-Type', 'text/plain')])
             return "OK"
         except Exception as err:
@@ -116,8 +104,8 @@ class HTTPInServer(Actor):
     def __otherDelimiter(self, data):
         r = []
         for line in data.readlines():
-            if line.rstrip("\n").endswith(self.delimiter):
-                line = line.rstrip("\n")[:-len(self.delimiter)]
+            if line.rstrip("\n").endswith(self.kwargs.delimiter):
+                line = line.rstrip("\n")[:-len(self.kwargs.delimiter)]
                 if line != "\n":
                     r.append(line)
                 yield "".join(r)
@@ -136,14 +124,14 @@ class HTTPInServer(Actor):
             self.queue_mapping[path] = getattr(self.queuepool, queue)
 
     def __serve(self):
-        if self.keyfile is not None and self.certfile is not None:
+        if self.kwargs.keyfile is not None and self.kwargs.certfile is not None:
             self.__server = pywsgi.WSGIServer(
-                (self.address, self.port), self.consume, keyfile=self.keyfile, certfile=self.certfile)
+                (self.kwargs.address, self.kwargs.port), self.consume, keyfile=self.kwargs.keyfile, certfile=self.kwargs.certfile)
         else:
             self.__server = pywsgi.WSGIServer(
-                (self.address, self.port), self.consume, log=None)
+                (self.kwargs.address, self.kwargs.port), self.consume, log=None)
         self.__server.start()
-        self.logging.info("Serving on %s:%s" % (self.address, self.port))
+        self.logging.info("Serving on %s:%s" % (self.kwargs.address, self.kwargs.port))
 
     def postHook(self):
 

@@ -3,7 +3,7 @@
 #
 #  zmqpullin.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,15 +39,6 @@ class ZMQPullIn(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - mode(str)("server")
            |  The mode to run in.  Possible options are:
            |  - server: Binds to a port and listens.
@@ -71,12 +62,8 @@ class ZMQPullIn(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, mode="server", interface="0.0.0.0", port=19283, servers=[]):
-        Actor.__init__(self, name, size, frequency)
-        self.mode = mode
-        self.interface = interface
-        self.port = port
-        self.servers = servers
+    def __init__(self, actor_config, mode="server", interface="0.0.0.0", port=19283, servers=[]):
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
 
     def preHook(self):
@@ -84,11 +71,11 @@ class ZMQPullIn(Actor):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PULL)
 
-        if self.mode == "server":
-            self.socket.bind("tcp://*:%s" % self.port)
-            self.logging.info("Listening on port %s" % (self.port))
+        if self.kwargs.mode == "server":
+            self.socket.bind("tcp://*:%s" % self.kwargs.port)
+            self.logging.info("Listening on port %s" % (self.kwargs.port))
         else:
-            self.socket.connect("tcp://%s" % self.servers[0])
+            self.socket.connect("tcp://%s" % self.kwargs.servers[0])
 
         spawn(self.drain)
 
@@ -96,4 +83,6 @@ class ZMQPullIn(Actor):
 
         while self.loop():
             data = self.socket.recv()
-            self.submit({"header":{}, "data": data}, self.pool.queue.outbox)
+            event = self.createEvent()
+            event.data = data
+            self.submit(event, self.pool.queue.outbox)

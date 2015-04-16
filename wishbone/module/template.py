@@ -40,23 +40,16 @@ class Template(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - location(str)("./")
            |  The directory containing templates.
 
-        - key(str)(self.name)
-           |  The header key storing configuration.
+        - template(str)()*
+           |  The template filename stored in directory <location>.
 
-        - header_templates(list)([])
-           |  An optional list of keys containing templates.
+        - header_templates(list)([])*
+           |  An optional list of strings with header references
+           | containing templates.
+           | <module_instance>.header.<key>
 
 
 
@@ -70,21 +63,17 @@ class Template(Actor):
 
     '''
 
-    def __init__(self, name, size, frequency, location="./", key=None, header_templates=[]):
-        Actor.__init__(self, name, size, frequency)
-
-        self.location = location
-        if key is None:
-            self.key = self.name
-        else:
-            self.key = key
-
-        self.header_templates = header_templates
-        self.templates = Environment(loader=FileSystemLoader(location))
+    def __init__(self, actor_config, location="./", template=None, header_templates=[]):
+        Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
+
+    def preHook(self):
+
+        if self.kwargs.template is not None:
+            self.kwargs.templates = Environment(loader=FileSystemLoader(self.kwargs.location))
 
     def consume(self, event):
         event = self.construct(event)
@@ -92,31 +81,27 @@ class Template(Actor):
 
     def construct(self, event):
 
-        try:
-            event["header"][self.key]["template"]
-        except KeyError:
-            self.logging.error(
-                'Header information event["header"]["%s"]["template"] was expected but not found. Event purged.' % (self.key))
-            raise
-
-        for key in self.header_templates:
+        for template_ref in self.kwargs.header_templates:
             try:
-                template = JinjaTemplate(event["header"][self.key][key])
-                event["header"][self.key][key] = template.render(**event["data"])
+                (namespace, part, variable) = template_ref.split('.')
+                template = event.getHeaderValue(namespace, variable)
+                template_r = JinjaTemplate(template)
+                event.setHeaderValue(variable, template_r.render(**event.data), namespace)
             except Exception as err:
                 self.logging.warning(
-                    "Failed to convert header key %s.  Reason: %s" % (key))
+                    "Failed to convert header key '%s'.  Reason: %s" % (variable, err))
                 raise
 
-        try:
-            template = self.templates.get_template(event["header"][self.key]["template"])
-        except Exception as err:
-            self.logging.error("Template %s does not exist as a file in directory %s." % (event["header"][self.key]["template"], self.location))
-            raise
-        else:
+        if self.kwargs.template is not None:
             try:
-                event["data"] = template.render(**event["data"])
+                template = self.kwargs.templates.get_template(self.kwargs.template)
             except Exception as err:
-                self.logging.error('There was an error processing the template. Reason: %s' % (err))
+                self.logging.error('No template found with filename "%s%s".' % (self.kwargs.location, self.kwargs.template))
                 raise
+            else:
+                try:
+                    event.data = template.render(**event.data)
+                except Exception as err:
+                    self.logging.error('There was an error processing the template. Reason: %s' % (err))
+                    raise
         return event
