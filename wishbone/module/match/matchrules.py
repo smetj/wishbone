@@ -38,6 +38,7 @@ class MatchRules():
     <=:     Smaller or equal than
     =:      Equal than
     in:     Check whether element is in list
+    !in:    Check whether element is not in list
     '''
 
     def __init__(self):
@@ -49,7 +50,8 @@ class MatchRules():
                         "<=": self.lessOrEqual,
                         "=": self.equal,
                         "!=": self.notEqual,
-                        "in": self.hasMember
+                        "in": self.hasMember,
+                        "!in": self.hasNotMember
                         }
 
     def do(self, condition, data):
@@ -84,4 +86,14 @@ class MatchRules():
         return float(data) != float(value)
 
     def hasMember(self, value, data):
-        return str(value) in data
+        if isinstance(data, list):
+            return str(value) in data
+        else:
+            return False
+
+    def hasNotMember(self, value, data):
+        if isinstance(data, list):
+            return str(value) not in data
+        else:
+            return False
+
