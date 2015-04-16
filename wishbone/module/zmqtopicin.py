@@ -3,7 +3,7 @@
 #
 #  zmqsubscriber.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ from wishbone import Actor
 import zmq.green as zmq
 from gevent import spawn
 
+
 class ZMQTopicIn(Actor):
 
     '''**Subscribes to one or more ZeroMQ Topic publish modules.**
@@ -34,15 +35,6 @@ class ZMQTopicIn(Actor):
     Consumes data from one or more ZeroMQ publishers.
 
     Parameters:
-
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
 
         - host(string)("localhost")
            |  The host to submit to.
@@ -64,19 +56,16 @@ class ZMQTopicIn(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, port=19283, timeout=10, topic=""):
-        Actor.__init__(self, name, size, frequency)
-        self.port = port
-        self.timeout = timeout
-        self.topic = topic
+    def __init__(self, actor_config, port=19283, timeout=10, topic=""):
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
 
     def preHook(self):
 
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
-        self.socket.connect("tcp://localhost:%s" % self.port)
-        self.socket.setsockopt(zmq.SUBSCRIBE, self.topic)
+        self.socket.connect("tcp://localhost:%s" % self.kwargs.port)
+        self.socket.setsockopt(zmq.SUBSCRIBE, self.kwargs.topic)
         spawn(self.drain)
 
     def drain(self):
@@ -85,4 +74,6 @@ class ZMQTopicIn(Actor):
             string = self.socket.recv()
             messagedata = string.split(" ")[1:]
             messagedata = " ".join(messagedata)
-            self.submit({"header": {}, "data": messagedata}, self.pool.queue.outbox)
+            event = self.createEvent()
+            event.data = messagedata
+            self.submit(event, self.pool.queue.outbox)

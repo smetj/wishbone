@@ -4,7 +4,7 @@
 #
 #  humanlogformat.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ class HumanLogFormat(Actor):
 
     Internal Wishbone format:
 
-    (6, 1367682301.430527, 'Router', 'Received SIGINT. Shutting down.')
+    (6, 1367682301.430527, 3342, 'Router', 'Received SIGINT. Shutting down.')
 
     Sample output format:
 
@@ -49,15 +49,7 @@ class HumanLogFormat(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
+        n/a
 
     Queues:
 
@@ -68,9 +60,8 @@ class HumanLogFormat(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size=100, frequency=1, colorize=True, ident=None):
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
+    def __init__(self, actor_config, colorize=True, ident=None):
+        Actor.__init__(self, actor_config)
         self.levels = {
             0: "emergency",
             1: "alert",
@@ -92,7 +83,7 @@ class HumanLogFormat(Actor):
             7: "\x1B[1;37m"
         }
 
-        if colorize:
+        if self.kwargs.colorize:
             self.colorize = self.doColorize
         else:
             self.colorize = self.doNoColorize
@@ -101,23 +92,22 @@ class HumanLogFormat(Actor):
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
 
-        if ident is None:
-            self.ident = os.path.basename(sys.argv[0])
-        else:
-            self.ident = ident
+        if self.kwargs.ident is None:
+            self.kwargs.ident = os.path.basename(sys.argv[0])
 
     def consume(self, event):
+
         log = ("%s %s %s %s: %s" % (
-            strftime("%Y-%m-%dT%H:%M:%S", localtime(event["data"][1])),
-            "%s[%s]:" % (self.ident, event["data"][2]),
-            self.levels[event["data"][0]],
-            event["data"][3],
-            event["data"][4]))
-        event["data"] = self.colorize(log, event["data"][0])
+            strftime("%Y-%m-%dT%H:%M:%S", localtime(event.last.data[1])),
+            "%s[%s]:" % (self.kwargs.ident, event.last.data[2]),
+            self.levels[event.last.data[0]],
+            event.last.data[3],
+            event.last.data[4]))
+        event.data = self.colorize(log, event.last.data[0])
         self.submit(event, self.pool.queue.outbox)
 
     def doColorize(self, message, level):
         return self.colors[level] + message + "\x1B[0m"
 
     def doNoColorize(self, message, level):
-        pass
+        return message

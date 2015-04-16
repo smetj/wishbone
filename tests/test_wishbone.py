@@ -3,7 +3,7 @@
 #
 #  test_wishbone.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,14 +23,17 @@
 #
 
 import pytest
+
 from wishbone import QueuePool
 from wishbone import Queue
+from wishbone.error import QueueEmpty
+from utils import getter
 
 
 def test_listQueues():
     q = QueuePool(1)
     q.createQueue("hello")
-    assert list(q.listQueues(names=True)) == ['hello', 'admin_out', 'admin_in', 'failed', 'success', 'logs', 'metrics']
+    assert list(q.listQueues(names=True)) == ['hello', 'failed', 'success', 'logs', 'metrics']
 
 
 def test_createQueue():

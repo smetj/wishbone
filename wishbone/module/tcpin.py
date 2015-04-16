@@ -3,7 +3,7 @@
 #
 #  tcpin.py
 #
-#  Copyright 2014 Jelle Smet development@smetj.net
+#  Copyright 2015 Jelle Smet development@smetj.net
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,15 +35,6 @@ class TCPIn(Actor):
     Creates a TCP socket to which data can be submitted.
 
     Parameters:
-
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
 
         - address(str)("0.0.0.0")
            |  The address to bind to.
@@ -88,32 +79,27 @@ class TCPIn(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, port=19283, address='0.0.0.0', delimiter="\n", max_connections=0, reuse_port=False):
-        Actor.__init__(self, name, size, frequency)
-        self.pool.createQueue("outbox")
+    def __init__(self, actor_config, port=19283, address='0.0.0.0', delimiter="\n", max_connections=0, reuse_port=False):
+        Actor.__init__(self, actor_config)
 
-        self.name = name
-        self.port = port
-        self.address = address
-        self.delimiter = delimiter
-        self.max_connections = max_connections
-        self.reuse_port = reuse_port
-        if self.delimiter is None:
+        if self.kwargs.delimiter is None:
             self.handle = self.__handleNoDelimiter
-        elif self.delimiter == "\n":
+        elif self.kwargs.delimiter == "\n":
             self.handle = self.__handleNextLine
         else:
             self.handle = self.__handleDelimiter
 
+        self.pool.createQueue("outbox")
+
     def preHook(self):
-        self.sock = self.__setupSocket(self.address, self.port)
-        self.logging.info("TCP server initialized on address %s and port %s." % (self.address, self.port))
+        self.sock = self.__setupSocket(self.kwargs.address, self.kwargs.port)
+        self.logging.info("TCP server initialized on address %s and port %s." % (self.kwargs.address, self.kwargs.port))
         spawn(self.serve)
 
     def __setupSocket(self, address, port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        if self.reuse_port:
+        if self.kwargs.reuse_port:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.setsockopt(socket.SOL_SOCKET, 15, 1)
         else:
@@ -127,7 +113,9 @@ class TCPIn(Actor):
     def __handleNoDelimiter(self, sock, address):
         sfile = sock.makefile()
         chunk = sfile.readlines()
-        self.submit({'header': {}, 'data': ''.join(chunk)}, self.pool.queue.outbox)
+        event = self.createEvent()
+        event.data = ''.join(chunk)
+        self.submit(event, self.pool.queue.outbox)
         sfile.close()
         sock.close()
 
@@ -146,7 +134,9 @@ class TCPIn(Actor):
                 self.logging.debug("Client %s disconnected." % (str(address[0])))
                 break
             else:
-                self.submit({'header': {}, 'data': chunk.rstrip('\r\n')}, self.pool.queue.outbox)
+                event = self.createEvent()
+                event.data = chunk.rstrip('\r\n')
+                self.submit(event, self.pool.queue.outbox)
 
     def __handleDelimiter(self, sock, address):
         self.logging.debug("Connection from %s." % (str(address[0])))
@@ -155,18 +145,20 @@ class TCPIn(Actor):
 
         while self.loop():
             chunk = sfile.readline()
-
+            event = self.createEvent()
             if not chunk:
                 if len(data) > 0:
-                    self.submit({'header': {}, 'data': ''.join(data)}, self.pool.queue.outbox)
+                    event.data = ''.join(data)
+                    self.submit(event, self.pool.queue.outbox)
                 self.logging.debug("Client %s disconnected." % (str(address[0])))
                 break
 
-            elif chunk.endswith(self.delimiter):
-                chunk = chunk.rstrip(self.delimiter)
+            elif chunk.endswith(self.kwargs.delimiter):
+                chunk = chunk.rstrip(self.kwargs.delimiter)
                 if chunk != '':
                     data.append(chunk)
-                    self.submit({'header': {}, 'data': ''.join(data)}, self.pool.queue.outbox)
+                    event.data = ''.join(data)
+                    self.submit(event, self.pool.queue.outbox)
                     data = []
             else:
                 data.append(chunk)
@@ -175,9 +167,9 @@ class TCPIn(Actor):
         sock.close()
 
     def serve(self):
-        if self.max_connections > 0:
-            pool = Pool(self.max_connections)
-            self.logging.debug("Setting up a connection pool of %s connections." % (self.max_connections))
+        if self.kwargs.max_connections > 0:
+            pool = Pool(self.kwargs.max_connections)
+            self.logging.debug("Setting up a connection pool of %s connections." % (self.kwargs.max_connections))
             self.stream_server = StreamServer(self.sock, self.handle, spawn=pool)
             self.stream_server.start()
         else:

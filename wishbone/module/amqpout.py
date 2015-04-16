@@ -3,7 +3,7 @@
 #
 #  amqpout.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,24 +37,15 @@ class AMQPOut(Actor):
     <queue> will be bound to each other.
 
     If no exchange name is provided, no exchange will be created. If
-    event["header"][<name>]["exchange"] exists it will override whatever is
+    event.header.<self.name>.exchange exists it will override whatever is
     defined in <exchange>.
 
     If no queue name is provided, no queue will be create. if
-    event["header"][<name>]["queue"] exists it will override whatever is
+    event.header.<self.name>.queue exists it will override whatever is
     defined in <queue>.
 
 
     Parameters:
-
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
 
         - host(str) "localhost"
            |  The host broker to connect to.
@@ -99,26 +90,11 @@ class AMQPOut(Actor):
            | Messages going to the defined broker.
     '''
 
-    def __init__(self, name, size=100, frequency=1, host="localhost", port=5672, vhost="/", user="guest", password="guest",
+    def __init__(self, actor_config, host="localhost", port=5672, vhost="/", user="guest", password="guest",
                  exchange="", exchange_type="direct", exchange_durable=False,
                  queue="", queue_durable=False, queue_exclusive=False, queue_auto_delete=True,
                  routing_key=""):
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
-        self.size = size
-        self.host = host
-        self.port = port
-        self.vhost = vhost
-        self.user = user
-        self.password = password
-        self.exchange = exchange
-        self.exchange_type = exchange_type
-        self.exchange_durable = exchange_durable
-        self.queue = queue
-        self.queue_durable = queue_durable
-        self.queue_exclusive = queue_exclusive
-        self.queue_auto_delete = queue_auto_delete
-        self.routing_key = routing_key
+        Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
@@ -128,31 +104,27 @@ class AMQPOut(Actor):
 
     def consume(self, event):
 
-        # self.channel.basic_publish(str(event["data"]),
-        #     exchange=event["header"][self.name].get("exchange", self.exchange),
-        #     routing_key=event["header"][self.name].get("routing_key", self.routing_key))
-
-        message = basic_message.Message(body=str(event["data"]))
+        message = basic_message.Message(body=str(event.data))
         self.channel.basic_publish(message,
-                                   exchange=self.exchange,
-                                   routing_key=self.routing_key)
+                                   exchange=self.kwargs.exchange,
+                                   routing_key=self.kwargs.routing_key)
 
     def setupConnectivity(self):
 
         while self.loop():
             try:
-                self.connection = amqp_connection(host=self.host, port=self.port, virtual_host=self.vhost, userid=self.user, password=self.password)
+                self.connection = amqp_connection(host=self.kwargs.host, port=self.kwargs.port, virtual_host=self.kwargs.vhost, userid=self.kwargs.user, password=self.kwargs.password)
                 self.channel = self.connection.channel()
 
-                if self.exchange != "":
-                    self.channel.exchange_declare(self.exchange, self.exchange_type, durable=self.exchange_durable)
-                    self.logging.debug("Declared exchange %s." % (self.exchange))
-                if self.queue != "":
-                    self.channel.queue_declare(self.queue, durable=self.queue_durable, exclusive=self.queue_exclusive, auto_delete=self.queue_auto_delete)
-                    self.logging.debug("Declared queue %s." % (self.queue))
-                if self.exchange != "" and self.queue != "":
-                    self.channel.queue.bind(self.queue, self.exchange, routing_key=self.routing_key)
-                    self.logging.debug("Bound queue %s to exchange %s." % (self.queue, self.exchange))
+                if self.kwargs.exchange != "":
+                    self.channel.exchange_declare(self.kwargs.exchange, self.kwargs.exchange_type, durable=self.kwargs.exchange_durable)
+                    self.logging.debug("Declared exchange %s." % (self.kwargs.exchange))
+                if self.kwargs.queue != "":
+                    self.channel.queue_declare(self.kwargs.queue, durable=self.kwargs.queue_durable, exclusive=self.kwargs.queue_exclusive, auto_delete=self.kwargs.queue_auto_delete)
+                    self.logging.debug("Declared queue %s." % (self.kwargs.queue))
+                if self.kwargs.exchange != "" and self.kwargs.queue != "":
+                    self.channel.queue_bind(self.kwargs.queue, self.kwargs.exchange, routing_key=self.kwargs.routing_key)
+                    self.logging.debug("Bound queue %s to exchange %s." % (self.kwargs.queue, self.kwargs.exchange))
 
                 self.logging.info("Connected to broker.")
                 break

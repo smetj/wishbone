@@ -3,7 +3,7 @@
 #
 #  null.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,15 +34,7 @@ class Null(Actor):
 
         Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
+          n/a
 
     Queues:
 
@@ -50,10 +42,9 @@ class Null(Actor):
            |  incoming events
     '''
 
-    def __init__(self, name, size=100, frequency=1):
+    def __init__(self, actor_config):
 
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 

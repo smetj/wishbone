@@ -3,7 +3,7 @@
 #
 #  modulemanager.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,18 +25,39 @@
 import pkg_resources
 import re
 from prettytable import PrettyTable
-from operator import itemgetter
+from wishbone.error import ModuleInitFailure, NoSuchModule
 
 
 class ModuleManager():
 
-    def __init__(self):
-        self.categories = ["wishbone", "wishbone.contrib"]
-        self.groups = ["flow", "encode", "decode", "function", "input", "output"]
+    def __init__(self,
+                 categories=["wishbone", "wishbone.contrib"],
+                 groups=["flow", "encode", "decode", "function", "input", "output"]):
+        self.categories = categories
+        self.groups = groups
 
-    def listNames(self, category=None):
+    def exists(self, name):
 
-        modules = []
+        '''Returns True when module exists otherwise False'''
+
+        if self.getModuleByName(name) == None:
+            return True
+        else:
+            return False
+
+    def getModule(self, category, group, name):
+
+        m = None
+        for module in pkg_resources.iter_entry_points("%s.%s" % (category, group)):
+            if module.name == name:
+                m = module.load()
+
+        if m == None:
+            raise NoSuchModule("Module %s.%s.%s is unknown." % (category, group, name))
+        else:
+            return m
+
+    def getModulesList(self, category=None):
 
         if category is None:
             for category in self.categories:
@@ -51,11 +72,10 @@ class ModuleManager():
                 (c, g) = (category.split('.'))
                 yield (c, g, m)
 
-    def getModule(self, category, group, name):
+    def getModuleByName(self, name):
 
-        for module in pkg_resources.iter_entry_points("%s.%s" % (category, group)):
-            if module.name == name:
-                return module.load()
+        (category, group, name) = name.split('.')
+        return self.getModule(category, group, name)
 
     def getModuleDoc(self, category, group, name):
 
@@ -81,10 +101,10 @@ class ModuleManager():
 
         category_header = None
         group_header = None
-        all_items = list(self.listNames())
+        all_items = list(self.getModulesList())
 
         for g in include_groups:
-            all_items += list(self.listNames(g))
+            all_items += list(self.getModulesList(g))
 
         for (category, group, module) in all_items:
             title = self.getModuleTitle(category, group, module)
@@ -111,6 +131,14 @@ class ModuleManager():
                     return module.dist.version
         except:
             return "?"
+
+    def validateModuleName(self, name):
+
+        '''Validates a module reference name.'''
+
+        if len(name.split('.')) != 3:
+
+            raise ModuleInitFailure('%s is not a valid name structure.  Should be x.x.x' % name)
 
     def __getTable(self):
 
