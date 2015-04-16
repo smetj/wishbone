@@ -3,7 +3,7 @@
 #
 #  namedpipein.py
 #
-#  Copyright 2014 Jelle Smet development@smetj.net
+#  Copyright 2015 Jelle Smet development@smetj.net
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,15 +38,6 @@ class NamedPipeIn(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - path(str)("/tmp/wishbone")
            |  The the location of the named pipe.
 
@@ -56,28 +47,28 @@ class NamedPipeIn(Actor):
            |  Data coming from the outside world.
     '''
 
-    def __init__(self, name, size=100, frequency=1, path="/tmp/wishbone"):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, path="/tmp/wishbone"):
+        Actor.__init__(self, actor_config)
 
         self.pool.createQueue("outbox")
-        self.name = name
-        self.path = path
 
     def preHook(self):
 
-        os.mkfifo(self.path)
-        self.logging.info('Named pipe %s created.' % (self.path))
-        spawn(self.drain)
+        os.mkfifo(self.kwargs.path)
+        self.logging.info('Named pipe %s created.' % (self.kwargs.path))
+        spawn(self.drain, self.kwargs.path)
 
     def consume(self, event):
         for line in event:
-            self.submit({"header": {}, "data": line}, self.pool.queue.outbox)
+            e = self.createEvent()
+            e.data = line
+            self.submit(e, self.pool.queue.outbox)
 
-    def drain(self):
+    def drain(self, p):
         '''Reads the named pipe.'''
 
         self.logging.info('Started.')
-        fd = os.open(self.path, os.O_RDWR | os.O_NONBLOCK)
+        fd = os.open(p, os.O_RDWR | os.O_NONBLOCK)
         gevent_os.make_nonblocking(fd)
 
         while self.loop():
@@ -93,6 +84,6 @@ class NamedPipeIn(Actor):
     def postHook(self):
 
         try:
-            os.unlink(self.path)
+            os.unlink(self.kwargs.path)
         except:
             pass

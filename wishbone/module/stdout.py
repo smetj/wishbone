@@ -3,7 +3,7 @@
 #
 #  stdout.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,14 +23,12 @@
 #
 
 from wishbone import Actor
-from gevent import sleep
 from os import getpid
 
 
 class Format():
 
     def __init__(self, complete, counter, pid):
-        self.countervalue = -1
         if complete:
             self.complete = self.__returnComplete
         else:
@@ -49,10 +47,10 @@ class Format():
         return self.pid(self.counter(self.complete(event)))
 
     def __returnComplete(self, event):
-        return event
+        return event.raw()
 
     def __returnIncomplete(self, event):
-        return event["data"]
+        return event.last.data
 
     def __returnCounter(self, event):
         self.countervalue += 1
@@ -75,16 +73,8 @@ class STDOUT(Actor):
     Prints incoming events to STDOUT. When <complete> is True,
     the complete event including headers is printed to STDOUT.
 
+
     Parameters:
-
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
 
         - complete(bool)(False)
            |  When True, print the complete event including headers.
@@ -93,14 +83,11 @@ class STDOUT(Actor):
            |  Puts an incremental number for each event in front
            |  of each event.
 
-        - prefix(str)("")
+        - prefix(str)("")*
            |  Puts the prefix in front of each printed event.
 
         - pid(bool)(False)
            |  Includes the pid of the process producing the output.
-
-        - flush(int)(1)
-           |  The interval at which data needs to be flushed.
 
 
     Queues:
@@ -109,16 +96,13 @@ class STDOUT(Actor):
            |  Incoming events.
     '''
 
-    def __init__(self, name, size=100, frequency=1, complete=False, counter=False, prefix="", pid=False, flush=1):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, complete=False, counter=False, prefix="", pid=False):
+        Actor.__init__(self, actor_config)
 
-        self.complete = complete
-        self.counter = counter
-        self.prefix = prefix
-        self.format = Format(complete, counter, pid)
-
+        self.format = Format(self.kwargs.complete, self.kwargs.counter, self.kwargs.pid)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
-        print ("%s%s" % (self.prefix, self.format.do(event)))
+
+        print("%s%s" % (self.kwargs.prefix, self.format.do(event)))

@@ -3,7 +3,7 @@
 #
 #  graphite.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -41,15 +41,6 @@ class Graphite(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - prefix(str)
            |  Some prefix to put in front of the metric name.
 
@@ -72,29 +63,29 @@ class Graphite(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size=100, frequency=1, prefix='', script=True, pid=False, source=True):
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
-        self.prefix = prefix
-        if script:
-            self.script_name = '.%s' % (basename(argv[0]).replace(".py", ""))
-        else:
-            self.script_name = ''
-        if pid:
-            self.pid = "-%s" % (getpid())
-        else:
-            self.pid = ''
-
-        self.source = source
-
-        if self.source:
-            self.doConsume = self.__consumeSource
-        else:
-            self.doConsume = self.__consumeNoSource
+    def __init__(self, actor_config, prefix='', script=True, pid=False, source=True):
+        Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
+
+    def preHook(self):
+
+        if self.kwargs.script:
+            self.script_name = '.%s' % (basename(argv[0]).replace(".py", ""))
+        else:
+            self.script_name = ''
+
+        if self.kwargs.pid:
+            self.pid = "-%s" % (getpid())
+        else:
+            self.pid = ''
+
+        if self.kwargs.source:
+            self.doConsume = self.__consumeSource
+        else:
+            self.doConsume = self.__consumeNoSource
 
     def consume(self, event):
 
@@ -102,10 +93,10 @@ class Graphite(Actor):
 
     def __consumeSource(self, event):
 
-        event = {"header": {}, "data": "%s%s%s%s.%s %s %s" % (self.prefix, event["data"][2], self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])}
+        event.data = "%s%s%s%s.%s %s %s" % (self.kwargs.prefix, event.last.data[2], self.script_name, self.pid, event.last.data[3], event.last.data[4], event.last.data[0])
         self.submit(event, self.pool.queue.outbox)
 
     def __consumeNoSource(self, event):
 
-        event = {"header": {}, "data": "%s%s%s.%s %s %s" % (self.prefix, self.script_name, self.pid, event["data"][3], event["data"][4], event["data"][0])}
+        event.data = "%s%s%s.%s %s %s" % (self.kwargs.prefix, self.script_name, self.pid, event.last.data[3], event.last.data[4], event.last.data[0])
         self.submit(event, self.pool.queue.outbox)

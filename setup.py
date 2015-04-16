@@ -3,7 +3,7 @@
 #
 #  setup.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,9 +27,9 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '1.0.4'
+VERSION = '1.1.0'
 
-install_requires = ['gevent>=1.1',
+install_requires = ['gevent>=1.0.1',
                     'greenlet>=0.3.2',
                     'argparse==1.2.1',
                     'prettytable==0.7.2',
@@ -37,14 +37,15 @@ install_requires = ['gevent>=1.1',
                     'pyyaml==3.11',
                     'msgpack-python==0.4.2',
                     'pyzmq==14.3.1',
-                    'amqp==1.4.5',
-                    'grequests==0.2.0',
+                    'amqp==1.4.6',
                     'jinja2==2.7.3',
                     'jsonschema==2.4.0',
                     'gearman==2.0.2',
                     'pycrypto==2.6.1',
                     'flask==0.10.1',
-                    'gevent_inotifyx==0.1.1']
+                    'gevent_inotifyx==0.1.1',
+                    'requests==2.5.1',
+                    'uplook']
 
 try:
     with open('README.rst', 'rt') as f:
@@ -99,7 +100,7 @@ setup(
     install_requires=install_requires,
     namespace_packages=[],
     packages=find_packages(),
-    package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/sse.html']},
+    package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/sse.html', 'data/banner.tmpl']},
     zip_safe=False,
     dependency_links=['https://github.com/surfly/gevent/tarball/72119c8c3e704b75a2d91d8555ca8673928ebabb#egg=gevent-1.1'],
     entry_points={
@@ -122,9 +123,10 @@ setup(
         ],
         'wishbone.function': [
             'header = wishbone.module.header:Header',
-            'template = wishbone.module.template:Template',
+            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate',
+            'keyvalue = wishbone.module.keyvalue:KeyValue',
             'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
-            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate'
+            'template = wishbone.module.template:Template'
         ],
         'wishbone.input': [
             'amqp = wishbone.module.amqpin:AMQPIn',
@@ -143,6 +145,7 @@ setup(
         'wishbone.output': [
             'amqp = wishbone.module.amqpout:AMQPOut',
             'disk = wishbone.module.diskout:DiskOut',
+            'elasticsearch = wishbone.module.elasticsearchout:ElasticSearchOut',
             'email = wishbone.module.emailout:EmailOut',
             'file = wishbone.module.fileout:FileOut',
             'http = wishbone.module.httpoutclient:HTTPOutClient',

@@ -3,7 +3,7 @@
 #
 #  zmqpushout.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,15 +38,6 @@ class ZMQPushOut(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - mode(str)("server")
            |  The mode to run in.  Possible options are:
            |  - server: Binds to a port and listens.
@@ -70,12 +61,8 @@ class ZMQPushOut(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, mode="server", interface="0.0.0.0", port=19283, clients=[]):
-        Actor.__init__(self, name, size, frequency)
-        self.mode = mode
-        self.interface = interface
-        self.port = port
-        self.clients = clients
+    def __init__(self, actor_config, mode="server", interface="0.0.0.0", port=19283, clients=[]):
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
@@ -84,16 +71,16 @@ class ZMQPushOut(Actor):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUSH)
 
-        if self.mode == "server":
-            self.socket.bind("tcp://*:%s" % self.port)
-            self.logging.info("Listening on port %s" % (self.port))
+        if self.kwargs.mode == "server":
+            self.socket.bind("tcp://*:%s" % self.kwargs.port)
+            self.logging.info("Listening on port %s" % (self.kwargs.port))
         else:
-            self.socket.connect("tcp://%s" % self.clients[0])
+            self.socket.connect("tcp://%s" % self.kwargs.clients[0])
 
     def consume(self, event):
 
         try:
-            # self.socket.send(event["data"], flags=zmq.NOBLOCK)
-            self.socket.send(event["data"])
+            # self.socket.send(event.data, flags=zmq.NOBLOCK)
+            self.socket.send(event.data)
         except Exception as err:
             self.logging.error("Failed to submit message.  Reason: %s" % (err))

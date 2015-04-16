@@ -4,7 +4,7 @@
 #
 #  roundrobin.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,15 +38,6 @@ class RoundRobin(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - randomize(bool)(False)
             |  Randomizes the queue selection instead of going round-robin
             |  over all queues.
@@ -58,21 +49,19 @@ class RoundRobin(Actor):
            |  Incoming events
     '''
 
-    def __init__(self, name, size=100, frequency=1, randomize=False):
-        Actor.__init__(self, name, size, frequency)
+    def __init__(self, actor_config, randomize=False):
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
-
-        self.randomize = randomize
 
     def preHook(self):
 
         self.destination_queues = []
         for queue in self.pool.listQueues(names=True):
-            if queue not in ["admin_in", "admin_out", "failed", "success", "metrics", "logs"]:
+            if queue not in ["failed", "success", "metrics", "logs"]:
                 self.destination_queues.append(self.pool.getQueue(queue))
 
-        if not self.randomize:
+        if not self.kwargs.randomize:
             self.cycle = cycle(self.destination_queues)
             self.chooseQueue = self.__chooseNextQueue
         else:

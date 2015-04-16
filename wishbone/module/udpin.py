@@ -3,7 +3,7 @@
 #
 #  udpin.py
 #
-#  Copyright 2014 Jelle Smet development@smetj.net
+#  Copyright 2015 Jelle Smet development@smetj.net
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,15 +34,6 @@ class UDPIn(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - address(string)("0.0.0.0")
            |  The address to bind to.
 
@@ -61,21 +52,20 @@ class UDPIn(Actor):
 
     '''
 
-    def __init__(self, name, size=100, frequency=1, address="0.0.0.0", port=19283):
-        Actor.__init__(self, name, size, frequency)
-        self.pool.createQueue("outbox")
-        self.name = name
-        self._address = address
-        self.port = port
+    def __init__(self, actor_config, address="0.0.0.0", port=19283):
+        Actor.__init__(self, actor_config)
 
-        self.server = DatagramServer("%s:%s" % (address, port), self.handle)
+        self.pool.createQueue("outbox")
+        self.server = DatagramServer("%s:%s" % (self.kwargs.address, self.kwargs.port), self.handle)
 
     def handle(self, data, address):
         '''Is called upon each incoming message'''
 
-        self.submit({'header': {}, 'data': data}, self.pool.queue.outbox)
+        event = self.createEvent()
+        event.data = data
+        self.submit(event, self.pool.queue.outbox)
 
     def preHook(self):
-        self.logging.info('Started listening on %s:%s' % (self._address, self.port))
+        self.logging.info('Started listening on %s:%s' % (self.kwargs.address, self.kwargs.port))
         self.server.start()
 

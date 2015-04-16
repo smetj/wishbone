@@ -3,7 +3,7 @@
 #
 #  bootstrap.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,18 +22,18 @@
 #
 #
 
-from wishbone.router import Default
-from wishbone.error import QueueConnected
-from wishbone.utils import BootstrapFile, Module, PIDFile
-from wishbone import ModuleManager
-
 import argparse
-import multiprocessing
 import os
 import sys
+
+from wishbone.router import Default
+from wishbone import ModuleManager
+from wishbone.config import ConfigFile
+from wishbone.utils import PIDFile
+from gevent import signal
 from daemon import DaemonContext
-from gevent import sleep, signal
 from pkg_resources import get_distribution
+from jinja2 import Template
 
 
 class BootStrap():
@@ -72,7 +72,7 @@ class BootStrap():
         llist.add_argument('--group', type=str, dest='group', default=None, help='List the modules of this group type.')
 
         show = subparsers.add_parser('show', description="Shows the details of a module.")
-        show.add_argument('--module', type=str, help='Shows the documentation of the module. ')
+        show.add_argument('--module', type=str, required=True, help='Shows the documentation of the module. ')
 
         arguments = vars(parser.parse_args())
 
@@ -94,45 +94,32 @@ class Dispatch():
 
     def __init__(self):
 
-        self.config = BootstrapFile()
         self.routers = []
-        signal(2, self.__stopSequence)
         self.__stopping = False
-        self.module_manager = ModuleManager()
 
     def generateHeader(self):
-        '''
-        Prints a header.
-        '''
+        '''Generates the Wishbone ascii header.'''
 
-        return """          __       __    __
-.--.--.--|__.-----|  |--|  |--.-----.-----.-----.
-|  |  |  |  |__ --|     |  _  |  _  |     |  -__|
-|________|__|_____|__|__|_____|_____|__|__|_____|
-                                   version %s
+        with open("%s/data/banner.tmpl" % (os.path.dirname(__file__))) as f:
+            template = Template(''.join(f.readlines()))
 
-Build event pipeline servers with minimal effort.
-
-""" % (get_distribution('wishbone').version)
+        return template.render(version=get_distribution('wishbone').version)
 
     def debug(self, command, config, instances, queue_size, frequency, identification):
         '''
         Handles the Wishbone debug command.
         '''
 
-        config = self.config.load(config)
+        processes = []
 
-        if instances == 1:
-            self.routers.append(RouterBootstrap(config, debug=True, queue_size=queue_size, frequency=frequency, identification=identification))
-            self.routers[-1].start()
+        def stopSequence():
+            for proc in processes:
+                proc.stop()
 
-        else:
-            for x in xrange(instances):
-                self.routers.append(RouterBootstrapProcess(config, debug=True, queue_size=queue_size, frequency=frequency, identification=identification))
-                self.routers[-1].start()
+        signal(2, stopSequence)
 
-            while multiprocessing.active_children():
-                sleep(1)
+        module_manager = ModuleManager()
+        router_config = ConfigFile().load(config)
 
         # sys.exit(0)
 
@@ -140,12 +127,16 @@ Build event pipeline servers with minimal effort.
 
         print self.generateHeader()
         print "Available modules:"
-        print self.module_manager.getModuleTable(category, group, include_groups)
+        print ModuleManager().getModuleTable(category, group, include_groups)
 
     def show(self, command, module):
         '''
         Shows the help message of a module.
         '''
+
+        module_manager = ModuleManager()
+        module_manager.validateModuleName(module)
+        module_manager.exists(module)
 
         print self.generateHeader()
         try:
@@ -154,9 +145,10 @@ Build event pipeline servers with minimal effort.
             (category, sub, group, module) = module.split('.')
             category = "%s.%s" % (category, sub)
 
+
         try:
-            title = self.module_manager.getModuleTitle(category, group, module)
-            version = self.module_manager.getModuleVersion(category, group, module)
+            title = module_manager.getModuleTitle(category, group, module)
+            version = module_manager.getModuleVersion(category, group, module)
             header = "%s.%s.%s" % (category, group, module)
             print
             print "="*len(header)
@@ -167,43 +159,33 @@ Build event pipeline servers with minimal effort.
             print
             print title
             print "-"*len(title)
-            print self.module_manager.getModuleDoc(category, group, module)
-        except Exception:
-            print "Failed to load module %s.%s.%s." % (category, group, module)
+            print module_manager.getModuleDoc(category, group, module)
+        except Exception as err:
+            print "Failed to load module %s.%s.%s. Reason: %s" % (category, group, module, err)
 
     def start(self, command, config, instances, pid, queue_size, frequency, identification):
         '''
         Handles the Wishbone start command.
         '''
 
-        config = self.config.load(config)
-        self.pid = PIDFile(pid)
+        module_manager = ModuleManager()
+        router_config = ConfigFile().load(config)
+        pid_file = PIDFile(pid)
 
-        if instances == 1:
-            print ("Starting 1 instance to background with pid %s." % (os.getpid()))
-            try:
-                with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
-                    self.pid.create([os.getpid()])
-                    instance = RouterBootstrap(config, debug=False, queue_size=queue_size, frequency=frequency, identification=identification)
-                    instance.start()
-            except Exception as err:
-                sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
-        else:
-            try:
-                print "Starting %s instances in background." % (instances)
-                with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
-                    pids = []
-                    processes = []
-                    for counter in xrange(instances):
-                        processes.append(RouterBootstrapProcess(config, debug=False, queue_size=queue_size, frequency=frequency, identification=identification))
-                        processes[-1].start()
-                        pids.append(processes[-1].pid)
-                    self.pid.create(pids)
-                    for process in processes:
-                        process.join()
-
-            except Exception as err:
-                sys.stdout.write("Failed to start instance.  Reason: %s\n" % (err))
+        with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
+            if instances == 1:
+                sys.stdout.write("\nWishbone instance started with pid %s\n" % (os.getpid()))
+                pid_file.create([os.getpid()])
+                Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False).start()
+            else:
+                processes = []
+                for instance in range(instances):
+                    processes.append(Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, process=True).start())
+                pids = [str(p.pid) for p in processes]
+                print("\n%s Wishbone instances started in background with pid %s\n" % (len(pids), ", ".join(pids)))
+                pid_file.create(pids)
+                for proc in processes:
+                    proc.join()
 
     def stop(self, command, pid):
         '''
@@ -256,129 +238,12 @@ Build event pipeline servers with minimal effort.
             False
 
 
-class RouterBootstrapProcess(multiprocessing.Process):
-
-    '''
-    Wraps RouterBootstrap into a Process class.
-    '''
-
-    def __init__(self, config, debug=False, queue_size=100, frequency=1, identification=None):
-        multiprocessing.Process.__init__(self)
-        self.config = config
-        self.debug = debug
-        self.queue_size = queue_size
-        self.frequency = frequency
-        self.identification = identification
-        self.daemon = True
-
-    def run(self):
-        '''
-        Executed by Process when started.
-        '''
-
-        router = RouterBootstrap(self.config, self.debug, self.queue_size, self.frequency, self.identification)
-        router.start()
-
-
-class RouterBootstrap():
-
-    '''
-    Setup, configure and a router process.
-    '''
-
-    def __init__(self, config, debug=False, queue_size=100, frequency=1, identification=None):
-        self.config = config
-        self.identification = identification
-        self.debug = debug
-        self.router = Default(size=queue_size, frequency=frequency)
-        self.module = Module()
-
-    def loadModule(self, name):
-        '''
-        Loads a module using the entrypoint name.
-        '''
-
-        return self.module.load(name)
-
-    def setupModules(self, modules):
-        '''
-        Loads and initialzes the modules from the bootstrap file.
-        '''
-
-        for module in modules:
-            m = self.loadModule(modules[module]["module"])
-            if "arguments" in modules[module]:
-                self.router.registerModule(m, module, **modules[module]["arguments"])
-            else:
-                self.router.registerModule(m, module)
-
-    def setupRoutes(self, table):
-        '''
-        Connects the modules from the bootstrap file.
-        '''
-
-        for route in table:
-            sm, sq, dm, dq = self.__splitRoute(route)
-            self.router.pool.getModule(sm).connect(sq, self.router.pool.getModule(dm), dq)
-
-    def start(self):
-        '''
-        Calls the router's start() function.
-        '''
-
-        self.setupModules(self.config["modules"])
-        self.setupRoutes(self.config["routingtable"])
-
-        if self.debug:
-            self.__debug()
-
-        try:
-            syslog = self.loadModule("wishbone.output.syslog")
-            self.router.registerModule(syslog, "syslog", ident=self.identification)
-            self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("syslog"), "inbox")
-        except QueueConnected:
-            pass
-
-        self.router.start()
-        while self.router.isRunning():
-            sleep(1)
-
-    def stop(self):
-        '''
-        Calls the router's stop() function.
-        '''
-
-        self.router.stop()
-
-    def __debug(self):
-        '''
-        In debug mode we route all logging to SDOUT.
-        '''
-
-        # In debug mode we write our logs to STDOUT
-        log_stdout = self.loadModule("wishbone.output.stdout")
-        log_human = self.loadModule("wishbone.encode.humanlogformat")
-        self.router.registerModule(log_stdout, "log_stdout")
-        self.router.registerModule(log_human, "log_format", ident=self.identification)
-        self.router.pool.getModule("logs_funnel").connect("outbox", self.router.pool.getModule("log_format"), "inbox")
-        self.router.pool.getModule("log_format").connect("outbox", self.router.pool.getModule("log_stdout"), "inbox")
-
-    def __splitRoute(self, definition):
-        '''
-        Splits the route definition string into 4 separate string.
-        '''
-
-        (source, destination) = definition.split('->')
-        (sm, sq) = source.rstrip().lstrip().split('.')
-        (dm, dq) = destination.rstrip().lstrip().split('.')
-        return sm, sq, dm, dq
-
-
 def main():
-    try:
-        BootStrap()
-    except Exception as err:
-        print "Failed to bootstrap instance.  Reason: %s" % (err)
+    BootStrap()
+    # try:
+    #     BootStrap()
+    # except Exception as err:
+    #     print "Failed to bootstrap instance.  Reason: %s" % (err)
 
 if __name__ == '__main__':
     main()

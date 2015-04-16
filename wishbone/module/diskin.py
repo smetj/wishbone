@@ -3,7 +3,7 @@
 #
 #  diskin.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,7 +27,8 @@ import cPickle as pickle
 from gevent.fileobject import FileObjectThread
 from gevent import spawn, sleep, event
 from os import remove
-import glob, os
+import glob
+import os
 from time import time
 
 
@@ -37,15 +38,6 @@ class DiskIn(Actor):
 
 
     Parameters:
-
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
 
         - directory(str)
            |  The directory to write data to.
@@ -67,12 +59,8 @@ class DiskIn(Actor):
            |  Incoming events.
     '''
 
-    def __init__(self, name, size=100, frequency=1, directory="./", idle_trigger=False, idle_time=10):
-        Actor.__init__(self, name, size, frequency)
-        self.name = name
-        self.directory = directory
-        self.idle_trigger = idle_trigger
-        self.idle_time = idle_time
+    def __init__(self, actor_config, directory="./", idle_trigger=False, idle_time=10):
+        Actor.__init__(self, actor_config)
         self.reading = event.Event()
         self.reading.set()
         self.pool.createQueue("outbox")
@@ -84,14 +72,14 @@ class DiskIn(Actor):
 
     def createDir(self):
 
-        if os.path.exists(self.directory):
-            if not os.path.isdir(self.directory):
-                raise Exception("%s exists but is not a directory" % (self.directory))
+        if os.path.exists(self.kwargs.directory):
+            if not os.path.isdir(self.kwargs.directory):
+                raise Exception("%s exists but is not a directory" % (self.kwargs.directory))
             else:
-                self.logging.info("Directory %s exists so I'm using it." % (self.directory))
+                self.logging.info("Directory %s exists so I'm using it." % (self.kwargs.directory))
         else:
-            self.logging.info("Directory %s does not exist so I'm creating it." % (self.directory))
-            os.makedirs(self.directory)
+            self.logging.info("Directory %s does not exist so I'm creating it." % (self.kwargs.directory))
+            os.makedirs(self.kwargs.directory)
 
     def monitorDirectory(self):
         while self.loop:
@@ -99,7 +87,7 @@ class DiskIn(Actor):
             sleep(0.5)
 
     def processDirectory(self):
-        for filename in glob.glob("%s/*.ready" % (self.directory)):
+        for filename in glob.glob("%s/*.ready" % (self.kwargs.directory)):
             self.reading.wait()
             self.readFile(filename)
 
@@ -111,6 +99,7 @@ class DiskIn(Actor):
                 while self.loop():
                     try:
                         event = pickle.load(f)
+                        event.setHeaderNamespace(self.name)
                         self.submit(event, self.pool.queue.outbox)
                     except EOFError:
                         break
@@ -121,11 +110,11 @@ class DiskIn(Actor):
 
         while self.loop():
             try:
-                newest = max(glob.iglob("%s/*" % (self.directory)), key=os.path.getmtime)
+                newest = max(glob.iglob("%s/*" % (self.kwargs.directory)), key=os.path.getmtime)
             except:
                 pass
             else:
-                if time() - os.path.getctime(newest) >= self.idle_time:
+                if time() - os.path.getctime(newest) >= self.kwargs.idle_time:
                     self.reading.set()
                 else:
                     self.reading.clear()

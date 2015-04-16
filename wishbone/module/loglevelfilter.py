@@ -3,7 +3,7 @@
 #
 #  loglevelfilter.py
 #
-#  Copyright 2014 Jelle Smet <development@smetj.net>
+#  Copyright 2015 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -38,15 +38,6 @@ class LogLevelFilter(Actor):
 
     Parameters:
 
-        - name(str)
-           |  The name of the module.
-
-        - size(int)
-           |  The default max length of each queue.
-
-        - frequency(int)
-           |  The frequency in seconds to generate metrics.
-
         - loglevel(int)(6)
            |  The maximum allowed loglevel.
 
@@ -60,14 +51,13 @@ class LogLevelFilter(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, name, size=100, frequency=1, loglevel=6):
-        Actor.__init__(self, name, size, frequency)
-        self.loglevel = loglevel
+    def __init__(self, actor_config, loglevel=6):
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consumer, "inbox")
 
     def consumer(self, event):
 
-        if event["data"][0] <= self.loglevel:
+        if event.data[0] <= self.kwargs.loglevel:
             self.submit(event, self.pool.queue.outbox)
