@@ -131,8 +131,6 @@ class Actor():
     def start(self):
         '''Starts the module.'''
 
-        # self.readQueuesFromDisk()
-
         if hasattr(self, "preHook"):
             self.logging.debug("preHook() found, executing")
             self.preHook()
