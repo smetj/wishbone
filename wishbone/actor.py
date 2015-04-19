@@ -38,6 +38,10 @@ from sys import exc_info
 import traceback
 
 
+class ActorConfig(namedtuple('ActorConfig', 'name size frequency lookup')):
+    pass
+
+
 class Actor():
 
     def __init__(self, config):
