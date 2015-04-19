@@ -45,7 +45,7 @@ class Module():
 class Event(object):
 
     '''
-    The Wishbone event object representation.
+    **The Wishbone event object representation.**
 
     A class object containing the event data being passed from one Wishbone
     module to the other.
