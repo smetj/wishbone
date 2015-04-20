@@ -71,8 +71,7 @@ class Match(Actor):
     rule matches, evaluation the other rules will continue untill all rules
     are processed.
 
-    Examples
-    ~~~~~~~~
+    **Examples**
 
     This example would route the events - with field "greeting" containing
     the value "hello" - to the outbox queue without adding any information

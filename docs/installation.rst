@@ -4,8 +4,7 @@ Installation
 
 Wishbone works on python 2.7+ and PyPy 2.3.1+
 
-Versioning
-----------
+**Versioning**
 
 - Wishbone uses `Semantic Versioning`_.
 - Each release is tagged in `Github`_ with the release number.
@@ -13,25 +12,48 @@ Versioning
 - The development branch is where all development is done.
 
 
-Wishbone
---------
-
 Pypi
-'''''
+----
 
 To install the latest stable release from
-https://pypi.python.org/pypi/wishbone use *pip*.
+https://pypi.python.org/pypi/wishbone use *pip*:
 
 .. code-block:: sh
 
-    $ pip install wishbone
+    $ pip install wishbone --process-dependency-links
 
 
+or use *easy_install*:
 
 
-From source
-'''''''''''
-Wishbone' source can be downloaded from http://github.com/smetj/wishbone
+.. code-block:: sh
+
+    $ easy_install wishbone
+
+
+Verify installation
+~~~~~~~~~~~~~~~~~~~
+
+Once installed you should have the `wishbone` executable available in your search
+path:
+
+.. code-block:: sh
+
+    $ wishbone --help
+    usage: wishbone [-h] {start,debug,stop,kill,list,show} ...
+
+    Wishbone bootstrap server.
+
+    positional arguments:
+      {start,debug,stop,kill,list,show}
+
+    optional arguments:
+      -h, --help            show this help message and exit
+
+
+Source
+------
+Wishbone source can be downloaded from http://github.com/smetj/wishbone
 
 
 Stable
@@ -61,7 +83,7 @@ Install the latest *development* release from the **development** branch.
 
 
 Docker
-''''''
+------
 
 Wishbone is also available as a Docker container.
 
@@ -90,7 +112,7 @@ The following commands runs a Wishbone container:
 
 .. code-block:: sh
 
-    $ docker run --privileged=true -t -i --volume /bootstrap:/bootstrap smetj/wishbone:1.0.0 debug --config /bootstrap/simple.yaml
+    $ docker run --privileged=true -t -i --volume /bootstrap:/bootstrap smetj/wishbone:latest debug --config /bootstrap/simple.yaml
 
 The idea is that the Docker *host* has a directory called "/bootstrap" which
 contains all the Wishbone bootstrap files. The above command mounts the host's
@@ -99,25 +121,6 @@ Once done you can point the *--config* parameter to the mountpoint and load
 the bootstrap files stored on the host.
 
 
-
-Verify installation
-'''''''''''''''''''
-
-Once installed you should have the `wishbone` executable available in your search
-path:
-
-.. code-block:: sh
-
-    $ wishbone --help
-    usage: wishbone [-h] {start,debug,stop,kill,list,show} ...
-
-    Wishbone bootstrap server.
-
-    positional arguments:
-      {start,debug,stop,kill,list,show}
-
-    optional arguments:
-      -h, --help            show this help message and exit
 
 .. _semantic versioning: http://semver.org/
 .. _Github: https://github.com/smetj/wishbone/releases
