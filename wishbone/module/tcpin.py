@@ -63,8 +63,7 @@ class TCPIn(Actor):
            |  Data coming from the outside world.
 
 
-    delimiter
-    ~~~~~~~~~
+    **delimiter**
 
     When no delimiter is defined, all incoming data between connect and
     disconnect is considered to be 1 event. When a delimiter is defined,
