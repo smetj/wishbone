@@ -61,3 +61,4 @@ from emailout import EmailOut
 from match import Match
 from fileout import FileOut
 from jsonvalidate import JSONValidate
+from httpoutclient import HTTPOutClient
