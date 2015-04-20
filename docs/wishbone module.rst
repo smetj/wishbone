@@ -10,7 +10,7 @@ functionality. They are created by inheriting :py:class:`wishbone.Actor` as a
 baseclass. Modules cannot (and are not supposed to) directly invoke each
 others functionality. Their only means of interaction is by passing events to
 each other's :py:class:`wishbone.Queue` queues. Modules typically have, but
-are not limited to, an **inbox, outbox, successful** and **failed** queue.
+are not limited to, an **inbox, outbox, success** and **failed** queue.
 
 A module's queues always live inside :py:class:`wishbone.QueuePool` which,
 besides offering some convenience functions, is nothing more than a container
@@ -198,10 +198,10 @@ Decode a data format into another or into the internal metric/log format.
 Important properties and behavior
 ---------------------------------
 
-successful and failed queues
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+success and failed queues
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each module has a *successful* and *failed* queue.  Whenever a registered
+Each module has a *success* and *failed* queue.  Whenever a registered
 method (see :py:class:`wishbone.Actor.registerConsumer`) fails to process an
 event, the framework will submit the event into the *failed* queue.  Therefor
 it is important not to trap exceptions in the *registered consumer methods*
@@ -213,12 +213,12 @@ An example which takes advantage of this behavior might be connecting the
 *failed* queue of the :py:class:`wishbone.module.TCPOut` module to the *inbox*
 queue of the :py:class:`wishbone.module.DiskOut` module.
 
-On the other side, each time a *registered consumer method* successfully
-processes an event, it will automatically be submitted to the *successful*
+On the other side, each time a *registered consumer method* successly
+processes an event, it will automatically be submitted to the *success*
 queue, from where it can be further processed by another module when desired.
 
 An example which takes advantage of this behavior might be connecting the
-*successful* queue of the :py:class:`wishbone.module.TCPOut` module to the
+*success* queue of the :py:class:`wishbone.module.TCPOut` module to the
 *acknowledgment* queue of the :py:class:`wishbone.module.AMQPOut` module.
 
 It's up to the method which has been registered to consume a queue to submit
@@ -243,8 +243,10 @@ transported.
 Module default parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :py:class:`wishbone.Actor` baseclass must be initialized with at least 3
-parameters:
+The :py:class:`wishbone.Actor` baseclass must be initialized with a
+:py:class:`wishbone.actor.ActorConfig` module, which requires 3 parameters.
+
+.. autoclass:: wishbone.actor.ActorConfig
 
 - name: The name of the module.
 - size: The size of each of the module queues.

@@ -2,9 +2,9 @@
 Introduction
 ============
 
-Wishbone is a Python library to create IO driven event processing servers by
-defining a pipeline of inputs and outputs with a number of intermediate
-processing stages in between through which events travel.
+Wishbone is a Python library to create event processing servers by defining a
+pipeline of inputs and outputs with a number of intermediate processing stages
+in between through which events travel.
 
 Wishbone comes with the necessary tools and modules to bootstrap servers from
 CLI and have them running as a permanent solution in a minimum of time.
@@ -13,12 +13,13 @@ CLI and have them running as a permanent solution in a minimum of time.
 Modules and Queues
 ------------------
 
-Modules are isolated blocks of code (greenlets) each with their own specific
-functionality. They are created by inheriting :py:class:`wishbone.Actor` as a
-baseclass. Modules cannot (and are not supposed to) directly invoke each
-others functionality. Their only means of interaction is by passing events to
-each other's :py:class:`wishbone.Queue` queues. Modules typically have, but
-are not limited to, an **inbox, outbox, successful** and **failed** queue.
+Modules are isolated blocks of code (currently greenlets) each with their own
+specific functionality. They are created by inheriting
+:py:class:`wishbone.Actor` as a baseclass. Modules cannot (and are not
+supposed to) directly invoke each others functionality. Their only means of
+interaction is by passing events to each other's :py:class:`wishbone.Queue`
+queues. Modules typically have, but are not limited to, an **inbox, outbox,
+successful** and **failed** queue.
 
 Router
 ------
@@ -46,17 +47,22 @@ builtin flow modules.
 Events
 ------
 
-Wishbone events are simple data structures:
+The events travaling from one module to the other must be of ype
+:py:class:`wishbone.Event`.
 
-.. code-block:: python
+Typically `input modules`_ initialize the :py:class:`wishbone.Event` objects the
+moment data comes into the module.
 
-    { "header":{}, "data": object }
+.. autoclass:: wishbone.Event
+    :members:
 
-Input modules are responsible for creating events using this format.
 
 Gevent
 ------
 
 Wishbone uses Gevent.  The modules run as cooperatively scheduled greenlets
 while taking advantage of the cooperative socket support for network IO.  This
-makes Wishbone servers cope well with IO intensive tasks.
+makes Wishbone servers cope best with IO intensive tasks.
+
+
+.. _input modules: builtin%20modules.html#input-modules
