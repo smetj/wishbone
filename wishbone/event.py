@@ -44,67 +44,105 @@ class Module():
 
 class Event(object):
 
+    '''
+    **The Wishbone event object representation.**
+
+    A class object containing the event data being passed from one Wishbone
+    module to the other.
+    '''
+
     def __init__(self, namespace):
         self.module = Namespace()
         self.initNamespace(namespace)
         self.last = self.module.__dict__[namespace]
 
     def clone(self):
-        '''returns a deep copy instance of the event.'''
+        '''
+        returns a deep copy instance of the event.
+        '''
 
         return deepcopy(self)
 
     def initNamespace(self, namespace):
-        '''Initializes an empty namespace.'''
+        '''
+        Initializes an empty event namespace.
+        Usually this is the module's instance name to which to which the event
+        arrives.
+        '''
 
         if namespace not in self.module.__dict__:
             self.module.__dict__[namespace] = Module(namespace)
         self.current_namespace = namespace
 
+    def getData(self, namespace, clone=False):
+        '''
+        Returns the data value of the requested namespace.
+        When clone is True, a deepcopied version is returned.
+        '''
+
+        if clone:
+            return deepcopy(self.module.__dict__[namespace].data)
+        else:
+            return self.module.__dict__[namespace].data
+
+    def getHeaderValue(self, namespace, key, clone=False):
+        '''
+        Returns the header values of the requested namespace.
+        When clone is True, a deepcopied version is returned.
+        '''
+
+        return self.module.__dict__[namespace].header.__dict__[key]
+
     def listNamespace(self):
-        '''Returns a generator iterating over all registered namespaces.'''
+        '''
+        Returns a generator returning over all registered namespace
+        instances.
+        '''
 
         for module in self.module.__dict__:
             yield self.module.__dict__[module]
 
-    def getData(self, namespace):
-
-        '''Returns the data of the requested namespace.'''
-
-        return self.module.__dict__[namespace].data
-
-    def __getLastData(self):
-        return self.last.data
-
-    def setData(self, data):
-        '''Sets the data field of the requested namespacec.'''
-
-        self.module.__dict__[self.current_namespace].data = data
-        self.last = self.module.__dict__[self.current_namespace]
-
-    def getHeaderValue(self, namespace, key):
-        '''Returns the header value of the requested namespace.'''
-
-        return self.module.__dict__[namespace].header.__dict__[key]
-
-    def lookupHeaderValue(self, name):
-        '''Returns the header value using dotted format.'''
+    def lookupHeaderValue(self, name, clone=False):
+        '''
+        Returns the header value using dotted format.
+        When clone is True, a deepcopied version is returned.
+        '''
 
         (namespace, key) = name.split('.')
-        return self.module.__dict__[namespace].header.__dict__[key]
+        return self.getHeaderValue(namespace, key, clone)
 
     def raw(self):
-        '''returns a dictionary representation of the event.'''
+        '''
+        Returns a dictionary representation of the event.
+        '''
 
         data = {}
         for module in self.listNamespace():
             data[module.name] = {"header": module.header.__dict__, "data": module.data, "error": module.error.__dict__}
         return data
 
-    def setHeaderValue(self, key, value, namespace=None):
-        '''Sets a header value of the requested namespace.'''
+    def setData(self, data):
+        '''
+        Sets the data value of the requested namespace.
+        '''
 
-        if namespace == None:
+        self.module.__dict__[self.current_namespace].data = data
+        self.last = self.module.__dict__[self.current_namespace]
+
+    def setErrorValue(self, line, error_type, error_value):
+        '''Sets the error value for the current namespace.'''
+
+        self.module.__dict__[self.current_namespace].error.line = line
+        self.module.__dict__[self.current_namespace].error.type = error_type
+        self.module.__dict__[self.current_namespace].error.type = error_value
+
+    def setHeaderValue(self, key, value, namespace=None):
+        '''Sets the header value of the requested namespace.
+
+        When <namespace> has value <None> then the current namespace is used.
+        '''
+
+        if namespace is None:
             namespace = self.current_namespace
         else:
             if namespace not in self.module.__dict__:
@@ -112,11 +150,7 @@ class Event(object):
 
         self.module.__dict__[namespace].header.__dict__[key] = value
 
-    def setErrorValue(self, line, error_type, error_value):
-        '''Sets the error value for namespace.'''
-
-        self.module.__dict__[self.current_namespace].error.line = line
-        self.module.__dict__[self.current_namespace].error.type = error_type
-        self.module.__dict__[self.current_namespace].error.type = error_value
+    def __getLastData(self):
+        return self.last.data
 
     data = property(__getLastData, setData)
