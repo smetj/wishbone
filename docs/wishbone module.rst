@@ -251,6 +251,7 @@ The :py:class:`wishbone.Actor` baseclass must be initialized with a
 - name: The name of the module.
 - size: The size of each of the module queues.
 - frequency: The frequency at which metrics are generated.
+- lookup: The UpLook lookup modules.
 
 Events
 ------
