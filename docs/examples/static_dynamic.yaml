@@ -1,0 +1,61 @@
+---
+lookups:
+  randomword:
+    module: wishbone.lookup.randomword
+  event:
+    module: wishbone.lookup.event
+
+modules:
+  static:
+    module: wishbone.input.testevent
+    arguments:
+      message : ~randomword()
+      interval: 1
+
+  static_header:
+    module: wishbone.function.header
+    arguments:
+      namespace: screen
+      header:
+        prefix: "Hello, I am a static lookup: "
+
+  dynamic:
+    module: wishbone.input.testevent
+    arguments:
+      message: ~~randomword()
+      interval: 1
+
+  dynamic_header:
+    module: wishbone.function.header
+    arguments:
+      namespace: screen
+      header:
+        prefix: "Hello, I am a dynamic lookup: "
+
+  funnel:
+    module: wishbone.flow.funnel
+
+  screen:
+    module: wishbone.output.stdout
+    arguments:
+      prefix: ~~event("screen.header.prefix")
+      complete: false
+
+  graphite:
+    module: wishbone.encode.graphite
+
+  graphite_out:
+    module: wishbone.output.tcp
+    arguments:
+      port: 2013
+
+routingtable:
+  - static.outbox         -> static_header.inbox
+  - static_header.outbox  -> funnel.static
+  - dynamic.outbox        -> dynamic_header.inbox
+  - dynamic_header.outbox -> funnel.dynamic
+  - funnel.outbox         -> screen.inbox
+
+  - wishbone_metrics.outbox -> graphite.inbox
+  - graphite.outbox         -> graphite_out.inbox
+...
