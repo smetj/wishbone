@@ -5,14 +5,20 @@ Bootstrap Files
 Bootstrap files are YAML formatted configuration files used to start a
 Wishbone server.
 
-They consist out of 3 sections:
+Example usage:
 
-.. literalinclude:: examples/static_dynamic.yaml
-   :language: yaml
-   :linenos:
+.. code::
+
+    $ wishbone start --config static_dynamic.yaml
+
+
+A bootstrap file consist out of 3 sections:
+
+Sections
+--------
 
 lookups
--------
+~~~~~~~
 
 The *lookups* section is a *dictionary of dictionaries* defining the lookup
 functions which can be used to provide values for the UpLook_ based module
@@ -36,7 +42,7 @@ The *lookups* section is optional if you're not using any UpLook variables
 
 
 modules
--------
+~~~~~~~
 
 The *modules* section is a *dictionary of dictionaries* containing the
 Wishbone modules to initialize. Each key is the module instance name.  Each
@@ -47,7 +53,7 @@ instance is again a dictionary containing 2 values:
 
 
 routingtable
-------------
+~~~~~~~~~~~~
 
 The routing table section determines which module queues should be connected
 to one another in order to achieve the desired event stream resulting into the
@@ -59,6 +65,15 @@ queue, a separator -> and a destination queue.
 A queue can only be connected to 1 single queue.  If you need to have *"one to
 many"* or *"many to one"* constructions then you need to use the
 :py:class:`wishbone.module.Fanout` and :py:class:`wishbone.module.Fanout`.
+
+
+Example file
+------------
+
+.. literalinclude:: examples/static_dynamic.yaml
+   :language: yaml
+   :linenos:
+
 
 
 
