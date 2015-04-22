@@ -2,11 +2,7 @@
 CLI options
 ===========
 
-Available commands
-==================
-
-start
------
+**start**
 
 The start command detaches the Wishbone server from console and runs it in the
 background.  This implies that logs are written to syslog unless specifically
@@ -43,8 +39,7 @@ start the Wishbone instance.
 
 ------------------
 
-debug
------
+**debug**
 
 The debug command does pretty much the same as start just that it keeps the
 Wishbone instance in the foreground without detaching it.  Logs are written to
@@ -73,8 +68,7 @@ STDOUT.  The running instance can be stopped gracefully with CTRL+C
 
 ------------------
 
-stop
-----
+**stop**
 
 Stops the Wishbone instance gracefully by sending SIGINT to all processes.
 
@@ -92,8 +86,7 @@ Stops the Wishbone instance gracefully by sending SIGINT to all processes.
 
 ------------------
 
-kill
-----
+**kill**
 
 ** Use with caution, sends SIGKILL to the pids in the pidfile. **
 
@@ -110,8 +103,7 @@ kill
 
 ------------------
 
-list
-----
+**list**
 
 Lists all installed Wishbone modules, given that they have the correct entry-points.
 
@@ -184,8 +176,7 @@ Lists all installed Wishbone modules, given that they have the correct entry-poi
 
 ------------------
 
-show
-----
+**show**
 
 Displays the docstring of the requested module.
 
