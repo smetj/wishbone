@@ -65,17 +65,15 @@ Contents:
 .. toctree::
     :maxdepth: 2
 
+    introduction
     installation
     bootstrap files
     cli options
     builtin modules
-    introduction
     wishbone module
     router
-
-
     patterns
-    components
+
 
 Indices and tables
 ==================
