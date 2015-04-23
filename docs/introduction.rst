@@ -72,7 +72,7 @@ Gevent
 
 Wishbone uses Gevent.  The modules run as cooperatively scheduled greenlets
 while taking advantage of the cooperative socket support for network IO.  This
-makes Wishbone servers cope best with IO intensive tasks.
+makes Wishbone servers cope best with IO bound tasks.
 
 
 .. _builtin modules: builtin%20modules.html
