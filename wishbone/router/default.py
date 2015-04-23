@@ -171,7 +171,7 @@ class Default(multiprocessing.Process):
 
         lookup_modules = {}
         for name, config in self.config.lookups.iteritems():
-            lookup_modules[name] = self.__registerLookupModule(config.module, config.get('arguments', {}))
+            lookup_modules[name] = self.__registerLookupModule(config.module, **config.get('arguments', {}))
 
         for name, instance in self.config.modules.iteritems():
             pmodule = self.module_manager.getModuleByName(instance.module)
@@ -199,12 +199,12 @@ class Default(multiprocessing.Process):
     def __noop(self):
         pass
 
-    def __registerLookupModule(self, name, arguments):
+    def __registerLookupModule(self, name, **kwargs):
 
         base = ".".join(name.split('.')[0:-1])
         function = name.split('.')[-1]
         m = importlib.import_module(base)
-        return getattr(m, function)(**arguments)
+        return getattr(m, function)(**kwargs)
 
     def __registerModule(self, module, actor_config, arguments={}):
         '''Initializes the wishbone module module.'''
