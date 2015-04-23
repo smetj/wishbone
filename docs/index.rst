@@ -70,6 +70,7 @@ Contents:
     bootstrap files
     cli options
     builtin modules
+    writing a module
     wishbone module
     router
     patterns
