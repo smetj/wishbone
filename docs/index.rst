@@ -9,11 +9,15 @@ https://github.com/smetj/wishbone
 Bootstrap a  server
 ===================
 
-Wishbone servers are boostrapped with a config file. The YAML formatted
-bootstrap file defines the modules_ to initialize and how these should be
-connected to each other.
+Wishbone servers are started with bootstrap file:
 
-The following example bootstraps a server by connecting 4 modules:
+.. code-block:: sh
+
+    $ wishbone start --config eventprocessor.yaml
+
+
+Bootstrap file define the modules_ to initialize and how these should be
+connected to each other:
 
 .. image:: intro.png
     :align: right
@@ -21,14 +25,8 @@ The following example bootstraps a server by connecting 4 modules:
 .. literalinclude:: examples/test_setup.yaml
    :language: yaml
 
-Module :py:class:`wishbone.module.TestEvent` is an input module which produces
-the word "*test*" every second.  The module's output queue is connected to
-module :class:`wishbone.module.RoundRobin` which "roundrobins" the events to
-one of two :class:`wishbone.module.STDOUT` output module instances which print
-all events to STDOUT using the defined prefix.
 
-Bootstrapping the environment is done by invoking the **wishbone**
-executable using the *--config* parameter pointing to the bootstrap file.
+Executing a bootstrap file:
 
 .. code-block:: sh
 
@@ -69,11 +67,11 @@ Contents:
     installation
     bootstrap files
     cli options
-    builtin modules
+    lookup functions
     writing a module
     wishbone module
     router
-    patterns
+    builtin modules
 
 
 Indices and tables
