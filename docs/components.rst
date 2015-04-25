@@ -25,3 +25,10 @@ Components
     :show-inheritance:
     :inherited-members:
 
+.. autofunction:: wishbone.lookup.event
+
+.. autofunction:: wishbone.lookup.randomword
+
+.. autofunction:: wishbone.lookup.randombool
+
+.. autofunction:: wishbone.lookup.randominteger

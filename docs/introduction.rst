@@ -35,14 +35,14 @@ the proper startup :py:func:`wishbone.router.Default.start` and shutdown
 :py:func:`wishbone.router.Default.stop` sequence of the registered modules.
 
 By default, the router connects each module's *metrics* and *logs* queue to a
-:py:class:`wishbone.module.Funnel`.  This allows the user to further organize
-log and metric processing by connecting other modules to one of these
-instances.
+:py:class:`wishbone.module.Funnel` named **wishbone_metrics** and
+**wishbone_logs** respecively.  It's up to user to further organize log and
+metric processing by connecting other modules to one of these instances.
 
 Queues are connected to each other with
 :py:func:`wishbone.router.Default.connect`.  A queue can only be connected to
 1 single queue.  If you need to have *"one to many"* or *"many to one"*
-constructions then you need to use the :py:class:`wishbone.module.Fanout` and
+constructions then you need to use :py:class:`wishbone.module.Fanout` or
 :py:class:`wishbone.module.Fanout`.
 
 
