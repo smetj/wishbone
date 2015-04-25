@@ -34,7 +34,10 @@ class ConfigFile(object):
 
     def load(self, filename):
 
-        return AttrDict(self.__processConfig(filename), recursive=True)
+        a = AttrDict(self.__processConfig(filename), recursive=True)
+        if "lookups" not in a:
+            a["lookups"] = {}
+        return a
 
     def __processConfig(self, filename):
 
