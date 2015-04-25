@@ -20,6 +20,15 @@ Sections
 lookups
 ~~~~~~~
 
+.. code-block:: yaml
+    :caption: lookups section extract
+
+    lookups:
+      randomword:
+        module: wishbone.lookup.randomword
+      event:
+        module: wishbone.lookup.event
+
 The *lookups* section is a *dictionary of dictionaries* defining the lookup
 functions which can be used to provide values for the UpLook_ based module
 argument values.
@@ -44,6 +53,22 @@ The *lookups* section is optional if you're not using any UpLook variables
 modules
 ~~~~~~~
 
+.. code-block:: yaml
+    :caption: modules section extract
+
+    modules:
+      static:
+        module: wishbone.input.testevent
+        arguments:
+          message : ~randomword()
+          interval: 1
+
+      dynamic:
+        module: wishbone.input.testevent
+        arguments:
+          message: ~~randomword()
+          interval: 1
+
 The *modules* section is a *dictionary of dictionaries* containing the
 Wishbone modules to initialize. Each key is the module instance name.  Each
 instance is again a dictionary containing 2 values:
@@ -54,6 +79,15 @@ instance is again a dictionary containing 2 values:
 
 routingtable
 ~~~~~~~~~~~~
+
+.. code-block:: yaml
+    :caption: routing table section extract
+
+    routingtable:
+      - static.outbox         -> static_header.inbox
+      - static_header.outbox  -> funnel.static
+      - dynamic.outbox        -> dynamic_header.inbox
+
 
 The routing table section determines which module queues should be connected
 to one another in order to achieve the desired event stream resulting into the
