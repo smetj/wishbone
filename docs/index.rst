@@ -9,14 +9,14 @@ https://github.com/smetj/wishbone
 Bootstrap a  server
 ===================
 
-Wishbone servers are started with bootstrap file:
+Wishbone `servers`_ are started with bootstrap file:
 
 .. code-block:: sh
 
-    $ wishbone start --config eventprocessor.yaml
+    $ wishbone start --config eventprocessor.yaml --id docker
 
 
-Bootstrap file define the modules_ to initialize and how these should be
+`Bootstrap files`_ define the modules_ to initialize and how these should be
 connected to each other:
 
 .. image:: intro.png
@@ -26,11 +26,11 @@ connected to each other:
    :language: yaml
 
 
-Executing a bootstrap file:
+Running a server:
 
 .. code-block:: sh
 
-    [smetj@dev-container ~]$ wishbone debug --config simple.yaml --id docker
+    [smetj@dev-container ~]$ wishbone debug --config simple.yaml
     2014-08-06T23:17:41 wishbone[6609]: debug metrics_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
     2014-08-06T23:17:41 wishbone[6609]: debug metrics_funnel: preHook() found, executing
     2014-08-06T23:17:41 wishbone[6609]: debug logs_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
@@ -66,7 +66,7 @@ Contents:
     introduction
     installation
     bootstrap files
-    cli options
+    server
     lookup functions
     writing a module
     wishbone module
@@ -80,4 +80,6 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`search`
 
+.. _servers: server.html
 .. _modules: builtin%20modules.html
+.. _Bootstrap files: bootstrap%20files.html
