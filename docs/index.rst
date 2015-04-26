@@ -68,9 +68,8 @@ Contents:
     bootstrap files
     server
     lookup functions
+    logs and metrics
     writing a module
-    wishbone module
-    router
     builtin modules
 
 
