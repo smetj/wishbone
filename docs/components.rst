@@ -25,6 +25,12 @@ Components
     :show-inheritance:
     :inherited-members:
 
+.. autoclass:: wishbone.config.ConfigFile
+    :members:
+
+.. autoclass:: wishbone.queue.QueuePool
+    :members:
+
 .. autofunction:: wishbone.lookup.event
 
 .. autofunction:: wishbone.lookup.randomword
@@ -32,3 +38,5 @@ Components
 .. autofunction:: wishbone.lookup.randombool
 
 .. autofunction:: wishbone.lookup.randominteger
+
+

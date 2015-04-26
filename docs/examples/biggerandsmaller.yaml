@@ -1,0 +1,39 @@
+---
+lookups:
+  randomint:
+    module: wishbone.lookup.randominteger
+
+modules:
+  input:
+    module: wishbone.input.testevent
+    arguments:
+      message : ~~randomint()
+      interval: 1
+
+  evaluate:
+    module: wishbone.contrib.flow.biggersmaller
+    arguments:
+      min: 50
+      max: 100
+
+  outside:
+    module: wishbone.output.stdout
+    arguments:
+      prefix: "The value is outside the defined scope: "
+
+  inside:
+    module: wishbone.output.stdout
+    arguments:
+      prefix: "The value is inside the defined scope: "
+
+  error:
+    module: wishbone.output.stdout
+    arguments:
+      prefix: "The value is not an integer: "
+
+routingtable:
+  - input.outbox      -> evaluate.inbox
+  - evaluate.inside   -> inside.inbox
+  - evaluate.outside  -> outside.inbox
+  - evaluate.failed   -> error.inbox
+...

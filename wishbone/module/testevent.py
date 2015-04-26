@@ -57,25 +57,26 @@ class TestEvent(Actor):
 
         self.pool.createQueue("outbox")
 
-        if interval == 0:
+    def preHook(self):
+
+        if self.kwargs.interval == 0:
             self.sleep = self.__doNoSleep
         else:
             self.sleep = self.__doSleep
 
-        if numbered:
-            self.number = self.__doNumber
+        if self.kwargs.numbered:
+            self.generateMessage = self.__doNumber
             self.n = 0
         else:
-            self.number = self.__doNoNumber
+            self.generateMessage = self.__doNoNumber
 
-    def preHook(self):
         self.threads.spawn(self.produce)
 
     def produce(self):
 
         while self.loop():
             event = self.createEvent()
-            event.data = "%s%s" % (self.kwargs.message, self.number())
+            event.data = self.generateMessage(self.kwargs.message)
             self.submit(event, self.pool.queue.outbox)
             self.sleep()
 
@@ -87,9 +88,9 @@ class TestEvent(Actor):
     def __doNoSleep(self):
         pass
 
-    def __doNumber(self):
+    def __doNumber(self, data):
         self.n += 1
-        return "_%s" % (self.n)
+        return "%s %s" % (self.n, data)
 
-    def __doNoNumber(self):
-        return ""
+    def __doNoNumber(self, data):
+        return data
