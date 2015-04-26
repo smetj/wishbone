@@ -13,7 +13,7 @@ Wishbone `servers`_ are started with bootstrap file:
 
 .. code-block:: sh
 
-    $ wishbone start --config eventprocessor.yaml --id docker
+    $ wishbone start --config eventprocessor.yaml
 
 
 `Bootstrap files`_ define the modules_ to initialize and how these should be
