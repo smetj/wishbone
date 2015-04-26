@@ -45,7 +45,7 @@ MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "g
                 "gevent.pool", "wishbone.tools", "gevent.fileobject", "gevent.server",
                 "amqp", "amqp.connection", "gevent.hub", "gevent.wsgi", "gevent.queue",
                 "flask", "ReadRulesDisk", "gevent_inotifyx", "amqp.exceptions", "Event",
-                "uplook", "UpLook", "msgpack", "zmq", "zmq.green"]
+                "uplook", "UpLook", "msgpack", "zmq", "zmq.green", "grequests"]
 
 
 for mod_name in MOCK_MODULES:
