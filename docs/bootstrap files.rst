@@ -20,8 +20,9 @@ Sections
 lookups
 ~~~~~~~
 
+**lookups section extract**
+
 .. code-block:: yaml
-    :caption: lookups section extract
 
     lookups:
       randomword:
@@ -53,8 +54,9 @@ The *lookups* section is optional if you're not using any UpLook variables
 modules
 ~~~~~~~
 
+**modules section extract**
+
 .. code-block:: yaml
-    :caption: modules section extract
 
     modules:
       static:
@@ -80,8 +82,9 @@ instance is again a dictionary containing 2 values:
 routingtable
 ~~~~~~~~~~~~
 
+**routing table section extract**
+
 .. code-block:: yaml
-    :caption: routing table section extract
 
     routingtable:
       - static.outbox         -> static_header.inbox
