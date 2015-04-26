@@ -51,6 +51,10 @@ Lookup modules are closures
 
         return randomInteger
 
+Writing a custom lookup function is really simple.  You just have to create an
+*importable* function which can be called using the arguments values provided
+in the bootstrap file.  This function then returns the function which can be
+called by Wishbone to retrieve the value you're after.
 
 .. _UpLook: https://github.com/smetj/uplook
 .. _bootstrap file: bootstrap%20files.html#modules
