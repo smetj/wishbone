@@ -36,9 +36,8 @@ class KeyValue(Actor):
 
     Parameters:
 
-        - overwrite(list)([])
-           |  A list of key/value pairs which overwrite Existing
-           |  keys.
+        - overwrite(dict)({})
+           |  A dict of key/value pairs to overwrite existing keys.
 
     Queues:
 
@@ -56,11 +55,9 @@ class KeyValue(Actor):
     def consume(self, event):
 
         data = event.data
-
         if isinstance(data, dict):
-            for item in self.kwargs.overwrite:
-                for key, value in item.iteritems():
-                    data[key] = value
+            for key, value in self.kwargs.overwrite:
+                data[key] = getattr(self.kwargs.overwrite, key)
 
             event.data = data
             self.submit(event, self.pool.queue.outbox)
