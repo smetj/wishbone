@@ -104,6 +104,9 @@ class AMQPIn(Actor):
 
         - ack
            |  Messages to acknowledge (requires the delivery_tag)
+
+        - nack
+           |  Cancels a message acknowledgement (requires the delivery_tag)
     '''
 
     def __init__(self, actor_config, host="localhost", port=5672, vhost="/", user="guest", password="guest",
@@ -111,31 +114,17 @@ class AMQPIn(Actor):
                  queue="wishbone", queue_durable=False, queue_exclusive=False, queue_auto_delete=True, queue_declare=True,
                  routing_key="", prefetch_count=1, no_ack=False):
         Actor.__init__(self, actor_config)
-        # self.kwargs.host = host
-        # self.kwargs.port = port
-        # self.kwargs.vhost = vhost
-        # self.kwargs.user = user
-        # self.kwargs.password = password
-        # self.kwargs.exchange = exchange
-        # self.kwargs.exchange_type = exchange_type
-        # self.kwargs.exchange_durable = exchange_durable
-        # self.kwargs.queue = queue
-        # self.kwargs.queue_durable = queue_durable
-        # self.kwargs.queue_exclusive = queue_exclusive
-        # self.kwargs.queue_auto_delete = queue_auto_delete
-        # self.kwargs.queue_declare = queue_declare
-        # self.kwargs.routing_key = routing_key
-        # self.kwargs.prefetch_count = prefetch_count
-        # self.kwargs.no_ack = no_ack
 
         self.pool.createQueue("outbox")
         self.pool.createQueue("ack")
+        self.pool.createQueue("nack")
         self.pool.queue.ack.disableFallThrough()
         self.connection = None
 
     def preHook(self):
         spawn(self.setupConnectivity)
         spawn(self.handleAcknowledgements)
+        spawn(self.handleAcknowledgementsCancel)
 
     def consume(self, message):
         event = self.createEvent()
@@ -193,6 +182,20 @@ class AMQPIn(Actor):
                 except Exception as err:
                     self.pool.queue.ack.rescue(event)
                     self.logging.error("Failed to acknowledge message.  Reason: %s." % (err))
+                    sleep(0.5)
+
+    def handleAcknowledgementsCancel(self):
+        while self.loop():
+            try:
+                event = self.pool.queue.nack.get()
+            except QueueEmpty as err:
+                err.waitUntilContent()
+            else:
+                try:
+                    self.channel.basic_reject(event.getHeaderValue(self.name, "delivery_tag"), True)
+                except Exception as err:
+                    self.pool.queue.ack.rescue(event)
+                    self.logging.error("Failed to cancel acknowledge message.  Reason: %s." % (err))
                     sleep(0.5)
 
     def postHook(self):
