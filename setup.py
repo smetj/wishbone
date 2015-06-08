@@ -110,7 +110,8 @@ setup(
             'funnel = wishbone.module.funnel:Funnel',
             'match = wishbone.module.match:Match',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
-            'biggersmaller = wishbone.module.biggerandsmaller:BiggerAndSmaller'
+            'biggersmaller = wishbone.module.biggerandsmaller:BiggerAndSmaller',
+            'consensus = wishbone.module.consensus:Consensus'
         ],
         'wishbone.encode': [
             'graphite = wishbone.module.graphite:Graphite',
