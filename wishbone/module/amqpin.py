@@ -105,7 +105,7 @@ class AMQPIn(Actor):
         - ack
            |  Messages to acknowledge (requires the delivery_tag)
 
-        - nack
+        - cancel
            |  Cancels a message acknowledgement (requires the delivery_tag)
     '''
 
@@ -117,7 +117,7 @@ class AMQPIn(Actor):
 
         self.pool.createQueue("outbox")
         self.pool.createQueue("ack")
-        self.pool.createQueue("nack")
+        self.pool.createQueue("cancel")
         self.pool.queue.ack.disableFallThrough()
         self.connection = None
 
@@ -187,7 +187,7 @@ class AMQPIn(Actor):
     def handleAcknowledgementsCancel(self):
         while self.loop():
             try:
-                event = self.pool.queue.nack.get()
+                event = self.pool.queue.cancel.get()
             except QueueEmpty as err:
                 err.waitUntilContent()
             else:
