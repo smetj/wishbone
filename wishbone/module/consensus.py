@@ -24,11 +24,12 @@
 
 
 from wishbone import Actor
+from gevent import sleep, spawn
 
 
 class Consensus(Actor):
 
-    '''**For each incoming queue an event is expected prior generating a new event.**
+    '''**Sends a new event when each incoming queue receives a predefined value.**
 
     DESCRIPTION
 
@@ -38,17 +39,21 @@ class Consensus(Actor):
         - lookup(str)
            |  The lookup value.
 
+        - expire(int)(0)
+           |  The time in seconds a consensus has to be achieved.
+           |  0 means no expiration.
+
 
     Queues:
 
-        - inbox
+        - *
            |  Incoming messages
 
         - outbox
            |  Outgoing messges
     '''
 
-    def __init__(self, actor_config, lookup):
+    def __init__(self, actor_config, lookup, expire=0):
 
         Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
@@ -66,6 +71,8 @@ class Consensus(Actor):
         def consume(event):
             if self.kwargs.lookup not in self.__queue_slot[queue]:
                 self.__queue_slot[queue].append(self.kwargs.lookup)
+                if self.kwargs.expire > 0:
+                    spawn(self.timer, queue, self.kwargs.lookup, self.kwargs.expire, event)
                 if self.consensusAchieved(self.kwargs.lookup):
                     self.submit(event, self.pool.queue.outbox)
 
@@ -84,3 +91,14 @@ class Consensus(Actor):
 
         for key, value in self.__queue_slot.iteritems():
             value.remove(lookup)
+
+    def timer(self, queue, lookup, length, event):
+
+        sleep(length)
+        if lookup in self.__queue_slot[queue]:
+            self.__queue_slot[queue].remove(lookup)
+            self.logging.info("Consensus window expired after %s seconds for lookup with value %s" % (self.kwargs.expire, lookup))
+            self.submit(event, self.pool.queue.failed)
+
+
+
