@@ -279,6 +279,6 @@ def test_negative_list_membership():
     one = Event("test")
     one.setData({"list_membership": ["one", "three", "two"]})
     actor.pool.queue.inbox.put(one)
-    assert "one" not in getter(actor.pool.queue.list_membership).data["list_membership"]
+    assert "test" not in getter(actor.pool.queue.list_membership).data["list_membership"]
 
 #     match.stop()
