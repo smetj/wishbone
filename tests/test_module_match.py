@@ -31,75 +31,74 @@ from wishbone.error import QueueEmpty
 
 from utils import getter
 
-
-def test_module_match():
-
-    rules = {
-        "regex": {
-            "condition": [
-                {"regex": "re:.*?two.*"}
-            ],
-            "queue": [
-                {"regex": {}}
-            ]
-        },
-        "neg_regex": {
-            "condition": [
-                {"neg_regex": "!re:.*?two.*"}
-            ],
-            "queue": [
-                {"neg_regex": {}}
-            ]
-        },
-        "bigger": {
-            "condition": [
-                {"bigger": ">:10"}
-            ],
-            "queue": [
-                {"bigger": {}}
-            ]
-        },
-        "bigger_equal": {
-            "condition": [
-                {"bigger_equal": ">=:10"}
-            ],
-            "queue": [
-                {"bigger_equal": {}}
-            ]
-        },
-        "smaller": {
-            "condition": [
-                {"smaller": "<:100"}
-            ],
-            "queue": [
-                {"smaller": {}}
-            ]
-        },
-        "smaller_equal": {
-            "condition": [
-                {"smaller_equal": "<=:100"}
-            ],
-            "queue": [
-                {"smaller_equal": {}}
-            ]
-        },
-        "equal": {
-            "condition": [
-                {"equal": "=:100"}
-            ],
-            "queue": [
-                {"equal": {}}
-            ]
-        },
-        "list_membership": {
-            "condition": [
-                {"list_membership": "in:test"}
-            ],
-            "queue": [
-                {"list_membership": {}}
-            ]
-        }
+RULES = {
+    "regex": {
+        "condition": [
+            {"regex": "re:.*?two.*"}
+        ],
+        "queue": [
+            {"regex": {}}
+        ]
+    },
+    "neg_regex": {
+        "condition": [
+            {"neg_regex": "!re:.*?two.*"}
+        ],
+        "queue": [
+            {"neg_regex": {}}
+        ]
+    },
+    "bigger": {
+        "condition": [
+            {"bigger": ">:10"}
+        ],
+        "queue": [
+            {"bigger": {}}
+        ]
+    },
+    "bigger_equal": {
+        "condition": [
+            {"bigger_equal": ">=:10"}
+        ],
+        "queue": [
+            {"bigger_equal": {}}
+        ]
+    },
+    "smaller": {
+        "condition": [
+            {"smaller": "<:100"}
+        ],
+        "queue": [
+            {"smaller": {}}
+        ]
+    },
+    "smaller_equal": {
+        "condition": [
+            {"smaller_equal": "<=:100"}
+        ],
+        "queue": [
+            {"smaller_equal": {}}
+        ]
+    },
+    "equal": {
+        "condition": [
+            {"equal": "=:100"}
+        ],
+        "queue": [
+            {"equal": {}}
+        ]
+    },
+    "list_membership": {
+        "condition": [
+            {"list_membership": "in:test"}
+        ],
+        "queue": [
+            {"list_membership": {}}
+        ]
     }
+}
+
+def generate_actor(rules):
 
     actor_config = ActorConfig('match', 100, 1, {})
     match = Match(actor_config, rules=rules)
@@ -110,62 +109,176 @@ def test_module_match():
         getattr(match.pool.queue, queue).disableFallThrough()
 
     match.start()
+    return match
 
-    # regex
+
+def test_regex():
+
+    rule = {"regex": {
+        "condition": [
+            {"regex": "re:.*?two.*"}
+        ],
+        "queue": [
+            {"regex": {}}
+        ]
+    }}
+
+    actor = generate_actor(rule)
     e = Event("test")
     e.setData({"regex": "one two three"})
-    match.pool.queue.inbox.put(e)
-    assert getter(match.pool.queue.regex).data["regex"] == "one two three"
+    actor.pool.queue.inbox.put(e)
+    assert getter(actor.pool.queue.regex).data["regex"] == "one two three"
 
-    # neg_regex
+
+def test_negative_regex():
+
+    rule = {"neg_regex": {
+        "condition": [
+            {"neg_regex": "!re:.*?two.*"}
+        ],
+        "queue": [
+            {"neg_regex": {}}
+        ]
+    }}
+
+    actor = generate_actor(rule)
     e = Event("test")
     e.setData({"neg_regex": "one twwo three"})
-    match.pool.queue.inbox.put(e)
-    assert getter(match.pool.queue.neg_regex).data["neg_regex"] == "one twwo three"
+    actor.pool.queue.inbox.put(e)
+    assert getter(actor.pool.queue.neg_regex).data["neg_regex"] == "one twwo three"
 
-    # bigger
+
+def test_bigger_than():
+
+    rule = {"bigger": {
+        "condition": [
+            {"bigger": ">:10"}
+        ],
+        "queue": [
+            {"bigger": {}}
+        ]
+    }}
+
+    actor = generate_actor(rule)
     e = Event("test")
     e.setData({"bigger": "100"})
-    match.pool.queue.inbox.put(e)
-    assert getter(match.pool.queue.bigger).data["bigger"] == "100"
+    actor.pool.queue.inbox.put(e)
+    assert getter(actor.pool.queue.bigger).data["bigger"] == "100"
 
-    # bigger_equal
+
+def test_bigger_than_equal_to():
+
+    rule = {"bigger_equal": {
+        "condition": [
+            {"bigger_equal": ">=:10"}
+        ],
+        "queue": [
+            {"bigger_equal": {}}
+        ]
+    }}
+
+    actor = generate_actor(rule)
     one = Event("test")
     one.setData({"bigger_equal": "100"})
     two = Event("test")
     two.setData({"bigger_equal": "101"})
-    match.pool.queue.inbox.put(one)
-    match.pool.queue.inbox.put(two)
-    assert int(getter(match.pool.queue.bigger_equal).data["bigger_equal"]) == 100
-    assert int(getter(match.pool.queue.bigger_equal).data["bigger_equal"]) > 100
+    actor.pool.queue.inbox.put(one)
+    actor.pool.queue.inbox.put(two)
+    assert int(getter(actor.pool.queue.bigger_equal).data["bigger_equal"]) == 100
+    assert int(getter(actor.pool.queue.bigger_equal).data["bigger_equal"]) > 100
 
-    # smaller
+
+def test_smaller_than():
+
+    rule = {"smaller": {
+        "condition": [
+            {"smaller": "<:100"}
+        ],
+        "queue": [
+            {"smaller": {}}
+        ]
+    }}
+
+    actor = generate_actor(rule)
     one = Event("test")
     one.setData({"smaller": "99"})
-    match.pool.queue.inbox.put(one)
-    match.pool.queue.inbox.put(two)
-    assert int(getter(match.pool.queue.smaller).data["smaller"]) < 100
+    actor.pool.queue.inbox.put(one)
+    assert int(getter(actor.pool.queue.smaller).data["smaller"]) < 100
 
-    # smaller_equal
+
+def test_smaller_than_equal_to():
+
+    rule = {"smaller_equal": {
+        "condition": [
+            {"smaller_equal": "<=:100"}
+        ],
+        "queue": [
+            {"smaller_equal": {}}
+        ]
+    }}
+
+    actor = generate_actor(rule)
     one = Event("test")
     one.setData({"smaller_equal": "100"})
     two = Event("test")
     two.setData({"smaller_equal": "99"})
-    match.pool.queue.inbox.put(one)
-    match.pool.queue.inbox.put(two)
-    assert int(getter(match.pool.queue.smaller_equal).data["smaller_equal"]) == 100
-    assert int(getter(match.pool.queue.smaller_equal).data["smaller_equal"]) < 100
+    actor.pool.queue.inbox.put(one)
+    actor.pool.queue.inbox.put(two)
+    assert int(getter(actor.pool.queue.smaller_equal).data["smaller_equal"]) == 100
+    assert int(getter(actor.pool.queue.smaller_equal).data["smaller_equal"]) < 100
 
-    # equal
+
+def test_equal_to():
+
+    rule = {"equal": {
+        "condition": [
+            {"equal": "=:100"}
+        ],
+        "queue": [
+            {"equal": {}}
+        ]
+    }}
+
+    actor = generate_actor(rule)
     one = Event("test")
     one.setData({"equal": "100"})
-    match.pool.queue.inbox.put(one)
-    assert int(getter(match.pool.queue.equal).data["equal"]) == 100
+    actor.pool.queue.inbox.put(one)
+    assert int(getter(actor.pool.queue.equal).data["equal"]) == 100
 
-    # list_membership
+
+def test_list_membership():
+
+    rule = {"list_membership": {
+        "condition": [
+            {"list_membership": "in:test"}
+        ],
+        "queue": [
+            {"list_membership": {}}
+        ]
+    }}
+
+    actor = generate_actor(rule)
     one = Event("test")
     one.setData({"list_membership": ["one", "test", "two"]})
-    match.pool.queue.inbox.put(one)
-    assert "one" in getter(match.pool.queue.list_membership).data["list_membership"]
+    actor.pool.queue.inbox.put(one)
+    assert "one" in getter(actor.pool.queue.list_membership).data["list_membership"]
 
-    match.stop()
+
+def test_negative_list_membership():
+
+    rule = {"list_membership": {
+        "condition": [
+            {"list_membership": "!in:test"}
+        ],
+        "queue": [
+            {"list_membership": {}}
+        ]
+    }}
+
+    actor = generate_actor(rule)
+    one = Event("test")
+    one.setData({"list_membership": ["one", "three", "two"]})
+    actor.pool.queue.inbox.put(one)
+    assert "one" not in getter(actor.pool.queue.list_membership).data["list_membership"]
+
+#     match.stop()
