@@ -209,10 +209,10 @@ class Default(multiprocessing.Process):
     def __registerModule(self, module, actor_config, arguments={}):
         '''Initializes the wishbone module module.'''
 
-        try:
-            setattr(self.pool.module, actor_config.name, module(actor_config, **arguments))
-        except Exception as err:
-            raise ModuleInitFailure("Problem loading module %s.  Reason: %s" % (actor_config.name, err))
+        # try:
+        setattr(self.pool.module, actor_config.name, module(actor_config, **arguments))
+        # except Exception as err:
+        #     raise ModuleInitFailure("Problem loading module %s.  Reason: %s" % (actor_config.name, err))
 
     def __setupConnections(self):
         '''Setup all connections as defined by configuration_manager'''

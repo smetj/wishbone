@@ -55,6 +55,8 @@ class Event(object):
         self.module = Namespace()
         self.initNamespace(namespace)
         self.last = self.module.__dict__[namespace]
+        self.__source_queue = None
+        self.__source_namespace = None
 
     def clone(self):
         '''
@@ -120,6 +122,22 @@ class Event(object):
         for module in self.listNamespace():
             data[module.name] = {"header": module.header.__dict__, "data": module.data, "error": module.error.__dict__}
         return data
+
+    def rollBackEvent(self):
+
+        '''When invoked resubmits this event to the queue it came from'''
+
+        if self.__source_queue is None or self.__source_namespace is None:
+            raise Exception("This event doesn't appear to be consumed from anywhere.")
+        del (self.module.__dict__[self.current_namespace])
+
+        self.current_namespace = self.__source_namespace
+        self.__source_queue.put(self)
+
+    def setSource(self, queue):
+
+        self.__source_namespace = self.current_namespace
+        self.__source_queue = queue
 
     def setData(self, data):
         '''

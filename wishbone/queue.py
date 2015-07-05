@@ -24,10 +24,11 @@
 #
 
 from uuid import uuid4
-from collections import deque
+from gevent.queue import Queue as Gevent_Queue
 from wishbone.error import QueueEmpty, QueueFull, ReservedName, QueueMissing
 from gevent.event import Event
 from time import time
+from gevent.queue import Empty, Full
 
 
 class Container():
@@ -86,9 +87,14 @@ class QueuePool():
             raise QueueMissing
 
     def join(self):
-        '''Blocks untill all queues in the pool are empty.'''
+        '''Blocks until all queues in the pool are empty.'''
+        counter = 0
         for queue in self.listQueues():
-            queue.waitUntilEmpty()
+            while queue.qsize() != 0:
+                sleep(0.2)
+                counter += 1
+                if counter == 5:
+                    break
 
 
 class Queue():
@@ -114,30 +120,18 @@ class Queue():
     def __init__(self, max_size=1):
         self.max_size = max_size
         self.id = str(uuid4())
-        self.__q = deque()
+        self.__q = Gevent_Queue(max_size)
         self.__in = 0
         self.__out = 0
         self.__dropped = 0
         self.__cache = {}
-
-        self.__empty = Event()
-        self.__empty.set()
-
-        self.__free = Event()
-        self.__free.set()
-
-        self.__full = Event()
-        self.__full.clear()
-
-        self.__content = Event()
-        self.__content.clear()
 
         self.put = self.__fallThrough
 
     def clean(self):
         '''Deletes the content of the queue.
         '''
-        self.__q = deque()
+        self.__q = Gevent_Queue(self.max_size)
 
     def disableFallThrough(self):
         self.put = self.__put
@@ -149,7 +143,7 @@ class Queue():
         while True:
             try:
                 yield self.get()
-            except QueueEmpty:
+            except Empty:
                 break
 
     def empty(self):
@@ -163,31 +157,23 @@ class Queue():
     def get(self):
         '''Gets an element from the queue.'''
 
-        try:
-            e = self.__q.pop()
-        except IndexError:
-            self.__empty.set()
-            self.__full.clear()
-            raise QueueEmpty("No more elements left to consume.", self.waitUntilFull, self.waitUntilContent)
-
+        e = self.__q.get()
         self.__out += 1
-        self.__free.set()
-        self.__content.clear()
         return e
 
     def rescue(self, element):
 
-        self.__q.append(element)
+        self.__q.put(element)
 
     def size(self):
         '''Returns the length of the queue.'''
 
-        return len(self.__q)
+        return self.__q.qsize()
 
     def stats(self):
         '''Returns statistics of the queue.'''
 
-        return {"size": len(self.__q),
+        return {"size": self.__q.qsize(),
                 "in_total": self.__in,
                 "out_total": self.__out,
                 "in_rate": self.__rate("in_rate", self.__in),
@@ -195,38 +181,6 @@ class Queue():
                 "dropped_total": self.__dropped,
                 "dropped_rate": self.__rate("dropped_rate", self.__dropped)
                 }
-
-    def waitUntilEmpty(self):
-        '''Blocks until the queue is completely empty.'''
-
-        try:
-            self.__empty.wait(timeout=0.5)
-        except:
-            pass
-
-    def waitUntilFull(self):
-        '''Blocks until the queue is completely full.'''
-
-        try:
-            self.__full.wait(timeout=0.5)
-        except:
-            pass
-
-    def waitUntilFree(self):
-        '''Blocks until at least 1 slot it free.'''
-
-        try:
-            self.__free.wait(timeout=0.5)
-        except:
-            pass
-
-    def waitUntilContent(self):
-        '''Blocks until at least 1 slot is taken.'''
-
-        try:
-            self.__content.wait(timeout=0.5)
-        except:
-            pass
 
     def __fallThrough(self, element):
         '''Accepts an element but discards it'''
@@ -236,15 +190,11 @@ class Queue():
     def __put(self, element):
         '''Puts element in queue.'''
 
-        if len(self.__q) == self.max_size:
-            self.__empty.clear()
-            self.__full.set()
-            raise QueueFull("Queue has reached capacity of %s elements" % (self.max_size), self.waitUntilEmpty, self.waitUntilFree)
-
-        self.__q.append(element)
-        self.__in += 1
-        self.__free.clear()
-        self.__content.set()
+        try:
+            self.__q.put_nowait(element)
+            self.__in += 1
+        except Full:
+            raise QueueFull("Queue has reached capacity of %s elements" % (self.max_size))
 
     def __rate(self, name, value):
 
