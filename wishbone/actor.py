@@ -159,12 +159,10 @@ class Actor():
         '''A convenience function which submits <event> to <queue>
         and deals with QueueFull and the module lock set to False.'''
 
-        while self.loop():
-            try:
-                queue.put(event)
-                break
-            except QueueFull as err:
-                err.waitUntilEmpty()
+        try:
+            queue.put(event)
+        except QueueFull as err:
+            event.rollBackEvent()
 
     def __consumer(self, function, queue):
         '''Greenthread which applies <function> to each element from <queue>
@@ -173,26 +171,21 @@ class Actor():
         self.__run.wait()
 
         while self.loop():
+            event = self.pool.queue.__dict__[queue].get()
+            self.current_event = event
+            event.initNamespace(self.name)
+            event.setSource(self.pool.queue.__dict__[queue])
+
             try:
-                event = self.pool.queue.__dict__[queue].get()
-                self.current_event = event
-            except QueueEmpty as err:
-                err.waitUntilContent()
+                function(event)
+            except Exception as err:
+                exc_type, exc_value, exc_traceback = exc_info()
+                event.setErrorValue(traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value))
+                self.logging.error("%s" % (err))
+                self.submit(event, self.pool.queue.failed)
+                raise
             else:
-                event.initNamespace(self.name)
-                try:
-                    function(event)
-                except QueueFull as err:
-                    self.pool.queue.__dict__[queue].rescue(event)
-                    err.waitUntilFree()
-                except Exception as err:
-                    exc_type, exc_value, exc_traceback = exc_info()
-                    event.setErrorValue(traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value))
-                    self.logging.error("%s" % (err))
-                    self.submit(event, self.pool.queue.failed)
-                    # raise
-                else:
-                    self.submit(event, self.pool.queue.success)
+                self.submit(event, self.pool.queue.success)
 
     def __buildUplook(self):
 
