@@ -23,7 +23,7 @@
 #
 
 from wishbone import Actor
-from gevent import spawn, sleep
+from gevent import sleep
 from gevent import os as gevent_os
 
 # from gevent import monkey;monkey.patch_all()
@@ -56,7 +56,7 @@ class NamedPipeIn(Actor):
 
         os.mkfifo(self.kwargs.path)
         self.logging.info('Named pipe %s created.' % (self.kwargs.path))
-        spawn(self.drain, self.kwargs.path)
+        self.sendToBackground(self.drain, self.kwargs.path)
 
     def consume(self, event):
         for line in event:

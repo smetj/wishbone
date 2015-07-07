@@ -23,7 +23,7 @@
 #
 
 from wishbone import Actor
-from gevent import spawn, sleep
+from gevent import sleep
 import grequests
 
 
@@ -69,9 +69,9 @@ class HTTPInClient(Actor):
     def preHook(self):
         if isinstance(self.kwargs.url, list):
             for url in self.kwargs.url:
-                spawn(self.scheduler, url)
+                self.sendToBackground(self.scheduler, url)
         else:
-            spawn(self.scheduler, self.kwargs.url)
+            self.sendToBackground(self.scheduler, self.kwargs.url)
 
     def scheduler(self, url):
         while self.loop():

@@ -23,7 +23,7 @@
 #
 
 from wishbone import Actor
-from gevent import pywsgi, spawn
+from gevent import pywsgi
 
 
 class HTTPInServer(Actor):
@@ -75,7 +75,7 @@ class HTTPInServer(Actor):
             self.delimit = self.__otherDelimiter
 
     def preHook(self):
-        spawn(self.__serve)
+        self.sendToBackground(self.__serve)
 
     def consume(self, env, start_response):
         event = self.createEvent()
