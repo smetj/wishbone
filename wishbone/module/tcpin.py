@@ -25,7 +25,7 @@
 from wishbone import Actor
 from gevent.server import StreamServer
 from gevent.pool import Pool
-from gevent import spawn, socket, sleep
+from gevent import socket, sleep
 
 
 class TCPIn(Actor):
@@ -94,7 +94,7 @@ class TCPIn(Actor):
     def preHook(self):
         self.sock = self.__setupSocket(self.kwargs.address, self.kwargs.port)
         self.logging.info("TCP server initialized on address %s and port %s." % (self.kwargs.address, self.kwargs.port))
-        spawn(self.serve)
+        self.sendToBackground(self.serve)
 
     def __setupSocket(self, address, port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

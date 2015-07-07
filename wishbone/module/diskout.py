@@ -28,7 +28,7 @@ from wishbone.error import QueueFull
 import cPickle as pickle
 from gevent.fileobject import FileObjectThread
 from gevent.event import Event
-from gevent import spawn, sleep
+from gevent import sleep
 import os
 from uuid import uuid4
 
@@ -68,7 +68,7 @@ class DiskOut(Actor):
     def preHook(self):
 
         self.createDir()
-        spawn(self.__flushTimer)
+        self.sendToBackground(self.__flushTimer)
 
     def createDir(self):
 

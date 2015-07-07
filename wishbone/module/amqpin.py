@@ -27,7 +27,7 @@ from wishbone import Actor
 from wishbone.error import QueueEmpty
 from amqp.connection import Connection as amqp_connection
 from amqp.exceptions import PreconditionFailed
-from gevent import sleep, spawn
+from gevent import sleep
 
 
 class AMQPIn(Actor):
@@ -122,9 +122,9 @@ class AMQPIn(Actor):
         self.connection = None
 
     def preHook(self):
-        spawn(self.setupConnectivity)
-        spawn(self.handleAcknowledgements)
-        spawn(self.handleAcknowledgementsCancel)
+        self.sendToBackground(self.setupConnectivity)
+        self.sendToBackground(self.handleAcknowledgements)
+        self.sendToBackground(self.handleAcknowledgementsCancel)
 
     def consume(self, message):
         event = self.createEvent()
@@ -157,7 +157,7 @@ class AMQPIn(Actor):
                 self.logging.error("Failed to connect to broker.  Reason %s " % (err))
                 sleep(1)
             else:
-                spawn(self.drain)
+                self.sendToBackground(self.drain)
                 break
 
     def drain(self):
@@ -167,7 +167,7 @@ class AMQPIn(Actor):
             except Exception as err:
                 self.logging.error("Problem connecting to broker.  Reason: %s" % (err))
                 sleep(1)
-                spawn(self.setupConnectivity)
+                self.sendToBackground(self.setupConnectivity)
                 break
 
     def handleAcknowledgements(self):

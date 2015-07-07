@@ -26,7 +26,7 @@ from gevent import monkey; monkey.patch_socket()
 from wishbone import Actor
 from amqp.connection import Connection as amqp_connection
 from amqp import basic_message
-from gevent import sleep, spawn
+from gevent import sleep
 
 
 class AMQPOut(Actor):
@@ -100,7 +100,7 @@ class AMQPOut(Actor):
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        spawn(self.setupConnectivity)
+        self.sendToBackground(self.setupConnectivity)
 
     def consume(self, event):
 

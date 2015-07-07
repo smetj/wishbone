@@ -23,7 +23,7 @@
 #
 
 from random import choice, randint
-from gevent import sleep, spawn
+from gevent import sleep
 from wishbone import Actor
 import os
 
@@ -101,7 +101,7 @@ class DictGenerator(Actor):
         else:
             self.getDict = self.getDictGeneratedKeys
 
-        spawn(self.generateDicts)
+        self.sendToBackground(self.generateDicts)
 
     def generateDicts(self):
 
