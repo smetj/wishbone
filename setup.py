@@ -116,6 +116,7 @@ setup(
         'wishbone.encode': [
             'graphite = wishbone.module.graphite:Graphite',
             'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
+            'influxdb = wishbone.module.influxdb:InfluxDB',
             'msgpack = wishbone.module.msgpackencode:MSGPackEncode',
             'json = wishbone.module.jsonencode:JSONEncode'
         ],
