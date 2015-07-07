@@ -212,8 +212,8 @@ class Dispatch():
             pid.cleanup()
             print("")
         except Exception as err:
-            print ("")
-            print ("Failed to stop instances.  Reason: %s" % (err))
+            print("")
+            print("Failed to stop instances.  Reason: %s" % (err))
 
     def __stopSequence(self):
         '''
@@ -236,7 +236,7 @@ class Dispatch():
         try:
             return [int(x) for x in os.listdir("/proc/self/fd")]
         except Exception as err:
-            print ("Failed to get active filedescriptors.  Reason: %s." % (err))
+            print("Failed to get active filedescriptors.  Reason: %s." % (err))
             sys.exit(1)
 
     def __alive(self, pid):
