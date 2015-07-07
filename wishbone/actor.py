@@ -25,10 +25,10 @@
 from wishbone.queue import QueuePool
 from wishbone.logging import Logging
 from wishbone.event import Event as Wishbone_Event
-from wishbone.error import QueueEmpty, QueueFull, QueueConnected, ModuleInitFailure
+from wishbone.event import Metric
+from wishbone.error import QueueFull, QueueConnected
 from wishbone.lookup import EventLookup
 from collections import namedtuple
-from gevent.pool import Group
 from gevent import spawn
 from gevent import sleep, socket
 from gevent.event import Event
@@ -38,9 +38,8 @@ from uplook import UpLook
 import traceback
 import inspect
 
-
-class ActorConfig(namedtuple('ActorConfig', 'name size frequency lookup')):
-    pass
+Greenlets = namedtuple('Greenlets', "consumer generic log metric")
+ActorConfig = namedtuple('ActorConfig', 'name size frequency lookup')
 
 
 class Actor():
@@ -57,9 +56,8 @@ class Actor():
         self.logging = Logging(config.name, self.pool.queue.logs)
 
         self.__loop = True
-        self.threads = Group()
-
-        spawn(self.__metricEmitter)
+        self.greenlets = Greenlets([], [], [], [])
+        self.greenlets.metric.append(spawn(self.metricProducer))
 
         self.__run = Event()
         self.__run.clear()
@@ -129,14 +127,10 @@ class Actor():
         submitted to the "failed" queue,  If <function> succeeds to the
         success queue.'''
 
-        consumer = self.threads.spawn(self.__consumer, function, queue)
-        consumer.function = function.__name__
-        consumer.queue = queue
+        self.greenlets.consumer.append(spawn(self.__consumer, function, queue))
 
     def start(self):
         '''Starts the module.'''
-
-        # self.readQueuesFromDisk()
 
         if hasattr(self, "preHook"):
             self.logging.debug("preHook() found, executing")
@@ -145,11 +139,27 @@ class Actor():
         self.__run.set()
         self.logging.debug("Started with max queue size of %s events and metrics interval of %s seconds." % (self.size, self.frequency))
 
-    def stop(self):
-        '''Stops the loop lock and waits until all registered consumers have exit.'''
+    def sendToBackground(self, function, *args, **kwargs):
+        '''Executes a function and sends it to the background.'''
 
+        self.greenlets.generic.append(spawn(function, *args, **kwargs))
+
+    def stop(self):
+        '''Stops the loop lock and waits until all registered consumers have exit otherwise kills them.'''
+
+        self.logging.info("Received stop. Initiating shutdown.")
         self.__loop = False
-        self.threads.join()
+
+        for background_job in self.greenlets.metric:
+            background_job.kill()
+
+        for background_job in self.greenlets.generic:
+            background_job.join(1)
+            background_job.kill()
+
+        for background_job in self.greenlets.consumer:
+            background_job.join(1)
+            background_job.kill()
 
         if hasattr(self, "postHook"):
             self.logging.debug("postHook() found, executing")
@@ -161,7 +171,7 @@ class Actor():
 
         try:
             queue.put(event)
-        except QueueFull as err:
+        except QueueFull:
             event.rollBackEvent()
 
     def __consumer(self, function, queue):
@@ -186,6 +196,7 @@ class Actor():
                 raise
             else:
                 self.submit(event, self.pool.queue.success)
+            sleep()
 
     def __buildUplook(self):
 
@@ -208,7 +219,7 @@ class Actor():
         self.uplook = uplook
         self.kwargs = uplook.get()
 
-    def __metricEmitter(self):
+    def metricProducer(self):
         '''A greenthread which collects the queue metrics at the defined interval.'''
 
         hostname = socket.gethostname()
@@ -217,14 +228,10 @@ class Actor():
             for queue in self.pool.listQueues(names=True):
                 stats = self.pool.getQueue(queue).stats()
                 for item in stats:
-                    while self.loop():
-                        try:
-                            event = Wishbone_Event("%s:metric" % self.name)
-                            event.data = (time(), "wishbone", hostname, "queue.%s.%s.%s" % (self.name, queue, item), stats[item], '', ())
-                            self.pool.queue.metrics.put(event)
-                            break
-                        except QueueFull as err:
-                            err.waitUntilFree()
+                    event = Wishbone_Event("%s:metric" % self.name)
+                    # event.data = (time(), "wishbone", hostname, "queue.%s.%s.%s" % (self.name, queue, item), stats[item], '', ())
+                    event.data = Metric(time(), hostname, self.name, queue, item, stats[item], ())
+                    self.submit(event, self.pool.queue.metrics)
             sleep(self.frequency)
 
     def doEventLookup(self, name):
