@@ -25,7 +25,7 @@
 from wishbone import Actor
 import cPickle as pickle
 from gevent.fileobject import FileObjectThread
-from gevent import spawn, sleep, event
+from gevent import sleep, event
 from os import remove
 import glob
 import os
@@ -67,8 +67,8 @@ class DiskIn(Actor):
 
     def preHook(self):
         self.createDir()
-        spawn(self.monitorDirectory)
-        spawn(self.diskMonitor)
+        self.sendToBackground(self.monitorDirectory)
+        self.sendToBackground(self.diskMonitor)
 
     def createDir(self):
 

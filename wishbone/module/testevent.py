@@ -70,7 +70,7 @@ class TestEvent(Actor):
         else:
             self.generateMessage = self.__doNoNumber
 
-        self.threads.spawn(self.produce)
+        self.sendToBackground(self.produce)
 
     def produce(self):
 

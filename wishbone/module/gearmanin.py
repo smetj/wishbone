@@ -24,7 +24,7 @@
 
 
 from wishbone import Actor
-from gevent import spawn, sleep
+from gevent import sleep
 from gevent import monkey
 monkey.patch_select()
 monkey.patch_socket()
@@ -78,7 +78,7 @@ class GearmanIn(Actor):
 
     def preHook(self):
         for _ in range(self.kwargs.workers):
-            spawn(self.gearmanWorker)
+            self.sendToBackground(self.gearmanWorker)
 
     def consume(self, gearman_worker, gearman_job):
         decrypted = self.decrypt(gearman_job.data)

@@ -24,7 +24,7 @@
 #
 
 from wishbone import Actor
-from gevent import spawn, sleep, socket
+from gevent import sleep, socket
 
 
 class UDSOut(Actor):
@@ -54,7 +54,7 @@ class UDSOut(Actor):
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        spawn(self.setupConnection)
+        self.sendToBackground(self.setupConnection)
 
     def consume(self, event):
         if isinstance(event.data, list):
