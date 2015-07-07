@@ -23,6 +23,7 @@
 #
 
 from copy import deepcopy
+from collections import namedtuple
 
 
 class Container():
@@ -40,6 +41,9 @@ class Module():
         self.header = Container()
         self.data = None
         self.error = Container()
+
+
+Metric = namedtuple("WishboneMetric", "time source module queue name value tags")
 
 
 class Event(object):
@@ -128,11 +132,11 @@ class Event(object):
         '''When invoked resubmits this event to the queue it came from'''
 
         if self.__source_queue is None or self.__source_namespace is None:
-            raise Exception("This event doesn't appear to be consumed from anywhere.")
-        del (self.module.__dict__[self.current_namespace])
-
-        self.current_namespace = self.__source_namespace
-        self.__source_queue.put(self)
+            pass
+        else:
+            del (self.module.__dict__[self.current_namespace])
+            self.current_namespace = self.__source_namespace
+            self.__source_queue.put(self)
 
     def setSource(self, queue):
 
