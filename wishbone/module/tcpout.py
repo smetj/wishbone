@@ -23,7 +23,7 @@
 #
 
 from wishbone import Actor
-from gevent import sleep, spawn, socket
+from gevent import sleep, socket
 
 
 class TCPOut(Actor):
@@ -64,7 +64,7 @@ class TCPOut(Actor):
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        spawn(self.setupConnection)
+        self.setupConnection(self.setupConnection)
 
     def setupConnection(self):
 

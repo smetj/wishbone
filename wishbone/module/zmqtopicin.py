@@ -25,7 +25,6 @@
 
 from wishbone import Actor
 import zmq.green as zmq
-from gevent import spawn
 
 
 class ZMQTopicIn(Actor):
@@ -66,7 +65,7 @@ class ZMQTopicIn(Actor):
         self.socket = self.context.socket(zmq.SUB)
         self.socket.connect("tcp://localhost:%s" % self.kwargs.port)
         self.socket.setsockopt(zmq.SUBSCRIBE, self.kwargs.topic)
-        spawn(self.drain)
+        self.sendToBackground(self.drain)
 
     def drain(self):
 

@@ -24,7 +24,6 @@
 
 
 from wishbone import Actor
-from gevent import spawn
 import zmq.green as zmq
 
 
@@ -77,7 +76,7 @@ class ZMQPullIn(Actor):
         else:
             self.socket.connect("tcp://%s" % self.kwargs.servers[0])
 
-        spawn(self.drain)
+        self.sendToBackground(self.drain)
 
     def drain(self):
 

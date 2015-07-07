@@ -24,7 +24,7 @@
 
 
 from wishbone import Actor
-from gevent import sleep, spawn
+from gevent import sleep
 
 
 class Consensus(Actor):
@@ -72,7 +72,7 @@ class Consensus(Actor):
             if self.kwargs.lookup not in self.__queue_slot[queue]:
                 self.__queue_slot[queue].append(self.kwargs.lookup)
                 if self.kwargs.expire > 0:
-                    spawn(self.timer, queue, self.kwargs.lookup, self.kwargs.expire, event)
+                    self.sendToBackground(self.timer, queue, self.kwargs.lookup, self.kwargs.expire, event)
                 if self.consensusAchieved(self.kwargs.lookup):
                     self.submit(event, self.pool.queue.outbox)
 

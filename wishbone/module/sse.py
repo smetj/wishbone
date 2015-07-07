@@ -23,7 +23,7 @@
 #
 
 from wishbone import Actor
-from gevent import spawn, pool
+from gevent import pool
 from gevent.wsgi import WSGIServer
 from flask import Flask, Response, render_template_string
 from gevent.queue import Queue
@@ -115,7 +115,7 @@ class ServerSentEvents(Actor):
 
         p = pool.Pool(1000)
         self.server = WSGIServer((self.kwargs.bind, self.kwargs.port), self.app, spawn=p, log=False)
-        spawn(self.server.serve_forever)
+        self.sendToBackground(self.server.serve_forever)
         self.logging.info("Listening on http://%s:%s" % (self.kwargs.bind, self.kwargs.port))
 
     def target(self, destination=""):
