@@ -29,6 +29,7 @@ from wishbone.error import QueueEmpty, QueueFull, ReservedName, QueueMissing
 from gevent.event import Event
 from time import time
 from gevent.queue import Empty, Full
+from gevent import sleep
 
 
 class Container():
@@ -64,7 +65,7 @@ class QueuePool():
     def createQueue(self, name):
         '''Creates a Queue.'''
 
-        if name in ["metrics", "logs", "success", "failed"]:
+        if name in ["metrics", "logs", "success", "failed"] or name.startswith("_"):
             raise ReservedName
 
         setattr(self.queue, name, Queue(self.__size))
@@ -190,11 +191,7 @@ class Queue():
     def __put(self, element):
         '''Puts element in queue.'''
 
-        try:
-            self.__q.put_nowait(element)
-            self.__in += 1
-        except Full:
-            raise QueueFull("Queue has reached capacity of %s elements" % (self.max_size))
+        self.__q.put_nowait(element)
 
     def __rate(self, name, value):
 
