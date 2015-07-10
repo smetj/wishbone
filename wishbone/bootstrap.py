@@ -248,11 +248,11 @@ class Dispatch():
 
 
 def main():
-    BootStrap()
-    # try:
-    #     BootStrap()
-    # except Exception as err:
-    #     print "Failed to bootstrap instance.  Reason: %s" % (err)
+    # BootStrap()
+    try:
+        BootStrap()
+    except Exception as err:
+        print "Failed to bootstrap instance.  Reason: %s" % (err)
 
 if __name__ == '__main__':
     main()

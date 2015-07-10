@@ -79,4 +79,4 @@ class InfluxDB(Actor):
 
     def generate(self, data):
 
-        return "%s source=%s,module=%s,queue=%s value=%s %s" % (data.name, data.source, data.module, data.queue, data.value, data.time)
+        return "%s,source=%s,module=%s,queue=%s value=%.5f %20.0f" % (data.name, data.source, data.module, data.queue, data.value, data.time * 1000000000)

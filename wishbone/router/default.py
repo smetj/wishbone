@@ -94,7 +94,7 @@ class Default(multiprocessing.Process):
         self.stdout_logging = stdout_logging
         self.process = process
 
-        self.pool = ModulePool()
+        self.module_pool = ModulePool()
 
         self.__running = False
         self.__block = event.Event()
@@ -111,7 +111,7 @@ class Default(multiprocessing.Process):
         children = []
 
         def lookupChildren(module, children):
-            for module in self.pool.getModule(module).getChildren():
+            for module in self.module_pool.getModule(module).getChildren():
                 name = module.split(".")[0]
                 if name not in children:
                     children.append(name)
@@ -134,17 +134,17 @@ class Default(multiprocessing.Process):
             self.__start()
 
     def stop(self):
-        '''Stops all input modules.'''
+        '''Stops all modules.'''
 
-        for module in self.pool.list():
-            if module.name not in self.getChildren("wishbone_logs"):
+        for module in self.module_pool.list():
+            if module.name not in self.getChildren("wishbone_logs") + ["wishbone_logs"] and not module.stopped:
                 module.stop()
 
         while not self.__logsEmpty():
-            sleep(0.5)
+            sleep(0.1)
 
         # This gives an error when starting in background, no idea why
-        # self.pool.module.wishbone_logs.stop()
+        # self.module_pool.module.wishbone_logs.stop()
 
         self.__running = False
         self.__block.set()
@@ -161,8 +161,8 @@ class Default(multiprocessing.Process):
         (source_module, source_queue) = source.split('.')
         (destination_module, destination_queue) = destination.split('.')
 
-        source = self.pool.getModule(source_module)
-        destination = self.pool.getModule(destination_module)
+        source = self.module_pool.getModule(source_module)
+        destination = self.module_pool.getModule(destination_module)
 
         source.connect(source_queue, destination, destination_queue)
 
@@ -173,13 +173,19 @@ class Default(multiprocessing.Process):
         for name, config in self.config.lookups.iteritems():
             lookup_modules[name] = self.__registerLookupModule(config.module, **config.get('arguments', {}))
 
+        self.__registerModule(Funnel, ActorConfig("wishbone_metrics", self.size, self.frequency, self.config.lookups))
+        self.__registerModule(Funnel, ActorConfig("wishbone_logs", self.size, self.frequency, self.config.lookups))
+
         for name, instance in self.config.modules.iteritems():
+            if name in ["metrics", "logs"]:
+                raise ModuleInitFailure('"%s" is a reserved name you cannot use as a module instance name.' % (name))
             pmodule = self.module_manager.getModuleByName(instance.module)
             actor_config = ActorConfig(name, self.size, self.frequency, lookup_modules)
             self.__registerModule(pmodule, actor_config, instance.get("arguments", {}))
 
-        self.__setupMetricConnections()
-        self.__setupLogConnections()
+            self.module_pool.getModule(name).connect("metrics", self.module_pool.module.wishbone_metrics, name)
+            self.module_pool.getModule(name).connect("logs", self.module_pool.module.wishbone_logs, name)
+
         self.__setupConnections()
 
         if self.stdout_logging:
@@ -190,7 +196,7 @@ class Default(multiprocessing.Process):
     def __logsEmpty(self):
         '''Checks each module whether any logs have stayed behind.'''
 
-        for module in self.pool.list():
+        for module in self.module_pool.list():
             if not module.pool.queue.logs.size() == 0:
                 return False
         else:
@@ -209,32 +215,16 @@ class Default(multiprocessing.Process):
     def __registerModule(self, module, actor_config, arguments={}):
         '''Initializes the wishbone module module.'''
 
-        # try:
-        setattr(self.pool.module, actor_config.name, module(actor_config, **arguments))
-        # except Exception as err:
-        #     raise ModuleInitFailure("Problem loading module %s.  Reason: %s" % (actor_config.name, err))
+        try:
+            setattr(self.module_pool.module, actor_config.name, module(actor_config, **arguments))
+        except Exception as err:
+            raise ModuleInitFailure("Problem loading module %s.  Reason: %s" % (actor_config.name, err))
 
     def __setupConnections(self):
         '''Setup all connections as defined by configuration_manager'''
 
         for route in self.config.routingtable:
             self.__connect("%s.%s" % (route.source_module, route.source_queue), "%s.%s" % (route.destination_module, route.destination_queue))
-
-    def __setupLogConnections(self):
-        '''Connect all log queues to a Funnel module'''
-
-        actor_config = ActorConfig("wishbone_logs", self.size, self.frequency, self.config.lookups)
-        self.__registerModule(Funnel, actor_config)
-        for module in self.pool.list():
-            module.connect("logs", self.pool.module.wishbone_logs, module.name)
-
-    def __setupMetricConnections(self):
-        '''Connects all metric queues to a Funnel module'''
-
-        actor_config = ActorConfig("wishbone_metrics", self.size, self.frequency, self.config.lookups)
-        self.__registerModule(Funnel, actor_config)
-        for module in self.pool.list():
-            module.connect("metrics", self.pool.module.wishbone_metrics, module.name)
 
     def __setupSTDOUTLogging(self):
 
@@ -243,7 +233,6 @@ class Default(multiprocessing.Process):
 
         log_human = self.module_manager.getModuleByName("wishbone.encode.humanlogformat")
         human_actor_config = ActorConfig("log_format", self.size, self.frequency, self.config.lookups)
-
         self.__registerModule(log_stdout, stdout_actor_config)
         self.__registerModule(log_human, human_actor_config)
         try:
@@ -264,7 +253,7 @@ class Default(multiprocessing.Process):
         self.__initConfig()
         self.__running = True
 
-        for module in self.pool.list():
+        for module in self.module_pool.list():
             module.start()
 
         self.block()
