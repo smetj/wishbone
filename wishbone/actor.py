@@ -32,6 +32,7 @@ from collections import namedtuple
 from gevent import spawn
 from gevent import sleep, socket
 from gevent.event import Event
+from gevent.queue import Full
 from time import time
 from sys import exc_info
 from uplook import UpLook
@@ -71,26 +72,28 @@ class Actor():
 
         self.__buildUplook()
 
-    def connect(self, source, instance, destination):
+        self.stopped = True
+
+    def connect(self, source, destination_module, destination_queue):
         '''Connects the <source> queue to the <destination> queue.
         In fact, the source queue overwrites the destination queue.'''
 
         if source in self.__children:
             raise QueueConnected("Queue %s.%s is already connected to %s." % (self.name, source, self.__children[source]))
         else:
-            self.__children[source] = "%s.%s" % (instance.name, destination)
+            self.__children[source] = "%s.%s" % (destination_module.name, destination_queue)
 
-        if destination in instance.__parents:
-            raise QueueConnected("Queue %s.%s is already connected to %s" % (instance.name, destination, instance.__parents[destination]))
+        if destination_queue in destination_module.__parents:
+            raise QueueConnected("Queue %s.%s is already connected to %s" % (destination_module.name, destination_queue, destination_module.__parents[destination_queue]))
         else:
-            instance.__parents[destination] = "%s.%s" % (self.name, source)
+            destination_module.__parents[destination_queue] = "%s.%s" % (self.name, source)
 
         if not self.pool.hasQueue(source):
             self.pool.createQueue(source)
 
-        setattr(instance.pool.queue, destination, self.pool.getQueue(source))
+        setattr(destination_module.pool.queue, destination_queue, self.pool.getQueue(source))
         self.pool.getQueue(source).disableFallThrough()
-        self.logging.debug("Connected queue %s.%s to %s.%s" % (self.name, source, instance.name, destination))
+        self.logging.debug("Connected queue %s.%s to %s.%s" % (self.name, source, destination_module.name, destination_queue))
 
     def createEvent(self):
 
@@ -98,6 +101,13 @@ class Actor():
         current namespace already set.'''
 
         return Wishbone_Event(self.name)
+
+    def doEventLookup(self, name):
+        (n, t, k) = name.split('.')
+        try:
+            return self.current_event.getHeaderValue(n, k)
+        except AttributeError:
+            return "You should use a dynamic lookup ~~ for header lookups. "
 
     def getChildren(self, queue=None):
         '''Returns the queue name <queue> is connected to.'''
@@ -138,6 +148,7 @@ class Actor():
 
         self.__run.set()
         self.logging.debug("Started with max queue size of %s events and metrics interval of %s seconds." % (self.size, self.frequency))
+        self.stopped = False
 
     def sendToBackground(self, function, *args, **kwargs):
         '''Executes a function and sends it to the background.'''
@@ -148,6 +159,7 @@ class Actor():
         '''Stops the loop lock and waits until all registered consumers have exit otherwise kills them.'''
 
         self.logging.info("Received stop. Initiating shutdown.")
+
         self.__loop = False
 
         for background_job in self.greenlets.metric:
@@ -165,14 +177,18 @@ class Actor():
             self.logging.debug("postHook() found, executing")
             self.postHook()
 
+        self.stopped = True
+
     def submit(self, event, queue):
         '''A convenience function which submits <event> to <queue>
         and deals with QueueFull and the module lock set to False.'''
 
-        try:
-            queue.put(event)
-        except QueueFull:
-            event.rollBackEvent()
+        while self.loop():
+            try:
+                queue.put(event)
+                break
+            except Full:
+                sleep(0.1)
 
     def __consumer(self, function, queue):
         '''Greenthread which applies <function> to each element from <queue>
@@ -184,7 +200,6 @@ class Actor():
             event = self.pool.queue.__dict__[queue].get()
             self.current_event = event
             event.initNamespace(self.name)
-            event.setSource(self.pool.queue.__dict__[queue])
 
             try:
                 function(event)
@@ -193,10 +208,9 @@ class Actor():
                 event.setErrorValue(traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value))
                 self.logging.error("%s" % (err))
                 self.submit(event, self.pool.queue.failed)
-                raise
+                # raise
             else:
                 self.submit(event, self.pool.queue.success)
-            sleep()
 
     def __buildUplook(self):
 
@@ -222,22 +236,16 @@ class Actor():
     def metricProducer(self):
         '''A greenthread which collects the queue metrics at the defined interval.'''
 
-        hostname = socket.gethostname()
         self.__run.wait()
+        hostname = socket.gethostname()
         while self.loop():
             for queue in self.pool.listQueues(names=True):
                 stats = self.pool.getQueue(queue).stats()
                 for item in stats:
-                    event = Wishbone_Event("%s:metric" % self.name)
-                    # event.data = (time(), "wishbone", hostname, "queue.%s.%s.%s" % (self.name, queue, item), stats[item], '', ())
+                    event = Wishbone_Event(self.name)
                     event.data = Metric(time(), hostname, self.name, queue, item, stats[item], ())
                     self.submit(event, self.pool.queue.metrics)
             sleep(self.frequency)
 
-    def doEventLookup(self, name):
-        (n, t, k) = name.split('.')
-        try:
-            return self.current_event.getHeaderValue(n, k)
-        except AttributeError:
-            return "You should use a dynamic lookup ~~ for header lookups. "
+
 
