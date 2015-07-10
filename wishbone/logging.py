@@ -25,6 +25,8 @@
 
 from wishbone.error import QueueFull
 from wishbone.event import Event
+from gevent.queue import Full
+from gevent import spawn, sleep
 from time import time
 from os import getpid
 
@@ -42,14 +44,22 @@ class Logging():
 
     def __log(self, level, message):
 
+        event = Event(self.name)
+        event.data = (level, time(), getpid(), self.name, message)
+
+        try:
+            self.logs.put(event)
+        except Full:
+            spawn(self.logLater, event)
+
+    def logLater(self, event):
+
         while True:
             try:
-                event = Event("%s:log" % self.name)
-                event.data = (level, time(), getpid(), self.name, message)
                 self.logs.put(event)
                 break
-            except QueueFull:
-                self.logs.waitUntilFree()
+            except Full:
+                sleep(0.1)
 
     def emergency(self, message):
         """Generates a log message with priority emergency(0).

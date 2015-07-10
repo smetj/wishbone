@@ -22,7 +22,6 @@
 #
 #
 
-
 from gevent import monkey; monkey.patch_socket()
 from wishbone import Actor
 import requests
@@ -83,7 +82,7 @@ class HTTPOutClient(Actor):
     def consume(self, event):
 
         try:
-            response = self.submitToResource(event["data"])
+            response = self.submitToResource(event.data)
             response.raise_for_status()
         except Exception as err:
             self.logging.error("Failed to submit data.  Reason: %s" % (err))
@@ -91,8 +90,8 @@ class HTTPOutClient(Actor):
 
     def __put(self, data):
 
-        return requests.put(self.kwargs.url, data=data, auth=(self.kwargs.username, self.kwargs.password), headers={'Content-type': self.kwargs.content_type, 'Accept': self.kwargs.accept}).send()
+        return requests.put(self.kwargs.url, data=data, auth=(self.kwargs.username, self.kwargs.password), headers={'Content-type': self.kwargs.content_type, 'Accept': self.kwargs.accept})
 
     def __post(self, data):
 
-        return requests.post(self.kwargs.url, data=data, auth=(self.kwargs.username, self.kwargs.password), headers={'Content-type': self.kwargs.content_type, 'Accept': self.kwargs.accept}).send()
+        return requests.post(self.kwargs.url, data=data, auth=(self.kwargs.username, self.kwargs.password), headers={'Content-type': self.kwargs.content_type, 'Accept': self.kwargs.accept})
