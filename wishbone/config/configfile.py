@@ -24,6 +24,54 @@
 
 import yaml
 from wishbone.external.attrdict import AttrDict
+from jsonschema import validate
+
+SCHEMA = {
+    "type": "object",
+    "properties": {
+        "lookups": {
+            "type": "object",
+            "patternProperties": {
+                ".*": {
+                    "type": "object",
+                    "properties": {
+                        "module": {
+                            "type": "string"
+                        },
+                        "arguments": {
+                            "type": "object"
+                        }
+                    },
+                    "required": ["module"],
+                    "additionalProperties": False
+                }
+            }
+        },
+        "modules": {
+            "type": "object",
+            "patternProperties": {
+                ".*": {
+                    "type": "object",
+                    "properties": {
+                        "module": {
+                            "type": "string"
+                        },
+                        "arguments": {
+                            "type": "object"
+                        }
+                    },
+                    "required": ["module"],
+                    "additionalProperties": False
+                }
+            }
+        },
+        "routingtable": {
+            "type": "array"
+        }
+    },
+    "required": ["modules", "routingtable"],
+    "additionalProperties": False
+}
 
 
 class ConfigFile(object):
@@ -34,16 +82,17 @@ class ConfigFile(object):
 
     def load(self, filename):
 
-        a = AttrDict(self.__processConfig(filename), recursive=True)
-        if "lookups" not in a:
-            a["lookups"] = {}
-        return a
-
-    def __processConfig(self, filename):
-
         config = self.__load(filename)
-        if self.__verify(config):
-            config["routingtable"] = self.__processRoutes(config["routingtable"])
+        self.__validate(config)
+        self.__validateRoutingTable(config)
+
+        if "lookups" not in config:
+            config["lookups"] = {}
+
+        config["routingtable"] = self.__processRoutes(config["routingtable"])
+
+        config = AttrDict(config, recursive=True)
+
         return config
 
     def __processRoutes(self, routes):
@@ -72,16 +121,16 @@ class ConfigFile(object):
         else:
             return config
 
-    def __verify(self, config):
-        assert "routingtable" in config, "'routingtable' section not found in bootstrap file."
-        assert "modules" in config, "'module' section not found in bootstrap file."
-        for module in config["modules"]:
-            assert "module" in config["modules"][module], "Cannot find the 'module' keyword in the '%s' module definition." % (module)
+    def __validate(self, config):
+
+        try:
+            validate(config, SCHEMA)
+        except Exception as err:
+            raise Exception("Failed to validate configuration file.  Reason: %s" % (err.message))
+
+    def __validateRoutingTable(self, config):
 
         for route in config["routingtable"]:
             (left, right) = route.split("->")
             assert "." in left.lstrip().rstrip(), "routingtable rule \"%s\" does not have the right format. Missing a dot." % (route)
             assert "." in right.lstrip().rstrip(), "routingtable rule \"%s\" does not have the right format. Missing a dot." % (route)
-
-        return True
-
