@@ -25,10 +25,9 @@
 
 from uuid import uuid4
 from gevent.queue import Queue as Gevent_Queue
-from wishbone.error import QueueEmpty, QueueFull, ReservedName, QueueMissing
-from gevent.event import Event
+from wishbone.error import ReservedName, QueueMissing
 from time import time
-from gevent.queue import Empty, Full
+from gevent.queue import Empty
 from gevent import sleep
 
 
@@ -192,6 +191,7 @@ class Queue():
         '''Puts element in queue.'''
 
         self.__q.put_nowait(element)
+        self.__in += 1
 
     def __rate(self, name, value):
 
