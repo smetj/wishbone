@@ -19,7 +19,12 @@ Features:
 - Added function module KeyValue
 - Added output module Elasticsearch
 - Match module now support negative list membership testing.
-- Added tests for each module.
+- Added tests for each module
+- Added support to cancel acknowledgements in wishbone.input.amqp
+- Match module now support negative list membership testing.
+- Queueing now uses standard blocking behavior.
+- Changed internal metric format.
+- Changed internal log format.
 
 Bugfixes:
 
@@ -30,8 +35,6 @@ Bugfixes:
 - Fixed bugs in wishbone.output.amqp
 - Added module wishbone.output.http
 - Exceptions are now *always* logged with line number, type, and message.
-- Match module now support negative list membership testing.
-
 
 Version 1.0.3
 ~~~~~~~~~~~~~
