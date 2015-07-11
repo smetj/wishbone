@@ -23,6 +23,7 @@
 #
 
 from wishbone import Actor
+from wishbone.event import Metric
 from os.path import basename
 from sys import argv
 from os import getpid
@@ -89,14 +90,19 @@ class Graphite(Actor):
 
     def consume(self, event):
 
+        if isinstance(event.data, Metric):
+            pass
+        else:
+            self.logging.error("Metric dropped because not of type <wishbone.event.Metric>")
+
         self.doConsume(event)
 
     def __consumeSource(self, event):
 
-        event.data = "%s%s%s%s.%s %s %s" % (self.kwargs.prefix, event.last.data[2], self.script_name, self.pid, event.last.data[3], event.last.data[4], event.last.data[0])
+        event.data = "%s%s%s%s.%s %s %s" % (self.kwargs.prefix, event.data.source, self.script_name, self.pid, event.data.queue, event.data.value, event.data.time)
         self.submit(event, self.pool.queue.outbox)
 
     def __consumeNoSource(self, event):
 
-        event.data = "%s%s%s.%s %s %s" % (self.kwargs.prefix, self.script_name, self.pid, event.last.data[3], event.last.data[4], event.last.data[0])
+        event.data = "%s%s%s.%s %s %s" % (self.kwargs.prefix, self.script_name, self.pid, event.data.queue, event.data.value, event.data.time)
         self.submit(event, self.pool.queue.outbox)
