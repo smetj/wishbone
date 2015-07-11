@@ -33,11 +33,7 @@ class InfluxDB(Actor):
 
     '''**Converts the internal metric format to InfluxDB line format.**
 
-    Incoming metrics have following format:
-
-        (time, type, source, name, value, unit, (tag1, tag2))
-        (1381002603.726132, 'wishbone', 'hostname', 'queue.outbox.in_rate', 0, '', ())
-
+    Incoming date must be of type <Metric>.
 
 
     Parameters:
