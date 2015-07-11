@@ -26,7 +26,7 @@ from wishbone.queue import QueuePool
 from wishbone.logging import Logging
 from wishbone.event import Event as Wishbone_Event
 from wishbone.event import Metric
-from wishbone.error import QueueFull, QueueConnected
+from wishbone.error import QueueConnected
 from wishbone.lookup import EventLookup
 from collections import namedtuple
 from gevent import spawn
