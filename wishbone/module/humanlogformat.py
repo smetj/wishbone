@@ -25,6 +25,7 @@
 
 
 from wishbone import Actor
+from wishbone.event import Log
 from time import strftime, localtime
 import os
 import sys
@@ -97,14 +98,17 @@ class HumanLogFormat(Actor):
 
     def consume(self, event):
 
-        log = ("%s %s %s %s: %s" % (
-            strftime("%Y-%m-%dT%H:%M:%S", localtime(event.last.data[1])),
-            "%s[%s]:" % (self.kwargs.ident, event.last.data[2]),
-            self.levels[event.last.data[0]],
-            event.last.data[3],
-            event.last.data[4]))
-        event.data = self.colorize(log, event.last.data[0])
-        self.submit(event, self.pool.queue.outbox)
+        if isinstance(event.data, Log):
+            log = ("%s %s %s %s: %s" % (
+                strftime("%Y-%m-%dT%H:%M:%S", localtime(event.data.time)),
+                "%s[%s]:" % (self.kwargs.ident, event.data.pid),
+                self.levels[event.data.level],
+                event.data.module,
+                event.data.message))
+            event.data = self.colorize(log, event.data.level)
+            self.submit(event, self.pool.queue.outbox)
+        else:
+            raise Exception("Incoming data needs to be of type <wishbone.event.Log>. Dropped event.")
 
     def doColorize(self, message, level):
         return self.colors[level] + message + "\x1B[0m"
