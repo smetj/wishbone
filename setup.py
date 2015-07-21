@@ -24,12 +24,18 @@
 
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
-import sys
+import sys, os
+
+# Required to make pycrypto compile with PyPy
+# https://github.com/dlitz/pycrypto/pull/59
+if "PyPy" in sys.version:
+    print("We are running PyPY, disable gmp to prevent pycrypto build error.")
+    os.environ["with_gmp"] = "no"
 
 PROJECT = 'wishbone'
 VERSION = '1.1.0'
 
-install_requires = ['gevent>=1.0.1',
+install_requires = ['gevent>=1.0',
                     'greenlet>=0.3.2',
                     'argparse==1.2.1',
                     'prettytable==0.7.2',
