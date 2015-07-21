@@ -22,9 +22,11 @@
 #
 #
 
+from gevent import monkey; monkey.patch_socket()
+import requests
+
 from wishbone import Actor
 from gevent import sleep
-import grequests
 
 
 class HTTPInClient(Actor):
@@ -78,8 +80,7 @@ class HTTPInClient(Actor):
             event = self.createEvent()
             event.data = None
             try:
-                r = grequests.get(url, auth=(self.kwargs.username, self.kwargs.password))
-                response = r.send()
+                response = requests.get(url, auth=(self.kwargs.username, self.kwargs.password))
             except Exception as err:
                 self.logging.warn("Problem requesting resource.  Reason: %s" % (err))
                 sleep(1)
