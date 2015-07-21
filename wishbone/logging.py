@@ -23,7 +23,7 @@
 #
 #
 
-from wishbone.event import Event
+from wishbone.event import Event, Log
 from gevent.queue import Full
 from gevent import spawn, sleep
 from time import time
@@ -44,7 +44,7 @@ class Logging():
     def __log(self, level, message):
 
         event = Event(self.name)
-        event.data = (level, time(), getpid(), self.name, message)
+        event.data = Log(time(), level, getpid(), self.name, message)
 
         try:
             self.logs.put(event)
