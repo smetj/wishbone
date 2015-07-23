@@ -142,7 +142,7 @@ class Match(Actor):
         if self.kwargs.location is not None:
             self.createDir()
             self.logging.info("Rules directoy '%s' defined." % (self.kwargs.location))
-            spawn(self.getRules)
+            self.sendToBackground(self.getRules)
 
     def createDir(self):
 
