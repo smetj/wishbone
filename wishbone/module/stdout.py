@@ -24,7 +24,7 @@
 
 from wishbone import Actor
 from os import getpid
-
+from colorama import init, Fore, Back, Style
 
 class Format():
 
@@ -73,6 +73,8 @@ class STDOUT(Actor):
     Prints incoming events to STDOUT. When <complete> is True,
     the complete event including headers is printed to STDOUT.
 
+    You can optionally define the colors used.
+
 
     Parameters:
 
@@ -89,6 +91,18 @@ class STDOUT(Actor):
         - pid(bool)(False)
            |  Includes the pid of the process producing the output.
 
+        - foreground_color(str)("WHITE")
+           |  The foreground color.
+           |  Valid values: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE
+
+        - background_color(str)("BLACK")
+           |  The background color.
+           |  Valid values: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE
+
+        - color_ style(str)("NORMAL")
+           |  The coloring style to use
+           |  Valid values: DIM, NORMAL, BRIGHT
+
 
     Queues:
 
@@ -96,13 +110,28 @@ class STDOUT(Actor):
            |  Incoming events.
     '''
 
-    def __init__(self, actor_config, complete=False, counter=False, prefix="", pid=False):
+    def __init__(self, actor_config, complete=False, counter=False, prefix="", pid=False, foreground_color="WHITE", background_color="BLACK", color_style="NORMAL"):
         Actor.__init__(self, actor_config)
 
+        self.__validateInput(foreground_color, background_color, color_style)
         self.format = Format(self.kwargs.complete, self.kwargs.counter, self.kwargs.pid)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
+        init(autoreset=True)
+
     def consume(self, event):
 
-        print("%s%s" % (self.kwargs.prefix, self.format.do(event)))
+        print("%s%s%s%s%s" % (getattr(Fore, self.kwargs.foreground_color),
+                              getattr(Back, self.kwargs.background_color),
+                              getattr(Style, self.kwargs.color_style),
+                              self.kwargs.prefix, self.format.do(event)))
+
+    def __validateInput(self, f, b, s):
+
+        if f not in ["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE"]:
+            raise Exception("Foreground value is not correct.")
+        if b not in ["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE"]:
+            raise Exception("Background value is not correct.")
+        if s not in ["DIM", "NORMAL", "BRIGHT"]:
+            raise Exception("Style value is not correct.")

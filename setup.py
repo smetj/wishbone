@@ -51,6 +51,7 @@ install_requires = ['gevent>=1.0',
                     'flask==0.10.1',
                     'gevent_inotifyx==0.1.1',
                     'requests==2.5.1',
+                    'colorama==0.3.3',
                     'uplook']
 
 try:
