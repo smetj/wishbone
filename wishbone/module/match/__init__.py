@@ -24,10 +24,11 @@
 
 
 from wishbone import Actor
-from gevent import spawn, sleep
+from gevent import sleep
 from .matchrules import MatchRules
 from .readrules import ReadRulesDisk
 import os
+from copy import deepcopy
 
 
 class Match(Actor):
@@ -44,21 +45,25 @@ class Match(Actor):
 
     A match rule is written in YAML syntax and consists out of 2 parts:
 
-        - condition:
+    - condition:
 
         A list of dictionaries holding with the individual conditions which
         ALL have to match for the complete rule to match.
 
+    ::
+
         re:     Regex matching
         !re:    Negative regex matching
         >:      Bigger than
-        >=:     Bigger than or equal to
+        >=:     Bigger or equal than
         <:      Smaller than
-        <=:     Smaller than or equal to
-        =:      Equal to
+        <=:     Smaller or equal than
+        =:      Equal than
         in:     Evaluate list membership
+        !in:    Evaluate negative list membership
 
-        - queue:
+
+    - queue:
 
         The queue section contains a list of dictionaries/maps each containing
         1 key with another dictionary/map as a value.  These key/value pairs
@@ -71,7 +76,8 @@ class Match(Actor):
     rule matches, evaluation the other rules will continue untill all rules
     are processed.
 
-    **Examples**
+    Examples
+    ~~~~~~~~
 
     This example would route the events - with field "greeting" containing
     the value "hello" - to the outbox queue without adding any information
@@ -110,6 +116,15 @@ class Match(Actor):
 
     Parameters:
 
+        - name(str)
+           |  The name of the module.
+
+        - size(int)
+           |  The default max length of each queue.
+
+        - frequency(int)
+           |  The frequency in seconds to generate metrics.
+
         - location(str)(None)
            |  The directory containing rules.
            |  If none, no rules are read from disk.
@@ -124,25 +139,29 @@ class Match(Actor):
            |  Incoming events
 
         - <queue_name>
-           |  The queue which matches a rule.
+           |  The queue which matches a rule
+
+        - nomatch
+           |  The queue receiving event without matches
 
     '''
 
     def __init__(self, actor_config, location=None, rules={}):
         Actor.__init__(self, actor_config)
 
+        self.pool.createQueue("inbox")
+        self.pool.createQueue("nomatch")
+        self.registerConsumer(self.consume, "inbox")
+
         self.__active_rules = {}
         self.match = MatchRules()
-        self.pool.createQueue("inbox")
-        self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
 
-        self.__active_rules = self.uplook.dump()["rules"]
+        self.createDir()
         if self.kwargs.location is not None:
-            self.createDir()
             self.logging.info("Rules directoy '%s' defined." % (self.kwargs.location))
-            self.sendToBackground(self.getRules)
+        self.sendToBackground(self.monitorRuleDirectory)
 
     def createDir(self):
 
@@ -155,22 +174,26 @@ class Match(Actor):
             self.logging.info("Directory %s does not exist so I'm creating it." % (self.kwargs.location))
             os.makedirs(self.kwargs.location)
 
-    def getRules(self):
+    def monitorRuleDirectory(self):
+
+        '''
+        Loads new rules when changes happen.
+        '''
 
         self.logging.info("Monitoring directory '%s' for changes" % (self.kwargs.location))
-        self.read = ReadRulesDisk(self.logging, self.kwargs.location)
+        self.readRules = ReadRulesDisk(self.logging, self.kwargs.location)
+
+        new_rules = self.readRules.readDirectory()
+        new_rules.update(self.kwargs.rules)
+        self.__active_rules = new_rules
+        self.logging.info("Read %s rules from disk and %s defined in config." % (len(new_rules), len(self.kwargs.rules)))
 
         while self.loop():
             try:
-                self.__active_rules = dict(self.read.readDirectory().items() + self.uplook.dump()["rules"])
-                break
-            except Exception as err:
-                self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
-                sleep(1)
-
-        while self.loop():
-            try:
-                self.__active_rules = dict(self.read.get().items() + self.uplook.dump()["rules"])
+                new_rules = self.readRules.waitForChanges()
+                new_rules.update(self.kwargs.rules)
+                self.__active_rules = new_rules
+                self.logging.info("Read %s rules from disk and %s defined in config." % (len(new_rules), len(self.kwargs.rules)))
             except Exception as err:
                 self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
                 sleep(1)
@@ -179,32 +202,36 @@ class Match(Actor):
         '''Submits matching documents to the defined queue along with
         the defined header.'''
 
-        for rule in self.__active_rules:
-            e = event.clone()
-            if self.evaluateCondition(self.__active_rules[rule]["condition"], e.data):
-                self.logging.debug("Match for rule %s." % (rule))
-                e.setHeaderValue("rule", rule)
-                for destination in self.__active_rules[rule]["queue"]:
-                    for queue, header in destination.iteritems():
-                        event_copy = e.clone()
-                        for key, value in header.iteritems():
-                            event_copy.setHeaderValue(key, value)
-                        self.submit(event_copy, self.pool.getQueue(queue))
-            else:
-                self.logging.debug("No match for rule %s." % (rule))
+        if isinstance(event.data, dict):
+            for rule in self.__active_rules:
+                e = deepcopy(event)
+                if self.evaluateCondition(self.__active_rules[rule]["condition"], e.data):
+                    e.setHeaderValue("rule", rule)
+                    for queue in self.__active_rules[rule]["queue"]:
+                        event_copy = deepcopy(e)
+                        for name in queue:
+                            if queue[name] is not None:
+                                for key, value in queue[name].iteritems():
+                                    event_copy.setHeaderValue(key, value)
+                                # event_copy["header"][self.name].update(queue[name])
+                            self.submit(event_copy, self.pool.getQueue(name))
+                else:
+                    e.setHeaderValue("rule", rule)
+                    self.submit(e, self.pool.queue.nomatch)
+                    # self.logging.debug("No match for rule %s." % (rule))
+        else:
+            raise Exception("Incoming data is not of type dict, dropped.")
 
     def evaluateCondition(self, conditions, fields):
         for condition in conditions:
             for field in condition:
                 if field in fields:
                     if not self.match.do(condition[field], fields[field]):
-                        # self.logging.warning("field %s with condition %s DOES NOT MATCH field %s with value %s" % (field, condition[field], field, fields[field]))
+                        # self.logging.debug("field %s with condition %s DOES NOT MATCH value %s" % (field, condition[field], fields[field]))
                         return False
                     else:
                         pass
-                        # self.logging.warning("field %s with condition %s MATCHES field %s with value %s" % (field, condition[field], field, fields[field]))
+                        # self.logging.debug("field %s with condition %s MATCHES value %s" % (field, condition[field], fields[field]))
                 else:
-                    # self.logging.warning("field %s does not occur in document.")
                     return False
-
         return True

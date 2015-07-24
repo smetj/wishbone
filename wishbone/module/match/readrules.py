@@ -3,7 +3,7 @@
 #
 #  readrulesdisk.py
 #
-#  Copyright 2015 Jelle Smet <development@smetj.net>
+#  Copyright 2014 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -30,7 +30,6 @@ import os
 import yaml
 from yaml.parser import ParserError
 
-
 class ReadRulesDisk():
 
     '''
@@ -42,40 +41,28 @@ class ReadRulesDisk():
         directory(string):   The directory to load rules from.
                             default: rules/
 
-        logger_object(class): A wishbone logger object.
     '''
 
-    def __init__(self, logger_object, directory="rules/"):
+    def __init__(self, logger, directory="rules/"):
+        self.logger = logger
         self.directory = directory
-        self.wait = event.Event()
-        self.wait.clear()
-        self.__rules = {}
-        self.logger = logger_object
 
-        if os.access(self.directory, os.R_OK):
-            spawn(self.monitorDirectory)
-        else:
+        if not os.access(self.directory, os.R_OK):
             raise Exception("Directory '%s' is not readable. Please verify." % (self.directory))
 
-    def monitorDirectory(self):
-        '''Monitors the given directory for changes.'''
-
-        fd = inotify.init()
-        wb = inotify.add_watch(
-            fd, self.directory, inotify.IN_CLOSE_WRITE + inotify.IN_CREATE + inotify.IN_DELETE + inotify.IN_MODIFY + inotify.IN_MOVE)
-        self.__rules = self.readDirectory()
-
-        while True:
-            self.wait.clear()
-            events = inotify.get_events(fd)
-            current_rules = self.readDirectory()
-
-            if cmp(current_rules, self.__rules) != 0:
-                self.logger.info("New set of rules loaded from disk")
-                self.__rules = current_rules
-                self.wait.set()
+        self.fd = inotify.init()
+        self.wb = inotify.add_watch(self.fd, self.directory, inotify.IN_CLOSE_WRITE + inotify.IN_CREATE + inotify.IN_DELETE + inotify.IN_MODIFY + inotify.IN_MOVE)
 
     def readDirectory(self):
+
+        return self.__readDirectory()
+
+    def waitForChanges(self, grace_period=5):
+
+        events = inotify.get_events(self.fd)
+        return self.readDirectory()
+
+    def __readDirectory(self):
         '''Reads the content of the given directory and creates a dict
         containing the rules.'''
 
@@ -89,20 +76,19 @@ class ReadRulesDisk():
                         self.ruleCompliant(rule)
                     except Exception as err:
                         self.logger.warning("Rule %s not valid. Skipped. Reason: %s" % (filename, err))
-                    rules[key_name] = rule
+                    else:
+                        rules[key_name] = rule
             except ParserError as err:
                 self.logger.warning("Failed to parse file %s.  Please validate the YAML syntax in a parser." % (filename))
             except IOError as err:
                 self.logger.warning("Failed to read %s.  Reason: %s" % (filename, err))
         return rules
 
-    def get(self):
-        self.wait.wait()
-        return self.__rules
-
     def ruleCompliant(self, rule):
+
+        '''Does basic rule validation'''
+
         assert isinstance(rule["condition"], list), "Condition needs to be of type list."
         for c in rule["condition"]:
             assert isinstance(c, dict), "An individual condition needs to be of type dict."
         assert isinstance(rule["queue"], list), "Queue needs to be of type list."
-
