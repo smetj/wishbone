@@ -7,11 +7,11 @@ Version 1.1.0
 Features:
 
 - Rewrite new internal event format.
-- Introduction of ConfigurationFactory to abstract configuration.
 - Refactoring of default router to use ConfigurationManager.
 - Refactoring of bootstrap code.
 - Support for dynamic and static variable lookups.
 - Support for header variable lookups.
+- Config validation using JSON schema.
 - Using ActorConfig object to encapsulate framework specific settings
 - Added wishbone.output.http module
 - Renamed "metrics_funnel" and "logs_funnel" to "wishbone_metrics"
@@ -19,10 +19,10 @@ Features:
 - Added function module KeyValue
 - Added output module Elasticsearch
 - Match module now support negative list membership testing.
-- Added tests for each module
+- Added tests for modules (not complete, more tests required)
 - Added support to cancel acknowledgements in wishbone.input.amqp
 - Match module now support negative list membership testing.
-- Queueing now uses standard blocking behavior.
+- Internal queueing now uses standard blocking behavior.
 - Changed internal metric format.
 - Changed internal log format.
 
