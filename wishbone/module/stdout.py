@@ -26,6 +26,7 @@ from wishbone import Actor
 from os import getpid
 from colorama import init, Fore, Back, Style
 
+
 class Format():
 
     def __init__(self, complete, counter, pid):
@@ -95,9 +96,9 @@ class STDOUT(Actor):
            |  The foreground color.
            |  Valid values: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE
 
-        - background_color(str)("BLACK")
+        - background_color(str)("RESET")
            |  The background color.
-           |  Valid values: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE
+           |  Valid values: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET
 
         - color_ style(str)("NORMAL")
            |  The coloring style to use
@@ -110,7 +111,7 @@ class STDOUT(Actor):
            |  Incoming events.
     '''
 
-    def __init__(self, actor_config, complete=False, counter=False, prefix="", pid=False, foreground_color="WHITE", background_color="BLACK", color_style="NORMAL"):
+    def __init__(self, actor_config, complete=False, counter=False, prefix="", pid=False, foreground_color="WHITE", background_color="RESET", color_style="NORMAL"):
         Actor.__init__(self, actor_config)
 
         self.__validateInput(foreground_color, background_color, color_style)
@@ -131,7 +132,7 @@ class STDOUT(Actor):
 
         if f not in ["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE"]:
             raise Exception("Foreground value is not correct.")
-        if b not in ["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE"]:
+        if b not in ["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE", "RESET"]:
             raise Exception("Background value is not correct.")
         if s not in ["DIM", "NORMAL", "BRIGHT"]:
             raise Exception("Style value is not correct.")
