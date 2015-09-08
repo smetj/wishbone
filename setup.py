@@ -52,6 +52,7 @@ install_requires = ['gevent>=1.0',
                     'gevent_inotifyx==0.1.1',
                     'requests==2.5.1',
                     'colorama==0.3.3',
+                    'arrow==0.6.0',
                     'uplook']
 
 try:
@@ -91,7 +92,6 @@ setup(
                  'Programming Language :: Python',
                  'Programming Language :: Python :: 2',
                  'Programming Language :: Python :: 2.7',
-                 'Programming Language :: Python :: 3.3',
                  'Programming Language :: Python :: Implementation :: PyPy',
                  'Intended Audience :: Developers',
                  'Intended Audience :: System Administrators',
