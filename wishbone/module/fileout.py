@@ -24,6 +24,7 @@
 
 
 from wishbone import Actor
+import arrow
 
 
 class FileOut(Actor):
@@ -40,6 +41,9 @@ class FileOut(Actor):
         - location(str)("./wishbone.out")
            |  The location of the output file.
 
+        - timestamp(bool)(False)
+           |  If true prepends each line with a ISO8601 timestamp.
+
     Queues:
 
         - inbox
@@ -47,7 +51,7 @@ class FileOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, location="./wishbone.out"):
+    def __init__(self, actor_config, location="./wishbone.out", timestamp=False):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -55,11 +59,24 @@ class FileOut(Actor):
 
     def preHook(self):
 
+        if self.kwargs.timestamp:
+            self.getTimestamp = self.returnTimestamp
+        else:
+            self.getTimestamp = self.returnNoTimestamp
+
         self.file = open(self.kwargs.location, "a")
 
     def consume(self, event):
-        self.file.write(str(event.data) + "\n")
+        self.file.write("%s%s\n" % (self.getTimestamp(), str(event.data)))
         self.file.flush()
+
+    def returnTimestamp(self):
+
+        return "%s: " % (arrow.now().isoformat())
+
+    def returnNoTimestamp(self):
+
+        return ""
 
     def postHook(self):
 
