@@ -23,11 +23,9 @@
 #
 
 
+from gevent import monkey; monkey.patch_all()
 from wishbone import Actor
 from gevent import sleep
-from gevent import monkey
-monkey.patch_select()
-monkey.patch_socket()
 from gearman import GearmanWorker
 from Crypto.Cipher import AES
 import base64
@@ -81,9 +79,8 @@ class GearmanIn(Actor):
             self.sendToBackground(self.gearmanWorker)
 
     def consume(self, gearman_worker, gearman_job):
-        decrypted = self.decrypt(gearman_job.data)
         event = self.createEvent()
-        event.setHeaderNamespace(self.name)
+        decrypted = self.decrypt(gearman_job.data)
         event.data = decrypted
         self.submit(event, self.pool.queue.outbox)
         return decrypted
