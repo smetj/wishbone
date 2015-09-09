@@ -35,7 +35,7 @@ if "PyPy" in sys.version:
 PROJECT = 'wishbone'
 VERSION = '1.1.0'
 
-install_requires = ['gevent>=1.0',
+install_requires = ['gevent==1.1b4',
                     'greenlet>=0.3.2',
                     'argparse==1.2.1',
                     'prettytable==0.7.2',
@@ -53,6 +53,8 @@ install_requires = ['gevent>=1.0',
                     'requests==2.5.1',
                     'colorama==0.3.3',
                     'arrow==0.6.0',
+                    'elasticsearch==1.6.0',
+                    'importlib==1.0.3',
                     'uplook']
 
 try:
@@ -109,7 +111,6 @@ setup(
     packages=find_packages(),
     package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/sse.html', 'data/banner.tmpl']},
     zip_safe=False,
-    dependency_links=['https://github.com/gevent/gevent/tarball/master#egg=gevent-1.1'],
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
         'wishbone.flow': [
