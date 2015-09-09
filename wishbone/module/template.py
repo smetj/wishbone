@@ -46,10 +46,10 @@ class Template(Actor):
         - template(str)()*
            |  The template filename stored in directory <location>.
 
-        - header_templates(list)([])*
-           |  An optional list of strings with header references
-           | containing templates.
-           | <module_instance>.header.<key>
+        - header_templates(dict)({})*
+           |  A dict of templates to render. Can be lookup values.
+           |  Results are stored in this module's instance header
+           |  using the provided key.
 
 
 
@@ -63,7 +63,7 @@ class Template(Actor):
 
     '''
 
-    def __init__(self, actor_config, location="./", template=None, header_templates=[]):
+    def __init__(self, actor_config, location="./", template=None, header_templates={}):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -81,12 +81,10 @@ class Template(Actor):
 
     def construct(self, event):
 
-        for template_ref in self.kwargs.header_templates:
+        for name, template in self.kwargs.header_templates.iteritems():
             try:
-                (namespace, part, variable) = template_ref.split('.')
-                template = event.getHeaderValue(namespace, variable)
                 template_r = JinjaTemplate(template)
-                event.setHeaderValue(variable, template_r.render(**event.data), namespace)
+                event.setHeaderValue(name, template_r.render(**event.data))
             except Exception as err:
                 self.logging.warning(
                     "Failed to convert header key '%s'.  Reason: %s" % (variable, err))
