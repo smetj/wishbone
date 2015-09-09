@@ -112,11 +112,11 @@ class Dispatch():
 
         processes = []
 
-        def stopSequence():
+        def stopSequence(*args, **kwargs):
             for proc in processes:
                 proc.stop()
 
-        signal(2, stopSequence)
+        signal.signal(2, stopSequence)
 
         module_manager = ModuleManager()
         router_config = ConfigFile().load(config)
@@ -153,7 +153,6 @@ class Dispatch():
         except ValueError:
             (category, sub, group, module) = module.split('.')
             category = "%s.%s" % (category, sub)
-
 
         try:
             title = module_manager.getModuleTitle(category, group, module)
@@ -248,11 +247,31 @@ class Dispatch():
 
 
 def main():
-    # BootStrap()
-    try:
-        BootStrap()
-    except Exception as err:
-        print "Failed to bootstrap instance.  Reason: %s" % (err)
+    BootStrap()
+    # except Exception as err:
+    #     print "sssss"
+    #     dump = []
+    #     for ob in gc.get_objects():
+    #         if not isinstance(ob, greenlet):
+    #             continue
+    #         if not ob:
+    #             continue   # not running anymore or not started
+    #         dump.append('Greenlet\n')
+    #         try:
+    #             if ob.exception is not None:
+    #                 print "xxxxxxxxxx", ob.exception
+    #         except:
+    #             pass
+    #         dump.append(''.join(traceback.format_stack(ob.gr_frame)))
+    #         dump.append('\n')
+
+    #     # print "\n".join(dump)
+
+
+    # try:
+    #     BootStrap()
+    # except Exception as err:
+    #     print "Failed to bootstrap instance.  Reason: %s" % (err)
 
 if __name__ == '__main__':
     main()
