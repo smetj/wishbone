@@ -29,12 +29,16 @@ class KeyValue(Actor):
 
     '''**Adds the requested key values to the event data.**
 
-    Assumes event.data is a Python datastructure to which the
-    requested key values can be added.
+    Assumes event.data is a Python datastructure to which the requested key
+    values can be added. Otherwise event.data is moved to a key name "<body>".
 
     Existing keys will be overwritten.
 
     Parameters:
+
+        - body(str)("data")
+           |  If event.data is not a dict, replace by dict and copy event.data
+           |  into event.data.<body>
 
         - overwrite(dict)({})
            |  A dict of key/value pairs to overwrite existing keys.
@@ -45,7 +49,7 @@ class KeyValue(Actor):
            |  Incoming events.
     '''
 
-    def __init__(self, actor_config, overwrite=[]):
+    def __init__(self, actor_config, body="data", overwrite=[]):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -54,12 +58,14 @@ class KeyValue(Actor):
 
     def consume(self, event):
 
-        data = event.data
-        if isinstance(data, dict):
-            for key, value in self.kwargs.overwrite:
-                data[key] = getattr(self.kwargs.overwrite, key)
+        data = {}
+        if not isinstance(event.data, dict):
+            data[self.kwargs.body] = event.data
+        else:
+            data = event.data
+
+        for key, value in self.kwargs.overwrite:
+            data[key] = getattr(self.kwargs.overwrite, key)
 
             event.data = data
             self.submit(event, self.pool.queue.outbox)
-        else:
-            raise Exception("data should be type dictself.")
