@@ -25,7 +25,7 @@
 from wishbone.actor import ActorConfig
 from wishbone.module import Funnel
 from wishbone.error import ModuleInitFailure, NoSuchModule, QueueConnected
-from gevent import signal, event, sleep
+from gevent import signal, event, sleep, spawn
 import multiprocessing
 import importlib
 
@@ -100,8 +100,13 @@ class Default(multiprocessing.Process):
         self.__block = event.Event()
         self.__block.clear()
 
-        signal(2, self.stop)
-        signal(15, self.__noop)
+        signal.signal(2, self.initiateStop)
+        signal.signal(15, self.__noop)
+
+        self.initiate_stop = event.Event()
+        self.initiate_stop.clear()
+        spawn(self.stop)
+
 
     def block(self):
         '''Blocks until stop() is called.'''
@@ -133,9 +138,14 @@ class Default(multiprocessing.Process):
         else:
             self.__start()
 
+    def initiateStop(self, *args, **kwargs):
+
+        self.initiate_stop.set()
+
     def stop(self):
         '''Stops all modules.'''
 
+        self.initiate_stop.wait()
         for module in self.module_pool.list():
             if module.name not in self.getChildren("wishbone_logs") + ["wishbone_logs"] and not module.stopped:
                 module.stop()
@@ -202,7 +212,7 @@ class Default(multiprocessing.Process):
         else:
             return True
 
-    def __noop(self):
+    def __noop(self, *args, **kwargs):
         pass
 
     def __registerLookupModule(self, name, **kwargs):
