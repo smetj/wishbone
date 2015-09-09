@@ -104,10 +104,14 @@ class Actor():
 
     def doEventLookup(self, name):
         (n, t, k) = name.split('.')
+
         try:
             return self.current_event.getHeaderValue(n, k)
         except AttributeError:
             return "You should use a dynamic lookup ~~ for header lookups. "
+        except KeyError:
+            self.logging.warning("There is no lookup value with name '%s'." % (name))
+            return ""
 
     def getChildren(self, queue=None):
         '''Returns the queue name <queue> is connected to.'''
