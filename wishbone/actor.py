@@ -26,7 +26,7 @@ from wishbone.queue import QueuePool
 from wishbone.logging import Logging
 from wishbone.event import Event as Wishbone_Event
 from wishbone.event import Metric
-from wishbone.error import QueueConnected
+from wishbone.error import QueueConnected, ModuleInitFailure
 from wishbone.lookup import EventLookup
 from collections import namedtuple
 from gevent import spawn, kill
@@ -224,10 +224,13 @@ class Actor():
 
         uplook = UpLook(**args)
         for name in uplook.listFunctions():
-            if isinstance(self.config.lookup[name], EventLookup):
-                uplook.registerLookup(name, self.doEventLookup)
+            if name not in self.config.lookup:
+                raise ModuleInitFailure("A lookup function '%s' was defined but no lookup function with that name registered." % (name))
             else:
-                uplook.registerLookup(name, self.config.lookup[name])
+                if isinstance(self.config.lookup[name], EventLookup):
+                    uplook.registerLookup(name, self.doEventLookup)
+                else:
+                    uplook.registerLookup(name, self.config.lookup[name])
 
         self.uplook = uplook
         self.kwargs = uplook.get()
