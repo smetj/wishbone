@@ -124,7 +124,7 @@ class Actor():
 
     def postHook(self):
 
-        self.logging.debug("Exit.")
+        pass
 
     def preHook(self):
 
@@ -174,6 +174,8 @@ class Actor():
         if hasattr(self, "postHook"):
             self.logging.debug("postHook() found, executing")
             self.postHook()
+
+        self.logging.debug("Exit.")
 
         self.stopped = True
 
