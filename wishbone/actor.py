@@ -29,7 +29,7 @@ from wishbone.event import Metric
 from wishbone.error import QueueConnected
 from wishbone.lookup import EventLookup
 from collections import namedtuple
-from gevent import spawn
+from gevent import spawn, kill
 from gevent import sleep, socket
 from gevent.event import Event
 from gevent.queue import Full
@@ -163,15 +163,13 @@ class Actor():
         self.__loop = False
 
         for background_job in self.greenlets.metric:
-            background_job.kill()
+            kill(background_job)
 
         for background_job in self.greenlets.generic:
-            background_job.join(1)
-            background_job.kill()
+            kill(background_job)
 
         for background_job in self.greenlets.consumer:
-            background_job.join(1)
-            background_job.kill()
+            kill(background_job)
 
         if hasattr(self, "postHook"):
             self.logging.debug("postHook() found, executing")
@@ -208,7 +206,6 @@ class Actor():
                 event.setErrorValue(traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value))
                 self.logging.error("%s" % (err))
                 self.submit(event, self.pool.queue.failed)
-                # raise
             else:
                 self.submit(event, self.pool.queue.success)
 
