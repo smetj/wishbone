@@ -62,3 +62,7 @@ from match import Match
 from fileout import FileOut
 from jsonvalidate import JSONValidate
 from httpoutclient import HTTPOutClient
+from consensus import Consensus
+from influxdb import InfluxDB
+from keyvalue import KeyValue
+from elasticsearchout import ElasticSearchOut
