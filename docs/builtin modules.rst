@@ -93,6 +93,18 @@ wishbone.output.disk
 
 --------
 
+wishbone.output.elasticsearchout
+--------------------
+.. autoclass:: wishbone.module.ElasticSearchOut
+
+--------
+
+wishbone.output.email
+--------------------
+.. autoclass:: wishbone.module.Email
+
+--------
+
 wishbone.output.file
 --------------------
 .. autoclass:: wishbone.module.FileOut
@@ -111,9 +123,9 @@ wishbone.output.null
 
 --------
 
-wishbone.output.topic
----------------------
-.. autoclass:: wishbone.module.ZMQTopicOut
+wishbone.output.push
+--------------------
+.. autoclass:: wishbone.module.ZMQPushOut
 
 --------
 
@@ -141,9 +153,9 @@ wishbone.output.tcp
 
 --------
 
-wishbone.output.push
---------------------
-.. autoclass:: wishbone.module.ZMQPushOut
+wishbone.output.topic
+---------------------
+.. autoclass:: wishbone.module.ZMQTopicOut
 
 --------
 
@@ -161,6 +173,11 @@ wishbone.output.UDSOut
 Flow modules
 ************
 
+wishbone.flow.consensus
+-----------------------
+.. autoclass:: wishbone.module.Consensus
+
+--------
 
 wishbone.flow.funnel
 --------------------
@@ -175,7 +192,7 @@ wishbone.flow.fanout
 --------
 
 wishbone.flow.match
---------------------
+-------------------
 .. autoclass:: wishbone.module.Match
 
 --------
@@ -194,13 +211,28 @@ wishbone.function.header
 
 --------
 
+wishbone.funtion.validatejson
+-----------------------------
+.. autoclass:: wishbone.module.JSONValidate
+
+--------
+
+wishbone.function.keyvalue
+--------------------------
+.. autoclass:: wishbone.module.KeyValue
+
+--------
+
+wishbone.function.loglevelfilter
+--------------------------------
+.. autoclass:: wishbone.module.LogLevelFilter
+
+--------
+
 wishbone.function.template
 --------------------------
 .. autoclass:: wishbone.module.Template
 
-wishbone.funtion.validatejson
------------------------------
-.. autoclass:: wishbone.module.JSONValidate
 
 
 Encode modules
@@ -218,9 +250,9 @@ wishbone.encode.humanlogformat
 
 --------
 
-wishbone.encode.msgpack
------------------------
-.. autoclass:: wishbone.module.MSGPackEncode
+wishbone.encode.influxdb
+------------------------------
+.. autoclass:: wishbone.module.InfluxDB
 
 --------
 
@@ -228,16 +260,24 @@ wishbone.encode.json
 -----------------------
 .. autoclass:: wishbone.module.JSONEncode
 
+--------
+
+wishbone.encode.msgpack
+-----------------------
+.. autoclass:: wishbone.module.MSGPackEncode
+
+
 
 Decode modules
 **************
+
+wishbone.decode.json
+-----------------------
+.. autoclass:: wishbone.module.JSONDecode
+
+--------
 
 wishbone.decode.msgpack
 -----------------------
 .. autoclass:: wishbone.module.MSGPackDecode
 
---------
-
-wishbone.decode.json
------------------------
-.. autoclass:: wishbone.module.JSONDecode
