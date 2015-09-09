@@ -107,7 +107,6 @@ class Default(multiprocessing.Process):
         self.initiate_stop.clear()
         spawn(self.stop)
 
-
     def block(self):
         '''Blocks until stop() is called.'''
         self.__block.wait()
