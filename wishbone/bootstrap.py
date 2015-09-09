@@ -247,31 +247,10 @@ class Dispatch():
 
 
 def main():
-    BootStrap()
-    # except Exception as err:
-    #     print "sssss"
-    #     dump = []
-    #     for ob in gc.get_objects():
-    #         if not isinstance(ob, greenlet):
-    #             continue
-    #         if not ob:
-    #             continue   # not running anymore or not started
-    #         dump.append('Greenlet\n')
-    #         try:
-    #             if ob.exception is not None:
-    #                 print "xxxxxxxxxx", ob.exception
-    #         except:
-    #             pass
-    #         dump.append(''.join(traceback.format_stack(ob.gr_frame)))
-    #         dump.append('\n')
-
-    #     # print "\n".join(dump)
-
-
-    # try:
-    #     BootStrap()
-    # except Exception as err:
-    #     print "Failed to bootstrap instance.  Reason: %s" % (err)
+    try:
+        BootStrap()
+    except Exception as err:
+        print "Failed to bootstrap instance.  Reason: %s" % (err)
 
 if __name__ == '__main__':
     main()
