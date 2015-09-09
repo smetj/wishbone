@@ -46,7 +46,7 @@ class TCPOut(Actor):
         - timeout(int)(1)
            |  The time in seconds to timeout when connecting
 
-        - delimiter(str)("\\n")
+        - delimiter(str)("\\n")*
            |  A delimiter to add to each event.
 
 
@@ -64,7 +64,7 @@ class TCPOut(Actor):
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        self.setupConnection(self.setupConnection)
+        self.sendToBackground(self.setupConnection)
 
     def setupConnection(self):
 
@@ -93,7 +93,7 @@ class TCPOut(Actor):
 
     def consume(self, event):
         if isinstance(event.last.data, list):
-            data = self.delimiter.join(event.last.data)
+            data = self.kwargs.delimiter.join(event.last.data)
         else:
             data = event.last.data
-        self.socket.sendall(str(data) + self.delimiter)
+        self.socket.sendall(str(data) + self.kwargs.delimiter)
