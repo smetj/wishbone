@@ -24,7 +24,7 @@
 
 from wishbone import Actor
 import cPickle as pickle
-from gevent.fileobject import FileObjectThread
+from gevent.fileobject import FileObjectPosix
 from gevent import sleep, event
 from os import remove
 import glob
@@ -93,13 +93,12 @@ class DiskIn(Actor):
 
     def readFile(self, filename):
         if filename.endswith("ready") and self.loop():
-            with open(filename, "r") as output_file:
+            with open(filename, "rb") as output_file:
                 self.logging.debug("Reading file %s" % filename)
-                f = FileObjectThread(output_file)
+                # f = FileObjectPosix(output_file)
                 while self.loop():
                     try:
-                        event = pickle.load(f)
-                        event.setHeaderNamespace(self.name)
+                        event = pickle.load(output_file)
                         self.submit(event, self.pool.queue.outbox)
                     except EOFError:
                         break
