@@ -44,6 +44,10 @@ class FileOut(Actor):
         - timestamp(bool)(False)
            |  If true prepends each line with a ISO8601 timestamp.
 
+        - complete(bool)(False)
+           |  When true dumps the complete event structure.
+           |  If not just the payload.
+
     Queues:
 
         - inbox
@@ -51,7 +55,7 @@ class FileOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, location="./wishbone.out", timestamp=False):
+    def __init__(self, actor_config, location="./wishbone.out", timestamp=False, complete=False):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -64,11 +68,22 @@ class FileOut(Actor):
         else:
             self.getTimestamp = self.returnNoTimestamp
 
+        if self.kwargs.complete:
+            self.getData = self.returnComplete
+        else:
+            self.getData = self.returnDataOnly
+
         self.file = open(self.kwargs.location, "a")
 
     def consume(self, event):
-        self.file.write("%s%s\n" % (self.getTimestamp(), str(event.data)))
+        self.file.write("%s%s\n" % (self.getTimestamp(), str(self.getData(event))))
         self.file.flush()
+
+    def returnDataOnly(self, event):
+        return event.data
+
+    def returnComplete(self, event):
+        return event.raw()
 
     def returnTimestamp(self):
 
