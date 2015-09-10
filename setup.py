@@ -36,26 +36,37 @@ PROJECT = 'wishbone'
 VERSION = '1.1.0'
 
 install_requires = ['gevent==1.1b4',
-                    'greenlet>=0.3.2',
-                    'argparse==1.2.1',
+                    'greenlet==0.4.9',
+                    'argparse==1.3.0',
                     'prettytable==0.7.2',
                     'python-daemon==1.6',
                     'pyyaml==3.11',
-                    'msgpack-python==0.4.2',
-                    'pyzmq==14.3.1',
+                    'msgpack-python==0.4.6',
+                    'pyzmq==14.7.0',
                     'amqp==1.4.6',
-                    'jinja2==2.7.3',
-                    'jsonschema==2.4.0',
+                    'jinja2==2.8',
+                    'jsonschema==2.5.1',
                     'gearman==2.0.2',
                     'pycrypto==2.6.1',
                     'flask==0.10.1',
                     'gevent_inotifyx==0.1.1',
-                    'requests==2.5.1',
+                    'requests==2.7.0',
                     'colorama==0.3.3',
                     'arrow==0.6.0',
                     'elasticsearch==1.6.0',
                     'importlib==1.0.3',
-                    'uplook']
+                    'uplook==0.2']
+
+# Deps pulled in by other modules
+# 'lockfile==0.10.2'
+# 'MarkupSafe==0.23'
+# 'repoze.lru==0.6',
+# 'werkzeug==0.10.4',
+# 'itsdangerous==0.24',
+# 'inotifyx==0.2.2',
+# 'six==1.9.0',
+# 'python-dateutil==2.4.2',
+# 'urllib3==1.12',
 
 try:
     with open('README.rst', 'rt') as f:
