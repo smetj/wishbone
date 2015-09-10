@@ -86,6 +86,7 @@ class HTTPOutClient(Actor):
             response.raise_for_status()
         except Exception as err:
             self.logging.error("Failed to submit data.  Reason: %s" % (err))
+            event.setHeaderValue("server_response", str(response.text))
             raise
 
     def __put(self, data):
