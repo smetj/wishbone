@@ -54,6 +54,7 @@ class BootStrap():
         start.add_argument('--queue-size', type=int, dest='queue_size', default=100, help='The queue size to use.')
         start.add_argument('--frequency', type=int, dest='frequency', default=1, help='The metric frequency.')
         start.add_argument('--id', type=str, dest='identification', default=None, help='An identification string.')
+        start.add_argument('--module_path', type=str, dest='module_path', default=None, help='A comma separated list of directories to search and find Wishbone modules.')
 
         debug = subparsers.add_parser('debug', description="Starts a Wishbone instance in foreground and writes logs to STDOUT.")
         debug.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
@@ -61,6 +62,7 @@ class BootStrap():
         debug.add_argument('--queue-size', type=int, dest='queue_size', default=100, help='The queue size to use.')
         debug.add_argument('--frequency', type=int, dest='frequency', default=1, help='The metric frequency.')
         debug.add_argument('--id', type=str, dest='identification', default=None, help='An identification string.')
+        debug.add_argument('--module_path', type=str, dest='module_path', default=None, help='A comma separated list of directories to search and find Wishbone modules.')
 
         stop = subparsers.add_parser('stop', description="Tries to gracefully stop the Wishbone instance.")
         stop.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
@@ -105,10 +107,13 @@ class Dispatch():
 
         return template.render(version=get_distribution('wishbone').version)
 
-    def debug(self, command, config, instances, queue_size, frequency, identification):
+    def debug(self, command, config, instances, queue_size, frequency, identification, module_path):
         '''
         Handles the Wishbone debug command.
         '''
+
+        if module_path is not None:
+            self.__expandSearchPath(module_path)
 
         processes = []
 
@@ -171,10 +176,13 @@ class Dispatch():
         except Exception as err:
             print "Failed to load module %s.%s.%s. Reason: %s" % (category, group, module, err)
 
-    def start(self, command, config, instances, pid, queue_size, frequency, identification):
+    def start(self, command, config, instances, pid, queue_size, frequency, identification, module_path):
         '''
         Handles the Wishbone start command.
         '''
+
+        if module_path is not None:
+            self.__expandSearchPath(module_path)
 
         module_manager = ModuleManager()
         router_config = ConfigFile().load(config)
@@ -245,6 +253,9 @@ class Dispatch():
         except:
             False
 
+    def __expandSearchPath(self, module_path):
+        for d in module_path.split(','):
+            sys.path.append(d.strip())
 
 def main():
     try:
