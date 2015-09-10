@@ -142,7 +142,7 @@ class Queue():
 
         while True:
             try:
-                yield self.get()
+                yield self.get(block=False)
             except Empty:
                 break
 
@@ -154,10 +154,10 @@ class Queue():
     def enableFallthrough(self):
         self.put = self.__fallThrough
 
-    def get(self):
+    def get(self, block=True):
         '''Gets an element from the queue.'''
 
-        e = self.__q.get()
+        e = self.__q.get(block=block)
         self.__out += 1
         return e
 
