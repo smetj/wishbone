@@ -133,15 +133,15 @@ class Dispatch():
             for instance in range(instances):
                 processes.append(Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, process=True).start())
             pids = [str(p.pid) for p in processes]
-            print("\nInstances started in foreground with pid %s\n" % (", ".join(pids)))
+            print(("\nInstances started in foreground with pid %s\n" % (", ".join(pids))))
             for proc in processes:
                 proc.join()
 
     def list(self, command, group, category=None, include_groups=[]):
 
-        print self.generateHeader()
-        print "Available modules:"
-        print ModuleManager().getModuleTable(category, group, include_groups)
+        print((self.generateHeader()))
+        print("Available modules:")
+        print((ModuleManager().getModuleTable(category, group, include_groups)))
 
     def show(self, command, module):
         '''
@@ -152,7 +152,7 @@ class Dispatch():
         module_manager.validateModuleName(module)
         module_manager.exists(module)
 
-        print self.generateHeader()
+        print((self.generateHeader()))
         try:
             (category, group, module) = module.split('.')
         except ValueError:
@@ -163,18 +163,18 @@ class Dispatch():
             title = module_manager.getModuleTitle(category, group, module)
             version = module_manager.getModuleVersion(category, group, module)
             header = "%s.%s.%s" % (category, group, module)
-            print
-            print "="*len(header)
-            print header
-            print "="*len(header)
-            print
-            print "Version: %s" % (version)
-            print
-            print title
-            print "-"*len(title)
-            print module_manager.getModuleDoc(category, group, module)
+            print()
+            print("="*len(header))
+            print(header)
+            print("="*len(header))
+            print()
+            print("Version: %s" % (version))
+            print()
+            print(title)
+            print("-"*len(title))
+            print(module_manager.getModuleDoc(category, group, module))
         except Exception as err:
-            print "Failed to load module %s.%s.%s. Reason: %s" % (category, group, module, err)
+            print("Failed to load module %s.%s.%s. Reason: %s" % (category, group, module, err))
 
     def start(self, command, config, instances, pid, queue_size, frequency, identification, module_path):
         '''
@@ -191,6 +191,7 @@ class Dispatch():
         with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
             if instances == 1:
                 sys.stdout.write("\nWishbone instance started with pid %s\n" % (os.getpid()))
+                sys.stdout.flush()
                 pid_file.create([os.getpid()])
                 Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False).start()
             else:
@@ -198,7 +199,7 @@ class Dispatch():
                 for instance in range(instances):
                     processes.append(Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, process=True).start())
                 pids = [str(p.pid) for p in processes]
-                print("\n%s Wishbone instances started in background with pid %s\n" % (len(pids), ", ".join(pids)))
+                print(("\n%s Wishbone instances started in background with pid %s\n" % (len(pids), ", ".join(pids))))
                 pid_file.create(pids)
                 for proc in processes:
                     proc.join()
@@ -220,7 +221,7 @@ class Dispatch():
             print("")
         except Exception as err:
             print("")
-            print("Failed to stop instances.  Reason: %s" % (err))
+            print(("Failed to stop instances.  Reason: %s" % (err)))
 
     def __stopSequence(self):
         '''
@@ -243,7 +244,7 @@ class Dispatch():
         try:
             return [int(x) for x in os.listdir("/proc/self/fd")]
         except Exception as err:
-            print("Failed to get active filedescriptors.  Reason: %s." % (err))
+            print(("Failed to get active filedescriptors.  Reason: %s." % (err)))
             sys.exit(1)
 
     def __alive(self, pid):
@@ -261,7 +262,7 @@ def main():
     try:
         BootStrap()
     except Exception as err:
-        print "Failed to bootstrap instance.  Reason: %s" % (err)
+        print("Failed to bootstrap instance.  Reason: %s" % (err))
 
 if __name__ == '__main__':
     main()
