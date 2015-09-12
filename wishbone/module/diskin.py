@@ -94,11 +94,11 @@ class DiskIn(Actor):
     def readFile(self, filename):
         if filename.endswith("ready") and self.loop():
             with open(filename, "rb") as output_file:
-                self.logging.debug("Reading file %s" % filename)
                 # f = FileObjectPosix(output_file)
                 while self.loop():
                     try:
                         event = pickle.load(output_file)
+                        self.logging.info("Read file %s" % filename)
                         self.submit(event, self.pool.queue.outbox)
                     except EOFError:
                         break
