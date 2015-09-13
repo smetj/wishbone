@@ -192,8 +192,9 @@ class Match(Actor):
             try:
                 new_rules = self.readRules.waitForChanges()
                 new_rules.update(self.kwargs.rules)
-                self.__active_rules = new_rules
-                self.logging.info("Read %s rules from disk and %s defined in config." % (len(new_rules), len(self.kwargs.rules)))
+                if cmp(self.__active_rules, new_rules) != 0:
+                    self.__active_rules = new_rules
+                    self.logging.info("Read %s rules from disk and %s defined in config." % (len(new_rules), len(self.kwargs.rules)))
             except Exception as err:
                 self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
                 sleep(1)
