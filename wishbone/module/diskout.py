@@ -26,7 +26,7 @@ from wishbone import Actor
 from wishbone.error import QueueFull
 
 import cPickle as pickle
-from gevent.fileobject import FileObjectPosix
+from gevent.os import make_nonblocking
 from gevent.event import Event
 from gevent import sleep
 import os
@@ -103,7 +103,7 @@ class DiskOut(Actor):
 
             try:
                 with open(r"%s/%s.%s.writing" % (self.kwargs.directory, self.name, i), "wb") as output_file:
-                    # f = FileObjectPosix(output_file)
+                    make_nonblocking(output_file)
                     for event in self.pool.queue.disk.dump():
                         pickle.dump(event, output_file)
             except Exception as err:
