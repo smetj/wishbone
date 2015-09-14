@@ -128,8 +128,7 @@ setup(
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
             'match = wishbone.module.match:Match',
-            'roundrobin = wishbone.module.roundrobin:RoundRobin',
-            'consensus = wishbone.module.consensus:Consensus'
+            'roundrobin = wishbone.module.roundrobin:RoundRobin'
         ],
         'wishbone.encode': [
             'graphite = wishbone.module.graphite:Graphite',
