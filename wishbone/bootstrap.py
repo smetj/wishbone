@@ -121,7 +121,7 @@ class Dispatch():
             for proc in processes:
                 proc.stop()
 
-        signal.signal(2, stopSequence)
+        signal(2, stopSequence)
 
         module_manager = ModuleManager()
         router_config = ConfigFile().load(config)
