@@ -23,7 +23,7 @@
 #
 
 from wishbone.actor import ActorConfig
-from wishbone.module import Funnel
+from wishbone.module.funnel import Funnel
 from wishbone.error import ModuleInitFailure, NoSuchModule, QueueConnected
 from gevent import signal, event, sleep, spawn
 import multiprocessing
@@ -100,8 +100,8 @@ class Default(multiprocessing.Process):
         self.__block = event.Event()
         self.__block.clear()
 
-        signal.signal(2, self.initiateStop)
-        signal.signal(15, self.__noop)
+        signal(2, self.initiateStop)
+        signal(15, self.__noop)
 
         self.initiate_stop = event.Event()
         self.initiate_stop.clear()
