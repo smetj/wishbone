@@ -8,73 +8,73 @@ Input modules
 
 wishbone.input.amqp
 -------------------
-.. autoclass:: wishbone.module.AMQPIn
+.. autoclass:: wishbone.module.amqpin.AMQPIn
 
 --------
 
 wishbone.input.dictgenerator
 ----------------------------
-.. autoclass:: wishbone.module.DictGenerator
+.. autoclass:: wishbone.module.dictgenerator.DictGenerator
 
 --------
 
 wishbone.input.disk
 -------------------
-.. autoclass:: wishbone.module.DiskIn
+.. autoclass:: wishbone.module.diskin.DiskIn
 
 --------
 
 wishbone.input.gearman
 ----------------------
-.. autoclass:: wishbone.module.GearmanIn
+.. autoclass:: wishbone.module.gearmanin.GearmanIn
 
 --------
 
 wishbone.input.httpclient
 -------------------------
-.. autoclass:: wishbone.module.HTTPInClient
+.. autoclass:: wishbone.module.httpinclient.HTTPInClient
 
 --------
 
 wishbone.input.httpserver
 -------------------------
-.. autoclass:: wishbone.module.HTTPInServer
+.. autoclass:: wishbone.module.httpinserver.HTTPInServer
 
 --------
 
 wishbone.input.namedpipe
--------------------------
-.. autoclass:: wishbone.module.NamedPipeIn
+------------------------
+.. autoclass:: wishbone.module.namedpipein.NamedPipeIn
 
 --------
 
 wishbone.input.pull
--------------------------
-.. autoclass:: wishbone.module.ZMQPullIn
+-------------------
+.. autoclass:: wishbone.module.zmqpullin.ZMQPullIn
 
 --------
 
 wishbone.input.tcp
--------------------------
-.. autoclass:: wishbone.module.TCPIn
+------------------
+.. autoclass:: wishbone.module.tcpin.TCPIn
 
 --------
 
 wishbone.input.testevent
--------------------------
-.. autoclass:: wishbone.module.TestEvent
+------------------------
+.. autoclass:: wishbone.module.testevent.TestEvent
 
 --------
 
 wishbone.input.topic
--------------------------
-.. autoclass:: wishbone.module.ZMQTopicIn
+--------------------
+.. autoclass:: wishbone.module.zmqtopicin.ZMQTopicIn
 
 --------
 
 wishbone.input.udp
--------------------------
-.. autoclass:: wishbone.module.UDPIn
+------------------
+.. autoclass:: wishbone.module.udpin.UDPIn
 
 
 Output modules
@@ -83,91 +83,91 @@ Output modules
 
 wishbone.output.amqp
 --------------------
-.. autoclass:: wishbone.module.AMQPOut
+.. autoclass:: wishbone.module.amqpout.AMQPOut
 
 --------
 
 wishbone.output.disk
 --------------------
-.. autoclass:: wishbone.module.DiskOut
+.. autoclass:: wishbone.module.diskout.DiskOut
 
 --------
 
 wishbone.output.elasticsearchout
---------------------
-.. autoclass:: wishbone.module.ElasticSearchOut
+--------------------------------
+.. autoclass:: wishbone.module.elasticsearchout.ElasticSearchOut
 
 --------
 
 wishbone.output.email
---------------------
-.. autoclass:: wishbone.module.Email
+---------------------
+.. autoclass:: wishbone.module.emailout.EmailOut
 
 --------
 
 wishbone.output.file
 --------------------
-.. autoclass:: wishbone.module.FileOut
+.. autoclass:: wishbone.module.fileout.FileOut
 
 --------
 
 wishbone.output.http
 --------------------
-.. autoclass:: wishbone.module.HTTPOutClient
+.. autoclass:: wishbone.module.httpoutclient.HTTPOutClient
 
 --------
 
 wishbone.output.null
 --------------------
-.. autoclass:: wishbone.module.Null
+.. autoclass:: wishbone.module.null.Null
 
 --------
 
 wishbone.output.push
 --------------------
-.. autoclass:: wishbone.module.ZMQPushOut
+.. autoclass:: wishbone.module.zmqpushout.ZMQPushOut
 
 --------
 
 wishbone.output.sse
 -------------------
-.. autoclass:: wishbone.module.ServerSentEvents
+.. autoclass:: wishbone.module.sse.ServerSentEvents
 
 --------
 
 wishbone.output.stdout
 ----------------------
-.. autoclass:: wishbone.module.STDOUT
+.. autoclass:: wishbone.module.stdout.STDOUT
 
 --------
 
 wishbone.output.syslog
 ----------------------
-.. autoclass:: wishbone.module.Syslog
+.. autoclass:: wishbone.module.wbsyslog.Syslog
 
 --------
 
 wishbone.output.tcp
 -------------------
-.. autoclass:: wishbone.module.TCPOut
+.. autoclass:: wishbone.module.tcpout.TCPOut
 
 --------
 
 wishbone.output.topic
 ---------------------
-.. autoclass:: wishbone.module.ZMQTopicOut
+.. autoclass:: wishbone.module.zmqtopicout.ZMQTopicOut
 
 --------
 
 wishbone.output.udp
 -------------------
-.. autoclass:: wishbone.module.UDPOut
+.. autoclass:: wishbone.module.udpout.UDPOut
 
 --------
 
 wishbone.output.UDSOut
 ----------------------
-.. autoclass:: wishbone.module.UDSOut
+.. autoclass:: wishbone.module.udsout.UDSOut
 
 
 Flow modules
@@ -175,31 +175,31 @@ Flow modules
 
 wishbone.flow.consensus
 -----------------------
-.. autoclass:: wishbone.module.Consensus
+.. autoclass:: wishbone.module.consensus.Consensus
 
 --------
 
 wishbone.flow.funnel
 --------------------
-.. autoclass:: wishbone.module.Funnel
+.. autoclass:: wishbone.module.funnel.Funnel
 
 --------
 
 wishbone.flow.fanout
 --------------------
-.. autoclass:: wishbone.module.Fanout
+.. autoclass:: wishbone.module.fanout.Fanout
 
 --------
 
 wishbone.flow.match
 -------------------
-.. autoclass:: wishbone.module.Match
+.. autoclass:: wishbone.module.match.Match
 
 --------
 
 wishbone.flow.roundrobin
 ------------------------
-.. autoclass:: wishbone.module.RoundRobin
+.. autoclass:: wishbone.module.roundrobin.RoundRobin
 
 
 Function modules
@@ -207,31 +207,31 @@ Function modules
 
 wishbone.function.header
 ------------------------
-.. autoclass:: wishbone.module.Header
+.. autoclass:: wishbone.module.header.Header
 
 --------
 
 wishbone.funtion.validatejson
 -----------------------------
-.. autoclass:: wishbone.module.JSONValidate
+.. autoclass:: wishbone.module.jsonvalidate.JSONValidate
 
 --------
 
 wishbone.function.keyvalue
 --------------------------
-.. autoclass:: wishbone.module.KeyValue
+.. autoclass:: wishbone.module.keyvalue.KeyValue
 
 --------
 
 wishbone.function.loglevelfilter
 --------------------------------
-.. autoclass:: wishbone.module.LogLevelFilter
+.. autoclass:: wishbone.module.loglevelfilter.LogLevelFilter
 
 --------
 
 wishbone.function.template
 --------------------------
-.. autoclass:: wishbone.module.Template
+.. autoclass:: wishbone.module.template.Template
 
 
 
@@ -240,31 +240,31 @@ Encode modules
 
 wishbone.encode.graphite
 ------------------------
-.. autoclass:: wishbone.module.Graphite
+.. autoclass:: wishbone.module.graphite.Graphite
 
 --------
 
 wishbone.encode.humanlogformat
 ------------------------------
-.. autoclass:: wishbone.module.HumanLogFormat
+.. autoclass:: wishbone.module.humanlogformat.HumanLogFormat
 
 --------
 
 wishbone.encode.influxdb
-------------------------------
-.. autoclass:: wishbone.module.InfluxDB
+------------------------
+.. autoclass:: wishbone.module.influxdb.InfluxDB
 
 --------
 
 wishbone.encode.json
------------------------
-.. autoclass:: wishbone.module.JSONEncode
+--------------------
+.. autoclass:: wishbone.module.jsonencode.JSONEncode
 
 --------
 
 wishbone.encode.msgpack
 -----------------------
-.. autoclass:: wishbone.module.MSGPackEncode
+.. autoclass:: wishbone.module.msgpackencode.MSGPackEncode
 
 
 
@@ -272,12 +272,12 @@ Decode modules
 **************
 
 wishbone.decode.json
------------------------
-.. autoclass:: wishbone.module.JSONDecode
+--------------------
+.. autoclass:: wishbone.module.jsondecode.JSONDecode
 
 --------
 
 wishbone.decode.msgpack
 -----------------------
-.. autoclass:: wishbone.module.MSGPackDecode
+.. autoclass:: wishbone.module.msgpackdecode.MSGPackDecode
 

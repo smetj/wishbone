@@ -42,7 +42,6 @@ class Match(Actor):
     The match rules can be either stored on disk or directly defined into the
     bootstrap file.
 
-
     A match rule is written in YAML syntax and consists out of 2 parts:
 
     - condition:
