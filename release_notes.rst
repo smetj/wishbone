@@ -11,20 +11,22 @@ Features:
 - Refactoring of bootstrap code.
 - Support for dynamic and static variable lookups.
 - Support for header variable lookups.
-- Config validation using JSON schema.
 - Using ActorConfig object to encapsulate framework specific settings
-- Added wishbone.output.http module
 - Renamed "metrics_funnel" and "logs_funnel" to "wishbone_metrics"
   and "wishbone_logs" respectively.
-- Added function module KeyValue
-- Added output module Elasticsearch
+- New module wishbone.function.keyvalye
+- New module wishbone.function.jsonvalidate
+- New module wishbone.output.elasticsearch
+- New module wishbone.output.http
+- New module wishbone.encode.influxdb
 - Match module now support negative list membership testing.
-- Added tests for modules (not complete, more tests required)
 - Added support to cancel acknowledgements in wishbone.input.amqp
-- Match module now support negative list membership testing.
 - Internal queueing now uses standard blocking behavior.
 - Changed internal metric format.
 - Changed internal log format.
+- Added support for TTL in diskout module to prevent endless loops.
+- Adapted modules to use lookups where appropriate.
+- Added tests for modules (not complete, more tests required)
 
 Bugfixes:
 
@@ -33,7 +35,6 @@ Bugfixes:
 - Fix to minimize gethostbyname() lookups in logging.
 - Fixed bugs in wishbone.input.amqp
 - Fixed bugs in wishbone.output.amqp
-- Added module wishbone.output.http
 - Exceptions are now *always* logged with line number, type, and message.
 
 Version 1.0.3
