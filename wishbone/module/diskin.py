@@ -26,6 +26,7 @@ from wishbone import Actor
 import cPickle as pickle
 from gevent import os
 from gevent import sleep, event
+from gevent.os import make_nonblocking
 from os import remove
 import glob
 import os
@@ -94,7 +95,7 @@ class DiskIn(Actor):
     def readFile(self, filename):
         if filename.endswith("ready") and self.loop():
             with open(filename, "rb") as output_file:
-                os.make_nonblocking(output_file)
+                make_nonblocking(output_file)
                 while self.loop():
                     try:
                         event = pickle.load(output_file)
@@ -110,7 +111,7 @@ class DiskIn(Actor):
         while self.loop():
             try:
                 newest = max(glob.iglob("%s/*" % (self.kwargs.directory)), key=os.path.getmtime)
-            except:
+            except Exception as err:
                 pass
             else:
                 if time() - os.path.getctime(newest) >= self.kwargs.idle_time:
