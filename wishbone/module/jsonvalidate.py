@@ -36,6 +36,8 @@ class JSONValidate(Actor):
 
     The defined schema has to be valid JSON data.
 
+    Events which do not pass validation are send to the default <failed> queue.
+
     Parameters:
 
         - schema(str)(None)
