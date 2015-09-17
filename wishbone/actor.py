@@ -184,8 +184,7 @@ class Actor():
         self.stopped = True
 
     def submit(self, event, queue):
-        '''A convenience function which submits <event> to <queue>
-        and deals with QueueFull and the module lock set to False.'''
+        '''A convenience function which submits <event> to <queue>.'''
 
         while self.loop():
             try:
