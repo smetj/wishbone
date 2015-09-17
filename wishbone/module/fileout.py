@@ -24,6 +24,7 @@
 
 
 from wishbone import Actor
+from gevent.os import make_nonblocking
 import arrow
 
 
@@ -74,6 +75,7 @@ class FileOut(Actor):
             self.getData = self.returnDataOnly
 
         self.file = open(self.kwargs.location, "a")
+        make_nonblocking(self.file)
 
     def consume(self, event):
         self.file.write("%s%s\n" % (self.getTimestamp(), str(self.getData(event))))
