@@ -93,17 +93,16 @@ class DiskIn(Actor):
             self.readFile(filename)
 
     def readFile(self, filename):
-        if filename.endswith("ready") and self.loop():
-            with open(filename, "rb") as output_file:
-                make_nonblocking(output_file)
-                while self.loop():
-                    try:
-                        event = pickle.load(output_file)
-                        self.logging.info("Read file %s" % filename)
+        try:
+            if filename.endswith("ready") and self.loop():
+                with open(filename, "rb") as output_file:
+                    make_nonblocking(output_file)
+                    self.logging.info("Read file %s" % filename)
+                    for event in self.__pickleReader(output_file):
                         self.submit(event, self.pool.queue.outbox)
-                    except EOFError:
-                        break
-            remove(filename)
+                remove(filename)
+        except Exception as err:
+            self.logging.error("Failed to read file %s.  Reason: %s" % (filename, str(err)))
 
     def diskMonitor(self):
         '''Primitive monitor which checks whether new data is added to disk.'''
@@ -119,3 +118,11 @@ class DiskIn(Actor):
                 else:
                     self.reading.clear()
             sleep(1)
+
+    def __pickleReader(self, p):
+
+        try:
+            while self.loop():
+                yield pickle.load(p)
+        except EOFError:
+            pass
