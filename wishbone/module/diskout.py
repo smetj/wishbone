@@ -31,6 +31,7 @@ import os
 from gevent.event import Event
 from gevent import sleep
 from uuid import uuid4
+from os import remove
 
 
 class DiskOut(Actor):
@@ -70,8 +71,7 @@ class DiskOut(Actor):
         self.pool.queue.disk.disableFallThrough()
         self.pool.createQueue("ttl_exceeded")
 
-        self.__flush_lock = Event()
-        self.__flush_lock.set()
+        self.__flush_lock = False
 
     def preHook(self):
 
@@ -96,47 +96,47 @@ class DiskOut(Actor):
 
     def consume(self, event):
 
-        while self.loop():
-            try:
-                if self.validateTTL(event):
+        if self.validateTTL(event):
+            while self.loop():
+                try:
                     self.pool.queue.disk.put(event)
-                else:
-                    self.logging.warning("Event TTL of %s exceeded in transit (%s) moving to ttl_exceeded queue." % (event.getHeaderValue(self.name, "ttl_counter"), self.kwargs.ttl))
-                    self.pool.queue.ttl_exceeded.put(event)
-                break
-            except QueueFull as err:
-                self.__flush_lock.wait()
-                self.flushDisk()
-                err.waitUntilEmpty()
+                    break
+                except Full:
+                    self.flushDisk()
+        else:
+            self.logging.warning("Event TTL of %s exceeded in transit (%s) moving event to ttl_exceeded queue." % (event.getHeaderValue(self.name, "ttl_counter"), self.kwargs.ttl))
+            self.submit(event, self.pool.queue.ttl_exceeded)
+
 
     def flushDisk(self):
 
-        self.__flush_lock.clear()
-        if self.pool.queue.disk.size() > 0:
-
+        if self.pool.queue.disk.size() > 0 and not self.__flush_lock:
+            self.__flush_lock = True
             i = str(uuid4())
             filename = "%s/%s.%s.writing" % (self.kwargs.directory, self.name, i)
-            self.logging.debug("Flusing %s messages to %s." % (self.pool.queue.disk.size(), filename))
 
             try:
                 with open(r"%s/%s.%s.writing" % (self.kwargs.directory, self.name, i), "wb") as output_file:
                     make_nonblocking(output_file)
+                    self.logging.debug("Flushing %s messages to %s." % (self.pool.queue.disk.size(), filename))
                     for event in self.pool.queue.disk.dump():
                         pickle.dump(event, output_file)
             except Exception as err:
                 self.logging.error("Failed to write file '%s' to '%s'.  Reason: '%s'." % (self.name, self.kwargs.directory, err))
-                os.rename("%s/%s.%s.writing" % (self.kwargs.directory, self.name, i), "%s/%s.%s.failed" % (self.kwargs.directory, self.name, i))
+                try:
+                    remove("%s/%s.%s.writing" % (self.kwargs.directory, self.name, i))
+                except Exception as err:
+                    self.logging.debug("No file %s/%s.%s.writing to remove" % (self.kwargs.directory, self.name, i))
+                self.submit(event, self.pool.queue.disk)
             else:
                 os.rename("%s/%s.%s.writing" % (self.kwargs.directory, self.name, i), "%s/%s.%s.ready" % (self.kwargs.directory, self.name, i))
                 self.logging.info("Wrote file %s/%s.%s.ready" % (self.kwargs.directory, self.name, i))
-
-        self.__flush_lock.set()
+            self.__flush_lock = False
 
     def __flushTimer(self):
 
         while self.loop():
             sleep(self.kwargs.interval)
-            self.__flush_lock.wait()
             self.flushDisk()
 
     def __doTTL(self, event):
