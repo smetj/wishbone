@@ -24,6 +24,7 @@
 
 from wishbone import Actor
 from gevent import pywsgi
+from wishbone.logging import MockLogger
 
 
 class HTTPInServer(Actor):
@@ -73,6 +74,9 @@ class HTTPInServer(Actor):
             self.delimit = self.__newLineDelimiter
         else:
             self.delimit = self.__otherDelimiter
+
+        self.logger_info = MockLogger(self.name, self.pool.queue.logs, 6)
+        self.logger_error = MockLogger(self.name, self.pool.queue.logs, 3)
 
     def preHook(self):
         self.sendToBackground(self.__serve)
@@ -126,10 +130,18 @@ class HTTPInServer(Actor):
     def __serve(self):
         if self.kwargs.keyfile is not None and self.kwargs.certfile is not None:
             self.__server = pywsgi.WSGIServer(
-                (self.kwargs.address, self.kwargs.port), self.consume, keyfile=self.kwargs.keyfile, certfile=self.kwargs.certfile)
+                (self.kwargs.address, self.kwargs.port),
+                self.consume,
+                log=self.logger_info,
+                error_log=self.logger_error,
+                keyfile=self.kwargs.keyfile,
+                certfile=self.kwargs.certfile)
         else:
             self.__server = pywsgi.WSGIServer(
-                (self.kwargs.address, self.kwargs.port), self.consume, log=None)
+                (self.kwargs.address, self.kwargs.port),
+                self.consume,
+                log=self.logger_info,
+                error_log=self.logger_error)
         self.__server.start()
         self.logging.info("Serving on %s:%s" % (self.kwargs.address, self.kwargs.port))
 
