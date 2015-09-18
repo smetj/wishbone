@@ -29,6 +29,26 @@ from gevent import spawn, sleep
 from time import time
 from os import getpid
 
+class MockLogger():
+    '''
+    A wrapper around Logging which mimics logger.Logger
+    '''
+
+    def __init__(self, name, q, level=5):
+
+        self.level = level
+        self.l = Logging(name, q)
+
+    def flush(self):
+        pass
+
+    def write(self, line):
+        self.l._Logging__log(self.level, line)
+
+    def writelines(self, lines):
+        for line in lines:
+            self.l.Logging.__log(self.level, line)
+
 
 class Logging():
 
@@ -46,19 +66,7 @@ class Logging():
         event = Event(self.name)
         event.data = Log(time(), level, getpid(), self.name, message)
 
-        try:
-            self.logs.put(event)
-        except Full:
-            spawn(self.logLater, event)
-
-    def logLater(self, event):
-
-        while True:
-            try:
-                self.logs.put(event)
-                break
-            except Full:
-                sleep(0.1)
+        self.logs.put(event)
 
     def emergency(self, message):
         """Generates a log message with priority emergency(0).
