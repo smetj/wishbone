@@ -55,7 +55,7 @@ install_requires = ['gevent==1.1b4',
                     'arrow==0.6.0',
                     'elasticsearch==1.6.0',
                     'importlib==1.0.3',
-                    'uplook==0.2']
+                    'uplook==0.3']
 
 # Deps pulled in by other modules
 # 'lockfile==0.10.2'
