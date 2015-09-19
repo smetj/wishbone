@@ -32,7 +32,7 @@ from collections import namedtuple
 from gevent import spawn, kill
 from gevent import sleep, socket
 from gevent.event import Event
-from gevent.queue import Full
+from wishbone.error import QueueFull
 from time import time
 from sys import exc_info
 from uplook import UpLook
@@ -190,7 +190,7 @@ class Actor():
             try:
                 queue.put(event)
                 break
-            except Full:
+            except QueueFull:
                 sleep(0.1)
 
     def __consumer(self, function, queue):
