@@ -25,7 +25,6 @@ Features:
 - Internal queueing now uses standard blocking behavior.
 - Changed internal metric format.
 - Changed internal log format.
-- Added support for TTL in diskout module to prevent endless loops.
 - Reroute wsgi logging to Wishbone logging.
 - Adapted modules to use lookups where appropriate.
 - Added tests for modules (not complete, more tests required)
