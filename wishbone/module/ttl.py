@@ -69,7 +69,7 @@ class TTL(Actor):
             self.logging.warning("Event TTL of %s exceeded in transit (%s) moving event to ttl_exceeded queue." % (event.getHeaderValue(self.name, "ttl_counter"), self.kwargs.ttl))
             self.submit(event, self.pool.queue.ttl_exceeded)
 
-    def checkTTL(self, event):
+    def validateTTL(self, event):
 
         try:
             value = event.getHeaderValue(self.name, "ttl_counter")
