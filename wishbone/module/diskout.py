@@ -22,13 +22,13 @@
 #
 #
 
+from wishbone.error import QueueFull
 from wishbone import Actor
 from gevent.os import make_nonblocking
 from gevent import sleep
 from uuid import uuid4
 import os
 import cPickle as pickle
-
 
 class DiskOut(Actor):
 
@@ -84,17 +84,14 @@ class DiskOut(Actor):
             try:
                 self.pool.queue.disk.put(event)
                 break
-            except Full:
+            except QueueFull:
                 self.flushDisk()
-
 
     def flushDisk(self):
 
         if self.pool.queue.disk.size() > 0 and not self.__flush_lock:
             self.__flush_lock = True
             i = str(uuid4())
-            filename = "%s/%s.%s.writing" % (self.kwargs.directory, self.name, i)
-
             try:
                 with open(r"%s/%s.%s.writing" % (self.kwargs.directory, self.name, i), "wb") as output_file:
                     make_nonblocking(output_file)
