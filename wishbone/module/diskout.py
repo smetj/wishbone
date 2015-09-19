@@ -23,15 +23,11 @@
 #
 
 from wishbone import Actor
-from wishbone.error import QueueFull
-
-import cPickle as pickle
 from gevent.os import make_nonblocking
-import os
-from gevent.event import Event
 from gevent import sleep
 from uuid import uuid4
 from os import remove
+import cPickle as pickle
 
 
 class DiskOut(Actor):
@@ -48,39 +44,27 @@ class DiskOut(Actor):
         - interval(int)(10)
            |  The time in seconds to flush the queue to disk.
 
-        - ttl(int)(0)
-           |  When event has been written to disk more than <ttl>
-           |  it will be forwarded to queue <ttl_exceeded>
-
 
     Queues:
 
         - inbox
            |  Incoming events.
 
-        - ttl_exceeded
-           |  Events which passed the module <ttl> times.
     '''
 
-    def __init__(self, actor_config, directory="./", interval=10, ttl=0):
+    def __init__(self, actor_config, directory="./", interval=10):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
         self.pool.createQueue("disk")
         self.pool.queue.disk.disableFallThrough()
-        self.pool.createQueue("ttl_exceeded")
 
         self.__flush_lock = False
 
     def preHook(self):
 
         self.createDir()
-        if self.kwargs.ttl > 0:
-            self.validateTTL = self.__doTTL
-        else:
-            self.validateTTL = self.__doNoTTL
-
         self.sendToBackground(self.__flushTimer)
 
     def createDir(self):
@@ -96,16 +80,12 @@ class DiskOut(Actor):
 
     def consume(self, event):
 
-        if self.validateTTL(event):
-            while self.loop():
-                try:
-                    self.pool.queue.disk.put(event)
-                    break
-                except Full:
-                    self.flushDisk()
-        else:
-            self.logging.warning("Event TTL of %s exceeded in transit (%s) moving event to ttl_exceeded queue." % (event.getHeaderValue(self.name, "ttl_counter"), self.kwargs.ttl))
-            self.submit(event, self.pool.queue.ttl_exceeded)
+        while self.loop():
+            try:
+                self.pool.queue.disk.put(event)
+                break
+            except Full:
+                self.flushDisk()
 
 
     def flushDisk(self):
@@ -138,22 +118,3 @@ class DiskOut(Actor):
         while self.loop():
             sleep(self.kwargs.interval)
             self.flushDisk()
-
-    def __doTTL(self, event):
-
-        try:
-            value = event.getHeaderValue(self.name, "ttl_counter")
-            value += 1
-            event.setHeaderValue("ttl_counter", value)
-        except KeyError:
-            event.setHeaderValue("ttl_counter", 1)
-            value = 1
-
-        if value > self.kwargs.ttl:
-            return False
-        else:
-            return True
-
-    def __doNoTTL(self, event):
-
-        return True
