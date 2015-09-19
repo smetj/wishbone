@@ -26,7 +26,7 @@ from wishbone import Actor
 from gevent.os import make_nonblocking
 from gevent import sleep
 from uuid import uuid4
-from os import remove
+import os
 import cPickle as pickle
 
 
@@ -98,19 +98,19 @@ class DiskOut(Actor):
             try:
                 with open(r"%s/%s.%s.writing" % (self.kwargs.directory, self.name, i), "wb") as output_file:
                     make_nonblocking(output_file)
-                    self.logging.debug("Flushing %s messages to %s." % (self.pool.queue.disk.size(), filename))
+                    size = self.pool.queue.disk.size()
                     for event in self.pool.queue.disk.dump():
                         pickle.dump(event, output_file)
             except Exception as err:
                 self.logging.error("Failed to write file '%s' to '%s'.  Reason: '%s'." % (self.name, self.kwargs.directory, err))
                 try:
-                    remove("%s/%s.%s.writing" % (self.kwargs.directory, self.name, i))
+                    os.remove("%s/%s.%s.writing" % (self.kwargs.directory, self.name, i))
                 except Exception as err:
                     self.logging.debug("No file %s/%s.%s.writing to remove" % (self.kwargs.directory, self.name, i))
                 self.submit(event, self.pool.queue.disk)
             else:
                 os.rename("%s/%s.%s.writing" % (self.kwargs.directory, self.name, i), "%s/%s.%s.ready" % (self.kwargs.directory, self.name, i))
-                self.logging.info("Wrote file %s/%s.%s.ready" % (self.kwargs.directory, self.name, i))
+                self.logging.info("Wrote %s events to file %s/%s.%s.ready" % (size, self.kwargs.directory, self.name, i))
             self.__flush_lock = False
 
     def __flushTimer(self):
