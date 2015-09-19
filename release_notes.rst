@@ -19,12 +19,14 @@ Features:
 - New module wishbone.output.elasticsearch
 - New module wishbone.output.http
 - New module wishbone.encode.influxdb
+- New module wishobne.flow.ttl
 - Match module now support negative list membership testing.
 - Added support to cancel acknowledgements in wishbone.input.amqp
 - Internal queueing now uses standard blocking behavior.
 - Changed internal metric format.
 - Changed internal log format.
 - Added support for TTL in diskout module to prevent endless loops.
+- Reroute wsgi logging to Wishbone logging.
 - Adapted modules to use lookups where appropriate.
 - Added tests for modules (not complete, more tests required)
 
