@@ -201,6 +201,12 @@ wishbone.flow.roundrobin
 ------------------------
 .. autoclass:: wishbone.module.roundrobin.RoundRobin
 
+--------
+
+wishbone.flow.ttl
+-----------------
+.. autoclass:: wishbone.module.ttl.TTL
+
 
 Function modules
 ****************
