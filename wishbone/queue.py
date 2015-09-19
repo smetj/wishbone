@@ -25,9 +25,9 @@
 
 from uuid import uuid4
 from gevent.queue import Queue as Gevent_Queue
-from wishbone.error import ReservedName, QueueMissing
+from wishbone.error import ReservedName, QueueMissing, QueueFull, QueueEmpty
 from time import time
-from gevent.queue import Empty
+from gevent.queue import Empty, Full
 from gevent import sleep
 
 
@@ -143,7 +143,7 @@ class Queue():
         while True:
             try:
                 yield self.get(block=False)
-            except Empty:
+            except QueueEmpty:
                 break
 
     def empty(self):
@@ -157,7 +157,10 @@ class Queue():
     def get(self, block=True):
         '''Gets an element from the queue.'''
 
-        e = self.__q.get(block=block)
+        try:
+            e = self.__q.get(block=block)
+        except Empty:
+            raise QueueEmpty("Queue is empty.")
         self.__out += 1
         return e
 
@@ -190,8 +193,11 @@ class Queue():
     def __put(self, element):
         '''Puts element in queue.'''
 
-        self.__q.put_nowait(element)
-        self.__in += 1
+        try:
+            self.__q.put_nowait(element)
+            self.__in += 1
+        except Full:
+            raise QueueFull("Queue full.")
 
     def __rate(self, name, value):
 
