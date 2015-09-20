@@ -124,12 +124,14 @@ class Match(Actor):
         - frequency(int)
            |  The frequency in seconds to generate metrics.
 
-        - location(str)(None)
+        - location(str)("")
            |  The directory containing rules.
-           |  If none, no rules are read from disk.
+           |  If empty, no rules are read from disk.
 
-        - rules(list)({})
-           |  A list of rules in the above described format.
+        - rules(dict)({})
+           |  A dict of rules in the above described format.
+           |  For example:
+           |  {"omg": {"condition": [{"greeting": "re:^hello$"}], "queue": [{"outbox": {"one": 1}}]}}
 
 
     Queues:
@@ -145,7 +147,7 @@ class Match(Actor):
 
     '''
 
-    def __init__(self, actor_config, location=None, rules={}):
+    def __init__(self, actor_config, location="", rules={}):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -157,10 +159,13 @@ class Match(Actor):
 
     def preHook(self):
 
-        self.createDir()
-        if self.kwargs.location is not None:
+        if self.kwargs.location != "":
+            self.createDir()
             self.logging.info("Rules directoy '%s' defined." % (self.kwargs.location))
-        self.sendToBackground(self.monitorRuleDirectory)
+            self.sendToBackground(self.monitorRuleDirectory)
+        else:
+            self.__active_rules.update(self.uplook.dump()["rules"])
+            self.logging.info("No rules directory defined, not reading rules from disk.")
 
     def createDir(self):
 
@@ -202,6 +207,7 @@ class Match(Actor):
         '''Submits matching documents to the defined queue along with
         the defined header.'''
 
+        print self.__active_rules
         if isinstance(event.data, dict):
             for rule in self.__active_rules:
                 e = deepcopy(event)
