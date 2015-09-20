@@ -73,26 +73,27 @@ class Template(Actor):
     def preHook(self):
 
         if self.kwargs.template is not None:
-            self.kwargs.templates = Environment(loader=FileSystemLoader(self.kwargs.location))
+            self.templates = Environment(loader=FileSystemLoader(self.kwargs.location))
 
     def consume(self, event):
+
         event = self.construct(event)
         self.submit(event, self.pool.queue.outbox)
 
     def construct(self, event):
 
-        for name, template in self.kwargs.header_templates.iteritems():
+        for name, template in self.uplook.dump()["header_templates"].iteritems():
             try:
                 template_r = JinjaTemplate(template)
                 event.setHeaderValue(name, template_r.render(**event.data))
             except Exception as err:
                 self.logging.warning(
-                    "Failed to convert header key '%s'.  Reason: %s" % (variable, err))
+                    "Failed to convert header key '%s'.  Reason: %s" % (name, err))
                 raise
 
         if self.kwargs.template is not None:
             try:
-                template = self.kwargs.templates.get_template(self.kwargs.template)
+                template = self.templates.get_template(self.kwargs.template)
             except Exception as err:
                 self.logging.error('No template found with filename "%s%s".' % (self.kwargs.location, self.kwargs.template))
                 raise
