@@ -25,7 +25,8 @@
 import pytest
 
 from wishbone.event import Event
-from wishbone.module import HumanLogFormat
+from wishbone.event import Log
+from wishbone.module.humanlogformat import HumanLogFormat
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 from utils import getter
@@ -34,13 +35,13 @@ from utils import getter
 def test_module_humanlogformat():
 
     actor_config = ActorConfig('humanlogformat', 100, 1, {})
-    humanlogformat = HumanLogFormat(actor_config, colorize=False)
+    humanlogformat = HumanLogFormat(actor_config, colorize=False, ident='setup.py')
     humanlogformat.pool.queue.inbox.disableFallThrough()
     humanlogformat.pool.queue.outbox.disableFallThrough()
     humanlogformat.start()
 
     e = Event('test')
-    e.setData((6, 1367682301.430527, 3342, 'Router', 'Received SIGINT. Shutting down.'))
+    e.setData(Log(1367682301.430527, 6, 3342, 'Router', 'Received SIGINT. Shutting down.'))
 
     humanlogformat.pool.queue.inbox.put(e)
     one = getter(humanlogformat.pool.queue.outbox)
