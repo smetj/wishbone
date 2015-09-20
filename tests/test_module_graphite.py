@@ -25,26 +25,27 @@
 import pytest
 
 from wishbone.event import Event
-from wishbone.module import Graphite
+from wishbone.module.graphite import Graphite
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 from utils import getter
-
+from wishbone.event import Metric
 
 def test_module_graphite():
 
     actor_config = ActorConfig('graphite', 100, 1, {})
-    graphite = Graphite(actor_config)
+    graphite = Graphite(actor_config, script=False)
     graphite.pool.queue.inbox.disableFallThrough()
     graphite.pool.queue.outbox.disableFallThrough()
     graphite.start()
 
     e = Event('test')
-    e.setData((1381002603.726132, 'wishbone', 'hostname', 'queue.outbox.in_rate', 0, '', ()))
+    m = Metric(1381002603.726132, "hostname", "setup", "queue.outbox", "in_rate", 0, ())
+    e.setData(m)
 
     graphite.pool.queue.inbox.put(e)
     one = getter(graphite.pool.queue.outbox)
 
     assert one.last.data == "hostname.setup.queue.outbox.in_rate 0 1381002603.73"
 
-
+test_module_graphite()

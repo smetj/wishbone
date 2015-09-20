@@ -25,7 +25,7 @@
 import pytest
 
 from wishbone.event import Event
-from wishbone.module import Header
+from wishbone.module.header import Header
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 from utils import getter

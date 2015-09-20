@@ -25,9 +25,8 @@
 import pytest
 
 from wishbone.event import Event
-from wishbone.module import Funnel
+from wishbone.module.funnel import Funnel
 from wishbone.actor import ActorConfig
-from wishbone.error import QueueEmpty
 
 from utils import getter
 
@@ -55,7 +54,7 @@ def test_module_funnel():
     funnel.pool.queue.one.put(event_one)
     funnel.pool.queue.two.put(event_two)
 
-    assert getter(funnel.pool.queue.outbox).raw()["test"]["data"] == "one"
-    assert getter(funnel.pool.queue.outbox).raw()["test"]["data"] == "two"
+    assert getter(funnel.pool.queue.outbox).raw()["test"]["data"] in ["one", "two"]
+    assert getter(funnel.pool.queue.outbox).raw()["test"]["data"] in ["one", "two"]
 
     funnel.stop()
