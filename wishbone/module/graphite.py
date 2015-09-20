@@ -99,6 +99,7 @@ class Graphite(Actor):
 
     def __consumeSource(self, event):
 
+        print event.data
         event.data = "%s%s%s%s.%s.%s.%s %s %s" % (self.kwargs.prefix, event.data.source, self.script_name, self.pid, event.data.module, event.data.queue, event.data.name, event.data.value, event.data.time)
         self.submit(event, self.pool.queue.outbox)
 
