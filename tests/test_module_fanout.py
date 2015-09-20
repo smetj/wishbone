@@ -25,7 +25,7 @@
 import pytest
 
 from wishbone.event import Event
-from wishbone.module import Fanout
+from wishbone.module.fanout import Fanout
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 from utils import getter

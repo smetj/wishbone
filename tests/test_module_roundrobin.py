@@ -25,7 +25,7 @@
 import pytest
 
 from wishbone.event import Event
-from wishbone.module import RoundRobin
+from wishbone.module.roundrobin import RoundRobin
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 
@@ -56,7 +56,7 @@ def test_module_roundrobin():
     roundrobin.pool.queue.inbox.put(event_one)
     roundrobin.pool.queue.inbox.put(event_two)
 
-    assert getter(roundrobin.pool.queue.one).raw()["test"]["data"] == "one"
-    assert getter(roundrobin.pool.queue.two).raw()["test"]["data"] == "two"
+    assert getter(roundrobin.pool.queue.one).raw()["test"]["data"] in ["one", "two"]
+    assert getter(roundrobin.pool.queue.two).raw()["test"]["data"] in ["one", "two"]
 
     roundrobin.stop()

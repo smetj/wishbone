@@ -23,6 +23,7 @@
 #
 
 from wishbone.error import QueueEmpty
+from gevent import sleep
 
 def getter(queue):
     counter = 0
@@ -32,6 +33,6 @@ def getter(queue):
             return None
         else:
             try:
-                return queue.get()
-            except QueueEmpty as err:
-                err.waitUntilContent()
+                return queue.get(block=False)
+            except QueueEmpty:
+                sleep(0.1)
