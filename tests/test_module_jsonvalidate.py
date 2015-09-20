@@ -25,7 +25,7 @@
 import pytest
 
 from wishbone.event import Event
-from wishbone.module import JSONValidate
+from wishbone.module.jsonvalidate import JSONValidate
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 import os

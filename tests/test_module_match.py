@@ -25,78 +25,12 @@
 import pytest
 
 from wishbone.event import Event
-from wishbone.module import Match
+from wishbone.module.match import Match
 from wishbone.actor import ActorConfig
 from wishbone.error import QueueEmpty
 
 from utils import getter
 
-RULES = {
-    "regex": {
-        "condition": [
-            {"regex": "re:.*?two.*"}
-        ],
-        "queue": [
-            {"regex": {}}
-        ]
-    },
-    "neg_regex": {
-        "condition": [
-            {"neg_regex": "!re:.*?two.*"}
-        ],
-        "queue": [
-            {"neg_regex": {}}
-        ]
-    },
-    "bigger": {
-        "condition": [
-            {"bigger": ">:10"}
-        ],
-        "queue": [
-            {"bigger": {}}
-        ]
-    },
-    "bigger_equal": {
-        "condition": [
-            {"bigger_equal": ">=:10"}
-        ],
-        "queue": [
-            {"bigger_equal": {}}
-        ]
-    },
-    "smaller": {
-        "condition": [
-            {"smaller": "<:100"}
-        ],
-        "queue": [
-            {"smaller": {}}
-        ]
-    },
-    "smaller_equal": {
-        "condition": [
-            {"smaller_equal": "<=:100"}
-        ],
-        "queue": [
-            {"smaller_equal": {}}
-        ]
-    },
-    "equal": {
-        "condition": [
-            {"equal": "=:100"}
-        ],
-        "queue": [
-            {"equal": {}}
-        ]
-    },
-    "list_membership": {
-        "condition": [
-            {"list_membership": "in:test"}
-        ],
-        "queue": [
-            {"list_membership": {}}
-        ]
-    }
-}
 
 def generate_actor(rules):
 
@@ -280,5 +214,3 @@ def test_negative_list_membership():
     one.setData({"list_membership": ["one", "three", "two"]})
     actor.pool.queue.inbox.put(one)
     assert "test" not in getter(actor.pool.queue.list_membership).data["list_membership"]
-
-#     match.stop()
