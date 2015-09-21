@@ -79,7 +79,7 @@ class DictGenerator(Actor):
             self.generateKey = self.generateKeyNumber
 
         if self.kwargs.num_values:
-            self.generateValue = self.generateValueNumber
+            self.generateValue = self.generateValueInteger
         else:
             self.generateValue = self.pickWord
 
