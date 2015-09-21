@@ -23,7 +23,7 @@
 #
 
 
-# import pytest
+import pytest
 
 from wishbone.event import Event
 from wishbone.module.template import Template
