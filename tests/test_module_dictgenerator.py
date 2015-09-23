@@ -56,7 +56,7 @@ def test_module_dictgenerator_randomize_keys():
 def test_module_dictgenerator_num_values():
 
     actor_config = ActorConfig('template', 100, 1, {})
-    dictgenerator = DictGenerator(actor_config, num_values=True)
+    dictgenerator = DictGenerator(actor_config, num_values=True, num_values_min=1, num_values_max=2)
 
     dictgenerator.pool.queue.outbox.disableFallThrough()
     dictgenerator.start()
@@ -67,5 +67,16 @@ def test_module_dictgenerator_num_values():
         assert isinstance(value, int)
 
     assert isinstance(event.data.items()[0][1], int)
+    assert event.data.items()[0][1] >= 1 and event.data.items()[0][1] <= 2
 
-def
+def test_module_dictgenerator_num_elements():
+
+    actor_config = ActorConfig('template', 100, 1, {})
+    dictgenerator = DictGenerator(actor_config, min_elements=1, max_elements=2)
+
+    dictgenerator.pool.queue.outbox.disableFallThrough()
+    dictgenerator.start()
+
+    event = getter(dictgenerator.pool.queue.outbox)
+
+    assert len(event.data.keys()) >= 1 and len(event.data.keys()) <= 2
