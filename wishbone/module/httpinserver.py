@@ -48,6 +48,9 @@ class HTTPInServer(Actor):
         - certfile(str)(None)
            |  When SSL is required, the location of the certfile to use.
 
+        - ca_certs(str)(None)
+            |  When SSL is required, the location of the ca certs to use.
+
         - delimiter(str)(None)
            |  The delimiter which separates multiple
            |  messages in a stream of data.
@@ -65,7 +68,7 @@ class HTTPInServer(Actor):
     The root resource "/" is mapped the <outbox> queue.
     '''
 
-    def __init__(self, actor_config, address="0.0.0.0", port=19283, keyfile=None, certfile=None, delimiter=None):
+    def __init__(self, actor_config, address="0.0.0.0", port=19283, keyfile=None, certfile=None, ca_certs=None, delimiter=None):
         Actor.__init__(self, actor_config)
 
         if self.kwargs.delimiter is None:
@@ -118,24 +121,16 @@ class HTTPInServer(Actor):
                 r.append(line)
         yield "\n".join(r)
 
-    def __setupQueues(self):
-        return
-        self.deleteQueue("inbox")
-        for resource in self.resources:
-            path = resource.keys()[0]
-            queue = resource[resource.keys()[0]]
-            self.createQueue(queue)
-            self.queue_mapping[path] = getattr(self.queuepool, queue)
-
     def __serve(self):
-        if self.kwargs.keyfile is not None and self.kwargs.certfile is not None:
+        if self.kwargs.keyfile is not None and self.kwargs.certfile is not None and self.kwargs.ca_certs is not None:
             self.__server = pywsgi.WSGIServer(
                 (self.kwargs.address, self.kwargs.port),
                 self.consume,
                 log=self.logger_info,
                 error_log=self.logger_error,
                 keyfile=self.kwargs.keyfile,
-                certfile=self.kwargs.certfile)
+                certfile=self.kwargs.certfile,
+                ca_certs=self.kwargs.ca_certs)
         else:
             self.__server = pywsgi.WSGIServer(
                 (self.kwargs.address, self.kwargs.port),
