@@ -27,6 +27,7 @@ Features:
 - Changed internal log format.
 - Reroute wsgi logging to Wishbone logging.
 - Adapted modules to use lookups where appropriate.
+- Added etcd lookup module.
 - Added tests for modules (not complete, more tests required)
 
 Bugfixes:
