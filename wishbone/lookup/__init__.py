@@ -21,7 +21,7 @@
 #  MA 02110-1301, USA.
 #
 #
-
+from uplook.errors import NoSuchValue
 
 class EventLookup():
     pass
@@ -132,3 +132,20 @@ def randominteger(min=0, max=100):
         return randint(min, max)
 
     return randomInteger
+
+def etcd(base="http://127.0.0.1:2379/v2/keys"):
+
+    import requests
+
+    base = base.rstrip('/')
+
+    def etcdLookup(key):
+        key = key.lstrip('/')
+
+        try:
+            response = requests.get('%s/%s' % (base, key))
+            response.raise_for_status()
+            return response.json()["node"]["value"]
+        except Exception as err:
+            raise NoSuchValue(str(err))
+    return etcdLookup
