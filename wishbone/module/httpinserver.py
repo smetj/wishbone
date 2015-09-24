@@ -24,6 +24,7 @@
 
 from wishbone import Actor
 from gevent import pywsgi
+from gevent.pool import Pool
 from wishbone.logging import MockLogger
 
 
@@ -55,6 +56,9 @@ class HTTPInServer(Actor):
            |  The delimiter which separates multiple
            |  messages in a stream of data.
 
+        - poolsize(int)(1000)
+            |  The connection pool size.
+
     Queues:
 
         - outbox
@@ -68,7 +72,7 @@ class HTTPInServer(Actor):
     The root resource "/" is mapped the <outbox> queue.
     '''
 
-    def __init__(self, actor_config, address="0.0.0.0", port=19283, keyfile=None, certfile=None, ca_certs=None, delimiter=None):
+    def __init__(self, actor_config, address="0.0.0.0", port=19283, keyfile=None, certfile=None, ca_certs=None, delimiter=None, poolsize=1000):
         Actor.__init__(self, actor_config)
 
         if self.kwargs.delimiter is None:
@@ -85,21 +89,49 @@ class HTTPInServer(Actor):
         self.sendToBackground(self.__serve)
 
     def consume(self, env, start_response):
-        event = self.createEvent()
+
         try:
-            for line in self.delimit(env["wsgi.input"]):
-                if env['PATH_INFO'] == '/':
+            try:
+                queue = self.__validateQueueName(env['PATH_INFO'])
+            except Exception as err:
+                start_response('404 Not Found', [('Content-Type', 'text/plain')])
+                return "%s" % (err)
+
+            if env["REQUEST_METHOD"] in ["PUT", "POST"]:
+                counter = 0
+                for line in self.delimit(env["wsgi.input"]):
+                    event = self.createEvent()
                     event.data = line
-                    self.submit(event, self.pool.queue.outbox)
-                else:
-                    q = self.pool.getQueue(env['PATH_INFO'].lstrip('/'))
-                    event.data = line
-                    self.submit(event, q)
-            start_response('200 OK', [('Content-Type', 'text/plain')])
-            return "OK"
+                    self.submit(event, self.pool.getQueue(queue))
+                    counter += 1
+                start_response('200 OK', [('Content-Type', 'text/plain')])
+                return "Submitted %s event(s) to queue '%s'." % (counter, queue)
+            elif env["REQUEST_METHOD"] == "GET":
+                start_response('200 OK', [('Content-Type', 'text/plain')])
+                return "OK"
+            else:
+                start_response('405 Method Not Allowed', [('Content-Type', 'text/plain')])
+                return "405 Method Not Allowed"
         except Exception as err:
-            start_response('404 Not Found', [('Content-Type', 'text/html')])
+            start_response('500 Internal Server Error', [('Content-Type', 'text/html')])
             return "A problem occurred processing your request. Reason: %s" % (err)
+
+    def __validateQueueName(self, path):
+
+        '''Validates and returns a trimmed value.'''
+
+        result = [ x for x in path.split('/') if x != "" ]
+        if result == []:
+            queue = "outbox"
+        else:
+            queue = result[0]
+
+        if len(result) > 1:
+            raise Exception("Endpoint can only have a depthlevel of 1.")
+        elif not self.pool.hasQueue(queue):
+            raise Exception("There is no queue with name %s." % (queue))
+        else:
+            return queue
 
     def __newLineDelimiter(self, data):
         for line in data.readlines():
@@ -122,10 +154,12 @@ class HTTPInServer(Actor):
         yield "\n".join(r)
 
     def __serve(self):
+        pool = Pool(self.kwargs.poolsize)
         if self.kwargs.keyfile is not None and self.kwargs.certfile is not None and self.kwargs.ca_certs is not None:
             self.__server = pywsgi.WSGIServer(
                 (self.kwargs.address, self.kwargs.port),
                 self.consume,
+                spawn=pool,
                 log=self.logger_info,
                 error_log=self.logger_error,
                 keyfile=self.kwargs.keyfile,
@@ -135,10 +169,11 @@ class HTTPInServer(Actor):
             self.__server = pywsgi.WSGIServer(
                 (self.kwargs.address, self.kwargs.port),
                 self.consume,
+                spawn=pool,
                 log=self.logger_info,
                 error_log=self.logger_error)
         self.__server.start()
-        self.logging.info("Serving on %s:%s" % (self.kwargs.address, self.kwargs.port))
+        self.logging.info("Serving on %s:%s with a connection poolsize of %s." % (self.kwargs.address, self.kwargs.port, self.kwargs.poolsize))
 
     def postHook(self):
 
