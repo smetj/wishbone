@@ -26,7 +26,6 @@ from gevent import monkey;monkey.patch_socket()
 from wishbone import Actor
 from wishbone.error import QueueEmpty
 from amqp.connection import Connection as amqp_connection
-from amqp.exceptions import PreconditionFailed
 from gevent import sleep
 
 
