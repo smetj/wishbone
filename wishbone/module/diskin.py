@@ -23,14 +23,13 @@
 #
 
 from wishbone import Actor
-import cPickle as pickle
-from gevent import os
 from gevent import sleep, event
 from gevent.os import make_nonblocking
-from os import remove
+from time import time
 import glob
 import os
-from time import time
+import cPickle as pickle
+
 
 
 class DiskIn(Actor):
@@ -98,9 +97,9 @@ class DiskIn(Actor):
                 with open(filename, "rb") as output_file:
                     make_nonblocking(output_file)
                     self.logging.info("Read file %s" % filename)
-                    for event in self.__pickleReader(output_file):
-                        self.submit(event, self.pool.queue.outbox)
-                remove(filename)
+                    for e in self.__pickleReader(output_file):
+                        self.submit(e, self.pool.queue.outbox)
+                os.remove(filename)
         except Exception as err:
             self.logging.error("Failed to read file %s.  Reason: %s" % (filename, str(err)))
 
@@ -110,7 +109,7 @@ class DiskIn(Actor):
         while self.loop():
             try:
                 newest = max(glob.iglob("%s/*" % (self.kwargs.directory)), key=os.path.getmtime)
-            except Exception as err:
+            except Exception:
                 pass
             else:
                 if time() - os.path.getctime(newest) >= self.kwargs.idle_time:
