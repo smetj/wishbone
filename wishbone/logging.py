@@ -24,10 +24,9 @@
 #
 
 from wishbone.event import Event, Log
-from gevent.queue import Full
-from gevent import spawn, sleep
 from time import time
 from os import getpid
+
 
 class MockLogger():
     '''
@@ -43,11 +42,11 @@ class MockLogger():
         pass
 
     def write(self, line):
-        self.l._Logging__log(self.level, line)
+        self.l._Logging__log(self.level, line.rstrip())
 
     def writelines(self, lines):
         for line in lines:
-            self.l.Logging.__log(self.level, line)
+            self.l.Logging.__log(self.level, line.rstrip())
 
 
 class Logging():
