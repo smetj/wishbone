@@ -24,9 +24,6 @@
 
 from wishbone import Actor
 from wishbone.event import Metric
-from os.path import basename
-from sys import argv
-from os import getpid
 
 
 class InfluxDB(Actor):
