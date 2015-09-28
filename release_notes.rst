@@ -1,6 +1,14 @@
 Wishbone changelog
 ==================
 
+Versoin 1.1.1
+~~~~~~~~~~~~~
+
+Bugfixes:
+
+- Added lock reading rules in wishbone.flow.match module.
+
+
 Version 1.1.0
 ~~~~~~~~~~~~~
 
