@@ -22,15 +22,11 @@
 #
 #
 
-import pytest
-
 from wishbone.event import Event
 from wishbone.module.match import Match
 from wishbone.actor import ActorConfig
-from wishbone.error import QueueEmpty
-
 from utils import getter
-
+from gevent import sleep
 
 def generate_actor(rules):
 
@@ -45,6 +41,58 @@ def generate_actor(rules):
     match.start()
     return match
 
+def test_file_load():
+
+    import os
+    import yaml
+    import shutil
+
+    os.mkdir('/tmp/wishbone_tests')
+    actor_config = ActorConfig('match', 100, 1, {})
+    match = Match(actor_config, location="/tmp/wishbone_tests")
+    match.pool.createQueue("file")
+    match.pool.queue.file.disableFallThrough()
+    match.pool.queue.inbox.disableFallThrough()
+
+    #Test 1
+    rule_1 = {
+        "condition": [
+            {"file": "re:.*?one.*"}
+        ],
+        "queue": [
+            {"file": {}}
+        ]
+    }
+
+    with open('/tmp/wishbone_tests/one.yaml', 'w') as one:
+        one.write(yaml.dump(rule_1, default_flow_style=False))
+    match.start()
+    sleep(1)
+
+    e = Event("test")
+    e.setData({"file": "zero one two"})
+    match.pool.queue.inbox.put(e)
+
+    assert getter(match.pool.queue.file).data["file"] == "zero one two"
+
+    #Test 2
+    rule_2 = {
+        "condition": [
+            {"file": "re:.*?two.*"}
+        ],
+        "queue": [
+            {"file": {}}
+        ]
+    }
+    with open('/tmp/wishbone_tests/two.yaml', 'w') as one:
+        one.write(yaml.dump(rule_2, default_flow_style=False))
+    sleep(1)
+
+    e = Event("test")
+    e.setData({"file": "one two three"})
+    match.pool.queue.inbox.put(e)
+    assert getter(match.pool.queue.file).data["file"] == "one two three"
+    shutil.rmtree('/tmp/wishbone_tests')
 
 def test_regex():
 
