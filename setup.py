@@ -33,7 +33,7 @@ if "PyPy" in sys.version:
     os.environ["with_gmp"] = "no"
 
 PROJECT = 'wishbone'
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 
 install_requires = ['gevent==1.1b4',
                     'greenlet==0.4.9',
