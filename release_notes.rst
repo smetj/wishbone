@@ -7,7 +7,15 @@ Versoin 1.1.1
 Bugfixes:
 
 - Added lock reading rules in wishbone.flow.match module.
+- Monkey patching SSL in wishbone.output.http when doing https.
+- Better disconnect testing in wishbone.output.tcp
+- Workaround for bug in wishbone.function.template where header
+  template values are not read correctly when a lookup function
+  used.
 
+Misc:
+
+- Updated to gevent-1.1b5
 
 Version 1.1.0
 ~~~~~~~~~~~~~
