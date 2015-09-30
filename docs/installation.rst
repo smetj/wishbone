@@ -82,6 +82,13 @@ Install the latest *development* release from the **development** branch.
     $ sudo python setup.py install
 
 
+Execute tests
+~~~~~~~~~~~~~
+
+.. code-block:: sh
+
+    $ python setup.py test
+
 Docker
 ------
 
