@@ -227,7 +227,6 @@ class Match(Actor):
                 else:
                     e.setHeaderValue("rule", rule)
                     self.submit(e, self.pool.queue.nomatch)
-
                     # self.logging.debug("No match for rule %s." % (rule))
             self.rule_lock.release()
         else:
