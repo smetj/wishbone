@@ -64,25 +64,38 @@ class TCPOut(Actor):
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
-        self.sendToBackground(self.setupConnection)
+        self.sendToBackground(self.connectionMonitor)
 
-    def setupConnection(self):
+    def connectionMonitor(self):
 
         while self.loop():
             try:
-                self.socket.sendall('')
-                sleep(1)
+                self.socket = self.setupConnection()
+                self.logging.info("Connected to %s:%s." % (self.kwargs.host, self.kwargs.port))
             except Exception as err:
+                self.logging.error("Failed to connect to %s:%s. Reason: %s" % (self.kwargs.host, self.kwargs.port, err))
+                sleep(1)
+            else:
                 while self.loop():
                     try:
-                        self.socket = socket.socket()
-                        self.socket.settimeout(self.kwargs.timeout)
-                        self.socket.connect((self.kwargs.host, self.kwargs.port))
-                        self.logging.info("Connected to %s:%s." % (self.kwargs.host, self.kwargs.port))
-                        break
+                        if self.socket.recv(0) == '':
+                            self.logging.error("Connection to %s:%s interrupted.  Reason: %s" % (self.kwargs.host, self.kwargs.port, err))
+                            break
+                        else:
+                            self.logging.info("Receiving data from %s.  That should not happen since its an output module. Dropping conection." % (self.kwargs.host))
+                            raise Exception("Data received from remote side.")
+                    except socket.timeout:
+                        pass
                     except Exception as err:
-                        self.logging.error("Failed to connect to %s:%s. Reason: %s" % (self.kwargs.host, self.kwargs.port, err))
-                        sleep(1)
+                        self.logging.error("Connection to %s:%s interrupted.  Reason: %s" % (self.kwargs.host, self.kwargs.port, err))
+                        break
+
+    def setupConnection(self):
+
+        s = socket.socket()
+        s.settimeout(self.kwargs.timeout)
+        s.connect((self.kwargs.host, self.kwargs.port))
+        return s
 
     def postHook(self):
         try:
