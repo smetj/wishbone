@@ -13,9 +13,18 @@ Bugfixes:
   template values are not read correctly when a lookup function
   used.
 
+Bugs:
+
+- Fixed bug in wishbone.function.keyvalue where events got garbled and copied
+  multiple times.
+- Fixed bug in wishbone.input.amqp where reconnects were not happening.
+
 Misc:
 
 - Updated to gevent-1.1b5
+- Changed wishbone.output.tcp to open/close connections and do not attempt
+  to keep connection open.
+
 
 Version 1.1.0
 ~~~~~~~~~~~~~
