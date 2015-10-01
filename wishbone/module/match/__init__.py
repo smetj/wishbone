@@ -31,6 +31,7 @@ import os
 from copy import deepcopy
 from gevent.lock import Semaphore
 
+
 class Match(Actor):
 
     '''**Pattern matching on a key/value document stream.**
@@ -167,7 +168,6 @@ class Match(Actor):
         else:
             self.__active_rules.update(self.uplook.dump()["rules"])
             self.logging.info("No rules directory defined, not reading rules from disk.")
-
 
     def createDir(self):
 
