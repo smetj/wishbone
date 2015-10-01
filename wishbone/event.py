@@ -46,6 +46,7 @@ class Module():
 Metric = namedtuple("WishboneMetric", "time source module queue name value tags")
 Log = namedtuple("WishboneLog", "time level pid module message")
 
+
 class Event(object):
 
     '''
