@@ -63,32 +63,15 @@ class TCPOut(Actor):
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
-    def preHook(self):
-        self.sendToBackground(self.connectionMonitor)
+    def consume(self, event):
 
-    def connectionMonitor(self):
-
-        while self.loop():
-            try:
-                self.socket = self.setupConnection()
-                self.logging.info("Connected to %s:%s." % (self.kwargs.host, self.kwargs.port))
-            except Exception as err:
-                self.logging.error("Failed to connect to %s:%s. Reason: %s" % (self.kwargs.host, self.kwargs.port, err))
-                sleep(1)
-            else:
-                while self.loop():
-                    try:
-                        if self.socket.recv(0) == '':
-                            self.logging.error("Connection to %s:%s interrupted.  Reason: %s" % (self.kwargs.host, self.kwargs.port, err))
-                            break
-                        else:
-                            self.logging.info("Receiving data from %s.  That should not happen since its an output module. Dropping conection." % (self.kwargs.host))
-                            raise Exception("Data received from remote side.")
-                    except socket.timeout:
-                        pass
-                    except Exception as err:
-                        self.logging.error("Connection to %s:%s interrupted.  Reason: %s" % (self.kwargs.host, self.kwargs.port, err))
-                        break
+        if isinstance(event.last.data, list):
+            data = self.kwargs.delimiter.join(event.last.data)
+        else:
+            data = event.last.data
+        connection = self.setupConnection()
+        connection.sendall(str(data) + self.kwargs.delimiter)
+        connection.close()
 
     def setupConnection(self):
 
@@ -96,17 +79,3 @@ class TCPOut(Actor):
         s.settimeout(self.kwargs.timeout)
         s.connect((self.kwargs.host, self.kwargs.port))
         return s
-
-    def postHook(self):
-        try:
-            self.socket.close()
-            self.logging.info("Connection closed to %s:%s" % (self.kwargs.host, self.kwargs.port))
-        except:
-            pass
-
-    def consume(self, event):
-        if isinstance(event.last.data, list):
-            data = self.kwargs.delimiter.join(event.last.data)
-        else:
-            data = event.last.data
-        self.socket.sendall(str(data) + self.kwargs.delimiter)
