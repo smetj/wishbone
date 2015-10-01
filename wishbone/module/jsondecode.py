@@ -57,7 +57,7 @@ class JSONDecode(Actor):
     def consume(self, event):
 
         try:
-            event.data = self.convert(event.data)
+            event.setData(self.convert(event.data))
         except Exception as err:
             self.logging.warn("Unable to decode JSON data.  Reason: %s" % (err))
             raise
