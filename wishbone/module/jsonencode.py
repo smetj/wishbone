@@ -57,10 +57,5 @@ class JSONEncode(Actor):
 
     def consume(self, event):
 
-        try:
-            event.setData(dumps(event.data))
-        except Exception as err:
-            self.logging.warn("Unable to encode data to JSON.  Reason: %s" % (err))
-            raise
-
+        event.setData(dumps(event.data))
         self.submit(event, self.pool.queue.outbox)
