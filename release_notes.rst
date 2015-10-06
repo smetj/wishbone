@@ -4,7 +4,7 @@ Wishbone changelog
 Versoin 1.1.1
 ~~~~~~~~~~~~~
 
-Bugfixes:
+Features:
 
 - Added lock reading rules in wishbone.flow.match module.
 - Monkey patching SSL in wishbone.output.http when doing https.
@@ -12,6 +12,7 @@ Bugfixes:
 - Workaround for bug in wishbone.function.template where header
   template values are not read correctly when a lookup function
   used.
+- Improved logging of jsonvalidate
 
 Bugs:
 
