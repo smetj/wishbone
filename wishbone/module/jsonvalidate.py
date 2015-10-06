@@ -77,6 +77,8 @@ class JSONValidate(Actor):
             self.validate(event.data)
         except Exception as err:
             raise Exception(self.__condenseError(err))
+        else:
+            self.submit(event, self.pool.queue.outbox)
 
     def __loadValidationSchema(self, path):
         with open(path, 'r') as schema:
@@ -92,4 +94,4 @@ class JSONValidate(Actor):
 
     def __condenseError(self, err):
 
-        return " -> ".join ([l.lstrip() for l in str(err).split("\n") if l != ""])
+        return " -> ".join([l.lstrip() for l in str(err).split("\n") if l != ""])
