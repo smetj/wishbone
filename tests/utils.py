@@ -30,7 +30,7 @@ def getter(queue):
     while True:
         counter += 1
         if counter >= 5:
-            return None
+            raise Exception("No event from queue")
         else:
             try:
                 return queue.get(block=False)
