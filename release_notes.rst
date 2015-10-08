@@ -19,6 +19,8 @@ Bugs:
 - Fixed bug in wishbone.function.keyvalue where events got garbled and copied
   multiple times.
 - Fixed bug in wishbone.input.amqp where reconnects were not happening.
+- Fixed bug where sending logs to logs queue could fill queue and fail with
+  QueueFull.
 
 Misc:
 
