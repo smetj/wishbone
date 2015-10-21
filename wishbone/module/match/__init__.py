@@ -207,7 +207,6 @@ class Match(Actor):
         '''Submits matching documents to the defined queue along with
         the defined header.'''
 
-        print self.__active_rules
         if isinstance(event.data, dict):
             for rule in self.__active_rules:
                 e = deepcopy(event)
