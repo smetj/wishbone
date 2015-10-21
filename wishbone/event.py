@@ -43,7 +43,7 @@ class Module():
         self.error = Container()
 
 
-Metric = namedtuple("WishboneMetric", "time source module queue name value tags")
+Metric = namedtuple("WishboneMetric", "time type source name value unit tags")
 Log = namedtuple("WishboneLog", "time level pid module message")
 
 class Event(object):
