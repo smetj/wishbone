@@ -1,7 +1,7 @@
 Wishbone changelog
 ==================
 
-Versoin 1.1.1
+Version 1.1.1
 ~~~~~~~~~~~~~
 
 Features:
@@ -21,6 +21,7 @@ Bugs:
 - Fixed bug in wishbone.input.amqp where reconnects were not happening.
 - Fixed bug where sending logs to logs queue could fill queue and fail with
   QueueFull.
+- Fixed bug in metric formatting.
 
 Misc:
 
