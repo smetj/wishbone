@@ -246,10 +246,9 @@ class Actor():
         hostname = socket.gethostname()
         while self.loop():
             for queue in self.pool.listQueues(names=True):
-                stats = self.pool.getQueue(queue).stats()
-                for item in stats:
+                for metric, value in self.pool.getQueue(queue).stats().iteritems():
                     event = Wishbone_Event(self.name)
-                    event.data = Metric(time(), hostname, self.name, queue, item, stats[item], ())
+                    event.data = Metric(time=time(), type="wishbone", source=hostname, name="module.%s.queue.%s.%s" % (self.name, queue, metric), value=value, unit="", tags=())
                     self.submit(event, self.pool.queue.metrics)
             sleep(self.frequency)
 
