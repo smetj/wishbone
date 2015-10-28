@@ -72,4 +72,12 @@ class InfluxDB(Actor):
 
     def generate(self, data):
 
-        return "%s,source=%s,module=%s,queue=%s value=%.5f %20.0f" % (data.name, data.source, data.module, data.queue, data.value, data.time * 1000000000)
+        name = data.name.split('.')
+        return "{name},source={source},type={type},module={module},queue={queue} value={value:.5f} {time:20.0f}".format(
+                    name=name[4],
+                    source=data.source,
+                    type=data.type,
+                    module=name[1],
+                    queue=name[3],
+                    value=data.value,
+                    time=data.time * 1000000000)

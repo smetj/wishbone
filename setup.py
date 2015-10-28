@@ -33,9 +33,9 @@ if "PyPy" in sys.version:
     os.environ["with_gmp"] = "no"
 
 PROJECT = 'wishbone'
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 
-install_requires = ['gevent==1.1b4',
+install_requires = ['gevent==1.1b6',
                     'greenlet==0.4.9',
                     'argparse==1.3.0',
                     'prettytable==0.7.2',
@@ -55,7 +55,7 @@ install_requires = ['gevent==1.1b4',
                     'arrow==0.6.0',
                     'elasticsearch==1.6.0',
                     'importlib==1.0.3',
-                    'uplook==0.3']
+                    'uplook==0.4']
 
 # Deps pulled in by other modules
 # 'lockfile==0.10.2'

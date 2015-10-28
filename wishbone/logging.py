@@ -24,8 +24,10 @@
 #
 
 from wishbone.event import Event, Log
+from wishbone.error import QueueFull
 from time import time
 from os import getpid
+from gevent import sleep
 
 
 class MockLogger():
@@ -65,7 +67,12 @@ class Logging():
         event = Event(self.name)
         event.data = Log(time(), level, getpid(), self.name, message)
 
-        self.logs.put(event)
+        while True:
+            try:
+                self.logs.put(event)
+                break
+            except QueueFull:
+                sleep(0.1)
 
     def emergency(self, message):
         """Generates a log message with priority emergency(0).

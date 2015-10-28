@@ -28,6 +28,7 @@ from wishbone.event import Event as Wishbone_Event
 from wishbone.event import Metric
 from wishbone.error import QueueConnected, ModuleInitFailure
 from wishbone.lookup import EventLookup
+from uplook.errors import NoSuchValue
 from collections import namedtuple
 from gevent import spawn, kill
 from gevent import sleep, socket
@@ -110,8 +111,8 @@ class Actor():
         except AttributeError:
             return "You should use a dynamic lookup ~~ for header lookups. "
         except KeyError:
-            self.logging.warning("There is no lookup value with name '%s'." % (name))
-            return ""
+            self.logging.debug("There is no lookup value with name '%s'." % (name))
+            raise NoSuchValue
 
     def getChildren(self, queue=None):
         '''Returns the queue name <queue> is connected to.'''
@@ -245,10 +246,9 @@ class Actor():
         hostname = socket.gethostname()
         while self.loop():
             for queue in self.pool.listQueues(names=True):
-                stats = self.pool.getQueue(queue).stats()
-                for item in stats:
+                for metric, value in self.pool.getQueue(queue).stats().iteritems():
                     event = Wishbone_Event(self.name)
-                    event.data = Metric(time(), hostname, self.name, queue, item, stats[item], ())
+                    event.data = Metric(time=time(), type="wishbone", source=hostname, name="module.%s.queue.%s.%s" % (self.name, queue, metric), value=value, unit="", tags=())
                     self.submit(event, self.pool.queue.metrics)
             sleep(self.frequency)
 

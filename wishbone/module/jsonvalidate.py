@@ -76,9 +76,7 @@ class JSONValidate(Actor):
         try:
             self.validate(event.data)
         except Exception as err:
-            self.logging.warn("JSON data does not pass the validation schema.  Reason: %s" % (
-                str(err).replace("\n", " > ")))
-            raise
+            raise Exception(self.__condenseError(err))
         else:
             self.submit(event, self.pool.queue.outbox)
 
@@ -93,3 +91,7 @@ class JSONValidate(Actor):
 
     def __noValidate(self, data):
         return True
+
+    def __condenseError(self, err):
+
+        return " -> ".join([l.lstrip() for l in str(err).split("\n") if l != ""])

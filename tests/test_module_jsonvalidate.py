@@ -22,12 +22,9 @@
 #
 #
 
-import pytest
-
 from wishbone.event import Event
 from wishbone.module.jsonvalidate import JSONValidate
 from wishbone.actor import ActorConfig
-from wishbone.error import QueueEmpty
 import os
 from utils import getter
 
@@ -36,10 +33,10 @@ def test_module_jsonvalidate():
 
     actor_config = ActorConfig('jsonvalidate', 100, 1, {})
 
-    with open("jsonvalidate.jsonschema", "w") as j:
+    with open("/tmp/jsonvalidate.jsonschema", "w") as j:
         j.write('{"type": "object", "properties": {"one": { "type": "integer"}}}')
 
-    jsonvalidate = JSONValidate(actor_config, "jsonvalidate.jsonschema")
+    jsonvalidate = JSONValidate(actor_config, "/tmp/jsonvalidate.jsonschema")
 
     jsonvalidate.pool.queue.inbox.disableFallThrough()
     jsonvalidate.pool.queue.outbox.disableFallThrough()
@@ -58,6 +55,6 @@ def test_module_jsonvalidate():
     jsonvalidate.pool.queue.inbox.put(invalid)
     invalid_event = getter(jsonvalidate.pool.queue.failed)
 
-    os.remove("jsonvalidate.jsonschema")
+    os.remove("/tmp/jsonvalidate.jsonschema")
     assert valid_event.data == {"one": 1}
     assert invalid_event.data == {"one": "one"}

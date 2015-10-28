@@ -22,7 +22,7 @@
 #
 #
 
-from gevent import monkey;monkey.patch_socket()
+from gevent import monkey;monkey.patch_all()
 from wishbone import Actor
 from wishbone.error import QueueEmpty
 from amqp.connection import Connection as amqp_connection
@@ -121,7 +121,7 @@ class AMQPIn(Actor):
         self.connection = None
 
     def preHook(self):
-        self.sendToBackground(self.setupConnectivity)
+        self.sendToBackground(self.drain)
         self.sendToBackground(self.handleAcknowledgements)
         self.sendToBackground(self.handleAcknowledgementsCancel)
 
@@ -135,8 +135,8 @@ class AMQPIn(Actor):
 
         while self.loop():
             try:
-                if not hasattr(self.connection, 'is_alive') or (hasattr(self.connection, 'is_alive') and not self.connection.is_alive()):
-                    self.connection = amqp_connection(host=self.kwargs.host, port=self.kwargs.port, virtual_host=self.kwargs.vhost, userid=self.kwargs.user, password=self.kwargs.password)
+                # if not hasattr(self.connection, 'is_alive') or (hasattr(self.connection, 'is_alive') and not self.connection.is_alive()):
+                self.connection = amqp_connection(host=self.kwargs.host, port=self.kwargs.port, virtual_host=self.kwargs.vhost, userid=self.kwargs.user, password=self.kwargs.password)
                 self.channel = self.connection.channel()
                 if self.kwargs.exchange != "":
                     self.channel.exchange_declare(self.kwargs.exchange, self.kwargs.exchange_type, durable=self.kwargs.exchange_durable, auto_delete=self.kwargs.exchange_auto_delete, passive=self.kwargs.exchange_passive)
@@ -156,46 +156,38 @@ class AMQPIn(Actor):
                 self.logging.error("Failed to connect to broker.  Reason %s " % (err))
                 sleep(1)
             else:
-                self.sendToBackground(self.drain)
                 break
 
     def drain(self):
+
+        self.setupConnectivity()
         while self.loop():
             try:
                 self.connection.drain_events()
             except Exception as err:
                 self.logging.error("Problem connecting to broker.  Reason: %s" % (err))
+                self.setupConnectivity()
                 sleep(1)
-                self.sendToBackground(self.setupConnectivity)
-                break
 
     def handleAcknowledgements(self):
         while self.loop():
+            event = self.pool.queue.ack.get()
             try:
-                event = self.pool.queue.ack.get()
-            except QueueEmpty as err:
-                err.waitUntilContent()
-            else:
-                try:
-                    self.channel.basic_ack(event.getHeaderValue(self.name, "delivery_tag"))
-                except Exception as err:
-                    self.pool.queue.ack.rescue(event)
-                    self.logging.error("Failed to acknowledge message.  Reason: %s." % (err))
-                    sleep(0.5)
+                self.channel.basic_ack(event.getHeaderValue(self.name, "delivery_tag"))
+            except Exception as err:
+                self.pool.queue.ack.rescue(event)
+                self.logging.error("Failed to acknowledge message.  Reason: %s." % (err))
+                sleep(0.5)
 
     def handleAcknowledgementsCancel(self):
         while self.loop():
+            event = self.pool.queue.cancel.get()
             try:
-                event = self.pool.queue.cancel.get()
-            except QueueEmpty as err:
-                err.waitUntilContent()
-            else:
-                try:
-                    self.channel.basic_reject(event.getHeaderValue(self.name, "delivery_tag"), True)
-                except Exception as err:
-                    self.pool.queue.ack.rescue(event)
-                    self.logging.error("Failed to cancel acknowledge message.  Reason: %s." % (err))
-                    sleep(0.5)
+                self.channel.basic_reject(event.getHeaderValue(self.name, "delivery_tag"), True)
+            except Exception as err:
+                self.pool.queue.ack.rescue(event)
+                self.logging.error("Failed to cancel acknowledge message.  Reason: %s." % (err))
+                sleep(0.5)
 
     def postHook(self):
         try:

@@ -82,7 +82,8 @@ class Template(Actor):
 
     def construct(self, event):
 
-        for name, template in self.uplook.dump()["header_templates"].iteritems():
+        for name in self.uplook.dump()["header_templates"].iterkeys():
+            template = getattr(self.kwargs.header_templates, name)
             try:
                 template_r = JinjaTemplate(template)
                 event.setHeaderValue(name, template_r.render(**event.data))
