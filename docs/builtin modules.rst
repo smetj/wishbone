@@ -173,12 +173,6 @@ wishbone.output.UDSOut
 Flow modules
 ************
 
-wishbone.flow.consensus
------------------------
-.. autoclass:: wishbone.module.consensus.Consensus
-
---------
-
 wishbone.flow.funnel
 --------------------
 .. autoclass:: wishbone.module.funnel.Funnel
