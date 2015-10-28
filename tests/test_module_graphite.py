@@ -34,18 +34,19 @@ from wishbone.event import Metric
 def test_module_graphite():
 
     actor_config = ActorConfig('graphite', 100, 1, {})
-    graphite = Graphite(actor_config, script=False)
+    graphite = Graphite(actor_config, template='{type}.{source}.{name} {value} {time}')
     graphite.pool.queue.inbox.disableFallThrough()
     graphite.pool.queue.outbox.disableFallThrough()
     graphite.start()
 
     e = Event('test')
-    m = Metric(1381002603.726132, "hostname", "setup", "queue.outbox", "in_rate", 0, ())
+    m = Metric(1381002603.726132, "wishbone", "hostname", "queue.outbox.in_rate", 0, "", ())
+
     e.setData(m)
 
     graphite.pool.queue.inbox.put(e)
     one = getter(graphite.pool.queue.outbox)
 
-    assert one.last.data == "hostname.setup.queue.outbox.in_rate 0 1381002603.73"
+    assert one.last.data == "wishbone.hostname.queue.outbox.in_rate 0 1381002603.73"
 
 test_module_graphite()
