@@ -29,6 +29,7 @@ from .matchrules import MatchRules
 from .readrules import ReadRulesDisk
 import os
 from copy import deepcopy
+from gevent.lock import Semaphore
 
 
 class Match(Actor):
@@ -156,6 +157,7 @@ class Match(Actor):
 
         self.__active_rules = {}
         self.match = MatchRules()
+        self.rule_lock = Semaphore()
 
     def preHook(self):
 
@@ -191,13 +193,14 @@ class Match(Actor):
         new_rules.update(self.kwargs.rules)
         self.__active_rules = new_rules
         self.logging.info("Read %s rules from disk and %s defined in config." % (len(new_rules), len(self.kwargs.rules)))
-
         while self.loop():
             try:
                 new_rules = self.readRules.waitForChanges()
                 new_rules.update(self.kwargs.rules)
                 if cmp(self.__active_rules, new_rules) != 0:
+                    self.rule_lock.acquire()
                     self.__active_rules = new_rules
+                    self.rule_lock.release()
                     self.logging.info("Read %s rules from disk and %s defined in config." % (len(new_rules), len(self.kwargs.rules)))
             except Exception as err:
                 self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
@@ -207,8 +210,8 @@ class Match(Actor):
         '''Submits matching documents to the defined queue along with
         the defined header.'''
 
-        print self.__active_rules
         if isinstance(event.data, dict):
+            self.rule_lock.acquire()
             for rule in self.__active_rules:
                 e = deepcopy(event)
                 if self.evaluateCondition(self.__active_rules[rule]["condition"], e.data):
@@ -225,6 +228,7 @@ class Match(Actor):
                     e.setHeaderValue("rule", rule)
                     self.submit(e, self.pool.queue.nomatch)
                     # self.logging.debug("No match for rule %s." % (rule))
+            self.rule_lock.release()
         else:
             raise Exception("Incoming data is not of type dict, dropped.")
 

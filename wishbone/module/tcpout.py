@@ -63,37 +63,19 @@ class TCPOut(Actor):
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
-    def preHook(self):
-        self.sendToBackground(self.setupConnection)
-
-    def setupConnection(self):
-
-        while self.loop():
-            try:
-                self.socket.sendall('')
-                sleep(1)
-            except Exception as err:
-                while self.loop():
-                    try:
-                        self.socket = socket.socket()
-                        self.socket.settimeout(self.kwargs.timeout)
-                        self.socket.connect((self.kwargs.host, self.kwargs.port))
-                        self.logging.info("Connected to %s:%s." % (self.kwargs.host, self.kwargs.port))
-                        break
-                    except Exception as err:
-                        self.logging.error("Failed to connect to %s:%s. Reason: %s" % (self.kwargs.host, self.kwargs.port, err))
-                        sleep(1)
-
-    def postHook(self):
-        try:
-            self.socket.close()
-            self.logging.info("Connection closed to %s:%s" % (self.kwargs.host, self.kwargs.port))
-        except:
-            pass
-
     def consume(self, event):
+
         if isinstance(event.last.data, list):
             data = self.kwargs.delimiter.join(event.last.data)
         else:
             data = event.last.data
-        self.socket.sendall(str(data) + self.kwargs.delimiter)
+        connection = self.setupConnection()
+        connection.sendall(str(data) + self.kwargs.delimiter)
+        connection.close()
+
+    def setupConnection(self):
+
+        s = socket.socket()
+        s.settimeout(self.kwargs.timeout)
+        s.connect((self.kwargs.host, self.kwargs.port))
+        return s

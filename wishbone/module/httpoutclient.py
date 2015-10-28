@@ -79,6 +79,9 @@ class HTTPOutClient(Actor):
         else:
             raise Exception("Invalid http method defined: '%s'." % self.kwargs.method)
 
+        if self.kwargs.url.startswith('https'):
+            monkey.patch_ssl()
+
     def consume(self, event):
 
         try:
