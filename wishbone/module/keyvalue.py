@@ -67,5 +67,5 @@ class KeyValue(Actor):
         for key, value in self.kwargs.overwrite:
             data[key] = getattr(self.kwargs.overwrite, key)
 
-            event.data = data
-            self.submit(event, self.pool.queue.outbox)
+        event.setData(data)
+        self.submit(event, self.pool.queue.outbox)

@@ -1,6 +1,35 @@
 Wishbone changelog
 ==================
 
+Version 1.1.1
+~~~~~~~~~~~~~
+
+Features:
+
+- Added lock reading rules in wishbone.flow.match module.
+- Monkey patching SSL in wishbone.output.http when doing https.
+- Better disconnect testing in wishbone.output.tcp
+- Workaround for bug in wishbone.function.template where header
+  template values are not read correctly when a lookup function
+  used.
+- Improved logging of jsonvalidate
+
+Bugs:
+
+- Fixed bug in wishbone.function.keyvalue where events got garbled and copied
+  multiple times.
+- Fixed bug in wishbone.input.amqp where reconnects were not happening.
+- Fixed bug where sending logs to logs queue could fill queue and fail with
+  QueueFull.
+- Fixed bug in metric formatting.
+
+Misc:
+
+- Updated to gevent-1.1b5
+- Changed wishbone.output.tcp to open/close connections and do not attempt
+  to keep connection open.
+
+
 Version 1.1.0
 ~~~~~~~~~~~~~
 

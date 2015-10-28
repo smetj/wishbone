@@ -25,6 +25,8 @@
 from wishbone import Actor
 from os import getpid
 from colorama import init, Fore, Back, Style
+from gevent.monkey import patch_sys; patch_sys(stdin=True, stdout=True, stderr=True)
+import sys
 
 
 class Format():
@@ -123,10 +125,11 @@ class STDOUT(Actor):
 
     def consume(self, event):
 
-        print("%s%s%s%s%s" % (getattr(Fore, self.kwargs.foreground_color),
+        sys.stdout.write("%s%s%s%s%s\n" % (getattr(Fore, self.kwargs.foreground_color),
                               getattr(Back, self.kwargs.background_color),
                               getattr(Style, self.kwargs.color_style),
                               self.kwargs.prefix, self.format.do(event)))
+        sys.stdout.flush()
 
     def __validateInput(self, f, b, s):
 

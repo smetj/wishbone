@@ -50,5 +50,9 @@ def test_module_loglevelfilter():
 
     one=getter(loglevelfilter.pool.queue.outbox)
     assert one.data == (1, 1367682301.430527, 3342, 'Router', 'Received SIGINT. Shutting down.')
-    two=getter(loglevelfilter.pool.queue.outbox)
-    assert two == None
+    try:
+        two=getter(loglevelfilter.pool.queue.outbox)
+    except Exception:
+        assert True
+    else:
+        assert False

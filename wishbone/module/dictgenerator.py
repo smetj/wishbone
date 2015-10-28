@@ -23,7 +23,7 @@
 #
 
 from random import choice, randint
-from gevent import sleep
+from gevent import sleep, idle
 from wishbone import Actor
 import os
 
@@ -91,11 +91,6 @@ class DictGenerator(Actor):
 
     def preHook(self):
 
-        if self.kwargs.interval > 0:
-            self.sleep = self.__doSleep
-        else:
-            self.sleep = self.__doNoSleep
-
         if self.kwargs.keys != []:
             self.getDict = self.getDictPredefinedKeys
         else:
@@ -110,7 +105,7 @@ class DictGenerator(Actor):
             event.data = self.getDict()
             self.submit(event, self.pool.queue.outbox)
             self.key_number = +1
-            self.sleep()
+            sleep(self.kwargs.interval)
 
     def getDictPredefinedKeys(self):
 
@@ -145,9 +140,3 @@ class DictGenerator(Actor):
         '''Generates a key by incrementing integer.'''
         self.key_number += 1
         return str(self.key_number)
-
-    def __doSleep(self):
-        sleep(self.kwargs.interval)
-
-    def __doNoSleep(self):
-        pass

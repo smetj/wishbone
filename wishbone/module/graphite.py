@@ -35,26 +35,21 @@ class Graphite(Actor):
 
     Incoming metrics have following format:
 
-        (time, type, source, name, value, unit, (tag1, tag2))
-        (1381002603.726132, 'wishbone', 'hostname', 'queue.outbox.in_rate', 0, '', ())
+        See http://wishbone.readthedocs.org/en/1.1.0/logs%20and%20metrics.html#format
+        for more information about the format.
 
+        Available template variables are:
 
+            time, source, name, value unit, prefix, script, pid, source
 
     Parameters:
 
-        - prefix(str)
-           |  Some prefix to put in front of the metric name.
+        - template(str)('{prefix}.{source}.{script}.{pid}.{type}.{name} {value} {time}'):
+            | The template to use to build the metric structure.
+            | Python templates are used.
 
-        - script(bool)(True)
-           |  Include the script name.
-
-        - pid(bool)(False)
-           |  Include pid value in script name.
-
-        - source(bool)(True):
-           |  Include the source name in the naming schema.
-
-
+        - prefix(str)("wishbone"):
+            |
     Queues:
 
         - inbox
@@ -64,46 +59,21 @@ class Graphite(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, actor_config, prefix='', script=True, pid=False, source=True):
+    def __init__(self, actor_config, template="{prefix}.{source}.{script}.{type}.{name} {value} {time}", prefix='wishbone'):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
-
-    def preHook(self):
-
-        if self.kwargs.script:
-            self.script_name = '.%s' % (basename(argv[0]).replace(".py", ""))
-        else:
-            self.script_name = ''
-
-        if self.kwargs.pid:
-            self.pid = "-%s" % (getpid())
-        else:
-            self.pid = ''
-
-        if self.kwargs.source:
-            self.doConsume = self.__consumeSource
-        else:
-            self.doConsume = self.__consumeNoSource
+        self.script = basename(argv[0]).replace(".py", "")
+        self.pid = getpid()
 
     def consume(self, event):
 
         if isinstance(event.data, Metric):
-            pass
+            v = {"prefix": self.kwargs.prefix, "script": self.script, "pid": self.pid}
+            v.update(event.data._asdict())
+            event.setData(self.kwargs.template.format(**v))
+            self.submit(event, self.pool.queue.outbox)
         else:
             self.logging.error("Metric dropped because not of type <wishbone.event.Metric>")
-
-        self.doConsume(event)
-
-    def __consumeSource(self, event):
-
-        print event.data
-        event.data = "%s%s%s%s.%s.%s.%s %s %s" % (self.kwargs.prefix, event.data.source, self.script_name, self.pid, event.data.module, event.data.queue, event.data.name, event.data.value, event.data.time)
-        self.submit(event, self.pool.queue.outbox)
-
-    def __consumeNoSource(self, event):
-
-        event.data = "%s%s%s.%s.%s.%s %s %s" % (self.kwargs.prefix, self.script_name, self.pid, event.data.module, event.data.queue, event.data.name, event.data.value, event.data.time)
-        self.submit(event, self.pool.queue.outbox)
