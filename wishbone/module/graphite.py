@@ -59,7 +59,7 @@ class Graphite(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, actor_config, template="{prefix}.{source}.{script}[{pid}].{type}.{name} {value} {time}", prefix='wishbone'):
+    def __init__(self, actor_config, template="{prefix}.{source}.{script}.{type}.{name} {value} {time}", prefix='wishbone'):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
