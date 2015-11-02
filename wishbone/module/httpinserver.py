@@ -24,6 +24,7 @@
 
 from wishbone import Actor
 from gevent import pywsgi
+from gevent import socket
 from gevent.pool import Pool
 from wishbone.logging import MockLogger
 
@@ -59,6 +60,11 @@ class HTTPInServer(Actor):
         - poolsize(int)(1000)
             |  The connection pool size.
 
+        - so_reuseport(bool)(False)
+            |  Enables socket option SO_REUSEPORT.
+            |  See https://lwn.net/Articles/542629/
+            |  Required when running multiple Wishbone instances.
+
     Queues:
 
         - outbox
@@ -72,7 +78,7 @@ class HTTPInServer(Actor):
     The root resource "/" is mapped the <outbox> queue.
     '''
 
-    def __init__(self, actor_config, address="0.0.0.0", port=19283, keyfile=None, certfile=None, ca_certs=None, delimiter=None, poolsize=1000):
+    def __init__(self, actor_config, address="0.0.0.0", port=19283, keyfile=None, certfile=None, ca_certs=None, delimiter=None, poolsize=1000, so_reuseport=False):
         Actor.__init__(self, actor_config)
 
         if self.kwargs.delimiter is None:
@@ -157,7 +163,7 @@ class HTTPInServer(Actor):
         pool = Pool(self.kwargs.poolsize)
         if self.kwargs.keyfile is not None and self.kwargs.certfile is not None and self.kwargs.ca_certs is not None:
             self.__server = pywsgi.WSGIServer(
-                (self.kwargs.address, self.kwargs.port),
+                self.getListener(),
                 self.consume,
                 spawn=pool,
                 log=self.logger_info,
@@ -167,11 +173,15 @@ class HTTPInServer(Actor):
                 ca_certs=self.kwargs.ca_certs)
         else:
             self.__server = pywsgi.WSGIServer(
-                (self.kwargs.address, self.kwargs.port),
+                self.getListener(),
                 self.consume,
                 spawn=pool,
                 log=self.logger_info,
                 error_log=self.logger_error)
+
+        if self.kwargs.so_reuseport:
+            self.__server.sock.setsockopt(socket.SOL_SOCKET, 15, 1)
+
         self.__server.start()
         self.logging.info("Serving on %s:%s with a connection poolsize of %s." % (self.kwargs.address, self.kwargs.port, self.kwargs.poolsize))
 
@@ -179,3 +189,17 @@ class HTTPInServer(Actor):
 
         self.logging.info("Stopped serving.")
         self.__server.stop()
+
+    def getListener(self):
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+        if self.kwargs.so_reuseport:
+            sock.setsockopt(socket.SOL_SOCKET, 15, 1)
+
+        sock.setblocking(0)
+        sock.bind((self.kwargs.address, self.kwargs.port))
+        sock.listen(50)
+        return sock
+
