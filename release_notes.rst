@@ -1,6 +1,19 @@
 Wishbone changelog
 ==================
 
+Version 1.1.2
+~~~~~~~~~~~~~
+
+Feature:
+
+- Adding SO_REUSEPORT for wishbone.input.httpserver
+
+Bugs:
+
+Misc:
+
+
+
 Version 1.1.1
 ~~~~~~~~~~~~~
 
