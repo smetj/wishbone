@@ -23,6 +23,7 @@
 #
 
 from wishbone import Actor
+from wishbone.event import Log
 import syslog
 import sys
 import os
@@ -40,8 +41,12 @@ class Syslog(Actor):
 
     Parameters:
 
-        - ident(str)
+        - level(int)(5)
+           |  The loglevel.
+
+        - ident(str)(<script_name>)
            |  The syslog id string.
+           |  If not provided the script name is used.
 
     Queues:
 
@@ -49,20 +54,30 @@ class Syslog(Actor):
            |  incoming events
     '''
 
-    def __init__(self, actor_config, ident=None):
+    def __init__(self, actor_config, level=5, ident=os.path.basename(sys.argv[0])):
         Actor.__init__(self, actor_config)
-        if ident is None:
-            self.kwargs.ident = os.path.basename(sys.argv[0])
-        else:
-            self.kwargs.ident = ident
+
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
+
         syslog.openlog("%s[%s]" % (self.kwargs.ident, os.getpid()))
 
     def consume(self, event):
-        syslog.syslog(event.data.level, "%s: %s" % (event.data.module, event.data.message))
+
+        if isinstance(event.data, Log):
+            syslog.syslog(event.data.level, "%s: %s" % (event.data.module, event.data.message))
+        else:
+            syslog.syslog(self.kwargs.level, "%s: %s" % (self.kwargs.ident, str(event.data)))
 
     def postHook(self):
         syslog.closelog()
+
+    def __getKwargsLevel(self, event):
+
+        return self.kwargs.level
+
+    def __getEventLevel(self, event):
+
+        return event.data.level
