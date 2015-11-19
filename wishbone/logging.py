@@ -74,47 +74,48 @@ class Logging():
             except QueueFull:
                 sleep(0.1)
 
-    def emergency(self, message):
+    def emergency(self, message, *args, **kwargs):
         """Generates a log message with priority emergency(0).
         """
         self.__log(0, message)
     emerg = emergency
+    exception = emergency
 
-    def alert(self, message):
+    def alert(self, message, *args, **kwargs):
         """Generates a log message with priority alert(1).
         """
         self.__log(1, message)
 
-    def critical(self, message):
+    def critical(self, message, *args, **kwargs):
         """Generates a log message with priority critical(2).
         """
         self.__log(2, message)
     crit = critical
 
-    def error(self, message):
+    def error(self, message, *args, **kwargs):
         """Generates a log message with priority error(3).
         """
-        self.__log(3, message)
+        self.__log(3, message, *args, **kwargs)
     err = error
 
-    def warning(self, message):
+    def warning(self, message, *args, **kwargs):
         """Generates a log message with priority warning(4).
         """
-        self.__log(4, message)
+        self.__log(4, message, *args, **kwargs)
     warn = warning
 
-    def notice(self, message):
+    def notice(self, message, *args, **kwargs):
         """Generates a log message with priority notice(5).
         """
         self.__log(5, message)
 
-    def informational(self, message):
+    def informational(self, message, *args, **kwargs):
         """Generates a log message with priority informational(6).
         """
         self.__log(6, message)
     info = informational
 
-    def debug(self, message):
+    def debug(self, message, *args, **kwargs):
         """Generates a log message with priority debug(7).
         """
         self.__log(7, message)
