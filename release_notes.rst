@@ -7,6 +7,7 @@ Version 1.1.2
 Feature:
 
 - Adding SO_REUSEPORT for wishbone.input.httpserver
+- Allow Logger() to easily monkey patch existing logger calls
 
 Bugs:
 
