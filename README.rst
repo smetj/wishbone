@@ -4,7 +4,7 @@ WishBone
 What?
 -----
 
-A Python framework to build event pipeline servers with minimal effort.
+A Python framework to build composable event pipeline servers with minimal effort.
 
 Documentation
 -------------
