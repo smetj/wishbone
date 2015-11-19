@@ -91,7 +91,7 @@ setup(
     name=PROJECT,
     version=VERSION,
 
-    description='Build event pipeline servers with minimal effort.',
+    description='Build composable event pipeline servers with minimal effort.',
     long_description=long_description,
 
     author='Jelle Smet',
