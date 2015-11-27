@@ -251,6 +251,3 @@ class Actor():
                     event.data = Metric(time=time(), type="wishbone", source=hostname, name="module.%s.queue.%s.%s" % (self.name, queue, metric), value=value, unit="", tags=())
                     self.submit(event, self.pool.queue.metrics)
             sleep(self.frequency)
-
-
-
