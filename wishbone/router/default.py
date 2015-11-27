@@ -106,6 +106,7 @@ class Default(multiprocessing.Process):
         self.initiate_stop = event.Event()
         self.initiate_stop.clear()
         spawn(self.stop)
+        spawn(self.__collectMetrics)
 
     def block(self):
         '''Blocks until stop() is called.'''
@@ -157,6 +158,26 @@ class Default(multiprocessing.Process):
 
         self.__running = False
         self.__block.set()
+
+    def __collectMetrics(self):
+
+        def getConnectedModuleQueue(m, q):
+            for c in self.config.routingtable:
+                if c.source_module == m and c.source_queue == q:
+                    return (c.destination_module, c.destination_queue)
+            return (None, None)
+
+        d = {"module": {}}
+        while not self.__block.isSet():
+            for module in self.module_pool.list():
+                d["module"][module.name] = {}
+                for queue in module.pool.listQueues(names=True):
+                    d["module"][module.name]["queue"] = {queue: {"metrics": module.pool.getQueue(queue).stats()}}
+                    (dest_mod, dest_q) = getConnectedModuleQueue(module.name, queue)
+                    if dest_mod is not None and dest_q is not None:
+                        d["module"][module.name]["queue"] = {queue: {"connection": {"module": dest_mod, "queue": dest_q}}}
+            print d
+            sleep(1)
 
     def __connect(self, source, destination):
         '''Connects one queue to the other.
