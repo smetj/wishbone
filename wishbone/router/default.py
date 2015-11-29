@@ -28,7 +28,10 @@ from wishbone.error import ModuleInitFailure, NoSuchModule, QueueConnected
 from gevent import signal, event, sleep, spawn
 import multiprocessing
 import importlib
-
+from gevent.pywsgi import WSGIServer
+import json
+from .monitorcontent import MONITORCONTENT
+from .monitorcontent import VisJSData
 
 class Container():
     pass
@@ -81,7 +84,7 @@ class Default(multiprocessing.Process):
 
     '''
 
-    def __init__(self, router_config, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False):
+    def __init__(self, router_config, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False, monitor=False):
 
         if process:
             multiprocessing.Process.__init__(self)
@@ -93,6 +96,7 @@ class Default(multiprocessing.Process):
         self.identification = identification
         self.stdout_logging = stdout_logging
         self.process = process
+        self.monitor = monitor
 
         self.module_pool = ModulePool()
 
@@ -106,7 +110,6 @@ class Default(multiprocessing.Process):
         self.initiate_stop = event.Event()
         self.initiate_stop.clear()
         spawn(self.stop)
-        spawn(self.__collectMetrics)
 
     def block(self):
         '''Blocks until stop() is called.'''
@@ -158,26 +161,6 @@ class Default(multiprocessing.Process):
 
         self.__running = False
         self.__block.set()
-
-    def __collectMetrics(self):
-
-        def getConnectedModuleQueue(m, q):
-            for c in self.config.routingtable:
-                if c.source_module == m and c.source_queue == q:
-                    return (c.destination_module, c.destination_queue)
-            return (None, None)
-
-        d = {"module": {}}
-        while not self.__block.isSet():
-            for module in self.module_pool.list():
-                d["module"][module.name] = {}
-                for queue in module.pool.listQueues(names=True):
-                    d["module"][module.name]["queue"] = {queue: {"metrics": module.pool.getQueue(queue).stats()}}
-                    (dest_mod, dest_q) = getConnectedModuleQueue(module.name, queue)
-                    if dest_mod is not None and dest_q is not None:
-                        d["module"][module.name]["queue"] = {queue: {"connection": {"module": dest_mod, "queue": dest_q}}}
-            print d
-            sleep(1)
 
     def __connect(self, source, destination):
         '''Connects one queue to the other.
@@ -283,8 +266,86 @@ class Default(multiprocessing.Process):
         self.__initConfig()
         self.__running = True
 
+        if self.monitor:
+            self.monitor = MonitorWebserver(self.config, self.module_pool, self.__block)
+            self.monitor.start()
+
         for module in self.module_pool.list():
             module.start()
 
         self.block()
+
+
+class MonitorWebserver():
+
+    def __init__(self, config, module_pool, block):
+        self.config = config
+        self.module_pool = module_pool
+        self.block = block
+        self.js_data = VisJSData()
+
+        # for module in self.module_pool.list():
+        #     self.js_data.addNode(module.name)
+
+        # for connection in self.config.routingtable:
+
+        #     self.js_data.addEdge(connection.source_module,
+        #                          connection.source_queue,
+        #                          connection.destination_module,
+        #                          connection.destination_queue)
+
+        for c in self.config.routingtable:
+            self.js_data.addModule(c.source_module)
+            self.js_data.addModule(c.destination_module)
+            self.js_data.addQueue(c.source_module, c.source_queue)
+            self.js_data.addQueue(c.destination_module, c.destination_queue)
+            self.js_data.addEdge2("%s.%s" % (c.source_module, c.source_queue), "%s.%s" % (c.destination_module, c.destination_queue))
+
+        # for connection in self.config.routingtable:
+        #     self.js_data.addEdge2("%s.%s" % (connection.source_module, connection.source_queue),
+        #                           "%s.%s" % (connection.destination_module, connection.destination_queue)
+            # )
+
+    def start(self):
+        spawn(self.setupWebserver)
+
+    def stop(self):
+        pass
+
+    def loop(self):
+
+        return not self.block.isSet()
+
+    def getMetrics(self):
+
+        def getConnectedModuleQueue(m, q):
+            for c in self.config.routingtable:
+                if c.source_module == m and c.source_queue == q:
+                    return (c.destination_module, c.destination_queue)
+            return (None, None)
+
+        d = {"module": {}}
+        for module in self.module_pool.list():
+            d["module"][module.name] = {}
+            for queue in module.pool.listQueues(names=True):
+                d["module"][module.name]["queue"] = {queue: {"metrics": module.pool.getQueue(queue).stats()}}
+                (dest_mod, dest_q) = getConnectedModuleQueue(module.name, queue)
+                if dest_mod is not None and dest_q is not None:
+                    d["module"][module.name]["queue"] = {queue: {"connection": {"module": dest_mod, "queue": dest_q}}}
+        return json.dumps(d)
+
+    def application(self, env, start_response):
+        if env['PATH_INFO'] == '/':
+            start_response('200 OK', [('Content-Type', 'text/html')])
+            return[MONITORCONTENT % (self.js_data.dumpString()[0], self.js_data.dumpString()[1])]
+        elif env['PATH_INFO'] == '/metrics':
+            start_response('200 OK', [('Content-Type', 'text/html')])
+            return[self.getMetrics()]
+        else:
+            start_response('404 Not Found', [('Content-Type', 'text/html')])
+            return [b'<h1>Not Found</h1>']
+
+    def setupWebserver(self):
+
+        WSGIServer(('', 8088), self.application, log=None, error_log=None).serve_forever()
 

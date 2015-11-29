@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  __uinit__.py
+#  __init__.py
 #
 #  Copyright 2015 Jelle Smet <development@smetj.net>
 #
