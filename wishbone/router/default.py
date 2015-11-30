@@ -301,10 +301,10 @@ class MonitorWebserver():
             self.js_data.addQueue(c.destination_module, c.destination_queue)
             self.js_data.addEdge2("%s.%s" % (c.source_module, c.source_queue), "%s.%s" % (c.destination_module, c.destination_queue))
 
-        # for connection in self.config.routingtable:
-        #     self.js_data.addEdge2("%s.%s" % (connection.source_module, connection.source_queue),
-        #                           "%s.%s" % (connection.destination_module, connection.destination_queue)
-            # )
+        for connection in self.config.routingtable:
+            self.js_data.addEdge2("%s.%s" % (connection.source_module, connection.source_queue),
+                                  "%s.%s" % (connection.destination_module, connection.destination_queue)
+            )
 
     def start(self):
         spawn(self.setupWebserver)

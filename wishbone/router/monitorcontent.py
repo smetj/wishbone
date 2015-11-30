@@ -32,12 +32,9 @@ MONITORCONTENT = """
 
   <style type="text/css">
     #mynetwork {
-      width: 1200px;
-      height: 1200px;
-      border: 1px solid lightgray;
-    }
-    p {
-      max-width:600px;
+      width: 100px;
+      height: 100px;
+      border: 0px solid lightgray;
     }
   </style>
 
@@ -47,8 +44,6 @@ MONITORCONTENT = """
 </head>
 
 <body>
-
-<p>Labels of edges can be aligned to edges in various ways. <br>Label alignment for nodes (top, bottom, left, right, inside) is planned but not in vis yet.</p>
 
 <div id="mynetwork"></div>
 
@@ -66,11 +61,36 @@ MONITORCONTENT = """
     edges: edges
   };
 
-    var options = {
-        layout: {
-
-        }
-    };
+//    var options = {
+//        "height":  window.innerHeight,
+//        "width":  window.innerWidth,
+//        "edges": {
+//            "smooth": {
+//              "forceDirection": "none"
+//            }
+//        }
+//    };
+var options = {
+  "height":  window.innerHeight,
+  "width":  window.innerWidth,
+  "edges": {
+    "smooth": false
+  },
+  "layout": {
+    "hierarchical": {
+      "enabled": true,
+      "direction": "UD",
+      "sortMethod": "directed"
+    }
+  },
+  "physics": {
+    "hierarchicalRepulsion": {
+      "centralGravity": 0
+    },
+    "minVelocity": 0.75,
+    "solver": "hierarchicalRepulsion"
+  }
+}
   var network = new vis.Network(container, data, options);
 </script>
 
@@ -91,19 +111,42 @@ class VisJSData():
     def addModule(self, name):
 
         if name not in self.nodes.keys():
-            self.nodes[name] = {"id": self.id, "label": name, "shape": "square"}
+            self.nodes[name] = {"id": self.id,
+                                "label": name,
+                                "shape": "dot",
+                                "size": 20,
+                                "title": "Module: %s" % (name),
+                                "shadow": True,
+                                "font.size": 20
+                                }
             self.id += 1
 
     def addQueue(self, module, name):
 
         if name not in self.nodes.keys():
-            self.nodes["%s.%s" % (module, name)] = {"id": self.id, "label": name, "shape": "circle"}
-            self.edges.append({"from": self.nodes[module]["id"], "to": self.nodes["%s.%s" % (module, name)]["id"]})
+            self.nodes["%s.%s" % (module, name)] = {"id": self.id,
+                                                    "label": name,
+                                                    "shape": "dot",
+                                                    "size": 5,
+                                                    "title": "Queue: %s.%s" % (module, name),
+                                                    "shadow": True,
+                                                    "font.size": 20
+                                                    }
+            self.edges.append({"from": self.nodes[module]["id"],
+                               "to": self.nodes["%s.%s" % (module, name)]["id"],
+                               "dashes": True})
             self.id += 1
 
-    def addNode(self, label):
+    def addNode(self, name):
 
-        self.nodes[label] = ({"id": self.id, "label": label})
+        self.nodes[name] = {"id": self.id,
+                            "label": name,
+                            "shape": "dot",
+                            "size": 5,
+                            "title": "Module: %s" % (name),
+                            "shadow": True,
+                            "font.size": 20
+                            }
         self.id += 1
 
     def addEdge2(self, f, t):
