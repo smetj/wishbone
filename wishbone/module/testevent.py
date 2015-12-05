@@ -23,6 +23,7 @@
 #
 
 from wishbone import Actor
+from wishbone.event import Event
 from gevent import sleep
 
 
@@ -54,7 +55,6 @@ class TestEvent(Actor):
 
     def __init__(self, actor_config, interval=1, message="test", numbered=False):
         Actor.__init__(self, actor_config)
-
         self.pool.createQueue("outbox")
 
     def preHook(self):
@@ -75,9 +75,8 @@ class TestEvent(Actor):
     def produce(self):
 
         while self.loop():
-            event = self.createEvent()
-            event.data = self.generateMessage(self.kwargs.message)
-            self.submit(event, self.pool.queue.outbox)
+            message = self.generateMessage(self.kwargs.message)
+            self.submit(Event(message), self.pool.queue.outbox)
             self.sleep()
 
         self.logging.info("Stopped producing events.")
