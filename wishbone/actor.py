@@ -98,10 +98,12 @@ class Actor():
 
     def createEvent(self):
 
-        '''Convenience function which returns an empty     Wishbone event with the
-        current namespace already set.'''
+        '''
+        Convenience function which returns an empty Wishbone event with the
+        current namespace already set.
+        '''
 
-        return Wishbone_Event(self.name)
+        return Wishbone_Event()
 
     def doEventLookup(self, name):
         (n, t, k) = name.split('.')
@@ -203,11 +205,10 @@ class Actor():
         while self.loop():
             event = self.pool.queue.__dict__[queue].get()
             self.current_event = event
-            event.initNamespace(self.name)
-
             try:
                 function(event)
             except Exception as err:
+                raise
                 exc_type, exc_value, exc_traceback = exc_info()
                 event.setErrorValue(traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value))
                 self.logging.error("%s" % (err))
@@ -251,6 +252,3 @@ class Actor():
                     event.data = Metric(time=time(), type="wishbone", source=hostname, name="module.%s.queue.%s.%s" % (self.name, queue, metric), value=value, unit="", tags=())
                     self.submit(event, self.pool.queue.metrics)
             sleep(self.frequency)
-
-
-

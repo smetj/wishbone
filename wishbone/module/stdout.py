@@ -53,7 +53,7 @@ class Format():
         return event.raw()
 
     def __returnIncomplete(self, event):
-        return event.last.data
+        return event.get('@data')
 
     def __returnCounter(self, event):
         self.countervalue += 1

@@ -24,6 +24,7 @@
 
 from copy import deepcopy
 from collections import namedtuple
+import time
 
 
 class Container():
@@ -56,124 +57,62 @@ class Event(object):
     module to the other.
     '''
 
-    def __init__(self, namespace):
-        self.module = Namespace()
-        self.initNamespace(namespace)
-        self.last = self.module.__dict__[namespace]
-        self.__source_queue = None
-        self.__source_namespace = None
+    def __init__(self, data=None):
+
+
+        self.data = {
+            "@epoch": time.time(),
+            "@tz": time.tzname[time.daylight],
+            "@data": data,
+            "@tmp": {
+            }
+        }
 
     def clone(self):
-        '''
-        returns a deep copy instance of the event.
-        '''
-
         return deepcopy(self)
 
-    def initNamespace(self, namespace):
-        '''
-        Initializes an empty event namespace.
-        Usually this is the module's instance name to which to which the event
-        arrives.
-        '''
+    def copy(self, source, destination):
 
-        if namespace not in self.module.__dict__:
-            self.module.__dict__[namespace] = Module(namespace)
-        self.current_namespace = namespace
+        self.set(destination, deepcopy(self.get(source)))
 
-    def getData(self, namespace, clone=False):
-        '''
-        Returns the data value of the requested namespace.
-        When clone is True, a deepcopied version is returned.
-        '''
+    def delete(self, key=None):
 
-        if clone:
-            return deepcopy(self.module.__dict__[namespace].data)
+        if key is None:
+            self.data = None
         else:
-            return self.module.__dict__[namespace].data
+            key = '.'.join(key.split('.')[:-1])
+            self.set(key, None)
 
-    def getHeaderValue(self, namespace, key, clone=False):
-        '''
-        Returns the header values of the requested namespace.
-        When clone is True, a deepcopied version is returned.
-        '''
+    def get(self, key=None):
 
-        return self.module.__dict__[namespace].header.__dict__[key]
+        def travel(path, d):
 
-    def listNamespace(self):
-        '''
-        Returns a generator returning over all registered namespace
-        instances.
-        '''
+            if len(path) == 1:
+                if isinstance(d, dict):
+                    return d[path[0]]
+                else:
+                    raise Exception()
+            else:
+                return travel(path[1:], d[path[0]])
+        if key is None:
+            return self.data
+        else:
+            path = key.split('.')
+            try:
+                return travel(path, self.data)
+            except:
+                raise KeyError(key)
 
-        for module in self.module.__dict__:
-            yield self.module.__dict__[module]
+    def set(self, value, key="@data"):
 
-    def lookupHeaderValue(self, name, clone=False):
-        '''
-        Returns the header value using dotted format.
-        When clone is True, a deepcopied version is returned.
-        '''
+        result = value
+        for name in reversed(key.split('.')):
+            result = {name: result}
+        self.data.update(result)
 
-        (namespace, key) = name.split('.')
-        return self.getHeaderValue(namespace, key, clone)
+    def dump(self):
+        return self.data
 
     def raw(self):
-        '''
-        Returns a dictionary representation of the event.
-        '''
-
-        data = {}
-        for module in self.listNamespace():
-            data[module.name] = {"header": module.header.__dict__, "data": module.data, "error": module.error.__dict__}
-        return data
-
-    def rollBackEvent(self):
-
-        '''When invoked resubmits this event to the queue it came from'''
-
-        if self.__source_queue is None or self.__source_namespace is None:
-            pass
-        else:
-            del (self.module.__dict__[self.current_namespace])
-            self.current_namespace = self.__source_namespace
-            self.__source_queue.put(self)
-
-    def setSource(self, queue):
-
-        self.__source_namespace = self.current_namespace
-        self.__source_queue = queue
-
-    def setData(self, data):
-        '''
-        Sets the data value of the requested namespace.
-        '''
-
-        self.module.__dict__[self.current_namespace].data = data
-        self.last = self.module.__dict__[self.current_namespace]
-
-    def setErrorValue(self, line, error_type, error_value):
-        '''Sets the error value for the current namespace.'''
-
-        self.module.__dict__[self.current_namespace].error.line = line
-        self.module.__dict__[self.current_namespace].error.type = error_type
-        self.module.__dict__[self.current_namespace].error.type = error_value
-
-    def setHeaderValue(self, key, value, namespace=None):
-        '''Sets the header value of the requested namespace.
-
-        When <namespace> has value <None> then the current namespace is used.
-        '''
-
-        if namespace is None:
-            namespace = self.current_namespace
-        else:
-            if namespace not in self.module.__dict__:
-                self.module.__dict__[namespace] = Module(namespace)
-
-        self.module.__dict__[namespace].header.__dict__[key] = value
-
-    def __getLastData(self):
-        return self.last.data
-
-    data = property(__getLastData, setData)
+        return self.data
+        ""

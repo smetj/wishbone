@@ -134,6 +134,11 @@ class Match(Actor):
            |  For example:
            |  {"omg": {"condition": [{"greeting": "re:^hello$"}], "queue": [{"outbox": {"one": 1}}]}}
 
+        - ignore_missing_fields(bool)(False)
+           |  When a doc is missing a field which is evaluated in the
+           |  condition this will simply be ignored and therefor can still yield a match.
+           |  When set to False(default) a missing field will automatically result in a non-match.
+
 
     Queues:
 
@@ -148,7 +153,7 @@ class Match(Actor):
 
     '''
 
-    def __init__(self, actor_config, location="", rules={}):
+    def __init__(self, actor_config, location="", rules={}, ignore_missing_fields=False):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -243,5 +248,6 @@ class Match(Actor):
                         pass
                         # self.logging.debug("field %s with condition %s MATCHES value %s" % (field, condition[field], fields[field]))
                 else:
-                    return False
+                    if not self.kwargs.ignore_missing_fields:
+                        return False
         return True
