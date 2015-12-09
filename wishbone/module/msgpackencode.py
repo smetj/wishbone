@@ -63,16 +63,13 @@ class MSGPackEncode(Actor):
             self.encode = self.__encodeData
 
     def consume(self, event):
-        event = self.encode(event)
+        event.set(self.encode(event.get()))
         self.submit(event, self.pool.queue.outbox)
 
     def __encodeComplete(self, event):
-        event.data = msgpack.packb(event)
+        event.set(msgpack.packb(event.dump(convert_timestamp=False)))
         return event
 
     def __encodeData(self, event):
-        event.data = msgpack.packb(event.data)
+        event.set(msgpack.packb(event.get()))
         return event
-
-
-

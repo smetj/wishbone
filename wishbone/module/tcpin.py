@@ -23,6 +23,7 @@
 #
 
 from wishbone import Actor
+from wishbone.event import Event
 from gevent.server import StreamServer
 from gevent.pool import Pool
 from gevent import socket, sleep
@@ -134,8 +135,7 @@ class TCPIn(Actor):
                 self.logging.debug("Client %s disconnected." % (str(address[0])))
                 break
             else:
-                event = self.createEvent()
-                event.data = chunk.rstrip('\r\n')
+                event = Event(chunk.rstrip('\r\n'))
                 self.submit(event, self.pool.queue.outbox)
 
     def __handleDelimiter(self, sock, address):
@@ -145,10 +145,9 @@ class TCPIn(Actor):
 
         while self.loop():
             chunk = sfile.readline()
-            event = self.createEvent()
             if not chunk:
                 if len(data) > 0:
-                    event.data = ''.join(data)
+                    event = Event(''.join(data))
                     self.submit(event, self.pool.queue.outbox)
                 self.logging.debug("Client %s disconnected." % (str(address[0])))
                 break
@@ -157,7 +156,7 @@ class TCPIn(Actor):
                 chunk = chunk.rstrip(self.kwargs.delimiter)
                 if chunk != '':
                     data.append(chunk)
-                    event.data = ''.join(data)
+                    event = Event(''.join(data))
                     self.submit(event, self.pool.queue.outbox)
                     data = []
             else:

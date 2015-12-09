@@ -26,6 +26,7 @@ from gevent import monkey; monkey.patch_socket()
 import requests
 
 from wishbone import Actor
+from wishbone.event import Event
 from gevent import sleep
 
 
@@ -77,16 +78,15 @@ class HTTPInClient(Actor):
 
     def scheduler(self, url):
         while self.loop():
-            event = self.createEvent()
-            event.data = None
+
             try:
                 response = requests.get(url, auth=(self.kwargs.username, self.kwargs.password))
             except Exception as err:
                 self.logging.warn("Problem requesting resource.  Reason: %s" % (err))
                 sleep(1)
             else:
-                event.setHeaderValue("status_code", response.status_code)
-                event.setHeaderValue("url", url)
-                event.data = response.text
+                event = Event(response.text)
+                event.set(response.status_code, "@tmp.%s.status_code" % (self.name))
+                event.set(response.url, "@tmp.%s.url" % (self.name))
                 self.submit(event, self.pool.queue.outbox)
                 sleep(self.kwargs.interval)

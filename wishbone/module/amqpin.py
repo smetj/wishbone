@@ -24,9 +24,9 @@
 
 from gevent import monkey;monkey.patch_all()
 from wishbone import Actor
-from wishbone.error import QueueEmpty
 from amqp.connection import Connection as amqp_connection
 from gevent import sleep
+from wishbone.event import Event
 
 
 class AMQPIn(Actor):
@@ -126,9 +126,8 @@ class AMQPIn(Actor):
         self.sendToBackground(self.handleAcknowledgementsCancel)
 
     def consume(self, message):
-        event = self.createEvent()
-        event.setHeaderValue("delivery_tag", message.delivery_info["delivery_tag"])
-        event.data = str(message.body)
+        event = Event(str(message.body))
+        event.set(message.delivery_info["delivery_tag"], "@tmp.%s.delivery_tag" % (self.name))
         self.submit(event, self.pool.queue.outbox)
 
     def setupConnectivity(self):
@@ -173,7 +172,7 @@ class AMQPIn(Actor):
         while self.loop():
             event = self.pool.queue.ack.get()
             try:
-                self.channel.basic_ack(event.getHeaderValue(self.name, "delivery_tag"))
+                self.channel.basic_ack(event.get("@tmp.%s.delivery_tag" % (self.name)))
             except Exception as err:
                 self.pool.queue.ack.rescue(event)
                 self.logging.error("Failed to acknowledge message.  Reason: %s." % (err))
@@ -183,7 +182,7 @@ class AMQPIn(Actor):
         while self.loop():
             event = self.pool.queue.cancel.get()
             try:
-                self.channel.basic_reject(event.getHeaderValue(self.name, "delivery_tag"), True)
+                self.channel.basic_reject(event.get("@tmp.%s.delivery_tag" % (self.name)), True)
             except Exception as err:
                 self.pool.queue.ack.rescue(event)
                 self.logging.error("Failed to cancel acknowledge message.  Reason: %s." % (err))

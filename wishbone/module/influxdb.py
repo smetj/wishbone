@@ -64,11 +64,13 @@ class InfluxDB(Actor):
 
     def consume(self, event):
 
-        if isinstance(event.data, Metric):
-            event.setData(self.generate(event.data))
+        data = event.get()
+
+        if isinstance(data, Metric):
+            event.set(self.generate(data))
             self.submit(event, self.pool.queue.outbox)
         else:
-            self.logging.error("Metric dropped because not of type <wishbone.event.Metric>")
+            self.logging.error("Event dropped because not of type <wishbone.event.Metric>")
 
     def generate(self, data):
 

@@ -31,7 +31,6 @@ import os
 import cPickle as pickle
 
 
-
 class DiskIn(Actor):
 
     '''**Reads messages from a disk buffer.**
