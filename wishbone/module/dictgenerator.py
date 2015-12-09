@@ -23,8 +23,9 @@
 #
 
 from random import choice, randint
-from gevent import sleep, idle
+from gevent import sleep
 from wishbone import Actor
+from wishbone.event import Event
 import os
 
 
@@ -101,8 +102,8 @@ class DictGenerator(Actor):
     def generateDicts(self):
 
         while self.loop():
-            event = self.createEvent()
-            event.data = self.getDict()
+            d = self.getDict()
+            event = Event(d)
             self.submit(event, self.pool.queue.outbox)
             self.key_number = +1
             sleep(self.kwargs.interval)

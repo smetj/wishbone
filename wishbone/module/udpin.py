@@ -23,6 +23,7 @@
 #
 
 from wishbone import Actor
+from wishbone.event import Event
 from gevent.server import DatagramServer
 
 
@@ -61,8 +62,7 @@ class UDPIn(Actor):
     def handle(self, data, address):
         '''Is called upon each incoming message'''
 
-        event = self.createEvent()
-        event.data = data
+        event = Event(data)
         self.submit(event, self.pool.queue.outbox)
 
     def preHook(self):

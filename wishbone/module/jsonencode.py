@@ -57,5 +57,5 @@ class JSONEncode(Actor):
 
     def consume(self, event):
 
-        event.setData(dumps(event.data))
+        event.set(dumps(event.get()))
         self.submit(event, self.pool.queue.outbox)

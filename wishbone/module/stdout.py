@@ -50,7 +50,7 @@ class Format():
         return self.pid(self.counter(self.complete(event)))
 
     def __returnComplete(self, event):
-        return event.raw()
+        return event.raw(tmp=True)
 
     def __returnIncomplete(self, event):
         return event.get('@data')

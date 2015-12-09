@@ -99,15 +99,15 @@ class HumanLogFormat(Actor):
     def consume(self, event):
 
         data = event.get('@data')
-        if isinstance(event.get('@data'), Log):
+        print data
+        if isinstance(data, Log):
             log = ("%s %s %s %s: %s" % (
                 strftime("%Y-%m-%dT%H:%M:%S", localtime(data.time)),
                 "%s[%s]:" % (self.kwargs.ident, data.pid),
                 self.levels[data.level],
                 data.module,
                 data.message))
-            print self.colorize(log, data.level)
-            event.set(self.colorize(log, data.level), '@data' )
+            event.set(self.colorize(log, data.level))
             self.submit(event, self.pool.queue.outbox)
         else:
             raise Exception("Incoming data needs to be of type <wishbone.event.Log>. Dropped event.")

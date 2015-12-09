@@ -70,10 +70,10 @@ class Graphite(Actor):
 
     def consume(self, event):
 
-        if isinstance(event.data, Metric):
+        if isinstance(event.get(), Metric):
             v = {"prefix": self.kwargs.prefix, "script": self.script, "pid": self.pid}
-            v.update(event.data._asdict())
-            event.setData(self.kwargs.template.format(**v))
+            v.update(event.get()._asdict())
+            event.set(self.kwargs.template.format(**v))
             self.submit(event, self.pool.queue.outbox)
         else:
             self.logging.error("Metric dropped because not of type <wishbone.event.Metric>")
