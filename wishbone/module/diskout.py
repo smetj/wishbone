@@ -30,6 +30,7 @@ from uuid import uuid4
 import os
 import cPickle as pickle
 
+
 class DiskOut(Actor):
 
     '''**Writes messages to a disk buffer.**
