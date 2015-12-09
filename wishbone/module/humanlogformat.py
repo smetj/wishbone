@@ -99,7 +99,6 @@ class HumanLogFormat(Actor):
     def consume(self, event):
 
         data = event.get('@data')
-        print data
         if isinstance(data, Log):
             log = ("%s %s %s %s: %s" % (
                 strftime("%Y-%m-%dT%H:%M:%S", localtime(data.time)),

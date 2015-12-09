@@ -32,8 +32,7 @@ class Template(Actor):
 
     '''**A Wishbone module which generates a text from a dictionary and a template.**
 
-    Convert a dictionary to a text using the Jinja2 template defined in the
-    header.
+    Converts a dictionary to a text using the defined Jinja2 template.
 
     Optionally header template values can be converted too.
 
@@ -45,6 +44,12 @@ class Template(Actor):
 
         - template(str)()*
            |  The template filename stored in directory <location>.
+
+        - source(str)("@data")*
+           |  The dictionary to use.
+
+        - destination(str)("@data")*
+           |  The location to which the rendered result has to be stored.
 
         - header_templates(dict)({})*
            |  A dict of templates to render. Can be lookup values.
@@ -63,7 +68,7 @@ class Template(Actor):
 
     '''
 
-    def __init__(self, actor_config, location="./", template=None, header_templates={}):
+    def __init__(self, actor_config, location="./", template=None, source="@data", destination="@data", header_templates={}):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -82,11 +87,11 @@ class Template(Actor):
 
     def construct(self, event):
 
-        for name in self.uplook.dump()["header_templates"].iterkeys():
-            template = getattr(self.kwargs.header_templates, name)
+        for name, template in self.kwargs.header_templates:
             try:
                 template_r = JinjaTemplate(template)
-                event.setHeaderValue(name, template_r.render(**event.data))
+                result = template_r.render(**event.get())
+                event.set(result, "@tmp.%s.%s" % (self.name, name))
             except Exception as err:
                 self.logging.warning(
                     "Failed to convert header key '%s'.  Reason: %s" % (name, err))
@@ -100,7 +105,8 @@ class Template(Actor):
                 raise
             else:
                 try:
-                    event.data = template.render(**event.data)
+                    result = template.render(**event.get(self.kwargs.source))
+                    event.set(result, self.kwargs.destination)
                 except Exception as err:
                     self.logging.error('There was an error processing the template. Reason: %s' % (err))
                     raise
