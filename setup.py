@@ -143,10 +143,8 @@ setup(
             'json = wishbone.module.jsondecode:JSONDecode'
         ],
         'wishbone.function': [
-            'header = wishbone.module.header:Header',
             'modify = wishbone.module.modify:Modify',
             'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate',
-            'keyvalue = wishbone.module.keyvalue:KeyValue',
             'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
             'template = wishbone.module.template:Template'
         ],

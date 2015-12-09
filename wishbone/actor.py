@@ -248,7 +248,13 @@ class Actor():
         while self.loop():
             for queue in self.pool.listQueues(names=True):
                 for metric, value in self.pool.getQueue(queue).stats().iteritems():
-                    event = Wishbone_Event(self.name)
-                    event.data = Metric(time=time(), type="wishbone", source=hostname, name="module.%s.queue.%s.%s" % (self.name, queue, metric), value=value, unit="", tags=())
+                    metric = Metric(time=time(),
+                                    type="wishbone",
+                                    source=hostname,
+                                    name="module.%s.queue.%s.%s" % (self.name, queue, metric),
+                                    value=value,
+                                    unit="",
+                                    tags=())
+                    event = Wishbone_Event(metric)
                     self.submit(event, self.pool.queue.metrics)
             sleep(self.frequency)

@@ -24,7 +24,7 @@
 
 from copy import deepcopy
 from collections import namedtuple
-import time
+import arrow
 
 
 class Container():
@@ -59,10 +59,9 @@ class Event(object):
 
     def __init__(self, data=None):
 
-
         self.data = {
-            "@epoch": time.time(),
-            "@tz": time.tzname[time.daylight],
+            "@timestamp": arrow.now(),
+            "@version": 1,
             "@data": data,
             "@tmp": {
             }
@@ -83,7 +82,7 @@ class Event(object):
             key = '.'.join(key.split('.')[:-1])
             self.set(key, None)
 
-    def get(self, key=None):
+    def get(self, key="@data"):
 
         def travel(path, d):
 
@@ -110,9 +109,17 @@ class Event(object):
             result = {name: result}
         self.data.update(result)
 
-    def dump(self):
-        return self.data
+    def dump(self, tmp=False, convert_timestamp=True):
 
-    def raw(self):
-        return self.data
-        ""
+        d = {}
+        for key, value in self.data.iteritems():
+            if key == "@tmp" and not tmp:
+                continue
+            elif isinstance(value, arrow.arrow.Arrow) and convert_timestamp:
+                d[key] = str(value)
+            else:
+                d[key] = value
+
+        return d
+
+    raw = dump
