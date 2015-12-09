@@ -1,0 +1,18 @@
+---
+modules:
+  input:
+    module: wishbone.input.dictgenerator
+    arguments:
+      interval: 0
+      keys:
+        - one
+        - two
+        - three
+
+  output:
+    module: wishbone.output.elasticsearch
+
+
+routingtable:
+  - input.outbox            -> output.inbox
+...
