@@ -81,6 +81,6 @@ class ZMQPushOut(Actor):
 
         try:
             # self.socket.send(event.data, flags=zmq.NOBLOCK)
-            self.socket.send(event.data)
+            self.socket.send(event.get())
         except Exception as err:
             self.logging.error("Failed to submit message.  Reason: %s" % (err))

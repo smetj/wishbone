@@ -69,7 +69,6 @@ class ZMQTopicOut(Actor):
     def consume(self, event):
 
         try:
-            self.socket.send("%s %s" % (self.kwargs.topic, event.data))
+            self.socket.send("%s %s" % (self.kwargs.topic, event.get()))
         except Exception as err:
-            self.logging.error("Failed to submit message.  Reason %s" % (err))
-            raise  # reraise the exception.
+            raise ("Failed to submit message.  Reason %s" % (err))

@@ -82,10 +82,10 @@ class FileOut(Actor):
         self.file.flush()
 
     def returnDataOnly(self, event):
-        return event.data
+        return event.get()
 
     def returnComplete(self, event):
-        return event.raw()
+        return event.raw(tmp=True)
 
     def returnTimestamp(self):
 

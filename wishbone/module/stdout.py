@@ -126,9 +126,9 @@ class STDOUT(Actor):
     def consume(self, event):
 
         sys.stdout.write("%s%s%s%s%s\n" % (getattr(Fore, self.kwargs.foreground_color),
-                              getattr(Back, self.kwargs.background_color),
-                              getattr(Style, self.kwargs.color_style),
-                              self.kwargs.prefix, self.format.do(event)))
+                                           getattr(Back, self.kwargs.background_color),
+                                           getattr(Style, self.kwargs.color_style),
+                                           self.kwargs.prefix, self.format.do(event)))
         sys.stdout.flush()
 
     def __validateInput(self, f, b, s):

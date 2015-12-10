@@ -67,7 +67,7 @@ class EmailOut(Actor):
     def consume(self, event):
 
         try:
-            message = MIMEText(str(event.data))
+            message = MIMEText(str(event.get()))
             message["Subject"] = self.kwargs.subject
             message["From"] = self.kwargs.from_address
             message["To"] = ",".join(self.kwargs.to)
@@ -78,5 +78,4 @@ class EmailOut(Actor):
                          message.as_string()
                          )
         except Exception as err:
-            self.logging.error("Failed to send out email.  Reason: %s" % (err))
-            raise
+            raise Exception("Failed to send out email.  Reason: %s" % (err))
