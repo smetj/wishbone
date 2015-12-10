@@ -150,13 +150,13 @@ class ServerSentEvents(Actor):
 
     def consume(self, event):
         try:
-            destination = event.getHeaderValue(self.name, "destination")
-        except:
+            destination = event.get('@tmp.%s.destination' % (self.name))
+        except KeyError:
             destination = ''
 
         try:
             for q in self.session_queues[destination]:
-                self.session_queues[destination][q].put(str(event.data))
+                self.session_queues[destination][q].put(str(event.get()))
         except KeyError:
             if destination == '':
                 destination = '/'

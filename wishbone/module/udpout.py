@@ -63,8 +63,8 @@ class UDPOut(Actor):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def consume(self, event):
-        if isinstance(event.data, list):
-            data = self.kwargs.delimiter.join(event.data)
+        if isinstance(event.get(), list):
+            data = self.kwargs.delimiter.join(event.get())
         else:
-            data = event.data
+            data = event.get()
         self.socket.sendto(str(data), (self.kwargs.host, self.kwargs.port))
