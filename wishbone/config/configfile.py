@@ -56,6 +56,9 @@ SCHEMA = {
                         "module": {
                             "type": "string"
                         },
+                        "description": {
+                            "type": "string"
+                        },
                         "arguments": {
                             "type": "object"
                         }

@@ -64,7 +64,7 @@ class BootStrap():
         debug.add_argument('--frequency', type=int, dest='frequency', default=1, help='The metric frequency.')
         debug.add_argument('--id', type=str, dest='identification', default=None, help='An identification string.')
         debug.add_argument('--module_path', type=str, dest='module_path', default=None, help='A comma separated list of directories to search and find Wishbone modules.')
-        debug.add_argument('--monitor', action="store_true", help='When enabled starts a webserver showing real-time overview of server.')
+        debug.add_argument('--monitor', action="store_true", help='When enabled starts a webserver on 8088 showing a graph of connected modules and queues.')
 
         stop = subparsers.add_parser('stop', description="Tries to gracefully stop the Wishbone instance.")
         stop.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
@@ -261,12 +261,10 @@ class Dispatch():
             sys.path.append(d.strip())
 
 def main():
-    BootStrap()
-    print "Don't forget to restore Bootstrap() catch all"
-    # try:
-    #     BootStrap()
-    # except Exception as err:
-    #     print("Failed to bootstrap instance.  Reason: %s" % (err))
+    try:
+        BootStrap()
+    except Exception as err:
+        print("Failed to bootstrap instance.  Reason: %s" % (err))
 
 if __name__ == '__main__':
     main()
