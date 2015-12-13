@@ -22,12 +22,9 @@
 #
 #
 
-import pytest
-
 from wishbone.event import Event
 from wishbone.module.msgpackencode import MSGPackEncode
 from wishbone.actor import ActorConfig
-from wishbone.error import QueueEmpty
 from utils import getter
 
 
@@ -40,9 +37,8 @@ def test_module_msgpackencode():
     msgpackencode.pool.queue.outbox.disableFallThrough()
     msgpackencode.start()
 
-    e = Event('test')
-    e.setData([1, 2, 3])
+    e = Event([1, 2, 3])
 
     msgpackencode.pool.queue.inbox.put(e)
     one = getter(msgpackencode.pool.queue.outbox)
-    assert one.data == '\x93\x01\x02\x03'
+    assert one.get() == '\x93\x01\x02\x03'
