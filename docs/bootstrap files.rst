@@ -54,13 +54,14 @@ The *lookups* section is optional if you're not using any UpLook variables
 modules
 ~~~~~~~
 
-**modules section extract**
+**modules section**
 
 .. code-block:: yaml
 
     modules:
       static:
         module: wishbone.input.testevent
+        description: "Produces a testevent for demo purposes."
         arguments:
           message : ~randomword()
           interval: 1
@@ -73,16 +74,28 @@ modules
 
 The *modules* section is a *dictionary of dictionaries* containing the
 Wishbone modules to initialize. Each key is the module instance name.  Each
-instance is again a dictionary containing 2 values:
+instance is again a dictionary containing 3 values:
 
-- module: The wishbone module to load (see *wishbone list*)
-- arguments: A dictionary of keyword arguments used to initialize the module.
+**module**
+
+The wishbone module to load.
+For a list of available module names see *wishbone list*.
+
+**description**
+
+An optional description explaining what the module does.
+The descriptoin appears in the module and queue graph.
+See --monitor option.
+
+**arguments**
+
+An optional dictionary of keyword arguments used to initialize the module.
 
 
 routingtable
 ~~~~~~~~~~~~
 
-**routing table section extract**
+**routing table section**
 
 .. code-block:: yaml
 
