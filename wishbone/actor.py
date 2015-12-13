@@ -110,7 +110,7 @@ class Actor():
         (n, t, k) = name.split('.')
 
         try:
-            return self.current_event.getHeaderValue(n, k)
+            return self.current_event.get(name)
         except AttributeError:
             return "You should use a dynamic lookup ~~ for header lookups. "
         except KeyError:
