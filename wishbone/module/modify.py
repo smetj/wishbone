@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  keyvalue.py
+#  modify.py
 #
 #  Copyright 2015 Jelle Smet <development@smetj.net>
 #
@@ -25,47 +25,43 @@
 from wishbone import Actor
 
 
-class KeyValue(Actor):
+class Modify(Actor):
 
-    '''**Adds the requested key values to the event data.**
+    '''**Modify and manipulate datastructures.**
 
-    Assumes event.data is a Python datastructure to which the requested key
-    values can be added. Otherwise event.data is moved to a key name "<body>".
+    This module modifies the data of an event.
 
-    Existing keys will be overwritten.
 
     Parameters:
 
-        - body(str)("data")
-           |  If event.data is not a dict, replace by dict and copy event.data
-           |  into event.data.<body>
+        - set(dict)({})
+           |  Sets the keys to the requested values
 
-        - overwrite(dict)({})
-           |  A dict of key/value pairs to overwrite existing keys.
+        - template(dict)({})
+           |  Sets the keys to the requested values
+
 
     Queues:
 
-        - inbox
-           |  Incoming events.
+        - outbox
+           |  Contains the generated events.
     '''
 
-    def __init__(self, actor_config, body="data", overwrite=[]):
+    def __init__(self, actor_config, set, template):
         Actor.__init__(self, actor_config)
-
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
 
     def consume(self, event):
 
-        data = {}
-        if not isinstance(event.data, dict):
-            data[self.kwargs.body] = event.data
-        else:
-            data = event.data
+        for key, value in self.kwargs.set:
+            event.set(value, key)
 
-        for key, value in self.kwargs.overwrite:
-            data[key] = getattr(self.kwargs.overwrite, key)
+        for key, value in self.kwargs.template:
+            try:
+                event.set(value.format(**event.raw()), key)
+            except KeyError:
+                event.set(value, key)
 
-        event.setData(data)
         self.submit(event, self.pool.queue.outbox)

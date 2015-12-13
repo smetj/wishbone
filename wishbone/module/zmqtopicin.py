@@ -24,6 +24,7 @@
 
 
 from wishbone import Actor
+from wishbone.event import Event
 import zmq.green as zmq
 
 
@@ -73,6 +74,5 @@ class ZMQTopicIn(Actor):
             string = self.socket.recv()
             messagedata = string.split(" ")[1:]
             messagedata = " ".join(messagedata)
-            event = self.createEvent()
-            event.data = messagedata
+            event = Event(messagedata)
             self.submit(event, self.pool.queue.outbox)

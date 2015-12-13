@@ -37,7 +37,7 @@ class Match(Actor):
     '''**Pattern matching on a key/value document stream.**
 
     This module routes messages to a queue associated to the matching rule
-    set.  The event['data'] payload has to be of <type 'dict'>.  Typically,
+    set.  The '@data' payload has to be of <type 'dict'>.  Typically,
     the source data is JSON converted to a Python dictionary.
 
     The match rules can be either stored on disk or directly defined into the
@@ -134,6 +134,11 @@ class Match(Actor):
            |  For example:
            |  {"omg": {"condition": [{"greeting": "re:^hello$"}], "queue": [{"outbox": {"one": 1}}]}}
 
+        - ignore_missing_fields(bool)(False)
+           |  When a doc is missing a field which is evaluated in the
+           |  condition this will simply be ignored and therefor can still yield a match.
+           |  When set to False(default) a missing field will automatically result in a non-match.
+
 
     Queues:
 
@@ -148,7 +153,7 @@ class Match(Actor):
 
     '''
 
-    def __init__(self, actor_config, location="", rules={}):
+    def __init__(self, actor_config, location="", rules={}, ignore_missing_fields=False):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -210,22 +215,22 @@ class Match(Actor):
         '''Submits matching documents to the defined queue along with
         the defined header.'''
 
-        if isinstance(event.data, dict):
+        if isinstance(event.get(), dict):
             self.rule_lock.acquire()
             for rule in self.__active_rules:
                 e = deepcopy(event)
-                if self.evaluateCondition(self.__active_rules[rule]["condition"], e.data):
-                    e.setHeaderValue("rule", rule)
+                if self.evaluateCondition(self.__active_rules[rule]["condition"], e.get()):
+                    e.set('@tmp.%s.rule' % (self.name), rule)
                     for queue in self.__active_rules[rule]["queue"]:
                         event_copy = deepcopy(e)
                         for name in queue:
                             if queue[name] is not None:
                                 for key, value in queue[name].iteritems():
-                                    event_copy.setHeaderValue(key, value)
+                                    event.set(value, '@tmp.%s.%s' % (self.name, key))
                                 # event_copy["header"][self.name].update(queue[name])
                             self.submit(event_copy, self.pool.getQueue(name))
                 else:
-                    e.setHeaderValue("rule", rule)
+                    e.set(rule, "@tmp.%s.rule" % (self.name))
                     self.submit(e, self.pool.queue.nomatch)
                     # self.logging.debug("No match for rule %s." % (rule))
             self.rule_lock.release()
@@ -243,5 +248,6 @@ class Match(Actor):
                         pass
                         # self.logging.debug("field %s with condition %s MATCHES value %s" % (field, condition[field], fields[field]))
                 else:
-                    return False
+                    if not self.kwargs.ignore_missing_fields:
+                        return False
         return True

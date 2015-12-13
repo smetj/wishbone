@@ -38,8 +38,9 @@ def test_module_dictgenerator_keys():
 
     event = getter(dictgenerator.pool.queue.outbox)
 
-    assert "one" in event.data.keys()
-    assert "two" in event.data.keys()
+    assert "one" in event.get().keys()
+    assert "two" in event.get().keys()
+
 
 def test_module_dictgenerator_randomize_keys():
 
@@ -51,7 +52,8 @@ def test_module_dictgenerator_randomize_keys():
 
     event = getter(dictgenerator.pool.queue.outbox)
 
-    assert '0' in event.data.keys()
+    assert '0' in event.get().keys()
+
 
 def test_module_dictgenerator_num_values():
 
@@ -63,11 +65,12 @@ def test_module_dictgenerator_num_values():
 
     event = getter(dictgenerator.pool.queue.outbox)
 
-    for key, value in event.data.iteritems():
+    for key, value in event.get().iteritems():
         assert isinstance(value, int)
 
-    assert isinstance(event.data.items()[0][1], int)
-    assert event.data.items()[0][1] >= 1 and event.data.items()[0][1] <= 2
+    assert isinstance(event.get().items()[0][1], int)
+    assert event.get().items()[0][1] >= 1 and event.get().items()[0][1] <= 2
+
 
 def test_module_dictgenerator_num_elements():
 
@@ -79,4 +82,4 @@ def test_module_dictgenerator_num_elements():
 
     event = getter(dictgenerator.pool.queue.outbox)
 
-    assert len(event.data.keys()) >= 1 and len(event.data.keys()) <= 2
+    assert len(event.get().keys()) >= 1 and len(event.get().keys()) <= 2

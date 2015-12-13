@@ -48,12 +48,6 @@ wishbone.input.namedpipe
 
 --------
 
-wishbone.input.pull
--------------------
-.. autoclass:: wishbone.module.zmqpullin.ZMQPullIn
-
---------
-
 wishbone.input.tcp
 ------------------
 .. autoclass:: wishbone.module.tcpin.TCPIn
@@ -66,15 +60,22 @@ wishbone.input.testevent
 
 --------
 
-wishbone.input.topic
---------------------
-.. autoclass:: wishbone.module.zmqtopicin.ZMQTopicIn
-
---------
-
 wishbone.input.udp
 ------------------
 .. autoclass:: wishbone.module.udpin.UDPIn
+
+--------
+
+wishbone.input.zeromq_pull
+--------------------------
+.. autoclass:: wishbone.module.zmqpullin.ZMQPullIn
+
+--------
+
+wishbone.input.zeromq_topic
+---------------------------
+.. autoclass:: wishbone.module.zmqtopicin.ZMQTopicIn
+
 
 
 Output modules
@@ -123,12 +124,6 @@ wishbone.output.null
 
 --------
 
-wishbone.output.push
---------------------
-.. autoclass:: wishbone.module.zmqpushout.ZMQPushOut
-
---------
-
 wishbone.output.sse
 -------------------
 .. autoclass:: wishbone.module.sse.ServerSentEvents
@@ -151,11 +146,6 @@ wishbone.output.tcp
 -------------------
 .. autoclass:: wishbone.module.tcpout.TCPOut
 
---------
-
-wishbone.output.topic
----------------------
-.. autoclass:: wishbone.module.zmqtopicout.ZMQTopicOut
 
 --------
 
@@ -168,6 +158,19 @@ wishbone.output.udp
 wishbone.output.UDSOut
 ----------------------
 .. autoclass:: wishbone.module.udsout.UDSOut
+
+--------
+
+wishbone.output.zeromq_topic
+----------------------------
+.. autoclass:: wishbone.module.zmqtopicout.ZMQTopicOut
+
+--------
+
+wishbone.output.zeromq_push
+---------------------------
+.. autoclass:: wishbone.module.zmqpushout.ZMQPushOut
+
 
 
 Flow modules
@@ -205,21 +208,15 @@ wishbone.flow.ttl
 Function modules
 ****************
 
-wishbone.function.header
+wishbone.function.modify
 ------------------------
-.. autoclass:: wishbone.module.header.Header
+.. autoclass:: wishbone.module.modify.Modify
 
 --------
 
 wishbone.funtion.validatejson
 -----------------------------
 .. autoclass:: wishbone.module.jsonvalidate.JSONValidate
-
---------
-
-wishbone.function.keyvalue
---------------------------
-.. autoclass:: wishbone.module.keyvalue.KeyValue
 
 --------
 

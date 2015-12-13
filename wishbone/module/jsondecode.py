@@ -56,9 +56,11 @@ class JSONDecode(Actor):
 
     def consume(self, event):
 
-        event.setData(self.convert(event.data))
+        data = event.get()
+        data = self.convert(data)
+        event.set(data)
+
         self.submit(event, self.pool.queue.outbox)
 
     def convert(self, data):
         return loads(data)
-

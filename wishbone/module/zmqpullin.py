@@ -24,6 +24,7 @@
 
 
 from wishbone import Actor
+from wishbone.event import Event
 import zmq.green as zmq
 
 
@@ -82,6 +83,5 @@ class ZMQPullIn(Actor):
 
         while self.loop():
             data = self.socket.recv()
-            event = self.createEvent()
-            event.data = data
+            event = Event(data)
             self.submit(event, self.pool.queue.outbox)

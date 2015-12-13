@@ -24,6 +24,7 @@
 
 from copy import deepcopy
 from collections import namedtuple
+import arrow
 
 
 class Container():
@@ -56,124 +57,110 @@ class Event(object):
     module to the other.
     '''
 
-    def __init__(self, namespace):
-        self.module = Namespace()
-        self.initNamespace(namespace)
-        self.last = self.module.__dict__[namespace]
-        self.__source_queue = None
-        self.__source_namespace = None
+    def __init__(self, data=None):
+
+        self.data = {
+            "@timestamp": arrow.now(),
+            "@version": 1,
+            "@data": data,
+            "@tmp": {
+            },
+            "@errors": {
+            }
+        }
 
     def clone(self):
         '''
-        returns a deep copy instance of the event.
+        Returns a cloned version of the event using deepcopy.
         '''
 
         return deepcopy(self)
 
-    def initNamespace(self, namespace):
+    def copy(self, source, destination):
         '''
-        Initializes an empty event namespace.
-        Usually this is the module's instance name to which to which the event
-        arrives.
+        Copies the source key to the destination key.
+
+        :param str source: The name of the source key.
+        :param str destination: The name of the destination key.
         '''
 
-        if namespace not in self.module.__dict__:
-            self.module.__dict__[namespace] = Module(namespace)
-        self.current_namespace = namespace
+        self.set(destination, deepcopy(self.get(source)))
 
-    def getData(self, namespace, clone=False):
+    def delete(self, key=None):
         '''
-        Returns the data value of the requested namespace.
-        When clone is True, a deepcopied version is returned.
+        Deletes a key.
+
+        :param str key: The name of the key to delete
         '''
 
-        if clone:
-            return deepcopy(self.module.__dict__[namespace].data)
+        if key is None:
+            self.data = None
         else:
-            return self.module.__dict__[namespace].data
+            key = '.'.join(key.split('.')[:-1])
+            self.set(key, None)
 
-    def getHeaderValue(self, namespace, key, clone=False):
+    def get(self, key="@data"):
         '''
-        Returns the header values of the requested namespace.
-        When clone is True, a deepcopied version is returned.
-        '''
+        Returns the value of <key>.
 
-        return self.module.__dict__[namespace].header.__dict__[key]
-
-    def listNamespace(self):
-        '''
-        Returns a generator returning over all registered namespace
-        instances.
+        :param str key: The name of the key to read.
+        :return: The value of <key>
         '''
 
-        for module in self.module.__dict__:
-            yield self.module.__dict__[module]
+        def travel(path, d):
 
-    def lookupHeaderValue(self, name, clone=False):
-        '''
-        Returns the header value using dotted format.
-        When clone is True, a deepcopied version is returned.
-        '''
-
-        (namespace, key) = name.split('.')
-        return self.getHeaderValue(namespace, key, clone)
-
-    def raw(self):
-        '''
-        Returns a dictionary representation of the event.
-        '''
-
-        data = {}
-        for module in self.listNamespace():
-            data[module.name] = {"header": module.header.__dict__, "data": module.data, "error": module.error.__dict__}
-        return data
-
-    def rollBackEvent(self):
-
-        '''When invoked resubmits this event to the queue it came from'''
-
-        if self.__source_queue is None or self.__source_namespace is None:
-            pass
+            if len(path) == 1:
+                if isinstance(d, dict):
+                    return d[path[0]]
+                else:
+                    raise Exception()
+            else:
+                return travel(path[1:], d[path[0]])
+        if key is None:
+            return self.data
         else:
-            del (self.module.__dict__[self.current_namespace])
-            self.current_namespace = self.__source_namespace
-            self.__source_queue.put(self)
+            path = key.split('.')
+            try:
+                return travel(path, self.data)
+            except:
+                raise KeyError(key)
 
-    def setSource(self, queue):
-
-        self.__source_namespace = self.current_namespace
-        self.__source_queue = queue
-
-    def setData(self, data):
+    def set(self, value, key="@data"):
         '''
-        Sets the data value of the requested namespace.
-        '''
+        Sets the value of <key>.
 
-        self.module.__dict__[self.current_namespace].data = data
-        self.last = self.module.__dict__[self.current_namespace]
-
-    def setErrorValue(self, line, error_type, error_value):
-        '''Sets the error value for the current namespace.'''
-
-        self.module.__dict__[self.current_namespace].error.line = line
-        self.module.__dict__[self.current_namespace].error.type = error_type
-        self.module.__dict__[self.current_namespace].error.type = error_value
-
-    def setHeaderValue(self, key, value, namespace=None):
-        '''Sets the header value of the requested namespace.
-
-        When <namespace> has value <None> then the current namespace is used.
+        :param value: The value to set.
+        :param str key: The name of the key to assign <value> to.
         '''
 
-        if namespace is None:
-            namespace = self.current_namespace
-        else:
-            if namespace not in self.module.__dict__:
-                self.module.__dict__[namespace] = Module(namespace)
+        if key.startswith('@') and key not in ["@data", "@tmp", "@error", "@version"]:
+            raise Exception("Keys starting with @ are reserved.")
+        result = value
+        for name in reversed(key.split('.')):
+            result = {name: result}
+        self.data.update(result)
 
-        self.module.__dict__[namespace].header.__dict__[key] = value
+    def dump(self, complete=False, convert_timestamp=True):
+        '''
+        Dumps the content of the event.
 
-    def __getLastData(self):
-        return self.last.data
+        :param bool complete: Determines whether to include @tmp and @errors.
+        :param bool convert_timestamp: When True converts <Arrow> object to iso8601 string.
+        :return: The content of the event.
+        :rtype: dict
+        '''
 
-    data = property(__getLastData, setData)
+        d = {}
+        for key, value in self.data.iteritems():
+            if key == "@tmp" and not complete:
+                continue
+            if key == "@errors" and not complete:
+                continue
+            elif isinstance(value, arrow.arrow.Arrow) and convert_timestamp:
+                d[key] = str(value)
+            else:
+                d[key] = value
+
+        return d
+
+    raw = dump

@@ -27,7 +27,6 @@ import pytest
 from wishbone.event import Event
 from wishbone.module.fanout import Fanout
 from wishbone.actor import ActorConfig
-from wishbone.error import QueueEmpty
 from utils import getter
 
 
@@ -45,8 +44,7 @@ def test_module_fanout():
 
     fanout.start()
 
-    e = Event('test')
-    e.setData("hello")
+    e = Event(["hello"])
 
     fanout.pool.queue.inbox.put(e)
     one = getter(fanout.pool.queue.one)
@@ -54,9 +52,6 @@ def test_module_fanout():
 
     fanout.stop()
 
-    assert one.raw()["test"]["data"] == "hello"
-    assert two.raw()["test"]["data"] == "hello"
-    assert id(one) != id(two)
-
-
-
+    assert one.get() == ["hello"]
+    assert two.get() == ["hello"]
+    assert id(one.get()) != id(two.get())

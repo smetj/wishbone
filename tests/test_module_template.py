@@ -43,12 +43,12 @@ def test_module_template_header():
     template.pool.queue.outbox.disableFallThrough()
     template.start()
 
-    e = Event('test')
-    e.setData({"one": 1})
+    e = Event({"one": 1})
 
     template.pool.queue.inbox.put(e)
     one = getter(template.pool.queue.outbox)
-    assert one.getHeaderValue('template', "hello") == "The numerical representation of one is 1"
+    print one.dump(tmp=True)
+    assert one.get('@tmp.template.hello') == "The numerical representation of one is 1"
 
 
 def test_module_template_file():
@@ -65,13 +65,34 @@ def test_module_template_file():
     template.pool.queue.outbox.disableFallThrough()
     template.start()
 
-    e = Event('test')
-    e.setHeaderValue("hello", "The numerical representation of one is {{one}}", "test")
-    e.setData({"one": 1})
+    e = Event({"one": 1})
+    # e.set("The numerical representation of one is {{one}}", "@data.hello.test")
 
     template.pool.queue.inbox.put(e)
     one = getter(template.pool.queue.outbox)
     unlink('template.tmpl')
 
-    assert one.data == "The numerical representation of one is 1"
+    assert one.get() == "The numerical representation of one is 1"
 
+def test_module_template_file_different_destination():
+
+    '''Tests template defined in file.'''
+
+    with open("template.tmpl", "w") as f:
+        f.write("The numerical representation of one is {{one}}")
+
+    actor_config = ActorConfig('template', 100, 1, {})
+    template = Template(actor_config, template="template.tmpl", destination="abc")
+
+    template.pool.queue.inbox.disableFallThrough()
+    template.pool.queue.outbox.disableFallThrough()
+    template.start()
+
+    e = Event({"one": 1})
+    # e.set("The numerical representation of one is {{one}}", "@data.hello.test")
+
+    template.pool.queue.inbox.put(e)
+    one = getter(template.pool.queue.outbox)
+    unlink('template.tmpl')
+
+    assert one.get("abc") == "The numerical representation of one is 1"
