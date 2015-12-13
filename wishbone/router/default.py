@@ -30,8 +30,8 @@ import multiprocessing
 import importlib
 from gevent import pywsgi
 import json
-from .monitorcontent import MONITORCONTENT
-from .monitorcontent import VisJSData
+from .graphcontent import GRAPHCONTENT
+from .graphcontent import VisJSData
 
 
 class Container():
@@ -85,7 +85,7 @@ class Default(multiprocessing.Process):
 
     '''
 
-    def __init__(self, router_config, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False, monitor=False):
+    def __init__(self, router_config, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False, graph=False):
 
         if process:
             multiprocessing.Process.__init__(self)
@@ -97,7 +97,7 @@ class Default(multiprocessing.Process):
         self.identification = identification
         self.stdout_logging = stdout_logging
         self.process = process
-        self.monitor = monitor
+        self.graph = graph
 
         self.module_pool = ModulePool()
 
@@ -300,9 +300,9 @@ class Default(multiprocessing.Process):
         self.__initConfig()
         self.__running = True
 
-        if self.monitor:
-            self.monitor = MonitorWebserver(self.config, self.module_pool, self.__block)
-            self.monitor.start()
+        if self.graph:
+            self.graph = GraphWebserver(self.config, self.module_pool, self.__block)
+            self.graph.start()
 
         for module in self.module_pool.list():
             module.start()
@@ -310,7 +310,7 @@ class Default(multiprocessing.Process):
         self.block()
 
 
-class MonitorWebserver():
+class GraphWebserver():
 
     def __init__(self, config, module_pool, block):
         self.config = config
@@ -334,7 +334,7 @@ class MonitorWebserver():
 
         for connection in self.config.routingtable:
             self.js_data.addEdge("%s.%s" % (connection.source_module, connection.source_queue),
-                                  "%s.%s" % (connection.destination_module, connection.destination_queue))
+                                 "%s.%s" % (connection.destination_module, connection.destination_queue))
 
     def start(self):
         spawn(self.setupWebserver)
@@ -367,7 +367,7 @@ class MonitorWebserver():
     def application(self, env, start_response):
         if env['PATH_INFO'] == '/':
             start_response('200 OK', [('Content-Type', 'text/html')])
-            return[MONITORCONTENT % (self.js_data.dumpString()[0], self.js_data.dumpString()[1])]
+            return[GRAPHCONTENT % (self.js_data.dumpString()[0], self.js_data.dumpString()[1])]
         elif env['PATH_INFO'] == '/metrics':
             start_response('200 OK', [('Content-Type', 'text/html')])
             return[self.getMetrics()]

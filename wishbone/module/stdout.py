@@ -102,10 +102,9 @@ class STDOUT(Actor):
            |  The background color.
            |  Valid values: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET
 
-        - color_ style(str)("NORMAL")
+        - color_style(str)("NORMAL")
            |  The coloring style to use
            |  Valid values: DIM, NORMAL, BRIGHT
-
 
     Queues:
 
