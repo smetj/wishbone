@@ -22,12 +22,8 @@
 #
 #
 
-import pytest
-
-from wishbone.event import Event
 from wishbone.module.httpinclient import HTTPInClient
 from wishbone.actor import ActorConfig
-from wishbone.error import QueueEmpty
 from utils import getter
 
 
@@ -40,5 +36,4 @@ def test_module_jsonencode():
     http.start()
 
     one = getter(http.pool.queue.outbox)
-    print one.data
-    assert "Google" in one.data
+    assert "Google" in one.get()

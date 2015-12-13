@@ -43,11 +43,8 @@ def test_module_jsonvalidate():
     jsonvalidate.pool.queue.failed.disableFallThrough()
     jsonvalidate.start()
 
-    valid = Event('valid')
-    valid.setData({"one": 1})
-
-    invalid = Event('invalid')
-    invalid.setData({"one": "one"})
+    valid = Event({"one": 1})
+    invalid = Event({"one": "one"})
 
     jsonvalidate.pool.queue.inbox.put(valid)
     valid_event = getter(jsonvalidate.pool.queue.outbox)
@@ -56,5 +53,6 @@ def test_module_jsonvalidate():
     invalid_event = getter(jsonvalidate.pool.queue.failed)
 
     os.remove("/tmp/jsonvalidate.jsonschema")
-    assert valid_event.data == {"one": 1}
-    assert invalid_event.data == {"one": "one"}
+
+    assert valid_event.get() == {"one": 1}
+    assert invalid_event.get() == {"one": "one"}

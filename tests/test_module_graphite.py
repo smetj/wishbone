@@ -27,9 +27,9 @@ import pytest
 from wishbone.event import Event
 from wishbone.module.graphite import Graphite
 from wishbone.actor import ActorConfig
-from wishbone.error import QueueEmpty
 from utils import getter
 from wishbone.event import Metric
+
 
 def test_module_graphite():
 
@@ -42,11 +42,10 @@ def test_module_graphite():
     e = Event('test')
     m = Metric(1381002603.726132, "wishbone", "hostname", "queue.outbox.in_rate", 0, "", ())
 
-    e.setData(m)
+    e.set(m)
 
     graphite.pool.queue.inbox.put(e)
     one = getter(graphite.pool.queue.outbox)
 
-    assert one.last.data == "wishbone.hostname.queue.outbox.in_rate 0 1381002603.73"
+    assert one.get() == "wishbone.hostname.queue.outbox.in_rate 0 1381002603.73"
 
-test_module_graphite()
