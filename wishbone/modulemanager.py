@@ -40,7 +40,7 @@ class ModuleManager():
 
         '''Returns True when module exists otherwise False'''
 
-        if self.getModuleByName(name) == None:
+        if self.getModuleByName(name) is None:
             return True
         else:
             return False
@@ -52,7 +52,7 @@ class ModuleManager():
             if module.name == name:
                 m = module.load()
 
-        if m == None:
+        if m is None:
             raise NoSuchModule("Module %s.%s.%s is unknown." % (category, group, name))
         else:
             return m
