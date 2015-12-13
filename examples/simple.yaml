@@ -1,0 +1,34 @@
+---
+lookups:
+  randomword:
+    module: wishbone.lookup.randomword
+  randombool:
+    module: wishbone.lookup.randombool
+  event:
+    module: wishbone.lookup.event
+
+modules:
+
+  input:
+    module: wishbone.input.testevent
+    arguments:
+      message : ~~randomword()
+      interval: 1
+
+  modify:
+    module: wishbone.function.modify
+    arguments:
+      set:
+        "@tmp.modify.greeting": "Hello, today's word is: "
+
+  output:
+    module: wishbone.output.stdout
+    arguments:
+      prefix: ~~event("@tmp.modify.greeting")
+
+
+
+routingtable:
+  - input.outbox            -> modify.inbox
+  - modify.outbox           -> output.inbox
+...

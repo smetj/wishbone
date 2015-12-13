@@ -47,7 +47,7 @@ class Modify(Actor):
            |  Contains the generated events.
     '''
 
-    def __init__(self, actor_config, set, template):
+    def __init__(self, actor_config, set={}, template={}):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
