@@ -1,11 +1,12 @@
 Wishbone changelog
 ==================
 
-Version 1.1.2
+Version 1.2.0
 ~~~~~~~~~~~~~
 
 Feature:
 
+- New internal data format.
 - Adding SO_REUSEPORT for wishbone.input.httpserver
 - Allow Logger() to easily monkey patch existing logger calls
 - Added --monitor option show layout.
