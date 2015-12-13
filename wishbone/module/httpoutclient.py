@@ -85,11 +85,11 @@ class HTTPOutClient(Actor):
     def consume(self, event):
 
         try:
-            response = self.submitToResource(event.data)
+            response = self.submitToResource(event.get())
             response.raise_for_status()
         except Exception as err:
             self.logging.error("Failed to submit data.  Reason: %s" % (err))
-            event.setHeaderValue("server_response", str(response.text))
+            event.set(str(response.text), "@tmp.%s.server_response" % (self.name))
             raise
 
     def __put(self, data):

@@ -143,9 +143,8 @@ setup(
             'json = wishbone.module.jsondecode:JSONDecode'
         ],
         'wishbone.function': [
-            'header = wishbone.module.header:Header',
+            'modify = wishbone.module.modify:Modify',
             'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate',
-            'keyvalue = wishbone.module.keyvalue:KeyValue',
             'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
             'template = wishbone.module.template:Template'
         ],
@@ -156,12 +155,12 @@ setup(
             'httpclient = wishbone.module.httpinclient:HTTPInClient',
             'httpserver = wishbone.module.httpinserver:HTTPInServer',
             'namedpipe = wishbone.module.namedpipein:NamedPipeIn',
-            'pull = wishbone.module.zmqpullin:ZMQPullIn',
             'tcp = wishbone.module.tcpin:TCPIn',
             'testevent = wishbone.module.testevent:TestEvent',
-            'topic = wishbone.module.zmqtopicin:ZMQTopicIn',
             'udp = wishbone.module.udpin:UDPIn',
-            'gearman = wishbone.module.gearmanin:GearmanIn'
+            'gearman = wishbone.module.gearmanin:GearmanIn',
+            'zeromq_topic = wishbone.module.zmqtopicin:ZMQTopicIn',
+            'zeromq_pull = wishbone.module.zmqpullin:ZMQPullIn'
         ],
         'wishbone.output': [
             'amqp = wishbone.module.amqpout:AMQPOut',
@@ -171,14 +170,14 @@ setup(
             'file = wishbone.module.fileout:FileOut',
             'http = wishbone.module.httpoutclient:HTTPOutClient',
             'null = wishbone.module.null:Null',
-            'topic = wishbone.module.zmqtopicout:ZMQTopicOut',
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog',
             'tcp = wishbone.module.tcpout:TCPOut',
-            'push = wishbone.module.zmqpushout:ZMQPushOut',
             'udp = wishbone.module.udpout:UDPOut',
             'uds = wishbone.module.udsout:UDSOut',
-            'sse = wishbone.module.sse:ServerSentEvents'
+            'sse = wishbone.module.sse:ServerSentEvents',
+            'zeromq_topic = wishbone.module.zmqtopicout:ZMQTopicOut',
+            'zeromq_push = wishbone.module.zmqpushout:ZMQPushOut'
         ],
         'wishbone.contrib.flow': [
         ],

@@ -37,9 +37,8 @@ def test_module_jsonencode():
     jsonencode.pool.queue.outbox.disableFallThrough()
     jsonencode.start()
 
-    e = Event('test')
-    e.setData(["one", "two", "three"])
+    e = Event(["one", "two", "three"])
 
     jsonencode.pool.queue.inbox.put(e)
     one = getter(jsonencode.pool.queue.outbox)
-    assert one.data == '["one", "two", "three"]'
+    assert one.get() == '["one", "two", "three"]'

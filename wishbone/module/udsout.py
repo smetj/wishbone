@@ -58,9 +58,9 @@ class UDSOut(Actor):
 
     def consume(self, event):
         if isinstance(event.data, list):
-            data = self.kwargs.delimiter.join(event.data)
+            data = self.kwargs.delimiter.join(event.get())
         else:
-            data = event.data
+            data = event.get()
 
         self.socket.send(str(data) + self.kwargs.delimiter)
 

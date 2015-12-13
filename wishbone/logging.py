@@ -64,8 +64,7 @@ class Logging():
 
     def __log(self, level, message):
 
-        event = Event(self.name)
-        event.data = Log(time(), level, getpid(), self.name, message)
+        event = Event(Log(time(), level, getpid(), self.name, message))
 
         while True:
             try:

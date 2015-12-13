@@ -25,6 +25,7 @@
 
 from gevent import monkey; monkey.patch_all()
 from wishbone import Actor
+from wishbone.event import Event
 from gevent import sleep
 from gearman import GearmanWorker
 from Crypto.Cipher import AES
@@ -79,9 +80,9 @@ class GearmanIn(Actor):
             self.sendToBackground(self.gearmanWorker)
 
     def consume(self, gearman_worker, gearman_job):
-        event = self.createEvent()
+
         decrypted = self.decrypt(gearman_job.data)
-        event.data = decrypted
+        event = Event(decrypted)
         self.submit(event, self.pool.queue.outbox)
         return decrypted
 

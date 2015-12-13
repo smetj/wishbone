@@ -15,7 +15,7 @@ Modules and Queues
 Modules are `greenlets`_ each with their own specific functionality. They are
 created by inheriting :py:class:`wishbone.Actor` as a baseclass. Modules
 cannot and are not supposed to directly invoke each others functionality.
-Their only means of interaction is by passing :py:class:`wishbone.Event`
+Their only means of interaction is by passing :py:class:`wishbone.event.Event`
 objects to each other's :py:class:`wishbone.Queue` queues.
 
 Modules typically have, but are **not** limited to, an **inbox**, **outbox**,
@@ -24,7 +24,8 @@ Modules typically have, but are **not** limited to, an **inbox**, **outbox**,
 .. warning::
 
     When a queue is not connected to another queue then submitting a message
-    into it will result into the message being dropped.  This is by design.
+    into it will result into the message being dropped.  This is by design to
+    ensure queues do not fill up without ever being consumed.
 
 
 Router
@@ -49,21 +50,75 @@ instance which on its turn is connected to a
 Events
 ------
 
-:py:class:`wishbone.Event` objects are used to transport data between modules.
+:py:class:`wishbone.event.Event` instances are used to transport data between modules.
 
-Typically `input modules`_ initialize the :py:class:`wishbone.Event` objects
-to encapsulate the data coming in from the outside.
+The `input modules`_ should initialize a :py:class:`wishbone.event.Event` instance to
+encapsulate the data they receive or generate.
 
-On the other hand, `output modules`_ extract the data portion of the event to
-submit that outside of the framework.
+:py:class:`wishbone.event.Event` is a simple class used for data representation
+:including some convenience functions for data manipulation.
 
-An event has a *header* and a *data* portion.  Each time an event enters a
-module, a namespace with the module instance name is automatically
-initialized. :py:data:`wishbone.Event.data` always returns the data portion
-of the module which has last written data into the event using
-:py:func:`wishbone.Event.setData`.
+Examples
+~~~~~~~~
 
-.. autoclass:: wishbone.Event
+.. code:: python
+
+    >>> from wishbone.event.Event import Event
+    >>> e = Event("hi")
+    >>> e.dump()
+    {'@timestamp': '2015-12-13T10:45:35.442088+01:00', '@version': 1, '@data': 'hi'}
+    >>>
+
+Initializing the Event objects assigns the data you pass to *@data*.
+
+
+.. code:: python
+
+    >>> e = Event("hi")
+    >>> e.get()
+    'hi'
+    >>>
+
+By default, the get method returns *@data*.
+
+
+.. code:: python
+
+    >>> e = Event({"one": {"two": hi}})
+    >>> e.get('@data.one.two')
+    'hi'
+    >>>
+
+Nested dictionaries can be accessed in dotted format.
+
+
+.. code:: python
+
+    >>> e = Event('hi')
+    >>> e.set("howdy", "one.two.three")
+    >>> e.get('one')
+    {'two': {'three': 'howdy'}}
+    >>>
+
+New 'root' keys can be created outside @data.
+Setting nested dictionary values can be done using dotted format.
+
+
+.. code:: python
+
+    >>> e = Event('hello')
+    >>> e.dump(complete=True)
+    {'@timestamp': '2015-12-13T11:10:45.862036+01:00', '@tmp': {},
+    '@version': 1, '@data': 'hello', '@errors': {}}
+    >>>>
+
+- *@tmp* is where modules can optionally store temporary data which is not
+  part of the data model but contain useful information for other modules.
+
+- The *@errors* key is where modules store exceptions related information.
+
+
+.. autoclass:: wishbone.event.Event
     :members:
 
 
