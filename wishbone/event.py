@@ -133,7 +133,7 @@ class Event(object):
         :param str key: The name of the key to assign <value> to.
         '''
 
-        if key.startswith('@') and key not in ["@data", "@tmp", "@error", "@version"]:
+        if key.startswith('@') and key.split('.')[0] not in ["@data", "@tmp", "@error", "@version"]:
             raise Exception("Keys starting with @ are reserved.")
         result = value
         for name in reversed(key.split('.')):

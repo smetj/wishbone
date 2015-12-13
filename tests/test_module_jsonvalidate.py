@@ -31,7 +31,7 @@ from utils import getter
 
 def test_module_jsonvalidate():
 
-    actor_config = ActorConfig('jsonvalidate', 100, 1, {})
+    actor_config = ActorConfig('jsonvalidate', 100, 1, {}, "")
 
     with open("/tmp/jsonvalidate.jsonschema", "w") as j:
         j.write('{"type": "object", "properties": {"one": { "type": "integer"}}}')

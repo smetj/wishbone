@@ -30,7 +30,7 @@ from utils import getter
 
 def test_module_msgpackdecode():
 
-    actor_config = ActorConfig('msgpackdecode', 100, 1, {})
+    actor_config = ActorConfig('msgpackdecode', 100, 1, {}, "")
     msgpackdecode = MSGPackDecode(actor_config)
 
     msgpackdecode.pool.queue.inbox.disableFallThrough()
