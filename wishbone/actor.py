@@ -41,7 +41,7 @@ import traceback
 import inspect
 
 Greenlets = namedtuple('Greenlets', "consumer generic log metric")
-ActorConfig = namedtuple('ActorConfig', 'name size frequency lookup')
+ActorConfig = namedtuple('ActorConfig', 'name size frequency lookup description')
 
 
 class Actor():
@@ -52,6 +52,7 @@ class Actor():
         self.name = config.name
         self.size = config.size
         self.frequency = config.frequency
+        self.description = config.description
 
         self.pool = QueuePool(config.size)
 
