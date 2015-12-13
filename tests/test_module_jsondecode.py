@@ -22,12 +22,9 @@
 #
 #
 
-import pytest
-
 from wishbone.event import Event
 from wishbone.module.jsondecode import JSONDecode
 from wishbone.actor import ActorConfig
-from wishbone.error import QueueEmpty
 from utils import getter
 
 
@@ -40,9 +37,8 @@ def test_module_jsondecode():
     jsondecode.pool.queue.outbox.disableFallThrough()
     jsondecode.start()
 
-    e = Event('test')
-    e.setData('["one", "two", "three"]')
+    e = Event('["one", "two", "three"]')
 
     jsondecode.pool.queue.inbox.put(e)
     one = getter(jsondecode.pool.queue.outbox)
-    assert one.data == ["one", "two", "three"]
+    assert one.get() == ["one", "two", "three"]

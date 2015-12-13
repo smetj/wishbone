@@ -23,7 +23,7 @@
 #
 
 from wishbone import Actor
-from gevent import sleep, socket
+from gevent import socket
 
 
 class TCPOut(Actor):
@@ -65,10 +65,10 @@ class TCPOut(Actor):
 
     def consume(self, event):
 
-        if isinstance(event.last.data, list):
-            data = self.kwargs.delimiter.join(event.last.data)
+        if isinstance(event.get(), list):
+            data = self.kwargs.delimiter.join(event.get())
         else:
-            data = event.last.data
+            data = event.get()
         connection = self.setupConnection()
         connection.sendall(str(data) + self.kwargs.delimiter)
         connection.close()

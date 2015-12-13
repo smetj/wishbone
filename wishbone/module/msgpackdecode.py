@@ -65,9 +65,8 @@ class MSGPackDecode(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def __decodeComplete(self, event):
-        return msgpack.unpackb(event.data)
+        return msgpack.unpackb(event.get())
 
     def __decodeData(self, event):
-
-        event.data = msgpack.unpackb(event.data)
+        event.set(msgpack.unpackb(event.get()))
         return event

@@ -23,6 +23,7 @@
 #
 
 from wishbone import Actor
+from wishbone.event import Log
 
 
 class LogLevelFilter(Actor):
@@ -59,5 +60,9 @@ class LogLevelFilter(Actor):
 
     def consumer(self, event):
 
-        if event.data[0] <= self.kwargs.loglevel:
-            self.submit(event, self.pool.queue.outbox)
+        data = event.get()
+        if isinstance(data, Log):
+            if data.level <= self.kwargs.loglevel:
+                self.submit(event, self.pool.queue.outbox)
+        else:
+            self.logging.warning("Incoming event is not of type <wishbone.event.Log>. Dropped")

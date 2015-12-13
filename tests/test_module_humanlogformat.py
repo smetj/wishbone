@@ -22,13 +22,10 @@
 #
 #
 
-import pytest
-
 from wishbone.event import Event
 from wishbone.event import Log
 from wishbone.module.humanlogformat import HumanLogFormat
 from wishbone.actor import ActorConfig
-from wishbone.error import QueueEmpty
 from utils import getter
 
 
@@ -41,8 +38,8 @@ def test_module_humanlogformat():
     humanlogformat.start()
 
     e = Event('test')
-    e.setData(Log(1367682301.430527, 6, 3342, 'Router', 'Received SIGINT. Shutting down.'))
+    e.set(Log(1367682301.430527, 6, 3342, 'Router', 'Received SIGINT. Shutting down.'))
 
     humanlogformat.pool.queue.inbox.put(e)
     one = getter(humanlogformat.pool.queue.outbox)
-    assert one.data == "2013-05-04T17:45:01 setup.py[3342]: informational Router: Received SIGINT. Shutting down."
+    assert one.get() == "2013-05-04T17:45:01 setup.py[3342]: informational Router: Received SIGINT. Shutting down."

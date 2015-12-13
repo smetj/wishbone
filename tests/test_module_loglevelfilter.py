@@ -22,12 +22,10 @@
 #
 #
 
-import pytest
-
 from wishbone.event import Event
+from wishbone.event import Log
 from wishbone.module.loglevelfilter import LogLevelFilter
 from wishbone.actor import ActorConfig
-from wishbone.error import QueueEmpty
 from utils import getter
 
 
@@ -39,19 +37,17 @@ def test_module_loglevelfilter():
     loglevelfilter.pool.queue.outbox.disableFallThrough()
     loglevelfilter.start()
 
-    e_one = Event('test')
-    e_one.setData((7, 1367682301.430527, 3342, 'Router', 'Received SIGINT. Shutting down.'))
 
-    e_two = Event('test')
-    e_two.setData((1, 1367682301.430527, 3342, 'Router', 'Received SIGINT. Shutting down.'))
+    e_one = Event(Log(1367682301.430527, 7, 3342, 'Router', 'Received SIGINT. Shutting down.'))
+    e_two = Event(Log(1367682301.430527, 1, 3342, 'Router', 'Received SIGINT. Shutting down.'))
 
     loglevelfilter.pool.queue.inbox.put(e_one)
     loglevelfilter.pool.queue.inbox.put(e_two)
 
-    one=getter(loglevelfilter.pool.queue.outbox)
-    assert one.data == (1, 1367682301.430527, 3342, 'Router', 'Received SIGINT. Shutting down.')
+    one = getter(loglevelfilter.pool.queue.outbox)
+    assert one.get().time == 1367682301.430527
     try:
-        two=getter(loglevelfilter.pool.queue.outbox)
+        getter(loglevelfilter.pool.queue.outbox)
     except Exception:
         assert True
     else:

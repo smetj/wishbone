@@ -23,6 +23,7 @@
 #
 
 from wishbone import Actor
+from wishbone.event import Event
 from gevent import sleep
 from gevent import os as gevent_os
 
@@ -60,8 +61,7 @@ class NamedPipeIn(Actor):
 
     def consume(self, event):
         for line in event:
-            e = self.createEvent()
-            e.data = line
+            e = Event(line)
             self.submit(e, self.pool.queue.outbox)
 
     def drain(self, p):

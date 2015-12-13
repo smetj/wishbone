@@ -22,7 +22,8 @@
 #
 #
 
-from gevent import monkey; monkey.patch_socket()
+from gevent import monkey
+monkey.patch_socket()
 from wishbone import Actor
 from amqp.connection import Connection as amqp_connection
 from amqp import basic_message
@@ -33,17 +34,15 @@ class AMQPOut(Actor):
 
     '''**Produces messages to AMQP.**
 
-    Submits messages to an AMQP message broker. The declared <exchange> and
-    <queue> will be bound to each other.
+    Submits messages to an AMQP message broker.
 
-    If no exchange name is provided, no exchange will be created. If
-    event.header.<self.name>.exchange exists it will override whatever is
-    defined in <exchange>.
+    If <exchange> is not provided, no exchange will be created during initialisation.
+    If <queue> is not provided, queue will be created during initialisation
 
-    If no queue name is provided, no queue will be create. if
-    event.header.<self.name>.queue exists it will override whatever is
-    defined in <queue>.
+    If <exchange> and <queue> are provided, they will both be created and
+    bound during initialisation.
 
+    <exchange> and <queue> can be event lookup values.
 
     Parameters:
 
@@ -94,6 +93,7 @@ class AMQPOut(Actor):
                  exchange="", exchange_type="direct", exchange_durable=False,
                  queue="", queue_durable=False, queue_exclusive=False, queue_auto_delete=True,
                  routing_key=""):
+
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -104,7 +104,7 @@ class AMQPOut(Actor):
 
     def consume(self, event):
 
-        message = basic_message.Message(body=str(event.data))
+        message = basic_message.Message(body=str(event.get()))
         self.channel.basic_publish(message,
                                    exchange=self.kwargs.exchange,
                                    routing_key=self.kwargs.routing_key)
@@ -113,7 +113,12 @@ class AMQPOut(Actor):
 
         while self.loop():
             try:
-                self.connection = amqp_connection(host=self.kwargs.host, port=self.kwargs.port, virtual_host=self.kwargs.vhost, userid=self.kwargs.user, password=self.kwargs.password)
+                self.connection = amqp_connection(host=self.kwargs.host,
+                                                  port=self.kwargs.port,
+                                                  virtual_host=self.kwargs.vhost,
+                                                  userid=self.kwargs.user,
+                                                  password=self.kwargs.password)
+
                 self.channel = self.connection.channel()
 
                 if self.kwargs.exchange != "":

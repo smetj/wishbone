@@ -73,8 +73,10 @@ class JSONValidate(Actor):
 
     def consume(self, event):
 
+        data = event.get()
+
         try:
-            self.validate(event.data)
+            self.validate(data)
         except Exception as err:
             raise Exception(self.__condenseError(err))
         else:

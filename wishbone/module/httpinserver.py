@@ -23,6 +23,7 @@
 #
 
 from wishbone import Actor
+from wishbone.event import Event
 from gevent import pywsgi
 from gevent import socket
 from gevent.pool import Pool
@@ -106,8 +107,7 @@ class HTTPInServer(Actor):
             if env["REQUEST_METHOD"] in ["PUT", "POST"]:
                 counter = 0
                 for line in self.delimit(env["wsgi.input"]):
-                    event = self.createEvent()
-                    event.data = line
+                    event = Event(line)
                     self.submit(event, self.pool.getQueue(queue))
                     counter += 1
                 start_response('200 OK', [('Content-Type', 'text/plain')])
@@ -126,7 +126,7 @@ class HTTPInServer(Actor):
 
         '''Validates and returns a trimmed value.'''
 
-        result = [ x for x in path.split('/') if x != "" ]
+        result = [x for x in path.split('/') if x != ""]
         if result == []:
             queue = "outbox"
         else:
