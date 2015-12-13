@@ -28,10 +28,11 @@ from wishbone.error import ModuleInitFailure, NoSuchModule, QueueConnected
 from gevent import signal, event, sleep, spawn
 import multiprocessing
 import importlib
-from gevent.pywsgi import WSGIServer
+from gevent import pywsgi
 import json
 from .monitorcontent import MONITORCONTENT
 from .monitorcontent import VisJSData
+
 
 class Container():
     pass
@@ -186,14 +187,32 @@ class Default(multiprocessing.Process):
         for name, config in self.config.lookups.iteritems():
             lookup_modules[name] = self.__registerLookupModule(config.module, **config.get('arguments', {}))
 
-        self.__registerModule(Funnel, ActorConfig("wishbone_metrics", self.size, self.frequency, self.config.lookups))
-        self.__registerModule(Funnel, ActorConfig("wishbone_logs", self.size, self.frequency, self.config.lookups))
+        self.__registerModule(Funnel, ActorConfig("wishbone_metrics",
+                                                  self.size,
+                                                  self.frequency,
+                                                  self.config.lookups,
+                                                  "All the modules' metrics arrive here."))
+
+        self.__registerModule(Funnel, ActorConfig("wishbone_logs",
+                                                  self.size,
+                                                  self.frequency,
+                                                  self.config.lookups,
+                                                  "All the modules' logs arrive here."))
 
         for name, instance in self.config.modules.iteritems():
+
             if name in ["metrics", "logs"]:
                 raise ModuleInitFailure('"%s" is a reserved name you cannot use as a module instance name.' % (name))
+
             pmodule = self.module_manager.getModuleByName(instance.module)
-            actor_config = ActorConfig(name, self.size, self.frequency, lookup_modules)
+            description = instance.get('description', self.module_manager.getModuleTitle(*instance.module.split('.')))
+
+            actor_config = ActorConfig(name,
+                                       self.size,
+                                       self.frequency,
+                                       lookup_modules,
+                                       description)
+
             self.__registerModule(pmodule, actor_config, instance.get("arguments", {}))
 
             self.module_pool.getModule(name).connect("metrics", self.module_pool.module.wishbone_metrics, name)
@@ -242,12 +261,22 @@ class Default(multiprocessing.Process):
     def __setupSTDOUTLogging(self):
 
         log_stdout = self.module_manager.getModuleByName("wishbone.output.stdout")
-        stdout_actor_config = ActorConfig("log_stdout", self.size, self.frequency, self.config.lookups)
+        stdout_actor_config = ActorConfig("log_stdout",
+                                          self.size,
+                                          self.frequency,
+                                          self.config.lookups,
+                                          "Writes the Wishbone logs to STDOUT.")
 
         log_human = self.module_manager.getModuleByName("wishbone.encode.humanlogformat")
-        human_actor_config = ActorConfig("log_format", self.size, self.frequency, self.config.lookups)
+        human_actor_config = ActorConfig("log_format",
+                                         self.size,
+                                         self.frequency,
+                                         self.config.lookups,
+                                         "Converts the Wishbone Logs into a readable format.")
+
         self.__registerModule(log_stdout, stdout_actor_config)
         self.__registerModule(log_human, human_actor_config)
+
         try:
             self.__connect("wishbone_logs.outbox", "log_format.inbox")
             self.__connect("log_format.outbox", "log_stdout.inbox")
@@ -256,7 +285,12 @@ class Default(multiprocessing.Process):
 
     def __setupSyslogLogging(self):
 
-        actor_config = ActorConfig("log_syslog", self.size, self.frequency, self.config.lookups)
+        actor_config = ActorConfig("log_syslog",
+                                   self.size,
+                                   self.frequency,
+                                   self.config.lookups,
+                                   "Writes incoming Wishbone logmessages into Syslog.")
+
         log_syslog = self.module_manager.getModuleByName("wishbone.output.syslog")
         self.__registerModule(log_syslog, actor_config)
         self.__connect("wishbone_logs.outbox", "log_syslog.inbox")
@@ -284,27 +318,23 @@ class MonitorWebserver():
         self.block = block
         self.js_data = VisJSData()
 
-        # for module in self.module_pool.list():
-        #     self.js_data.addNode(module.name)
-
-        # for connection in self.config.routingtable:
-
-        #     self.js_data.addEdge(connection.source_module,
-        #                          connection.source_queue,
-        #                          connection.destination_module,
-        #                          connection.destination_queue)
-
         for c in self.config.routingtable:
-            self.js_data.addModule(c.source_module)
-            self.js_data.addModule(c.destination_module)
+
+            self.js_data.addModule(instance_name=c.source_module,
+                                   module_name=self.config["modules"][c.source_module]["module"],
+                                   description=self.module_pool.getModule(c.source_module).description)
+
+            self.js_data.addModule(instance_name=c.destination_module,
+                                   module_name=self.config["modules"][c.destination_module]["module"],
+                                   description=self.module_pool.getModule(c.destination_module).description)
+
             self.js_data.addQueue(c.source_module, c.source_queue)
             self.js_data.addQueue(c.destination_module, c.destination_queue)
-            self.js_data.addEdge2("%s.%s" % (c.source_module, c.source_queue), "%s.%s" % (c.destination_module, c.destination_queue))
+            self.js_data.addEdge("%s.%s" % (c.source_module, c.source_queue), "%s.%s" % (c.destination_module, c.destination_queue))
 
         for connection in self.config.routingtable:
-            self.js_data.addEdge2("%s.%s" % (connection.source_module, connection.source_queue),
-                                  "%s.%s" % (connection.destination_module, connection.destination_queue)
-            )
+            self.js_data.addEdge("%s.%s" % (connection.source_module, connection.source_queue),
+                                  "%s.%s" % (connection.destination_module, connection.destination_queue))
 
     def start(self):
         spawn(self.setupWebserver)
@@ -347,5 +377,4 @@ class MonitorWebserver():
 
     def setupWebserver(self):
 
-        WSGIServer(('', 8088), self.application, log=None, error_log=None).serve_forever()
-
+        pywsgi.WSGIServer(('', 8088), self.application, log=None, error_log=None).serve_forever()
