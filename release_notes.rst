@@ -15,6 +15,8 @@ Bugs:
 
 Misc:
 
+- Updated to gevent-1.1b6
+- Prefixed zeromq modules with 'zeromq_'.
 
 
 Version 1.1.1
