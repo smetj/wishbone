@@ -36,7 +36,7 @@ def test_module_template_header():
 
     '''Tests template defined in header.'''
 
-    actor_config = ActorConfig('template', 100, 1, {})
+    actor_config = ActorConfig('template', 100, 1, {}, "")
     template = Template(actor_config, header_templates={"hello": "The numerical representation of one is {{one}}"})
 
     template.pool.queue.inbox.disableFallThrough()
@@ -47,7 +47,7 @@ def test_module_template_header():
 
     template.pool.queue.inbox.put(e)
     one = getter(template.pool.queue.outbox)
-    print one.dump(tmp=True)
+    print one.dump(complete=True)
     assert one.get('@tmp.template.hello') == "The numerical representation of one is 1"
 
 
@@ -58,7 +58,7 @@ def test_module_template_file():
     with open("template.tmpl", "w") as f:
         f.write("The numerical representation of one is {{one}}")
 
-    actor_config = ActorConfig('template', 100, 1, {})
+    actor_config = ActorConfig('template', 100, 1, {}, "")
     template = Template(actor_config, template="template.tmpl")
 
     template.pool.queue.inbox.disableFallThrough()
@@ -81,7 +81,7 @@ def test_module_template_file_different_destination():
     with open("template.tmpl", "w") as f:
         f.write("The numerical representation of one is {{one}}")
 
-    actor_config = ActorConfig('template', 100, 1, {})
+    actor_config = ActorConfig('template', 100, 1, {}, "")
     template = Template(actor_config, template="template.tmpl", destination="abc")
 
     template.pool.queue.inbox.disableFallThrough()

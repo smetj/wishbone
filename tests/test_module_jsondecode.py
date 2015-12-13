@@ -30,7 +30,7 @@ from utils import getter
 
 def test_module_jsondecode():
 
-    actor_config = ActorConfig('jsondecode', 100, 1, {})
+    actor_config = ActorConfig('jsondecode', 100, 1, {}, "")
     jsondecode = JSONDecode(actor_config)
 
     jsondecode.pool.queue.inbox.disableFallThrough()

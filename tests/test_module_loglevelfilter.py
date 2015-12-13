@@ -31,7 +31,7 @@ from utils import getter
 
 def test_module_loglevelfilter():
 
-    actor_config = ActorConfig('loglevelfilter', 100, 1, {})
+    actor_config = ActorConfig('loglevelfilter', 100, 1, {}, "")
     loglevelfilter = LogLevelFilter(actor_config)
     loglevelfilter.pool.queue.inbox.disableFallThrough()
     loglevelfilter.pool.queue.outbox.disableFallThrough()
