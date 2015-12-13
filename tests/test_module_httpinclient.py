@@ -29,7 +29,7 @@ from utils import getter
 
 def test_module_jsonencode():
 
-    actor_config = ActorConfig('jsonencode', 100, 1, {})
+    actor_config = ActorConfig('jsonencode', 100, 1, {}, "")
     http = HTTPInClient(actor_config, url="http://www.google.com", interval=1)
 
     http.pool.queue.outbox.disableFallThrough()

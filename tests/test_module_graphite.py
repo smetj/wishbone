@@ -33,7 +33,7 @@ from wishbone.event import Metric
 
 def test_module_graphite():
 
-    actor_config = ActorConfig('graphite', 100, 1, {})
+    actor_config = ActorConfig('graphite', 100, 1, {}, "")
     graphite = Graphite(actor_config, template='{type}.{source}.{name} {value} {time}')
     graphite.pool.queue.inbox.disableFallThrough()
     graphite.pool.queue.outbox.disableFallThrough()

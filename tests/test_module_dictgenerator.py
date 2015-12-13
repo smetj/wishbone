@@ -30,7 +30,7 @@ from utils import getter
 
 def test_module_dictgenerator_keys():
 
-    actor_config = ActorConfig('template', 100, 1, {})
+    actor_config = ActorConfig('template', 100, 1, {}, "")
     dictgenerator = DictGenerator(actor_config, keys=["one", "two"])
 
     dictgenerator.pool.queue.outbox.disableFallThrough()
@@ -44,7 +44,7 @@ def test_module_dictgenerator_keys():
 
 def test_module_dictgenerator_randomize_keys():
 
-    actor_config = ActorConfig('template', 100, 1, {})
+    actor_config = ActorConfig('template', 100, 1, {}, "")
     dictgenerator = DictGenerator(actor_config, randomize_keys=False)
 
     dictgenerator.pool.queue.outbox.disableFallThrough()
@@ -57,7 +57,7 @@ def test_module_dictgenerator_randomize_keys():
 
 def test_module_dictgenerator_num_values():
 
-    actor_config = ActorConfig('template', 100, 1, {})
+    actor_config = ActorConfig('template', 100, 1, {}, "")
     dictgenerator = DictGenerator(actor_config, num_values=True, num_values_min=1, num_values_max=2)
 
     dictgenerator.pool.queue.outbox.disableFallThrough()
@@ -74,7 +74,7 @@ def test_module_dictgenerator_num_values():
 
 def test_module_dictgenerator_num_elements():
 
-    actor_config = ActorConfig('template', 100, 1, {})
+    actor_config = ActorConfig('template', 100, 1, {}, "")
     dictgenerator = DictGenerator(actor_config, min_elements=1, max_elements=2)
 
     dictgenerator.pool.queue.outbox.disableFallThrough()

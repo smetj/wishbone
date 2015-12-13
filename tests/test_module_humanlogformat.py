@@ -31,7 +31,7 @@ from utils import getter
 
 def test_module_humanlogformat():
 
-    actor_config = ActorConfig('humanlogformat', 100, 1, {})
+    actor_config = ActorConfig('humanlogformat', 100, 1, {}, "")
     humanlogformat = HumanLogFormat(actor_config, colorize=False, ident='setup.py')
     humanlogformat.pool.queue.inbox.disableFallThrough()
     humanlogformat.pool.queue.outbox.disableFallThrough()
