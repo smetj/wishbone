@@ -25,7 +25,7 @@
 from wishbone import Actor
 from os import getpid
 from colorama import init, Fore, Back, Style
-from gevent.monkey import patch_sys; patch_sys(stdin=True, stdout=True, stderr=True)
+from gevent import monkey; monkey.patch_sys(stdin=True, stdout=True, stderr=True)
 import sys
 
 
@@ -50,7 +50,7 @@ class Format():
         return self.pid(self.counter(self.complete(event)))
 
     def __returnComplete(self, event):
-        return event.raw(tmp=True)
+        return event.raw(complete=True)
 
     def __returnIncomplete(self, event):
         return event.get('@data')

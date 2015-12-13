@@ -64,17 +64,34 @@ class Event(object):
             "@version": 1,
             "@data": data,
             "@tmp": {
+            },
+            "@errors": {
             }
         }
 
     def clone(self):
+        '''
+        Returns a cloned version of the event using deepcopy.
+        '''
+
         return deepcopy(self)
 
     def copy(self, source, destination):
+        '''
+        Copies the source key to the destination key.
+
+        :param str source: The name of the source key.
+        :param str destination: The name of the destination key.
+        '''
 
         self.set(destination, deepcopy(self.get(source)))
 
     def delete(self, key=None):
+        '''
+        Deletes a key.
+
+        :param str key: The name of the key to delete
+        '''
 
         if key is None:
             self.data = None
@@ -83,6 +100,12 @@ class Event(object):
             self.set(key, None)
 
     def get(self, key="@data"):
+        '''
+        Returns the value of <key>.
+
+        :param str key: The name of the key to read.
+        :return: The value of <key>
+        '''
 
         def travel(path, d):
 
@@ -103,17 +126,35 @@ class Event(object):
                 raise KeyError(key)
 
     def set(self, value, key="@data"):
+        '''
+        Sets the value of <key>.
 
+        :param value: The value to set.
+        :param str key: The name of the key to assign <value> to.
+        '''
+
+        if key.startswith('@') and key not in ["@data", "@tmp", "@error", "@version"]:
+            raise Exception("Keys starting with @ are reserved.")
         result = value
         for name in reversed(key.split('.')):
             result = {name: result}
         self.data.update(result)
 
-    def dump(self, tmp=False, convert_timestamp=True):
+    def dump(self, complete=False, convert_timestamp=True):
+        '''
+        Dumps the content of the event.
+
+        :param bool complete: Determines whether to include @tmp and @errors.
+        :param bool convert_timestamp: When True converts <Arrow> object to iso8601 string.
+        :return: The content of the event.
+        :rtype: dict
+        '''
 
         d = {}
         for key, value in self.data.iteritems():
-            if key == "@tmp" and not tmp:
+            if key == "@tmp" and not complete:
+                continue
+            if key == "@errors" and not complete:
                 continue
             elif isinstance(value, arrow.arrow.Arrow) and convert_timestamp:
                 d[key] = str(value)

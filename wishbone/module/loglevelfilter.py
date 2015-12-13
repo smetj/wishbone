@@ -62,7 +62,7 @@ class LogLevelFilter(Actor):
 
         data = event.get()
         if isinstance(data, Log):
-            if data[0] <= self.kwargs.loglevel:
+            if data.level <= self.kwargs.loglevel:
                 self.submit(event, self.pool.queue.outbox)
         else:
             self.logging.warning("Incoming event is not of type <wishbone.event.Log>. Dropped")

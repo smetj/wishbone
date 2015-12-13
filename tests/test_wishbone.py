@@ -22,18 +22,14 @@
 #
 #
 
-import pytest
-
 from wishbone import QueuePool
 from wishbone import Queue
-from wishbone.error import QueueEmpty
-from utils import getter
 
 
 def test_listQueues():
     q = QueuePool(1)
     q.createQueue("hello")
-    assert list(q.listQueues(names=True)) == ['hello', 'failed', 'success', 'logs', 'metrics']
+    assert sorted(list(q.listQueues(names=True))) == sorted(['hello', 'failed', 'success', 'logs', 'metrics'])
 
 
 def test_createQueue():
