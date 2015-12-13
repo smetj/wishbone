@@ -2,6 +2,7 @@
 modules:
   input:
     module: wishbone.input.testevent
+    description: I generate silly data.
     arguments:
       message: test
 
