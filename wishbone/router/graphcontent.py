@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  monitorcontent.py
+#  graphcontent.py
 #
 #  Copyright 2015 Jelle Smet <development@smetj.net>
 #
@@ -24,7 +24,7 @@
 
 import json
 
-MONITORCONTENT = """
+GRAPHCONTENT = """
 <!doctype html>
 <html>
 <head>
@@ -108,14 +108,14 @@ class VisJSData():
         self.nodes = {}
         self.edges = []
 
-    def addModule(self, name):
+    def addModule(self, instance_name, module_name, description):
 
-        if name not in self.nodes.keys():
-            self.nodes[name] = {"id": self.id,
-                                "label": name,
+        if instance_name not in self.nodes.keys():
+            self.nodes[instance_name] = {"id": self.id,
+                                "label": instance_name,
                                 "shape": "dot",
                                 "size": 20,
-                                "title": "Module: %s" % (name),
+                                "title": "Module: %s</br>Description: %s" % (module_name, description),
                                 "shadow": True,
                                 "font.size": 20
                                 }
@@ -137,32 +137,10 @@ class VisJSData():
                                "dashes": True})
             self.id += 1
 
-    def addNode(self, name):
-
-        self.nodes[name] = {"id": self.id,
-                            "label": name,
-                            "shape": "dot",
-                            "size": 5,
-                            "title": "Module: %s" % (name),
-                            "shadow": True,
-                            "font.size": 20
-                            }
-        self.id += 1
-
-    def addEdge2(self, f, t):
+    def addEdge(self, f, t):
 
         self.edges.append({"from": self.nodes[f]["id"],
                            "to": self.nodes[t]["id"],
-                           "arrows": "to"
-                           }
-                          )
-
-    def addEdge(self, from_module, from_queue, to_module, to_queue):
-
-        self.edges.append({"from": self.nodes[from_module]["id"],
-                           "to": self.nodes[to_module]["id"],
-                           "label": "%s->%s" % (from_queue, to_queue),
-                           "font": {"align": 'horizontal'},
                            "arrows": "to"
                            }
                           )

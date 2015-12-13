@@ -50,6 +50,7 @@ class Graphite(Actor):
 
         - prefix(str)("wishbone"):
             |
+
     Queues:
 
         - inbox
