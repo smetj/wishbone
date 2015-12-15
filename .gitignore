@@ -39,3 +39,5 @@ wishbone.sublime-project
 wishbone.sublime-workspace
 
 docs/_build
+
+.cache/*
