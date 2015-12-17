@@ -189,6 +189,7 @@ class Queue():
         '''Accepts an element but discards it'''
 
         self.__dropped += 1
+        del(element)
 
     def __put(self, element):
         '''Puts element in queue.'''
