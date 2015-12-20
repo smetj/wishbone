@@ -47,6 +47,8 @@ class Module():
 Metric = namedtuple("WishboneMetric", "time type source name value unit tags")
 Log = namedtuple("WishboneLog", "time level pid module message")
 
+EVENT_RESERVED = ["@timestamp", "@version", "@data", "@tmp", "@errors"]
+
 
 class Event(object):
 
@@ -93,11 +95,18 @@ class Event(object):
         :param str key: The name of the key to delete
         '''
 
+        if key.split('.')[0] in EVENT_RESERVED:
+            raise Exception("Cannot delete reserved keyword '%s'." % (key))
+
         if key is None:
             self.data = None
         else:
-            key = '.'.join(key.split('.')[:-1])
-            self.set(key, None)
+            if '.' in key:
+                s = key.split('.')
+                key = '.'.join(s[:-1])
+                del(self.get(key)[s[-1]])
+            else:
+                del(self.data[key])
 
     def get(self, key="@data"):
         '''
@@ -133,12 +142,14 @@ class Event(object):
         :param str key: The name of the key to assign <value> to.
         '''
 
-        if key.startswith('@') and key.split('.')[0] not in ["@data", "@tmp", "@error", "@version"]:
+        if key.startswith('@') and key.split('.')[0] not in EVENT_RESERVED:
             raise Exception("Keys starting with @ are reserved.")
         result = value
         for name in reversed(key.split('.')):
             result = {name: result}
-        self.data.update(result)
+
+        self.dict_merge(self.data, result)
+        # self.data.update(result)
 
     def dump(self, complete=False, convert_timestamp=True):
         '''
@@ -164,3 +175,25 @@ class Event(object):
         return d
 
     raw = dump
+
+    def dict_merge(self, dct, merge_dct):
+
+        """ Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
+        updating only top-level keys, dict_merge recurses down into dicts nested
+        to an arbitrary depth, updating keys. The ``merge_dct`` is merged into
+        ``dct``.
+
+        Stolen from https://gist.github.com/angstwad/bf22d1822c38a92ec0a9
+
+        :param dct: dict onto which the merge is executed
+        :param merge_dct: dct merged into dct
+        :return: None
+        """
+        for k, v in merge_dct.iteritems():
+            if (k in dct and isinstance(dct[k], dict)
+                    and isinstance(merge_dct[k], dict)):
+                self.dict_merge(dct[k], merge_dct[k])
+            else:
+                dct[k] = merge_dct[k]
+
+
