@@ -23,6 +23,8 @@
 #
 
 from wishbone import Actor
+import re
+import csv
 
 
 class Modify(Actor):
@@ -47,7 +49,7 @@ class Modify(Actor):
            |  Contains the generated events.
     '''
 
-    def __init__(self, actor_config, set={}, template={}):
+    def __init__(self, actor_config, expressions=[]):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
@@ -55,13 +57,29 @@ class Modify(Actor):
 
     def consume(self, event):
 
-        for key, value in self.kwargs.set:
-            event.set(value, key)
-
-        for key, value in self.kwargs.template:
-            try:
-                event.set(value.format(**event.raw()), key)
-            except KeyError:
-                event.set(value, key)
+        for expression in self.kwargs.expressions:
+            command, args = self.__extractExpr(expression)
+            event = getattr(self, "command%s" % (command))(event, *args)
 
         self.submit(event, self.pool.queue.outbox)
+
+    def commandset(self, event, value, key):
+
+        event.set(value, key)
+        return event
+
+    def commanddelete(self, event, key):
+
+        event.delete(key)
+        return event
+
+    def __extractExpr(self, e):
+
+        assert isinstance(e, dict)
+        assert len(e.keys()) == 1
+
+        c = e.keys()[0]
+        assert c in ["set", "delete"]
+
+        assert isinstance(e[c], list)
+        return c, e[c]
