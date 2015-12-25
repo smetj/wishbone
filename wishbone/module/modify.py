@@ -23,25 +23,118 @@
 #
 
 from wishbone import Actor
+from copy import deepcopy
 import re
-import csv
+
+VALID_EXPRESSIONS = ["add_item",
+                     "copy",
+                     "del_item",
+                     "delete",
+                     "extract",
+                     "lowercase",
+                     "set",
+                     "template",
+                     "uppercase"
+                     ]
 
 
 class Modify(Actor):
 
     '''**Modify and manipulate datastructures.**
 
-    This module modifies the data of an event.
+    This module modifies the data of an event using a sequential list of
+    expressions.
+
+    Expressions are dictionaries containing 1 item. The key is a string and
+    the value is a list of parameters accepted by the expression.
+
+    For example:
+
+        {"set": "hi", "@data.one"}
+
+        Sets the value "hi" to key "@data.one".
+
+
+    The YAML format of the bootstrap file lends itself a bit more to a
+    pleasant syntax.  For example:
+
+        module: wishbone.function.modify
+        arguments:
+          expressions:
+            - set: [ "Good day.", "@data.greeting" ]
+
+
+    Valid expressions are:
+
+        - add_item: [<source_key>, <item>]
+
+          Adds <item> to the list stored under <source_key>
+
+
+        - copy: [<source_key>, <destination_key>]
+
+          Copies and overwrites the content of <source_key> to
+          <destination_key>.
+
+
+        - del_item: [<key>, <item>]
+
+          Deletes first occurance of <item> from the list stored under
+          <source_key>.
+
+
+        - delete: [<key>]
+
+          Deletes <key> from the event.
+
+
+        - extract: [<destination>, <regex>, <source>]
+
+          Makes use of Python re module to extract named groups from <source>
+          using <regex> and add the resulting matches to <destination>.
+
+          The following example would extract the words "one" and "two" from
+          "@data.test" and add that to @data.extract resulting into:
+
+          {"@data":{"test:"one;two", extract:{"first": "one", "second": "two"}}}
+
+          extract: ["@data.extract", '(?P<first>.*?);(?P<second>.*)', "@data.test"]
+
+
+        - lowercase: [<key>]
+
+           Turns the string stored under <key> to lowercase.
+
+
+        - set: [<value>, <key>]
+
+          Sets <value> to the event <key>.
+
+
+        - template: [<destination>, <template>, <source>]
+
+          Renders <template> into a string using a dict stored in <source> and
+          writing the result into <destination>.
+
+
+        - uppercase: [<key>]
+
+           Turns the string stored under <key> to uppercase.
+
+
+        - template: [<destination_key>, <template>, <source_key>]
+
+          Uses the dictionary stored in <source_key> to complete <template>
+          and puts the results into key <destination_key>.
+          The templating language used is Python's builtin string format one.
+
+
 
 
     Parameters:
 
-        - set(dict)({})
-           |  Sets the keys to the requested values
-
-        - template(dict)({})
-           |  Sets the keys to the requested values
-
+        - expressions(list)([])
+           |  A list of expressions to apply.
 
     Queues:
 
@@ -58,28 +151,70 @@ class Modify(Actor):
     def consume(self, event):
 
         for expression in self.kwargs.expressions:
-            command, args = self.__extractExpr(expression)
-            event = getattr(self, "command%s" % (command))(event, *args)
+            try:
+                command, args = self.__extractExpr(expression)
+                event = getattr(self, "command_%s" % (command))(event, *args)
+            except Exception as err:
+                self.logging.error("Failed to process expression '%s'. Reason: %s Skipped." % (expression, err))
 
         self.submit(event, self.pool.queue.outbox)
 
-    def commandset(self, event, value, key):
+    def command_add_item(self, event, item, key):
 
-        event.set(value, key)
+        event.get(key).append(item)
+
         return event
 
-    def commanddelete(self, event, key):
+    def command_copy(self, event, source, destination):
+
+        event.copy(source, destination)
+        return event
+
+    def command_del_item(self, event, item, key):
+
+        event.get(key).remove(item)
+
+        return event
+
+    def command_delete(self, event, key):
 
         event.delete(key)
         return event
 
+    def command_extract(self, event, destination, regex, source):
+
+        matches = re.match(regex, event.get(source))
+        event.set(matches.groupdict(), destination)
+        return event
+
+    def command_lowercase(self, event, key):
+
+        event.set(event.get(key).lower(), key)
+        return event
+
+    def command_set(self, event, value, key):
+
+        event.set(deepcopy(value), key)
+        return event
+
+    def command_template(self, event, destination, template, key):
+
+        result = template.format(**event.get(key))
+        event.set(result, destination)
+        return event
+
+    def command_uppercase(self, event, key):
+
+        event.set(event.get(key).upper(), key)
+        return event
+
     def __extractExpr(self, e):
 
-        assert isinstance(e, dict)
-        assert len(e.keys()) == 1
+        assert isinstance(e, dict), "The expression should be a dict."
+        assert len(e.keys()) == 1, "The expression should only contain 1 value"
 
         c = e.keys()[0]
-        assert c in ["set", "delete"]
+        assert c in VALID_EXPRESSIONS, "'%s' is an invalid expression." % c
 
-        assert isinstance(e[c], list)
+        assert isinstance(e[c], list), "The expression value must be a list."
         return c, e[c]
