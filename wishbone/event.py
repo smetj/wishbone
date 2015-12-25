@@ -86,7 +86,7 @@ class Event(object):
         :param str destination: The name of the destination key.
         '''
 
-        self.set(destination, deepcopy(self.get(source)))
+        self.set(deepcopy(self.get(source)), destination)
 
     def delete(self, key=None):
         '''
