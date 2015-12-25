@@ -211,7 +211,7 @@ class Actor():
             except Exception as err:
                 exc_type, exc_value, exc_traceback = exc_info()
                 info = (traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value))
-                event.set(info, "@error.%s" % (self.name))
+                event.set(info, "@errors.%s" % (self.name))
                 self.logging.error("%s" % (err))
                 self.submit(event, self.pool.queue.failed)
             else:
