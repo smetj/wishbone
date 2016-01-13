@@ -125,7 +125,7 @@ class Event(object):
                     raise Exception()
             else:
                 return travel(path[1:], d[path[0]])
-        if key is None:
+        if key is None or key is "":
             return self.data
         else:
             path = key.split('.')
