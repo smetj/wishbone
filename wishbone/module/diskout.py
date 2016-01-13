@@ -33,11 +33,15 @@ import cPickle as pickle
 
 class DiskOut(Actor):
 
-    '''**Writes messages to a disk buffer.**
+    '''**Writes complete messages to a disk buffer.**
 
-    Persists incoming messages to disk.
+    Persists complete incoming messages to disk.
 
         Parameters:
+
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
 
         - directory(str)("./)
            |  The directory to write data to.
@@ -53,7 +57,7 @@ class DiskOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, directory="./", interval=10):
+    def __init__(self, actor_config, selection="@data", directory="./", interval=10):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")

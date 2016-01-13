@@ -42,6 +42,10 @@ class ElasticSearchOut(Actor):
 
     Parameters:
 
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
+
         - hosts(list)(["localhost:9200"])
            |  A list of "hostname:port" strings.
 
@@ -67,7 +71,7 @@ class ElasticSearchOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, hosts=["localhost:9200"], use_ssl=False, verify_certs=False, index="wishbone", doc_type="wishbone", interval=5):
+    def __init__(self, actor_config, selection="@data", hosts=["localhost:9200"], use_ssl=False, verify_certs=False, index="wishbone", doc_type="wishbone", interval=5):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.pool.createQueue("bulk")
@@ -88,7 +92,7 @@ class ElasticSearchOut(Actor):
             self.flush()
 
     def flush(self):
-        bulk(self.elasticsearch, [{"_index": self.kwargs.index, "_type": self.kwargs.doc_type, "_source": e.get()} for e in self.pool.queue.bulk.dump()])
+        bulk(self.elasticsearch, [{"_index": self.kwargs.index, "_type": self.kwargs.doc_type, "_source": e.get(self.kwargs.selection)} for e in self.pool.queue.bulk.dump()])
 
     def __flushTimer(self):
 
