@@ -31,11 +31,8 @@ import sys
 
 class Format():
 
-    def __init__(self, complete, counter, pid):
-        if complete:
-            self.complete = self.__returnComplete
-        else:
-            self.complete = self.__returnIncomplete
+    def __init__(self, selection, counter, pid):
+        self.selection = selection
         if counter:
             self.counter = self.__returnCounter
         else:
@@ -47,13 +44,13 @@ class Format():
             self.pid = self.__returnNoPid
 
     def do(self, event):
-        return self.pid(self.counter(self.complete(event)))
+        return self.pid(self.counter(event.get(self.selection)))
 
-    def __returnComplete(self, event):
-        return event.raw(complete=True)
+    # def __returnComplete(self, event):
+    #     return event.raw(complete=True)
 
-    def __returnIncomplete(self, event):
-        return event.get('@data')
+    # def __returnIncomplete(self, event):
+    #     return event.get('@data')
 
     def __returnCounter(self, event):
         self.countervalue += 1
@@ -81,8 +78,9 @@ class STDOUT(Actor):
 
     Parameters:
 
-        - complete(bool)(False)
-           |  When True, print the complete event including headers.
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
 
         - counter(bool)(False)
            |  Puts an incremental number for each event in front
@@ -112,11 +110,11 @@ class STDOUT(Actor):
            |  Incoming events.
     '''
 
-    def __init__(self, actor_config, complete=False, counter=False, prefix="", pid=False, foreground_color="WHITE", background_color="RESET", color_style="NORMAL"):
+    def __init__(self, actor_config, selection="@data", counter=False, prefix="", pid=False, foreground_color="WHITE", background_color="RESET", color_style="NORMAL"):
         Actor.__init__(self, actor_config)
 
         self.__validateInput(foreground_color, background_color, color_style)
-        self.format = Format(self.kwargs.complete, self.kwargs.counter, self.kwargs.pid)
+        self.format = Format(self.kwargs.selection, self.kwargs.counter, self.kwargs.pid)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 

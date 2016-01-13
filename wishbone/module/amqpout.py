@@ -46,7 +46,11 @@ class AMQPOut(Actor):
 
     Parameters:
 
-        - host(str) "localhost"
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
+
+        - host(str)("localhost")
            |  The host broker to connect to.
 
         - port(int)(5672)
@@ -89,7 +93,8 @@ class AMQPOut(Actor):
            | Messages going to the defined broker.
     '''
 
-    def __init__(self, actor_config, host="localhost", port=5672, vhost="/", user="guest", password="guest",
+    def __init__(self, actor_config, selection="@data",
+                 host="localhost", port=5672, vhost="/", user="guest", password="guest",
                  exchange="", exchange_type="direct", exchange_durable=False,
                  queue="", queue_durable=False, queue_exclusive=False, queue_auto_delete=True,
                  routing_key=""):
@@ -104,7 +109,7 @@ class AMQPOut(Actor):
 
     def consume(self, event):
 
-        message = basic_message.Message(body=str(event.get()))
+        message = basic_message.Message(body=str(event.get(self.kwargs.selection)))
         self.channel.basic_publish(message,
                                    exchange=self.kwargs.exchange,
                                    routing_key=self.kwargs.routing_key)
