@@ -36,6 +36,10 @@ class HTTPOutClient(Actor):
 
     Parameters:
 
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
+
         - method(str)("PUT")
            |  The http method to use. PUT/POST
 
@@ -64,7 +68,7 @@ class HTTPOutClient(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, config, method="PUT", content_type="application/json", accept="text/plain", url="https://localhost", username=None, password=None):
+    def __init__(self, config, selection="@data", method="PUT", content_type="application/json", accept="text/plain", url="https://localhost", username=None, password=None):
 
         Actor.__init__(self, config)
         self.pool.createQueue("inbox")
@@ -85,7 +89,7 @@ class HTTPOutClient(Actor):
     def consume(self, event):
 
         try:
-            response = self.submitToResource(event.get())
+            response = self.submitToResource(event.get(self.kwargs.selection))
             response.raise_for_status()
         except Exception as err:
             self.logging.error("Failed to submit data.  Reason: %s" % (err))

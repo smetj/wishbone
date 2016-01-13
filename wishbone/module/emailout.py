@@ -38,6 +38,10 @@ class EmailOut(Actor):
 
     Parameters:
 
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
+
         - mta(string)("localhost:25)
            |  The address:port of the MTA to submit the
            |  mail to.
@@ -59,7 +63,7 @@ class EmailOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, mta="localhost:25", subject="Wishbone", to=None, from_address=None):
+    def __init__(self, actor_config, selection="@data", mta="localhost:25", subject="Wishbone", to=None, from_address=None):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
@@ -67,7 +71,7 @@ class EmailOut(Actor):
     def consume(self, event):
 
         try:
-            message = MIMEText(str(event.get()))
+            message = MIMEText(str(event.get(self.kwargs.selection)))
             message["Subject"] = self.kwargs.subject
             message["From"] = self.kwargs.from_address
             message["To"] = ",".join(self.kwargs.to)

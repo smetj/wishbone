@@ -39,15 +39,16 @@ class FileOut(Actor):
 
     Parameters:
 
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
+
         - location(str)("./wishbone.out")
            |  The location of the output file.
 
         - timestamp(bool)(False)
            |  If true prepends each line with a ISO8601 timestamp.
 
-        - complete(bool)(False)
-           |  When true dumps the complete event structure.
-           |  If not just the payload.
 
     Queues:
 
@@ -56,7 +57,7 @@ class FileOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, location="./wishbone.out", timestamp=False, complete=False):
+    def __init__(self, actor_config, selection='@data', location="./wishbone.out", timestamp=False):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -69,23 +70,12 @@ class FileOut(Actor):
         else:
             self.getTimestamp = self.returnNoTimestamp
 
-        if self.kwargs.complete:
-            self.getData = self.returnComplete
-        else:
-            self.getData = self.returnDataOnly
-
         self.file = open(self.kwargs.location, "a")
         make_nonblocking(self.file)
 
     def consume(self, event):
-        self.file.write("%s%s\n" % (self.getTimestamp(), str(self.getData(event))))
+        self.file.write("%s%s\n" % (self.getTimestamp(), str(event.get(self.kwargs.selection))))
         self.file.flush()
-
-    def returnDataOnly(self, event):
-        return event.get()
-
-    def returnComplete(self, event):
-        return event.raw(tmp=True)
 
     def returnTimestamp(self):
 

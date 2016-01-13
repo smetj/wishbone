@@ -34,7 +34,8 @@ VALID_EXPRESSIONS = ["add_item",
                      "lowercase",
                      "set",
                      "template",
-                     "uppercase"
+                     "uppercase",
+                     "time",
                      ]
 
 
@@ -111,12 +112,6 @@ class Modify(Actor):
           Sets <value> to the event <key>.
 
 
-        - template: [<destination>, <template>, <source>]
-
-          Renders <template> into a string using a dict stored in <source> and
-          writing the result into <destination>.
-
-
         - uppercase: [<key>]
 
            Turns the string stored under <key> to uppercase.
@@ -125,9 +120,14 @@ class Modify(Actor):
         - template: [<destination_key>, <template>, <source_key>]
 
           Uses the dictionary stored in <source_key> to complete <template>
-          and puts the results into key <destination_key>.
+          and stores the results into key <destination_key>.
           The templating language used is Python's builtin string format one.
 
+        - time: [<destination_key>, <format>]
+
+          Modifies the <@timestamp> value according the the <format> specification
+          and stores it into <destination_key>.
+          See http://crsmithdev.com/arrow/#format for the format.
 
 
 
@@ -201,6 +201,12 @@ class Modify(Actor):
 
         result = template.format(**event.get(key))
         event.set(result, destination)
+        return event
+
+    def command_time(self, event, destination_key, f):
+
+        result = event.get("@timestamp").format(f)
+        event.set(result, destination_key)
         return event
 
     def command_uppercase(self, event, key):
