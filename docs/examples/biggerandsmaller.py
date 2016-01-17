@@ -5,13 +5,17 @@ from wishbone import Actor
 
 class BiggerAndSmaller(Actor):
 
-    '''**Checks whether an integer falls between min and max.**
+    '''**Checks whether an integer is between min and max.**
 
-    Checks whether an integer is between the defined minimum
-    and maximum values.  In case the integer is
+    Checks whether an integer is between the defined minimum and maximum
+    values.  When the value is inside the scope it is submitted to the
+    *inside* queue otherwise it is submitted to the *outside* queue.
 
 
     Parameters:
+
+        - selection(str)('@data')
+           |  The value
 
         - min(int)(1)
            |  The minimum integer value.
@@ -31,7 +35,7 @@ class BiggerAndSmaller(Actor):
            |  Values are outside the <min> and <max> values.
     '''
 
-    def __init__(self, actor_config, min=1, max=100):
+    def __init__(self, actor_config, selection='@data', min=1, max=100):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -44,7 +48,7 @@ class BiggerAndSmaller(Actor):
         if not isinstance(event.data, int):
             raise TypeError("Event data is not type integer")
 
-        if event.data >= self.kwargs.min and event.data <= self.kwargs.max:
+        if event.get(self.kwargs.selection) >= self.kwargs.min and event.data <= self.kwargs.max:
             self.submit(event, self.pool.queue.inside)
         else:
             self.submit(event, self.pool.queue.outside)
