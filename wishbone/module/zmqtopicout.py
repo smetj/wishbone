@@ -38,6 +38,10 @@ class ZMQTopicOut(Actor):
 
     Parameters:
 
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event
+
         - port(int)(19283)
            |  The port to bind to.
 
@@ -55,7 +59,7 @@ class ZMQTopicOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, port=19283, timeout=10, topic=""):
+    def __init__(self, actor_config, selection='@data', port=19283, timeout=10, topic=""):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
@@ -68,7 +72,8 @@ class ZMQTopicOut(Actor):
 
     def consume(self, event):
 
+        data = event.get(self.kwargs.selection)
         try:
-            self.socket.send("%s %s" % (self.kwargs.topic, event.get()))
+            self.socket.send("%s %s" % (self.kwargs.topic, data))
         except Exception as err:
             raise ("Failed to submit message.  Reason %s" % (err))

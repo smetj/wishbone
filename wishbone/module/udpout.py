@@ -37,6 +37,10 @@ class UDPOut(Actor):
 
     Parameters:
 
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
+
         - host(string)("localhost")
            |  The host to submit to.
 
@@ -63,8 +67,8 @@ class UDPOut(Actor):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def consume(self, event):
-        if isinstance(event.get(), list):
-            data = self.kwargs.delimiter.join(event.get())
-        else:
-            data = event.get()
+        data = event.get(self.kwargs.selection)
+        if isinstance(data, list):
+            data = self.kwargs.delimiter.join(data)
+
         self.socket.sendto(str(data), (self.kwargs.host, self.kwargs.port))

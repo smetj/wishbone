@@ -41,6 +41,10 @@ class Syslog(Actor):
 
     Parameters:
 
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
+
         - level(int)(5)
            |  The loglevel.
 
@@ -54,7 +58,7 @@ class Syslog(Actor):
            |  incoming events
     '''
 
-    def __init__(self, actor_config, level=5, ident=os.path.basename(sys.argv[0])):
+    def __init__(self, actor_config, selection="@data", level=5, ident=os.path.basename(sys.argv[0])):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -66,10 +70,11 @@ class Syslog(Actor):
 
     def consume(self, event):
 
+        d = event.get(self.kwargs.selection)
         if isinstance(event.data, Log):
-            syslog.syslog(event.data.level, "%s: %s" % (event.data.module, event.data.message))
+            syslog.syslog(event.data.level, "%s: %s" % (d.module, d.message))
         else:
-            syslog.syslog(self.kwargs.level, "%s: %s" % (self.kwargs.ident, str(event.data)))
+            syslog.syslog(self.kwargs.level, "%s: %s" % (self.kwargs.ident, str(d)))
 
     def postHook(self):
         syslog.closelog()
