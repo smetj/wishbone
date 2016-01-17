@@ -2,8 +2,8 @@
 Logs and metrics
 ================
 
-Logging
--------
+Logs
+----
 
 Each module has an instance of :py:class:`wishbone.Logging` offering a
 function for each loglevel.
@@ -53,8 +53,7 @@ Typically a :py:class:`wishbone.module.Graphite` instance is connected to the
 .. image:: graphite.png
 
 
-Format
-~~~~~~
+**Format**
 
 Wishbone represents metrics into a fixed data structure:
 
@@ -88,3 +87,4 @@ For example:
 .. code-block:: python
 
         (1381002603.726132, 'wishbone', 'hostname', 'queue.outbox.in_rate', 0, '', ("production",monitored))
+

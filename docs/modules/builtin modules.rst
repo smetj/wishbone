@@ -5,7 +5,6 @@ Builtin Modules
 Input modules
 *************
 
-
 wishbone.input.amqp
 -------------------
 .. autoclass:: wishbone.module.amqpin.AMQPIn
