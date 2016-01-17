@@ -37,6 +37,10 @@ class TCPOut(Actor):
 
     Parameters:
 
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
+
         - host(string)("localhost")
            |  The host to submit to.
 
@@ -57,7 +61,7 @@ class TCPOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, host="127.0.0.1", port=19283, timeout=10, delimiter="\n"):
+    def __init__(self, actor_config, selection="@data", host="127.0.0.1", port=19283, timeout=10, delimiter="\n"):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -65,10 +69,10 @@ class TCPOut(Actor):
 
     def consume(self, event):
 
-        if isinstance(event.get(), list):
-            data = self.kwargs.delimiter.join(event.get())
-        else:
-            data = event.get()
+        data = event.get(self.kwargs.selection)
+        if isinstance(data, list):
+            data = self.kwargs.delimiter.join(data)
+
         connection = self.setupConnection()
         connection.sendall(str(data) + self.kwargs.delimiter)
         connection.close()

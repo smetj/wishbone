@@ -70,6 +70,9 @@ class ServerSentEvents(Actor):
 
     Parameters:
 
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
 
         - bind(string)("0.0.0.0")
            |  The address to bind to.
@@ -97,7 +100,7 @@ class ServerSentEvents(Actor):
 
     '''
 
-    def __init__(self, actor_config, bind="0.0.0.0", port=19283, show_last=False, keepalive=False, keepalive_interval=5):
+    def __init__(self, actor_config, selection="@data", bind="0.0.0.0", port=19283, show_last=False, keepalive=False, keepalive_interval=5):
 
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
@@ -156,7 +159,7 @@ class ServerSentEvents(Actor):
 
         try:
             for q in self.session_queues[destination]:
-                self.session_queues[destination][q].put(str(event.get()))
+                self.session_queues[destination][q].put(str(event.get(self.kwargs.selection)))
         except KeyError:
             if destination == '':
                 destination = '/'

@@ -34,6 +34,10 @@ class UDSOut(Actor):
 
     Parameters:
 
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
+
         - path(str)("/tmp/wishbone")
            |  The unix domain socket to write events to.
 
@@ -47,7 +51,7 @@ class UDSOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, path="/tmp/wishbone", delimiter=""):
+    def __init__(self, actor_config, selection='@data', path="/tmp/wishbone", delimiter=""):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -57,6 +61,9 @@ class UDSOut(Actor):
         self.sendToBackground(self.setupConnection)
 
     def consume(self, event):
+
+        data = event.get(self.kwargs.selection)
+
         if isinstance(event.data, list):
             data = self.kwargs.delimiter.join(event.get())
         else:

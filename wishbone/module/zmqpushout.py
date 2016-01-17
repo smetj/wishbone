@@ -38,6 +38,10 @@ class ZMQPushOut(Actor):
 
     Parameters:
 
+        - selection(str)("@data")
+           |  The part of the event to submit externally.
+           |  Use an empty string to refer to the complete event.
+
         - mode(str)("server")
            |  The mode to run in.  Possible options are:
            |  - server: Binds to a port and listens.
@@ -61,7 +65,7 @@ class ZMQPushOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, mode="server", interface="0.0.0.0", port=19283, clients=[]):
+    def __init__(self, actor_config, selection="@data", mode="server", interface="0.0.0.0", port=19283, clients=[]):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
@@ -79,8 +83,9 @@ class ZMQPushOut(Actor):
 
     def consume(self, event):
 
+        data = event.get(self.kwargs.selection)
         try:
             # self.socket.send(event.data, flags=zmq.NOBLOCK)
-            self.socket.send(event.get())
+            self.socket.send(data)
         except Exception as err:
             self.logging.error("Failed to submit message.  Reason: %s" % (err))
