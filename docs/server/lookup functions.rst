@@ -3,14 +3,12 @@ Lookup functions
 ================
 
 Wishbone modules are initialized using the variables defined in the `bootstrap
-file`_. Instead of defining static values, it is possible to provide a lookup
-function which provides the said variable value by executing some predefined
-function.  See the `UpLook`_ library for more information.
-Lookup functions are defined and initialized in the `lookups section`_ of the
-bootstrap file.
+file`_. Instead of defining static values, you can define a lookup function
+which returns a value by executing some predefined function.  See the
+`UpLook`_ library for more information. Lookup functions are defined and
+initialized in the `lookups section`_ of the bootstrap file.
 
-Builtin lookup modules
-----------------------
+**Builtin lookup modules**
 
 Wishbone comes with a set of builtin lookup modules:
 
@@ -21,8 +19,7 @@ Wishbone comes with a set of builtin lookup modules:
 - :py:func:`wishbone.lookup.event`
 
 
-Importing modules
------------------
+**Importing modules**
 
 Lookup modules are referenced in the boostrap file with a dotted name:
 
@@ -38,8 +35,7 @@ imported.  The above lookup module should be possible to import like:
     from wishbone.lookup import randominteger
 
 
-Lookup modules are closures
----------------------------
+**Lookup modules are closures**
 
 .. code-block:: python
 

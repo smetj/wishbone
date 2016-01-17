@@ -64,14 +64,9 @@ Contents:
     :maxdepth: 2
 
     introduction
-    installation
-    bootstrap files
-    server
-    lookup functions
-    logs and metrics
-    writing a module
-    builtin modules
-
+    installation/index
+    server/index
+    modules/index
 
 Indices and tables
 ==================
