@@ -12,6 +12,8 @@ Feature:
 - Added --monitor option show layout.
 - Added support to provide description to the module section of
   the bootstrap file.
+- Added support to output modules to select which part of the event
+  is submitted externally.
 
 Bugs:
 
