@@ -24,7 +24,8 @@
 
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
-import sys, os
+import sys
+import os
 
 # Required to make pycrypto compile with PyPy
 # https://github.com/dlitz/pycrypto/pull/59
