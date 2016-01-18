@@ -82,6 +82,9 @@ class ReadRulesDisk():
                 self.logger.warning("Failed to parse file %s.  Please validate the YAML syntax in a parser." % (filename))
             except IOError as err:
                 self.logger.warning("Failed to read %s.  Reason: %s" % (filename, err))
+            except Exception as err:
+                self.logger.warning("Unknown error parsing file %s.  Skipped.  Reason: %s." % (filename, err))
+
         return rules
 
     def ruleCompliant(self, rule):
