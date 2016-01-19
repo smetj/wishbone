@@ -15,7 +15,7 @@ encapsulate the data they receive or generate.
 
 .. code:: python
 
-    >>> from wishbone.event.Event import Event
+    >>> from wishbone.event import Event
     >>> e = Event("hi")
     >>> e.dump()
     {'@timestamp': '2015-12-13T10:45:35.442088+01:00', '@version': 1, '@data': 'hi'}
