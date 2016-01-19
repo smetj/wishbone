@@ -17,6 +17,9 @@ Feature:
 
 Bugs:
 
+- Fixed bug in "match" module where failed YAML parsing makes the rule
+  processing thread die.
+
 Misc:
 
 - Updated to gevent-1.1b6
