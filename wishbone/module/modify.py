@@ -51,7 +51,7 @@ class Modify(Actor):
 
     For example:
 
-        {"set": "hi", "@data.one"}
+        {"set": ["hi", "@data.one"]}
 
         Sets the value "hi" to key "@data.one".
 
@@ -67,9 +67,9 @@ class Modify(Actor):
 
     Valid expressions are:
 
-        - add_item: [<source_key>, <item>]
+        - add_item: [<item>, <key>]
 
-          Adds <item> to the list stored under <source_key>
+          Adds <item> to the list stored under <key>
 
 
         - copy: [<source_key>, <destination_key>]
@@ -162,7 +162,6 @@ class Modify(Actor):
     def command_add_item(self, event, item, key):
 
         event.get(key).append(item)
-
         return event
 
     def command_copy(self, event, source, destination):
