@@ -95,8 +95,9 @@ class Event(object):
         :param str key: The name of the key to delete
         '''
 
-        if key.split('.')[0] in EVENT_RESERVED:
-            raise Exception("Cannot delete reserved keyword '%s'." % (key))
+        s = key.split('.')
+        if s[0] in EVENT_RESERVED and len(s) == 1:
+            raise Exception("Cannot delete root of reserved keyword '%s'." % (key))
 
         if key is None:
             self.data = None
