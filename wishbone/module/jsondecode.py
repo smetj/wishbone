@@ -34,7 +34,17 @@ class JSONDecode(Actor):
 
     Parameters:
 
-        n/a
+        - source(str)("@data")
+           |  The source of the event to decode.
+           |  Use an empty string to refer to the complete event.
+
+        - destination(str)("@data")
+           |  The destination key to store the Python <dict>.
+           |  Use an empty string to refer to the complete event.
+
+        - deserialize(bool)(False)
+           |  When True and <source> is a type list, each entry in the list
+           |  will be treated as a new event.
 
 
     Queues:
@@ -48,7 +58,7 @@ class JSONDecode(Actor):
 
     def __init__(self, actor_config):
 
-        Actor.__init__(self, actor_config)
+        Actor.__init__(self, actor_config, source="@data", destination="@data", deserialize=False)
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
@@ -56,9 +66,16 @@ class JSONDecode(Actor):
 
     def consume(self, event):
 
-        data = event.get()
+        data = event.get(self.kwargs.source)
         data = self.convert(data)
-        event.set(data)
+
+        if self.kwargs.deserialize:
+            if isinstance(data, list):
+                for item in data:
+                    self.submit(event, self.pool.queue.outbox)
+
+
+        event.set(data, self.kwargs.destination)
 
         self.submit(event, self.pool.queue.outbox)
 
