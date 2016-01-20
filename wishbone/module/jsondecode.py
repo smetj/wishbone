@@ -56,9 +56,9 @@ class JSONDecode(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, actor_config):
+    def __init__(self, actor_config, source="@data", destination="@data", deserialize=False):
 
-        Actor.__init__(self, actor_config, source="@data", destination="@data", deserialize=False)
+        Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
@@ -69,15 +69,14 @@ class JSONDecode(Actor):
         data = event.get(self.kwargs.source)
         data = self.convert(data)
 
-        if self.kwargs.deserialize:
-            if isinstance(data, list):
-                for item in data:
-                    self.submit(event, self.pool.queue.outbox)
-
-
-        event.set(data, self.kwargs.destination)
-
-        self.submit(event, self.pool.queue.outbox)
+        if self.kwargs.deserialize and isinstance(data, list):
+            for item in data:
+                e = event.clone()
+                e.set(item, self.kwargs.destination)
+                self.submit(e, self.pool.queue.outbox)
+        else:
+            event.set(data)
+            self.submit(event, self.pool.queue.outbox)
 
     def convert(self, data):
         return loads(data)
