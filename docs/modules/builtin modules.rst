@@ -203,19 +203,26 @@ wishbone.flow.ttl
 -----------------
 .. autoclass:: wishbone.module.ttl.TTL
 
-
-Function modules
-****************
-
-wishbone.function.modify
-------------------------
-.. autoclass:: wishbone.module.modify.Modify
-
 --------
 
 wishbone.funtion.validatejson
 -----------------------------
 .. autoclass:: wishbone.module.jsonvalidate.JSONValidate
+
+
+
+Function modules
+****************
+
+wishbone.function.deserialize
+-----------------------------
+.. autoclass:: wishbone.module.deserialize.Deserialize
+
+--------
+
+wishbone.function.modify
+------------------------
+.. autoclass:: wishbone.module.modify.Modify
 
 --------
 
