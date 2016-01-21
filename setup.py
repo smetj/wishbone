@@ -34,7 +34,7 @@ if "PyPy" in sys.version:
     os.environ["with_gmp"] = "no"
 
 PROJECT = 'wishbone'
-VERSION = '1.2.0'
+VERSION = '2.1.0'
 
 install_requires = ['gevent==1.1b6',
                     'greenlet==0.4.9',
@@ -130,7 +130,8 @@ setup(
             'funnel = wishbone.module.funnel:Funnel',
             'match = wishbone.module.match:Match',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
-            'ttl = wishbone.module.ttl:TTL'
+            'ttl = wishbone.module.ttl:TTL',
+            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate'
         ],
         'wishbone.encode': [
             'graphite = wishbone.module.graphite:Graphite',
@@ -144,8 +145,8 @@ setup(
             'json = wishbone.module.jsondecode:JSONDecode'
         ],
         'wishbone.function': [
+            'deserialize = wishbone.module.deserialize:Deserialize',
             'modify = wishbone.module.modify:Modify',
-            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate',
             'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
             'template = wishbone.module.template:Template'
         ],
