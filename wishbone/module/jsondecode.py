@@ -42,11 +42,6 @@ class JSONDecode(Actor):
            |  The destination key to store the Python <dict>.
            |  Use an empty string to refer to the complete event.
 
-        - deserialize(bool)(False)
-           |  When True and <source> is a type list, each entry in the list
-           |  will be treated as a new event.
-
-
     Queues:
 
         - inbox
@@ -56,7 +51,7 @@ class JSONDecode(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, actor_config, source="@data", destination="@data", deserialize=False):
+    def __init__(self, actor_config, source="@data", destination="@data"):
 
         Actor.__init__(self, actor_config)
 
@@ -68,15 +63,8 @@ class JSONDecode(Actor):
 
         data = event.get(self.kwargs.source)
         data = self.convert(data)
-
-        if self.kwargs.deserialize and isinstance(data, list):
-            for item in data:
-                e = event.clone()
-                e.set(item, self.kwargs.destination)
-                self.submit(e, self.pool.queue.outbox)
-        else:
-            event.set(data)
-            self.submit(event, self.pool.queue.outbox)
+        event.set(data, self.kwargs.destination)
+        self.submit(event, self.pool.queue.outbox)
 
     def convert(self, data):
         return loads(data)
