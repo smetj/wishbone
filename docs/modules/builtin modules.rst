@@ -187,6 +187,12 @@ wishbone.flow.fanout
 
 --------
 
+wishbone.flow.jq
+-------------------
+.. autoclass:: wishbone.module.wb_jq.JQ
+
+--------
+
 wishbone.flow.match
 -------------------
 .. autoclass:: wishbone.module.match.Match
