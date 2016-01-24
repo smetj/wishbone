@@ -3,12 +3,15 @@ modules:
 
   input:
     module: wishbone.input.tcp
+    description: Takes JSON data in over TCP port 19283
 
   decode:
     module: wishbone.decode.json
+    description: Converts JSON into a Python data structure
 
-  output:
+  evaluate:
     module: wishbone.flow.jq
+    description: Evaluates the datastructure against a jq condition
     arguments:
       conditions:
         - queue: hello
@@ -16,11 +19,12 @@ modules:
 
   screen:
     module: wishbone.output.stdout
+    description: Prints the complete event to STDOUT.
     arguments:
       selection: ""
 
 routingtable:
   - input.outbox   -> decode.inbox
-  - decode.outbox  -> output.inbox
-  - output.hello    -> screen.inbox
+  - decode.outbox  -> evaluate.inbox
+  - evaluate.hello -> screen.inbox
 ...
