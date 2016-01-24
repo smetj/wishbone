@@ -1,0 +1,26 @@
+---
+modules:
+
+  input:
+    module: wishbone.input.tcp
+
+  decode:
+    module: wishbone.decode.json
+
+  output:
+    module: wishbone.flow.jq
+    arguments:
+      conditions:
+        - queue: hello
+          expression: '.greeting | test( "hello" )'
+
+  screen:
+    module: wishbone.output.stdout
+    arguments:
+      selection: ""
+
+routingtable:
+  - input.outbox   -> decode.inbox
+  - decode.outbox  -> output.inbox
+  - output.hello    -> screen.inbox
+...

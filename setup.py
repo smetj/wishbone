@@ -56,7 +56,8 @@ install_requires = ['gevent==1.1b6',
                     'arrow==0.6.0',
                     'elasticsearch==1.6.0',
                     'importlib==1.0.3',
-                    'uplook==0.4.1']
+                    'uplook==0.4.1',
+                    'jq==0.1.6']
 
 # Deps pulled in by other modules
 # 'lockfile==0.10.2'
@@ -88,6 +89,10 @@ class PyTest(TestCommand):
         errcode = pytest.main(self.test_args)
         sys.exit(errcode)
 
+
+
+
+
 setup(
     name=PROJECT,
     version=VERSION,
@@ -100,7 +105,7 @@ setup(
 
     url='https://github.com/smetj/wishbone',
     download_url='https://github.com/smetj/wishbone/tarball/master',
-
+    dependency_links = ['https://github.com/smetj/jq.py/tarball/master#egg=jq-0.1.6'],
     classifiers=['Development Status :: 5 - Production/Stable',
                  'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
                  'Programming Language :: Python',
@@ -131,7 +136,8 @@ setup(
             'match = wishbone.module.match:Match',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
             'ttl = wishbone.module.ttl:TTL',
-            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate'
+            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate',
+            'jq = wishbone.module.wb_jq:JQ'
         ],
         'wishbone.encode': [
             'graphite = wishbone.module.graphite:Graphite',
