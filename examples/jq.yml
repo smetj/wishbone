@@ -13,6 +13,7 @@ modules:
     module: wishbone.flow.jq
     description: Evaluates the datastructure against a jq condition
     arguments:
+      location: ./rules
       conditions:
         - name: test
           queue: hello
