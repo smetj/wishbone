@@ -64,22 +64,9 @@ SCHEMA = {
     "additionalProperties": False
 }
 
-
-class JQ(Actor):
-
-    '''**Evaluates a data structure against jq expressions.**
-
-    Evalutes (JSON) data structures against a set of jq expressions to decide
-    which queue to forward the event to.
-
-    An expression is a dictionary with following structure:
-
-    {
+SCHEMA_DISK = {
     "type": "object",
     "properties": {
-        "name": {
-            "type": "string"
-        },
         "expression": {
             "type": "string"
         },
@@ -98,22 +85,93 @@ class JQ(Actor):
             }
         },
     },
-    "required": ["name", "expression", "queue"],
+    "required": ["expression", "queue"],
     "additionalProperties": False
-    }
+}
+
+class JQ(Actor):
+
+    '''**Evaluates a data structure against jq expressions.**
+
+    Evalutes (JSON) data structures against a set of jq expressions to decide
+    which queue to forward the event to.
+
+    The conditions defined in the <conditions> parameter have following format:
+
+        {
+        "type": "object",
+        "properties": {
+            "name": {
+                "type": "string"
+            },
+            "expression": {
+                "type": "string"
+            },
+            "queue": {
+                "type": "string"
+            },
+            "payload": {
+                "type": "object",
+                "patternProperties": {
+                    ".*": {
+                        "type": [
+                            "string",
+                            "number"
+                        ],
+                    }
+                }
+            },
+        },
+        "required": ["name", "expression", "queue"],
+        "additionalProperties": False
+        }
 
     For example:
 
-    { "name": "test",
-      "expression": ".greeting | test( "hello" )",
-      "queue": "outbox",
-      "payload": {
-        "one": 1,
-        "two": 2,
-      }
-     }
+        { "name": "test",
+          "expression": ".greeting | test( "hello" )",
+          "queue": "outbox",
+          "payload": {
+            "@tmp.some.key": 1,
+          }
+        }
+
+    The rules on disk must be in YAML format and have following layout:
+
+        {
+        "type": "object",
+        "properties": {
+            "expression": {
+                "type": "string"
+            },
+            "queue": {
+                "type": "string"
+            },
+            "payload": {
+                "type": "object",
+                "patternProperties": {
+                    ".*": {
+                        "type": [
+                            "string",
+                            "number"
+                        ],
+                    }
+                }
+            },
+        },
+        "required": ["expression", "queue"],
+        "additionalProperties": False
+        }
+
+    For example:
+
+        queue: nagios
+        expression: '.type | test( "nagios" )'
+
+    The filename is the condition name.
 
     The payload dictionary's keys are Wishbone event references.
+
 
     Parameters:
 
@@ -253,7 +311,7 @@ class ReadRulesDisk():
 
     def waitForChanges(self):
 
-        events = inotify.get_events(self.fd)
+        inotify.get_events(self.fd)
         return self.readDirectory()
 
     def __readDirectory(self):
@@ -267,12 +325,12 @@ class ReadRulesDisk():
                     rule_name = os.path.basename(filename).rstrip(".yaml")
                     rule = yaml.load("".join(f.readlines()))
                     try:
-                        validate(rule, SCHEMA)
+                        validate(rule, SCHEMA_DISK)
                     except Exception as err:
                         self.logging.warning("Rule %s not valid. Skipped. Reason: %s" % (filename, err.message))
                     else:
                         rule["name"] = rule_name
-                        rules.append[rule]
+                        rules.append(rule)
             except ParserError as err:
                 self.logging.warning("Failed to parse file %s.  Please validate the YAML syntax in a parser." % (filename))
             except IOError as err:
