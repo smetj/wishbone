@@ -64,6 +64,7 @@ class Deserialize(Actor):
             for item in data:
                 e = event.clone()
                 e.set(True, "@tmp.%s.generated_by" % (self.name))
+                e.set("", self.kwargs.destination)
                 e.set(item, self.kwargs.destination)
                 self.submit(e, self.pool.queue.outbox)
         else:
