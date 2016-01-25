@@ -14,8 +14,11 @@ modules:
     description: Evaluates the datastructure against a jq condition
     arguments:
       conditions:
-        - queue: hello
+        - name: test
+          queue: hello
           expression: '.greeting | test( "hello" )'
+          payload:
+            "@tmp.blah": "matched :)"
 
   screen:
     module: wishbone.output.stdout
