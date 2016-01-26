@@ -35,7 +35,6 @@ from glob import glob
 from yaml.parser import ParserError
 
 
-
 SCHEMA = {
     "type": "object",
     "properties": {
@@ -96,7 +95,26 @@ class JQ(Actor):
     Evalutes (JSON) data structures against a set of jq expressions to decide
     which queue to forward the event to.
 
-    The conditions defined in the <conditions> parameter have following format:
+    JQ expressions
+    --------------
+
+    More information about jq expressions can be found here:
+
+        - https://stedolan.github.io/jq/manual/
+
+
+    Jq expressions need to return either **True** or **False**, otherwise this
+    module will consider the result to be invalid and therefor skip the
+    condition.
+
+    Module level conditions
+    -----------------------
+
+    The module accepts the <conditions> parameter which is a list of
+    conditions to evaluate against each data structure coming in.
+    Each condition should have following format:
+
+    JSON-schema::
 
         {
         "type": "object",
@@ -126,7 +144,8 @@ class JQ(Actor):
         "additionalProperties": False
         }
 
-    For example:
+
+    Example::
 
         { "name": "test",
           "expression": ".greeting | test( "hello" )",
@@ -136,7 +155,18 @@ class JQ(Actor):
           }
         }
 
-    The rules on disk must be in YAML format and have following layout:
+    Disk level conditions
+    ---------------------
+
+    The directory <location> contains the conditions in YAML format. One
+    condition is one file.  Files not having '.yaml' extension are ignored.
+
+    This directory is monitored for changes and automatically reloaded
+    whenever something changes.
+
+    The rules should have following format:
+
+    JSON-schema::
 
         {
         "type": "object",
@@ -163,14 +193,15 @@ class JQ(Actor):
         "additionalProperties": False
         }
 
-    For example:
+    Example::
 
         queue: nagios
         expression: '.type | test( "nagios" )'
 
-    The filename is the condition name.
+    payload
+    -------
 
-    The payload dictionary's keys are Wishbone event references.
+    The payload is a dictionary where keys are wishbone event references.
 
 
     Parameters:
