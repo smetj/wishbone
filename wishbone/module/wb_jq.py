@@ -282,7 +282,7 @@ class JQ(Actor):
                     else:
                         self.logging.error("Jq expression '%s' does not return a bool therefor it is skipped." % (condition["name"]))
                 else:
-                    self.logging.error("Condition '%s' has queue '%s' defined but nothing connected." % (condition["name"], condition["queue"]))
+                    self.logging.warning("Condition '%s' has queue '%s' defined but nothing connected." % (condition["name"], condition["queue"]))
 
     def validateConditions(self, conditions):
         '''
