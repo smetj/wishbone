@@ -275,7 +275,12 @@ class JQ(Actor):
         with self.condition_read_lock:
             for condition in self.kwargs.conditions + self.disk_conditions:
                 if self.pool.hasQueue(condition["queue"]):
-                    result = jq(condition["expression"]).transform(data)
+                    try:
+                        result = jq(condition["expression"]).transform(data)
+                    except Exception as err:
+                        self.logging.error("Skipped invalid jq expression '%s'. Reason: %s" % (condition["name"], err.message.replace("\n", " -> ")))
+                        continue
+
                     if isinstance(result, bool):
                         if result:
                             matched = True
