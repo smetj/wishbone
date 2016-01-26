@@ -223,6 +223,9 @@ class JQ(Actor):
 
         - inbox
            |  Incoming events.
+
+        - no_match
+           |  Events which did not match at least one rule.
     '''
 
     def __init__(self, actor_config, selection="@data", conditions=[], location=""):
@@ -266,6 +269,7 @@ class JQ(Actor):
 
     def consume(self, event):
 
+        matched = False
         data = event.get(self.kwargs.selection)
 
         with self.condition_read_lock:
@@ -274,6 +278,7 @@ class JQ(Actor):
                     result = jq(condition["expression"]).transform(data)
                     if isinstance(result, bool):
                         if result:
+                            matched = True
                             e = event.clone()
                             if "payload" in condition:
                                 for key, value in condition["payload"].iteritems():
@@ -283,6 +288,10 @@ class JQ(Actor):
                         self.logging.error("Jq expression '%s' does not return a bool therefor it is skipped." % (condition["name"]))
                 else:
                     self.logging.warning("Condition '%s' has queue '%s' defined but nothing connected." % (condition["name"], condition["queue"]))
+
+        if not matched:
+            self.submit(event, self.pool.queue.no_match)
+
 
     def validateConditions(self, conditions):
         '''
