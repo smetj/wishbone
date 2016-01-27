@@ -51,7 +51,7 @@ MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "g
                 "amqp", "amqp.connection", "gevent.hub", "gevent.wsgi", "gevent.queue",
                 "flask", "ReadRulesDisk", "gevent_inotifyx", "amqp.exceptions", "Event",
                 "uplook", "UpLook", "msgpack", "zmq", "zmq.green", "grequests", "gevent.os", "make_nonblocking",
-                "uplook.errors"]
+                "uplook.errors", "jq"]
 
 
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
