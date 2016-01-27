@@ -14,29 +14,34 @@
 
 import sys
 import os
-# from mock import Mock as MagicMock
+from mock import Mock as MagicMock
 
 
-class Mock(object):
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        return Mock()
-
-    def __iter__(self):
-        yield None
-
+class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-        if name in ("__file__", "__path__"):
-            return "/dev/null"
-        elif name[0] == name[0].upper():
-            mockType = type(name, (), {})
-            mockType.__module__ = __name__
-            return mockType
-        else:
             return Mock()
+
+# class Mock(object):
+#     def __init__(self, *args, **kwargs):
+#         pass
+
+#     def __call__(self, *args, **kwargs):
+#         return Mock()
+
+#     def __iter__(self):
+#         yield None
+
+#     @classmethod
+#     def __getattr__(cls, name):
+#         if name in ("__file__", "__path__"):
+#             return "/dev/null"
+#         elif name[0] == name[0].upper():
+#             mockType = type(name, (), {})
+#             mockType.__module__ = __name__
+#             return mockType
+#         else:
+#             return Mock()
 
 MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "gevent.server",
                 "gevent.hub", "gevent.wsgi", "gevent.queue", "gevent.event", "gevent.select", "requests",
@@ -49,8 +54,7 @@ MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "g
                 "uplook.errors"]
 
 
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = Mock()
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 
