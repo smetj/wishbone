@@ -59,6 +59,14 @@ install_requires = ['gevent==1.1b6',
                     'uplook==0.4.1',
                     'jq==0.1.6']
 
+
+if os.environ.get("READTHEDOCS", False):
+    dependency_links = []
+else:
+    dependency_links = ['https://github.com/smetj/jq.py/tarball/master#egg=jq-0.1.6']
+
+
+
 # Deps pulled in by other modules
 # 'lockfile==0.10.2'
 # 'MarkupSafe==0.23'
@@ -105,7 +113,7 @@ setup(
 
     url='https://github.com/smetj/wishbone',
     download_url='https://github.com/smetj/wishbone/tarball/master',
-    dependency_links = ['https://github.com/smetj/jq.py/tarball/master#egg=jq-0.1.6'],
+    dependency_links = dependency_links,
     classifiers=['Development Status :: 5 - Production/Stable',
                  'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
                  'Programming Language :: Python',
