@@ -57,7 +57,7 @@ install_requires = ['gevent==1.1b6',
                     'elasticsearch==1.6.0',
                     'importlib==1.0.3',
                     'uplook==0.4.1',
-                    'jq==0.1.6']
+                    'jq_oniguruma==0.1.5']
 
 
 # Dirty hack to make readthedocs build the docs
@@ -65,10 +65,10 @@ install_requires = ['gevent==1.1b6',
 
 if os.environ.get("READTHEDOCS", False):
     dependency_links = []
-    install_requires.remove('jq==0.1.6')
-    install_requires.remove('pyzmq==14.7.0')
+    install_requires.remove('jq_oniguruma==0.1.5')
+
 else:
-    dependency_links = ['https://github.com/smetj/jq.py/tarball/master#egg=jq-0.1.6']
+    dependency_links = ['https://github.com/smetj/jq.py/tarball/master#egg=jq_oniguruma-0.1.5']
 
 
 
