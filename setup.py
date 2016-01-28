@@ -65,7 +65,7 @@ install_requires = ['gevent==1.1b6',
 
 if os.environ.get("READTHEDOCS", False):
     dependency_links = []
-    install_requires.remove('jq=0.1.6')
+    install_requires.remove('jq==0.1.6')
 else:
     dependency_links = ['https://github.com/smetj/jq.py/tarball/master#egg=jq-0.1.6']
 
