@@ -14,12 +14,28 @@
 
 import sys
 import os
-from unittest.mock import MagicMock
 
-class Mock(MagicMock):
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    def __iter__(self):
+        yield None
+
     @classmethod
     def __getattr__(cls, name):
+        if name in ("__file__", "__path__"):
+            return "/dev/null"
+        elif name[0] == name[0].upper():
+            mockType = type(name, (), {})
+            mockType.__module__ = __name__
+            return mockType
+        else:
             return Mock()
+
 
 MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "gevent.server",
                 "gevent.hub", "gevent.wsgi", "gevent.queue", "gevent.event", "gevent.select", "requests",
@@ -63,7 +79,7 @@ master_doc = "index"
 
 # General information about the project.
 project = u"Wishbone"
-copyright = u"2015, Jelle Smet"
+copyright = u"2016, Jelle Smet"
 
 # The version info for the project you"re documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
