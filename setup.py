@@ -60,8 +60,12 @@ install_requires = ['gevent==1.1b6',
                     'jq==0.1.6']
 
 
+# Dirty hack to make readthedocs build the docs
+# For some reason mocking out jq as documented is not working
+
 if os.environ.get("READTHEDOCS", False):
     dependency_links = []
+    install_requires.remove('jq=0.1.6')
 else:
     dependency_links = ['https://github.com/smetj/jq.py/tarball/master#egg=jq-0.1.6']
 
