@@ -49,15 +49,14 @@ class Modify(Actor):
     Expressions are dictionaries containing 1 item. The key is a string and
     the value is a list of parameters accepted by the expression.
 
-    For example:
+    For example::
 
         {"set": ["hi", "@data.one"]}
 
-        Sets the value "hi" to key "@data.one".
 
+    Sets the value "hi" to key "@data.one".
 
-    The YAML format of the bootstrap file lends itself a bit more to a
-    pleasant syntax.  For example:
+    In the the YAML formatted bootstrap file that would look like:
 
         module: wishbone.function.modify
         arguments:
@@ -67,67 +66,93 @@ class Modify(Actor):
 
     Valid expressions are:
 
-        - add_item: [<item>, <key>]
 
-          Adds <item> to the list stored under <key>
+      - **add_item**::
 
+          add_item: [<item>, <key>]
 
-        - copy: [<source_key>, <destination_key>]
-
-          Copies and overwrites the content of <source_key> to
-          <destination_key>.
+        Adds <item> to the list stored under <key>
 
 
-        - del_item: [<key>, <item>]
+      - **copy**::
 
-          Deletes first occurance of <item> from the list stored under
-          <source_key>.
+          copy: [<source_key>, <destination_key>]
 
-
-        - delete: [<key>]
-
-          Deletes <key> from the event.
+        Copies and overwrites the content of <source_key> to
+        <destination_key>.
 
 
-        - extract: [<destination>, <regex>, <source>]
+      - **del_item**::
 
-          Makes use of Python re module to extract named groups from <source>
-          using <regex> and add the resulting matches to <destination>.
+          del_item: [<key>, <item>]
 
-          The following example would extract the words "one" and "two" from
-          "@data.test" and add that to @data.extract resulting into:
-
-          {"@data":{"test:"one;two", extract:{"first": "one", "second": "two"}}}
-
-          extract: ["@data.extract", '(?P<first>.*?);(?P<second>.*)', "@data.test"]
+        Deletes first occurance of <item> from the list stored under
+        <source_key>.
 
 
-        - lowercase: [<key>]
+      - **delete**::
 
-           Turns the string stored under <key> to lowercase.
+          delete: [<key>]
 
-
-        - set: [<value>, <key>]
-
-          Sets <value> to the event <key>.
+        Deletes <key> from the event.
 
 
-        - uppercase: [<key>]
+      - **extract**::
 
-           Turns the string stored under <key> to uppercase.
+          extract: [<destination>, <regex>, <source>]
+
+        Makes use of Python re module to extract named groups from <source>
+        using <regex> and add the resulting matches to <destination>.
+
+        The following example would extract the words "one" and "two" from
+        "@data.test" and add the to @data.extract:
+
+          expression::
+
+            extract: ["@data.extract", '(?P<first>.*?);(?P<second>.*)', "@data.test"]
+
+          result::
+
+            {"@data":{"test:"one;two", extract:{"first": "one", "second": "two"}}}
 
 
-        - template: [<destination_key>, <template>, <source_key>]
+      - **lowercase**::
 
-          Uses the dictionary stored in <source_key> to complete <template>
-          and stores the results into key <destination_key>.
-          The templating language used is Python's builtin string format one.
+          lowercase: [<key>]
 
-        - time: [<destination_key>, <format>]
+        Turns the string stored under <key> to lowercase.
 
-          Modifies the <@timestamp> value according the the <format> specification
-          and stores it into <destination_key>.
-          See http://crsmithdev.com/arrow/#format for the format.
+
+      - **set**::
+
+          set: [<value>, <key>]
+
+        Sets <value> to the event <key>.
+
+
+      - **uppercase**::
+
+          uppercase: [<key>]
+
+        Turns the string stored under <key> to uppercase.
+
+
+      - **template**::
+
+          template: [<destination_key>, <template>, <source_key>]
+
+        Uses the dictionary stored in <source_key> to complete <template>
+        and stores the results into key <destination_key>.
+        The templating language used is Python's builtin string format one.
+
+
+      - **time**::
+
+          time: [<destination_key>, <format>]
+
+        Modifies the <@timestamp> value according the the <format> specification
+        and stores it into <destination_key>.
+        See http://crsmithdev.com/arrow/#format for the format.
 
 
 
@@ -138,8 +163,11 @@ class Modify(Actor):
 
     Queues:
 
-        - outbox
-           |  Contains the generated events.
+        - inbox:
+           |  Incoming messages
+
+        - outbox:
+           |  Outgoing modified messages
     '''
 
     def __init__(self, actor_config, expressions=[]):
