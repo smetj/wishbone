@@ -43,7 +43,7 @@ class Modify(Actor):
 
     '''**Modify and manipulate datastructures.**
 
-    This module modifies the data of an event using a sequential list of
+    This module modifies the data of an event using a **sequential** list of
     expressions.
 
     Expressions are dictionaries containing 1 item. The key is a string and
@@ -54,14 +54,14 @@ class Modify(Actor):
         {"set": ["hi", "@data.one"]}
 
 
-    Sets the value "hi" to key "@data.one".
+    Sets the value *"hi"* to key *"@data.one"*.
 
-    In the the YAML formatted bootstrap file that would look like:
+    In the the YAML formatted bootstrap file that would look like::
 
         module: wishbone.function.modify
         arguments:
           expressions:
-            - set: [ "Good day.", "@data.greeting" ]
+            - set: [ "hi", "@data.one" ]
 
 
     Valid expressions are:
@@ -71,38 +71,38 @@ class Modify(Actor):
 
           add_item: [<item>, <key>]
 
-        Adds <item> to the list stored under <key>
+        Adds *<item>* to the list stored under *<key>*.
 
 
       - **copy**::
 
           copy: [<source_key>, <destination_key>]
 
-        Copies and overwrites the content of <source_key> to
-        <destination_key>.
+        Copies and overwrites the content of *<source_key>* to
+        *<destination_key>*.
 
 
       - **del_item**::
 
           del_item: [<key>, <item>]
 
-        Deletes first occurance of <item> from the list stored under
-        <source_key>.
+        Deletes first occurance of *<item>* from the list stored under
+        *<source_key>*.
 
 
       - **delete**::
 
           delete: [<key>]
 
-        Deletes <key> from the event.
+        Deletes *<key>* from the event.
 
 
       - **extract**::
 
           extract: [<destination>, <regex>, <source>]
 
-        Makes use of Python re module to extract named groups from <source>
-        using <regex> and add the resulting matches to <destination>.
+        Makes use of Python re module to extract named groups from *<source>*
+        using *<regex>* and add the resulting matches to *<destination>*.
 
         The following example would extract the words "one" and "two" from
         "@data.test" and add the to @data.extract:
@@ -120,38 +120,38 @@ class Modify(Actor):
 
           lowercase: [<key>]
 
-        Turns the string stored under <key> to lowercase.
+        Turns the string stored under *<key>* to lowercase.
 
 
       - **set**::
 
           set: [<value>, <key>]
 
-        Sets <value> to the event <key>.
+        Sets *<value>* to the event *<key>*.
 
 
       - **uppercase**::
 
           uppercase: [<key>]
 
-        Turns the string stored under <key> to uppercase.
+        Turns the string stored under *<key>* to uppercase.
 
 
       - **template**::
 
           template: [<destination_key>, <template>, <source_key>]
 
-        Uses the dictionary stored in <source_key> to complete <template>
-        and stores the results into key <destination_key>.
-        The templating language used is Python's builtin string format one.
+        Uses the dictionary stored in *<source_key>* to complete *<template>*
+        and stores the results into key *<destination_key>*. The templating
+        language used is Python's builtin string format one.
 
 
       - **time**::
 
           time: [<destination_key>, <format>]
 
-        Modifies the <@timestamp> value according the the <format> specification
-        and stores it into <destination_key>.
+        Modifies the *<@timestamp>* value according the the *<format>* specification
+        and stores it into *<destination_key>*.
         See http://crsmithdev.com/arrow/#format for the format.
 
 
