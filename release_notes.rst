@@ -17,7 +17,6 @@ Feature:
 - Added wishbone.flow.jq module which uses jq-lib for JSON pattern matching.
 - Added wishbone.function.modify module.
 - Added --profile option to profile a wishbone server.
-- Misc performance improvements.
 
 Bugs:
 
@@ -28,6 +27,8 @@ Misc:
 
 - Updated to gevent-1.1b6
 - Prefixed zeromq modules with 'zeromq_'.
+- Rework configuration handling
+- Misc performance improvements
 
 
 Version 1.1.1
