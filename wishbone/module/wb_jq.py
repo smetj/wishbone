@@ -232,6 +232,7 @@ class JQ(Actor):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
+        self.pool.createQueue("no_match")
         self.registerConsumer(self.consume, "inbox")
         self.disk_conditions = []
         self.condition_read_lock = Semaphore()
@@ -244,6 +245,9 @@ class JQ(Actor):
             self.logging.info("No rules directory defined, not reading rules from disk.")
         else:
             self.logging.info("Rules directoy '%s' defined." % (self.kwargs.location))
+            self.monitor_location = ReadRulesDisk(self.logging, self.kwargs.location)
+            self.disk_conditions = self.monitor_location.readDirectory()
+            self.logging.info("Read %s rules from disk and %s defined in config." % (len(self.disk_conditions), len(self.kwargs.conditions)))
             self.sendToBackground(self.monitorRuleDirectory)
 
     def monitorRuleDirectory(self):
@@ -251,10 +255,6 @@ class JQ(Actor):
         '''
         Loads new rules when changes happen.
         '''
-
-        self.monitor_location = ReadRulesDisk(self.logging, self.kwargs.location)
-        self.disk_conditions = self.monitor_location.readDirectory()
-        self.logging.info("Read %s rules from disk and %s defined in config." % (len(self.disk_conditions), len(self.kwargs.conditions)))
 
         while self.loop():
             try:
@@ -296,7 +296,6 @@ class JQ(Actor):
 
         if not matched:
             self.submit(event, self.pool.queue.no_match)
-
 
     def validateConditions(self, conditions):
         '''
