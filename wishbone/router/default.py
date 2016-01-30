@@ -262,12 +262,8 @@ class GraphWebserver():
                                    module_name=self.config["modules"][c.destination_module]["module"],
                                    description=self.module_pool.getModule(c.destination_module).description)
 
-            print c.source_module, c.source_queue
             self.js_data.addQueue(c.source_module, c.source_queue)
-
-            print c.destination_module, c.destination_queue
             self.js_data.addQueue(c.destination_module, c.destination_queue)
-
             self.js_data.addEdge("%s.%s" % (c.source_module, c.source_queue), "%s.%s" % (c.destination_module, c.destination_queue))
 
         # for connection in self.config["routingtable"]:
