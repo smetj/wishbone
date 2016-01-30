@@ -2,7 +2,7 @@
 Events
 ======
 
-:pyclass`wishbone.event.Event` instances are used to transport data between
+:py:class:`wishbone.event.Event` instances are used to transport data between
 :the queues of modules.
 
 The `input modules`_ should initialize a :py:class:`wishbone.event.Event` instance to
