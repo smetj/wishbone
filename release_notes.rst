@@ -14,7 +14,10 @@ Feature:
   the bootstrap file.
 - Added support to output modules to select which part of the event
   is submitted externally.
-- Added jq library which uses jq-lib for JSON pattern matching.
+- Added wishbone.flow.jq module which uses jq-lib for JSON pattern matching.
+- Added wishbone.function.modify module.
+- Added --profile option to profile a wishbone server.
+- Misc performance improvements.
 
 Bugs:
 
