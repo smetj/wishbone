@@ -195,7 +195,7 @@ class Queue():
         '''Puts element in queue.'''
 
         try:
-            self.__q.put_nowait(element)
+            self.__q.put(element)
             self.__in += 1
         except Full:
             raise QueueFull("Queue full.")
