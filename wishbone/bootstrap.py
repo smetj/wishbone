@@ -69,6 +69,7 @@ class BootStrap():
         debug.add_argument('--id', type=str, dest='identification', default=None, help='An identification string.')
         debug.add_argument('--module_path', type=str, dest='module_path', default=None, help='A comma separated list of directories to search and find Wishbone modules.')
         debug.add_argument('--graph', action="store_true", help='When enabled starts a webserver on 8088 showing a graph of connected modules and queues.')
+        debug.add_argument('--profile', action="store_true", help='When enabled profiles the process and dumps a profile file in the current directory. The profile file can be loaded in Chrome developer tools.')
 
         stop = subparsers.add_parser('stop', description="Tries to gracefully stop the Wishbone instance.")
         stop.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
@@ -113,7 +114,7 @@ class Dispatch():
 
         return template.render(version=get_distribution('wishbone').version)
 
-    def debug(self, command, config, instances, queue_size, frequency, identification, module_path, graph):
+    def debug(self, command, config, instances, queue_size, frequency, identification, module_path, graph, profile):
         '''
         Handles the Wishbone debug command.
         '''
@@ -134,7 +135,15 @@ class Dispatch():
 
         if instances == 1:
             sys.stdout.write("\nInstance started in foreground with pid %s\n" % (os.getpid()))
-            Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph).start()
+
+            if profile:
+                from wishbone.utils.profile import Profiler
+                profiler = Profiler()
+                with Profiler():
+                    Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph).start()
+            else:
+                Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph).start()
+
         else:
             for instance in range(instances):
                 processes.append(Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, process=True, graph=graph).start())
