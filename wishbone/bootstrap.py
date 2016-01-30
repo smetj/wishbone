@@ -138,7 +138,6 @@ class Dispatch():
 
             if profile:
                 from wishbone.utils.profile import Profiler
-                profiler = Profiler()
                 with Profiler():
                     Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph).start()
             else:
