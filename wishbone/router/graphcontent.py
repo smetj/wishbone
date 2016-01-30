@@ -73,23 +73,6 @@ GRAPHCONTENT = """
 var options = {
   "height":  window.innerHeight,
   "width":  window.innerWidth,
-  "edges": {
-    "smooth": false
-  },
-  "layout": {
-    "hierarchical": {
-      "enabled": true,
-      "direction": "UD",
-      "sortMethod": "directed"
-    }
-  },
-  "physics": {
-    "hierarchicalRepulsion": {
-      "centralGravity": 0
-    },
-    "minVelocity": 0.75,
-    "solver": "hierarchicalRepulsion"
-  }
 }
   var network = new vis.Network(container, data, options);
 </script>
