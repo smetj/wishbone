@@ -106,7 +106,7 @@ class VisJSData():
 
     def addQueue(self, module, name):
 
-        if name not in self.nodes.keys():
+        if "%s.%s" % (module, name) not in self.nodes.keys():
             self.nodes["%s.%s" % (module, name)] = {"id": self.id,
                                                     "label": name,
                                                     "shape": "dot",
