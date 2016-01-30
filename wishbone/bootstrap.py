@@ -22,8 +22,12 @@
 #
 #
 
+
+
 import argparse
 import os
+# http://stackoverflow.com/questions/4554271/how-to-avoid-excessive-stat-etc-localtime-calls-in-strftime-on-linux
+os.environ["TZ"] = ":/etc/localtime"
 import sys
 
 from wishbone.router import Default
