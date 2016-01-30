@@ -31,7 +31,7 @@ from utils import getter
 def test_module_fanout():
 
     actor_config = ActorConfig('fanout', 100, 1, {}, "")
-    fanout = Fanout(actor_config, deep_copy=True)
+    fanout = Fanout(actor_config)
     fanout.pool.queue.inbox.disableFallThrough()
 
     fanout.pool.createQueue("one")
