@@ -33,10 +33,7 @@ class Fanout(Actor):
 
     Parameters:
 
-        - deep_copy(bool)(True)
-           |  make sure that each incoming event is submitted
-           |  to the outgoing queues as a seperate event and not a
-           |  reference.
+        n/a
 
 
     Queues:
@@ -46,7 +43,7 @@ class Fanout(Actor):
 
     '''
 
-    def __init__(self, actor_config, deep_copy=True):
+    def __init__(self, actor_config):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -58,18 +55,8 @@ class Fanout(Actor):
             if queue != "inbox":
                 self.destinations.append(self.pool.getQueue(queue))
 
-        if self.kwargs.deep_copy:
-            self.copy = self.__doDeepCopy
-        else:
-            self.copy = self.__doNoDeepCopy
-
     def consume(self, event):
 
         for queue in self.destinations:
-            self.submit(self.copy(event), queue)
+            self.submit(event.clone(), queue)
 
-    def __doDeepCopy(self, event):
-        return event.clone()
-
-    def __doNoDeepCopy(self, event):
-        return event
