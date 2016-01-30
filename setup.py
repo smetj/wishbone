@@ -36,7 +36,7 @@ if "PyPy" in sys.version:
 PROJECT = 'wishbone'
 VERSION = '2.1.0'
 
-install_requires = ['gevent==1.1b6',
+install_requires = ['gevent==1.1rc3',
                     'greenlet==0.4.9',
                     'argparse==1.3.0',
                     'prettytable==0.7.2',
