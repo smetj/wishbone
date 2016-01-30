@@ -58,7 +58,7 @@ STDOUT.  The running instance can be stopped gracefully with CTRL+C
     usage: wishbone debug [-h] [--config CONFIG] [--instances INSTANCES]
                           [--queue-size QUEUE_SIZE] [--frequency FREQUENCY]
                           [--id IDENTIFICATION] [--module_path MODULE_PATH]
-                          [--graph]
+                          [--graph] [--profile]
 
     Starts a Wishbone instance in foreground and writes logs to STDOUT.
 
@@ -78,6 +78,10 @@ STDOUT.  The running instance can be stopped gracefully with CTRL+C
                             find Wishbone modules.
       --graph               When enabled starts a webserver on 8088 showing a
                             graph of connected modules and queues.
+      --profile             When enabled profiles the process and dumps a profile
+                            file in the current directory. The profile file can be
+                            loaded in Chrome developer tools.
+
 
 
 ------------------
