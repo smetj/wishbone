@@ -151,7 +151,7 @@ class Default(multiprocessing.Process):
 
         self.initiate_stop.wait()
         for module in self.module_pool.list():
-            if module.name not in self.getChildren("wishbone_logs") + ["wishbone_logs"] and not module.stopped:
+            if module.name not in self.getChildren("@logs") + ["@logs"] and not module.stopped:
                 module.stop()
 
         while not self.__logsEmpty():
@@ -184,46 +184,17 @@ class Default(multiprocessing.Process):
         '''Setup all modules and routes.'''
 
         lookup_modules = {}
-        for name, config in self.config.lookups.iteritems():
-            lookup_modules[name] = self.__registerLookupModule(config.module, **config.get('arguments', {}))
 
-        self.__registerModule(Funnel, ActorConfig("wishbone_metrics",
-                                                  self.size,
-                                                  self.frequency,
-                                                  self.config.lookups,
-                                                  "All the modules' metrics arrive here."))
-
-        self.__registerModule(Funnel, ActorConfig("wishbone_logs",
-                                                  self.size,
-                                                  self.frequency,
-                                                  self.config.lookups,
-                                                  "All the modules' logs arrive here."))
+        for name, instance in self.config.lookups.iteritems():
+            lookup_modules[name] = self.__registerLookupModule(instance.module, **instance.arguments)
 
         for name, instance in self.config.modules.iteritems():
-
-            if name in ["metrics", "logs"]:
-                raise ModuleInitFailure('"%s" is a reserved name you cannot use as a module instance name.' % (name))
-
             pmodule = self.module_manager.getModuleByName(instance.module)
-            description = instance.get('description', self.module_manager.getModuleTitle(*instance.module.split('.')))
+            actor_config = ActorConfig(name, self.size, self.frequency, lookup_modules, "description")
 
-            actor_config = ActorConfig(name,
-                                       self.size,
-                                       self.frequency,
-                                       lookup_modules,
-                                       description)
-
-            self.__registerModule(pmodule, actor_config, instance.get("arguments", {}))
-
-            self.module_pool.getModule(name).connect("metrics", self.module_pool.module.wishbone_metrics, name)
-            self.module_pool.getModule(name).connect("logs", self.module_pool.module.wishbone_logs, name)
+            self.__registerModule(pmodule, actor_config, instance.arguments)
 
         self.__setupConnections()
-
-        if self.stdout_logging:
-            self.__setupSTDOUTLogging()
-        else:
-            self.__setupSyslogLogging()
 
     def __logsEmpty(self):
         '''Checks each module whether any logs have stayed behind.'''
@@ -237,10 +208,10 @@ class Default(multiprocessing.Process):
     def __noop(self, *args, **kwargs):
         pass
 
-    def __registerLookupModule(self, name, **kwargs):
+    def __registerLookupModule(self, module, **kwargs):
 
-        base = ".".join(name.split('.')[0:-1])
-        function = name.split('.')[-1]
+        base = ".".join(module.split('.')[0:-1])
+        function = module.split('.')[-1]
         m = importlib.import_module(base)
         return getattr(m, function)(**kwargs)
 
@@ -257,43 +228,6 @@ class Default(multiprocessing.Process):
 
         for route in self.config.routingtable:
             self.__connect("%s.%s" % (route.source_module, route.source_queue), "%s.%s" % (route.destination_module, route.destination_queue))
-
-    def __setupSTDOUTLogging(self):
-
-        log_stdout = self.module_manager.getModuleByName("wishbone.output.stdout")
-        stdout_actor_config = ActorConfig("log_stdout",
-                                          self.size,
-                                          self.frequency,
-                                          self.config.lookups,
-                                          "Writes the Wishbone logs to STDOUT.")
-
-        log_human = self.module_manager.getModuleByName("wishbone.encode.humanlogformat")
-        human_actor_config = ActorConfig("log_format",
-                                         self.size,
-                                         self.frequency,
-                                         self.config.lookups,
-                                         "Converts the Wishbone Logs into a readable format.")
-
-        self.__registerModule(log_stdout, stdout_actor_config)
-        self.__registerModule(log_human, human_actor_config)
-
-        try:
-            self.__connect("wishbone_logs.outbox", "log_format.inbox")
-            self.__connect("log_format.outbox", "log_stdout.inbox")
-        except QueueConnected:
-            pass
-
-    def __setupSyslogLogging(self):
-
-        actor_config = ActorConfig("log_syslog",
-                                   self.size,
-                                   self.frequency,
-                                   self.config.lookups,
-                                   "Writes incoming Wishbone logmessages into Syslog.")
-
-        log_syslog = self.module_manager.getModuleByName("wishbone.output.syslog")
-        self.__registerModule(log_syslog, actor_config)
-        self.__connect("wishbone_logs.outbox", "log_syslog.inbox")
 
     def __start(self):
 
@@ -318,7 +252,7 @@ class GraphWebserver():
         self.block = block
         self.js_data = VisJSData()
 
-        for c in self.config.routingtable:
+        for c in self.config["routingtable"]:
 
             self.js_data.addModule(instance_name=c.source_module,
                                    module_name=self.config["modules"][c.source_module]["module"],
@@ -328,13 +262,18 @@ class GraphWebserver():
                                    module_name=self.config["modules"][c.destination_module]["module"],
                                    description=self.module_pool.getModule(c.destination_module).description)
 
+            print c.source_module, c.source_queue
             self.js_data.addQueue(c.source_module, c.source_queue)
+
+            print c.destination_module, c.destination_queue
             self.js_data.addQueue(c.destination_module, c.destination_queue)
+
             self.js_data.addEdge("%s.%s" % (c.source_module, c.source_queue), "%s.%s" % (c.destination_module, c.destination_queue))
 
-        for connection in self.config.routingtable:
-            self.js_data.addEdge("%s.%s" % (connection.source_module, connection.source_queue),
-                                 "%s.%s" % (connection.destination_module, connection.destination_queue))
+        # for connection in self.config["routingtable"]:
+
+        #     self.js_data.addEdge("%s.%s" % (connection["source_module"], connection["source_queue"]),
+        #                          "%s.%s" % (connection["destination_module"], connection["destination_queue"]))
 
     def start(self):
         spawn(self.setupWebserver)
@@ -349,7 +288,7 @@ class GraphWebserver():
     def getMetrics(self):
 
         def getConnectedModuleQueue(m, q):
-            for c in self.config.routingtable:
+            for c in self.config["routingtable"]:
                 if c.source_module == m and c.source_queue == q:
                     return (c.destination_module, c.destination_queue)
             return (None, None)
