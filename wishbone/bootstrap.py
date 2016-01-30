@@ -131,7 +131,7 @@ class Dispatch():
         signal(2, stopSequence)
 
         module_manager = ModuleManager()
-        router_config = ConfigFile().load(config)
+        router_config = ConfigFile(config, 'STDOUT').dump()
 
         if instances == 1:
             sys.stdout.write("\nInstance started in foreground with pid %s\n" % (os.getpid()))
@@ -199,7 +199,7 @@ class Dispatch():
             self.__expandSearchPath(module_path)
 
         module_manager = ModuleManager()
-        router_config = ConfigFile().load(config)
+        router_config = ConfigFile(config)
         pid_file = PIDFile(pid)
 
         with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
@@ -274,10 +274,11 @@ class Dispatch():
 
 
 def main():
-    try:
-        BootStrap()
-    except Exception as err:
-        print("Failed to bootstrap instance.  Reason: %s" % (err))
+    BootStrap()
+    # try:
+    #     BootStrap()
+    # except Exception as err:
+    #     print("Failed to bootstrap instance.  Reason: %s" % (err))
 
 if __name__ == '__main__':
     main()
