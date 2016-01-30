@@ -22,9 +22,7 @@
 #
 #
 
-import sys
 import os
-import pkg_resources
 from gevent import sleep
 
 
