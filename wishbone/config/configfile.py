@@ -79,9 +79,41 @@ SCHEMA = {
 
 class ConfigFile(object):
 
-    def __init__(self):
+    def __init__(self, filename, logstyle):
 
-        pass
+        self.config = {"lookups": {}, "modules": {}, "routingtable": []}
+        self.load(filename)
+        self.__addLogFunnel()
+        self.__addMetricFunnel()
+        getattr(self, "_setupLogging%s" % (logstyle.upper()))()
+
+    def addModule(self, name, module, arguments={}, description=""):
+
+        if name.startswith('@'):
+            raise Exception("Module instance names cannot start with @.")
+
+        if name not in self.config["modules"]:
+            self.config["modules"][name] = {'description': description, 'module': module, 'arguments': arguments}
+            self.addConnection(name, "logs", "@logs", name)
+            self.addConnection(name, "metrics", "@metrics", name)
+
+        else:
+            raise Exception("Module instance name '%s' is already taken." % (name))
+
+    def addLookup(self, name, module, arguments={}):
+
+        if name not in self.config["lookups"]:
+            self.config["lookups"][name] = {"module": module, "arguments": arguments}
+        else:
+            raise Exception("Uplook instance name '%s' is already taken." % (name))
+
+    def addConnection(self, source_module, source_queue, destination_module, destination_queue):
+
+        if not self.__queueConnected(source_module, source_queue):
+            self.config["routingtable"].append(AttrDict({"source_module": source_module, "source_queue": source_queue, "destination_module": destination_module, "destination_queue": destination_queue}))
+
+    def dump(self):
+        return AttrDict(self.config)
 
     def load(self, filename):
 
@@ -89,22 +121,24 @@ class ConfigFile(object):
         self.__validate(config)
         self.__validateRoutingTable(config)
 
-        if "lookups" not in config:
-            config["lookups"] = {}
+        if "lookups" in config:
+            for lookup in config["lookups"]:
+                self.addLookup(name=lookup, **config["lookups"][lookup])
 
-        config["routingtable"] = self.__processRoutes(config["routingtable"])
+        for module in config["modules"]:
+            self.addModule(name=module, **config["modules"][module])
 
-        config = AttrDict(config, recursive=True)
-
-        return config
-
-    def __processRoutes(self, routes):
-
-        r = []
-        for route in routes:
+        for route in config["routingtable"]:
             sm, sq, dm, dq = self.__splitRoute(route)
-            r.append({"source_module": sm, "source_queue": sq, "destination_module": dm, "destination_queue": dq})
-        return r
+            self.addConnection(sm, sq, dm, dq)
+
+    def __queueConnected(self, module, queue):
+
+       for c in self.config["routingtable"]:
+            if (c["source_module"] == module and c["source_queue"] == queue) or (c["destination_module"] == module and c["destination_queue"] == queue):
+                raise Exception ("%s.%s is already connected to %s.%s" % (c["source_module"], c["source_queue"], c["destination_module"], c["destination_queue"]))
+            else:
+                return False
 
     def __splitRoute(self, route):
 
@@ -137,3 +171,32 @@ class ConfigFile(object):
             (left, right) = route.split("->")
             assert "." in left.lstrip().rstrip(), "routingtable rule \"%s\" does not have the right format. Missing a dot." % (route)
             assert "." in right.lstrip().rstrip(), "routingtable rule \"%s\" does not have the right format. Missing a dot." % (route)
+
+    def __addLogFunnel(self):
+
+        self.config["modules"]["@logs"] = {'description': "Centralizes the logs of all modules.", 'module': "wishbone.flow.funnel", "arguments": {}}
+
+    def __addMetricFunnel(self):
+
+        self.config["modules"]["@metrics"] = {'description': "Centralizes the metrics of all modules.", 'module': "wishbone.flow.funnel", "arguments": {}}
+
+    def _setupLoggingSTDOUT(self):
+        if not self.__queueConnected("@logs", "outbox"):
+            self.config["modules"]["@logs_format"] = {'description': "Create a human readable log format.", 'module': "wishbone.encode.humanlogformat", "arguments": {}}
+            self.addConnection("@logs", "outbox", "@logs_format", "inbox")
+        if not self.__queueConnected("@logs_format", "outbox"):
+            self.config["modules"]["@logs_stdout"] = {'description': "Prints all incoming logs to STDOUT.", 'module': "wishbone.output.stdout", "arguments": {}}
+            self.addConnection("@logs_format", "outbox", "@logs_stdout", "inbox")
+
+    def _setupLoggingSYSLOG(self):
+
+        pass
+        #         actor_config = ActorConfig("log_syslog",
+        #                            self.size,
+        #                            self.frequency,
+        #                            self.config["lookups"],
+        #                            "Writes incoming Wishbone logmessages into Syslog.")
+
+        # log_syslog = self.module_manager.getModuleByName("wishbone.output.syslog")
+        # self.__registerModule(log_syslog, actor_config)
+        # self.__connect("wishbone_logs.outbox", "log_syslog.inbox")
