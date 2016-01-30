@@ -41,3 +41,4 @@ wishbone.sublime-workspace
 docs/_build
 
 .cache/*
+./test_rules*
