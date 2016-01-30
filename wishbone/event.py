@@ -22,7 +22,6 @@
 #
 #
 
-from copy import deepcopy
 from collections import namedtuple
 import arrow
 
@@ -76,7 +75,10 @@ class Event(object):
         Returns a cloned version of the event using deepcopy.
         '''
 
-        return deepcopy(self)
+        c = self.deepish_copy(self.data)
+        e = Event()
+        e.data = c
+        return e
 
     def copy(self, source, destination):
         '''
@@ -86,7 +88,7 @@ class Event(object):
         :param str destination: The name of the destination key.
         '''
 
-        self.set(deepcopy(self.get(source)), destination)
+        self.set(self.deepish_copy(self.get(source)), destination)
 
     def delete(self, key=None):
         '''
@@ -197,4 +199,22 @@ class Event(object):
             else:
                 dct[k] = merge_dct[k]
 
+    def deepish_copy(self, org):
+        '''
+        much, much faster than deepcopy, for a dict of the simple python types.
 
+        Blatantly ripped off from https://writeonly.wordpress.com/2009/05/07
+        /deepcopy-is-a-pig-for-simple-data/
+        '''
+
+        out = dict().fromkeys(org)
+        for k,v in org.iteritems():
+            try:
+                out[k] = v.copy()   # dicts, sets
+            except AttributeError:
+                try:
+                    out[k] = v[:]   # lists, tuples, strings, unicode
+                except TypeError:
+                    out[k] = v      # ints
+
+        return out
