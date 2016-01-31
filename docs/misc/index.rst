@@ -1,0 +1,8 @@
+====
+Misc
+====
+
+.. toctree::
+    :hidden:
+
+    caveats
