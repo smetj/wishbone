@@ -80,12 +80,11 @@ SCHEMA = {
 class ConfigFile(object):
 
     def __init__(self, filename, logstyle):
-
+        self.logstyle = logstyle
         self.config = {"lookups": {}, "modules": {}, "routingtable": []}
-        self.load(filename)
         self.__addLogFunnel()
         self.__addMetricFunnel()
-        getattr(self, "_setupLogging%s" % (logstyle.upper()))()
+        self.load(filename)
 
     def addModule(self, name, module, arguments={}, description=""):
 
@@ -132,13 +131,14 @@ class ConfigFile(object):
             sm, sq, dm, dq = self.__splitRoute(route)
             self.addConnection(sm, sq, dm, dq)
 
+        getattr(self, "_setupLogging%s" % (self.logstyle.upper()))()
+
     def __queueConnected(self, module, queue):
 
-       for c in self.config["routingtable"]:
+        for c in self.config["routingtable"]:
             if (c["source_module"] == module and c["source_queue"] == queue) or (c["destination_module"] == module and c["destination_queue"] == queue):
-                raise Exception ("%s.%s is already connected to %s.%s" % (c["source_module"], c["source_queue"], c["destination_module"], c["destination_queue"]))
-            else:
-                return False
+                return True
+        return False
 
     def __splitRoute(self, route):
 
@@ -185,7 +185,6 @@ class ConfigFile(object):
         if not self.__queueConnected("@logs", "outbox"):
             self.config["modules"]["@logs_format"] = {'description': "Create a human readable log format.", 'module': "wishbone.encode.humanlogformat", "arguments": {}}
             self.addConnection("@logs", "outbox", "@logs_format", "inbox")
-        if not self.__queueConnected("@logs_format", "outbox"):
             self.config["modules"]["@logs_stdout"] = {'description': "Prints all incoming logs to STDOUT.", 'module': "wishbone.output.stdout", "arguments": {}}
             self.addConnection("@logs_format", "outbox", "@logs_stdout", "inbox")
 
