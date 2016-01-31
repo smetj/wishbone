@@ -137,7 +137,7 @@ class Dispatch():
             sys.stdout.write("\nInstance started in foreground with pid %s\n" % (os.getpid()))
 
             if profile:
-                from wishbone.utils.profile import Profiler
+                from wishbone.utils.py2devtools import Profiler
                 with Profiler():
                     Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph).start()
             else:
@@ -199,7 +199,7 @@ class Dispatch():
             self.__expandSearchPath(module_path)
 
         module_manager = ModuleManager()
-        router_config = ConfigFile(config)
+        router_config = ConfigFile(config, 'SYSLOG').dump()
         pid_file = PIDFile(pid)
 
         with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
