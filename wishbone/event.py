@@ -22,31 +22,41 @@
 #
 #
 
-from collections import namedtuple
 import arrow
 
-
-class Container():
-    pass
-
-
-class Namespace():
-    pass
-
-
-class Module():
-
-    def __init__(self, name):
-        self.name = name
-        self.header = Container()
-        self.data = None
-        self.error = Container()
-
-
-Metric = namedtuple("WishboneMetric", "time type source name value unit tags")
-Log = namedtuple("WishboneLog", "time level pid module message")
-
 EVENT_RESERVED = ["@timestamp", "@version", "@data", "@tmp", "@errors"]
+
+
+class Log(object):
+
+    '''
+    A Wishbone log object
+    '''
+
+    def __init__(self, time, level, pid, module, message):
+
+        self.time = time
+        self.level = level
+        self.pid = pid
+        self.module = module
+        self.message = message
+
+
+class Metric(object):
+
+    '''
+    A Wishbone metric object
+    '''
+
+    def __init__(self, time, type, source, name, value, unit, tags):
+
+        self.time = time
+        self.type = type
+        self.source = source
+        self.name = name
+        self.value = value
+        self.unit = unit
+        self.tags = tags
 
 
 class Event(object):
@@ -218,3 +228,4 @@ class Event(object):
                     out[k] = v      # ints
 
         return out
+

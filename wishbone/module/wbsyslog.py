@@ -71,18 +71,10 @@ class Syslog(Actor):
     def consume(self, event):
 
         d = event.get(self.kwargs.selection)
-        if isinstance(event.data, Log):
-            syslog.syslog(event.data.level, "%s: %s" % (d.module, d.message))
+        if isinstance(d, Log):
+            syslog.syslog(d.level, "%s: %s" % (d.module, d.message))
         else:
             syslog.syslog(self.kwargs.level, "%s: %s" % (self.kwargs.ident, str(d)))
 
     def postHook(self):
         syslog.closelog()
-
-    def __getKwargsLevel(self, event):
-
-        return self.kwargs.level
-
-    def __getEventLevel(self, event):
-
-        return event.data.level
