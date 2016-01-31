@@ -5,86 +5,63 @@ Logs and metrics
 Logs
 ----
 
-Each module has an instance of :py:class:`wishbone.Logging` offering a
-function for each loglevel.
+.. autoclass:: wishbone.event.Metric
 
-When modules are initialized by the router, it will automatically connect the
-*logs* queue of all modules to a :py:class:`wishbone.module.Funnel` instance
-called **wishbone_logs**. This module receives the logs from all modules. It
-is up to the user to decide which other module(s) to connect to the *outbox*
-of the *wishbone_logs* to further process the logs.
+::
 
-Logs events are tuples have following format:
+    Log({'message': 'Received stop. Initiating shutdown.', 'module': 'metrics_graphite', 'pid': 18179, 'level': 6, 'time': 1454272074.556823}
 
-(6, 1367682301.430527, 'Router', 'Received SIGINT. Shutting down.')
 
-Typically these log events are send to the :py:class:`wishbone.module.Syslog`
-or to :py:class:`wishbone.encode.HumanLogFormat` and
-:py:class:`wishbone.module.STDOUT`.
+Each module inherits an instance of :py:class:`wishbone.Logging`.
 
+When modules are loaded and initialized, :py:class:`wishbone.router.Default`
+will automatically connect the *logs* queue of all modules to a
+:py:class:`wishbone.module.Funnel` instance called **@logs**. This module
+centralizes the logs of all modules.
+
+If the user decides not to connect queue *@logs.outbox* to another queue then
+Wishbone will automatically initialize additional modules to it logs to either
+SYSLOG or STDOUT depending on it's started to run in the background (--start)
+or foreground (--debug) respectively.
+
+If you would like to send the centralized logs to another location you can
+achieve this by connecting queue *@logs.outbox* to other modules.
+
+Logs are simple Python classes :py:class:`wishbone.event.Log`
 
 Metrics
 -------
 
-Each modules collects and produces metrics of all its queues.  Metrics are
-generated at the defined <frequency> (see cli options).
+.. autoclass:: wishbone.event.Metric
 
-When modules are initialized by the router, it will automatically connect the
-*metrics* queue al all modules to a :py:class:`wishbone.module.Funnel`
-instance called **wishbone_metrics**. This module receives the metrics from
-all modules. It is up to the user to decide which other module(s) to connect
-to the *outbox* of the *wishbone_metrics* to further process the logs.
+::
 
-For each queue we have following metrics:
-
-- dropped_rate
-- dropped_total
-- in_rate
-- int_total
-- out_rate
-- out_total
-- size
+    Metric({'tags': (), 'unit': '', 'value': 0, 'name': 'module.input.queue.failed.size', 'source': 'server01', 'type': 'wishbone', 'time': 1454271176.479039})
 
 
-Typically a :py:class:`wishbone.module.Graphite` instance is connected to the
-*wishbone_metrics* module instance which in conjunction with
-:py:class:`wishbone.module.TCPOut` sends the metrics to Graphite.
+Each Wishbone module collects metrics of its queues.  Metrics are generated at
+the defined interval (see cli option --frequency).
+
+When modules are loaded and initialized, :py:class:`wishbone.router.Default`
+will automatically connect the *metrics* queue of all modules to a
+:py:class:`wishbone.module.funnel.Funnel` instance called **@metrics**. This module
+centralizes the metrics of all modules.
+
+By default the **@metrics.outbox** queue is not connected to another module
+(in contrary to **@logs.outbox**) therefor all metric data is lost by default.
+If however you would like to process the Wishbone metrics externally you can
+hook up the necessary modules to **@metrics.outbox** to achieve the desired
+result.
+
+Logs are simple Python classes :py:class:`wishbone.event.Metric`
+
+For example you can forward the Wishbone metrics to Graphite by chaining
+:py:class:`wishbone.module.graphite.Graphite` (converts
+:py:class:`wishbone.event.Metric` into a Graphite format) and
+:py:class:`wishbone.module.tcpout.TCPOut` (submits the Graphite data over TCP to
+Graphite).
 
 .. image:: graphite.png
 
 
-**Format**
-
-Wishbone represents metrics into a fixed data structure:
-
-    (time, type, source, name, value, unit, (tag1, tag2))
-
-It is a tuple containing a number of fields:
-
-- timestamp
-  A timestamp of the metric in unix time.
-
-- type
-  A free to choose description of the type of the metric
-
-- source
-  The originating source of the metric
-
-- name
-  The name of the metric
-
-- value
-  The metric value
-
-- unit
-  The value units
-
-- tags
-  A tuple of tags
-
-For example:
-
-.. code-block:: python
-
-        (1381002603.726132, 'wishbone', 'hostname', 'queue.outbox.in_rate', 0, '', ("production",monitored))
 
