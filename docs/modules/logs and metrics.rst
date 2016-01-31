@@ -27,7 +27,6 @@ or foreground (--debug) respectively.
 If you would like to send the centralized logs to another location you can
 achieve this by connecting queue *@logs.outbox* to other modules.
 
-Logs are simple Python classes :py:class:`wishbone.event.Log`
 
 Metrics
 -------
@@ -53,7 +52,6 @@ If however you would like to process the Wishbone metrics externally you can
 hook up the necessary modules to **@metrics.outbox** to achieve the desired
 result.
 
-Logs are simple Python classes :py:class:`wishbone.event.Metric`
 
 For example you can forward the Wishbone metrics to Graphite by chaining
 :py:class:`wishbone.module.graphite.Graphite` (converts
