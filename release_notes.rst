@@ -29,6 +29,7 @@ Misc:
 - Prefixed zeromq modules with 'zeromq_'.
 - Rework configuration handling
 - Misc performance improvements
+- Changed Metric and Log named tuples into Class
 
 
 Version 1.1.1
