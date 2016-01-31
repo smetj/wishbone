@@ -71,7 +71,7 @@ Contents:
     installation/index
     server/index
     modules/index
-    caveats
+    misc/index
 
 Indices and tables
 ==================
