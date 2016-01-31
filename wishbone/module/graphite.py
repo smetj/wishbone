@@ -71,9 +71,11 @@ class Graphite(Actor):
 
     def consume(self, event):
 
-        if isinstance(event.get(), Metric):
+        d = event.get()
+
+        if isinstance(d, Metric):
             v = {"prefix": self.kwargs.prefix, "script": self.script, "pid": self.pid}
-            v.update(event.get()._asdict())
+            v.update(d.dump())
             event.set(self.kwargs.template.format(**v))
             self.submit(event, self.pool.queue.outbox)
         else:
