@@ -23,6 +23,7 @@
 #
 
 import arrow
+import time
 
 EVENT_RESERVED = ["@timestamp", "@version", "@data", "@tmp", "@errors"]
 
@@ -41,6 +42,13 @@ class Log(object):
         self.module = module
         self.message = message
 
+    def __str__(self):
+
+        return "Log(%s)" % (self.__dict__)
+
+    def __repr__(self):
+
+        return "Log(%s)" % (self.__dict__)
 
 class Metric(object):
 
@@ -58,6 +66,17 @@ class Metric(object):
         self.unit = unit
         self.tags = tags
 
+    def __str__(self):
+
+        return "Metric(%s)" % (self.__dict__)
+
+    def __repr__(self):
+
+        return "Metric(%s)" % (self.__dict__)
+
+    def dump(self):
+
+        return self.__dict__
 
 class Event(object):
 
@@ -71,7 +90,8 @@ class Event(object):
     def __init__(self, data=None):
 
         self.data = {
-            "@timestamp": arrow.now(),
+#           "@timestamp": arrow.now(),
+            "@timestamp": time.time(),
             "@version": 1,
             "@data": data,
             "@tmp": {
