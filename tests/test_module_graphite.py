@@ -22,8 +22,6 @@
 #
 #
 
-import pytest
-
 from wishbone.event import Event
 from wishbone.module.graphite import Graphite
 from wishbone.actor import ActorConfig
@@ -41,7 +39,6 @@ def test_module_graphite():
 
     e = Event('test')
     m = Metric(1381002603.726132, "wishbone", "hostname", "queue.outbox.in_rate", 0, "", ())
-
     e.set(m)
 
     graphite.pool.queue.inbox.put(e)
