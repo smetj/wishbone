@@ -59,7 +59,6 @@ install_requires = ['gevent==1.1rc3',
                     'uplook==0.4.1',
                     'jq_oniguruma==0.1.5']
 
-
 # Dirty hack to make readthedocs build the docs
 # For some reason mocking out jq as documented is not working
 
@@ -68,9 +67,9 @@ if os.environ.get("READTHEDOCS", False):
     install_requires.remove('jq_oniguruma==0.1.5')
 
 else:
-    dependency_links = ['https://github.com/smetj/jq.py/tarball/master#egg=jq_oniguruma-0.1.5']
-
-
+    dependency_links = [
+        'https://github.com/smetj/jq.py/tarball/master#egg=jq_oniguruma-0.1.5'
+    ]
 
 # Deps pulled in by other modules
 # 'lockfile==0.10.2'
