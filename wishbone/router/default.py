@@ -190,7 +190,7 @@ class Default(multiprocessing.Process):
 
         for name, instance in self.config.modules.iteritems():
             pmodule = self.module_manager.getModuleByName(instance.module)
-            actor_config = ActorConfig(name, self.size, self.frequency, lookup_modules, "description")
+            actor_config = ActorConfig(name, self.size, self.frequency, lookup_modules, instance.description)
 
             self.__registerModule(pmodule, actor_config, instance.arguments)
 
