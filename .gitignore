@@ -43,3 +43,5 @@ docs/_build
 .cache/*
 ./test_rules*
 *.cpuprofile
+
+.eggs
