@@ -181,6 +181,7 @@ class ConfigFile(object):
         self.config["modules"]["@metrics"] = {'description': "Centralizes the metrics of all modules.", 'module': "wishbone.flow.funnel", "arguments": {}}
 
     def _setupLoggingSTDOUT(self):
+
         if not self.__queueConnected("@logs", "outbox"):
             self.config["modules"]["@logs_format"] = {'description': "Create a human readable log format.", 'module': "wishbone.encode.humanlogformat", "arguments": {}}
             self.addConnection("@logs", "outbox", "@logs_format", "inbox")
@@ -190,13 +191,7 @@ class ConfigFile(object):
 
     def _setupLoggingSYSLOG(self):
 
-        pass
-        #         actor_config = ActorConfig("log_syslog",
-        #                            self.size,
-        #                            self.frequency,
-        #                            self.config["lookups"],
-        #                            "Writes incoming Wishbone logmessages into Syslog.")
+        if not self.__queueConnected("@logs", "outbox"):
+            self.config["modules"]["@logs_syslog"] = {'description': "Writes all incoming messags to syslog.", 'module': "wishbone.output.syslog", "arguments": {}}
+            self.addConnection("@logs", "outbox", "@logs_syslog", "inbox")
 
-        # log_syslog = self.module_manager.getModuleByName("wishbone.output.syslog")
-        # self.__registerModule(log_syslog, actor_config)
-        # self.__connect("wishbone_logs.outbox", "log_syslog.inbox")
