@@ -42,6 +42,10 @@ class JSONDecode(Actor):
            |  The destination key to store the Python <dict>.
            |  Use an empty string to refer to the complete event.
 
+        - unicode(bool)(False)
+           |  When True, converts strings to unicode otherwise regular string.
+
+
     Queues:
 
         - inbox
@@ -51,13 +55,20 @@ class JSONDecode(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, actor_config, source="@data", destination="@data"):
+    def __init__(self, actor_config, source="@data", destination="@data", unicode=False):
 
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
         self.registerConsumer(self.consume, "inbox")
+
+    def preHook(self):
+
+        if self.kwargs.unicode:
+            self.convert = self.doUnicode
+        else:
+            self.convert = self.doNoUnicode
 
     def consume(self, event):
 
@@ -66,5 +77,31 @@ class JSONDecode(Actor):
         event.set(data, self.kwargs.destination)
         self.submit(event, self.pool.queue.outbox)
 
-    def convert(self, data):
+    def doUnicode(self, data):
         return loads(data)
+
+    def doNoUnicode(self, data):
+        return self.json_loads_byteified(data)
+
+    def json_loads_byteified(self, json_text):
+        return self._byteify(
+            loads(json_text, object_hook=self._byteify),
+            ignore_dicts=True
+        )
+
+    def _byteify(self, data, ignore_dicts=False):
+        # if this is a unicode string, return its string representation
+        if isinstance(data, unicode):
+            return data.encode('utf-8')
+        # if this is a list of values, return list of byteified values
+        if isinstance(data, list):
+            return [ self._byteify(item, ignore_dicts=True) for item in data ]
+        # if this is a dictionary, return dictionary of byteified keys and values
+        # but only if we haven't already byteified it
+        if isinstance(data, dict) and not ignore_dicts:
+            return {
+                self._byteify(key, ignore_dicts=True): self._byteify(value, ignore_dicts=True)
+                for key, value in data.iteritems()
+            }
+        # if it's anything else, return it in its original form
+        return data
