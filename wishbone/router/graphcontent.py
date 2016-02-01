@@ -93,11 +93,41 @@ class VisJSData():
 
     def addModule(self, instance_name, module_name, description):
 
+        if ".input." in module_name or ".output." in module_name:
+            shape = "square"
+            color = {
+              "border": 'red',
+              "background": '#D2E5FF',
+              "highlight": {
+                "border": '#2B7CE9',
+                "background": '#D2E5FF'
+              },
+              "hover": {
+                "border": '#2B7CE9',
+                "background": '#D2E5FF'
+              }
+            }
+        else:
+            shape = "dot"
+            color = {
+              "border": '#2B7CE9',
+              "background": '#D2E5FF',
+              "highlight": {
+                "border": '#2B7CE9',
+                "background": '#D2E5FF'
+              },
+              "hover": {
+                "border": '#2B7CE9',
+                "background": '#D2E5FF'
+              }
+            }
+
         if instance_name not in self.nodes.keys():
             self.nodes[instance_name] = {"id": self.id,
                                 "label": instance_name,
-                                "shape": "dot",
+                                "shape": shape,
                                 "size": 20,
+                                "color": color,
                                 "title": "Module: %s</br>Description: %s" % (module_name, description),
                                 "shadow": True,
                                 "font.size": 20
