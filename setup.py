@@ -57,18 +57,18 @@ install_requires = ['gevent==1.1rc3',
                     'elasticsearch==1.6.0',
                     'importlib==1.0.3',
                     'uplook==0.4.1',
-                    'jq_oniguruma==0.1.5']
+                    'pyjq_static==1.1']
 
 # Dirty hack to make readthedocs build the docs
 # For some reason mocking out jq as documented is not working
 
 if os.environ.get("READTHEDOCS", False):
     dependency_links = []
-    install_requires.remove('jq_oniguruma==0.1.5')
+    install_requires.remove('pyjq_static==1.1')
 
 else:
     dependency_links = [
-        'https://github.com/smetj/jq.py/tarball/master#egg=jq_oniguruma-0.1.5'
+        'https://github.com/smetj/pyjq/tarball/master#egg=pyjq_static-1.1'
     ]
 
 # Deps pulled in by other modules
