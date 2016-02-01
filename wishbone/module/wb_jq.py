@@ -244,18 +244,26 @@ class JQ(Actor):
 
         if self.kwargs.location == "":
             self.logging.info("No rules directory defined, not reading rules from disk.")
-            self.compileRules()
+            self.kwargs.conditions = self.compileRules(self.kwargs.conditions)
         else:
             self.logging.info("Rules directoy '%s' defined." % (self.kwargs.location))
             self.monitor_location = ReadRulesDisk(self.logging, self.kwargs.location)
-            self.disk_conditions = self.monitor_location.readDirectory()
+            self.disk_conditions = self.compileRules(self.monitor_location.readDirectory())
             self.logging.info("Read %s rules from disk and %s defined in config." % (len(self.disk_conditions), len(self.kwargs.conditions)))
             self.sendToBackground(self.monitorRuleDirectory)
 
-    def compileRules(self):
+    def compileRules(self, conditions):
 
-        for condition in self.kwargs.conditions + self.disk_conditions:
-            condition["compiled"] = pyjq.compile(condition["expression"])
+        ok = []
+        for condition in conditions:
+            try:
+                condition["compiled"] = pyjq.compile(condition["expression"])
+            except Exception as err:
+                message = err.message.replace("\n", " -> ")
+                self.logging.error("Failed to compile jq rule '%s'. Skipped.  Reason: '%s'" % (condition["name"], message))
+            else:
+                ok.append(condition)
+        return ok
 
     def monitorRuleDirectory(self):
 
@@ -268,8 +276,7 @@ class JQ(Actor):
                 fresh_conditions = self.monitor_location.waitForChanges()
                 with self.condition_read_lock:
                     if cmp(self.disk_conditions, fresh_conditions) != 0:
-                        self.disk_conditions = fresh_conditions
-                        self.compileRules()
+                        self.disk_conditions = self.compileRules(fresh_conditions)
                         self.logging.info("Read %s rules from disk and %s defined in config." % (len(self.disk_conditions), len(self.kwargs.conditions)))
             except Exception as err:
                 self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
@@ -279,9 +286,9 @@ class JQ(Actor):
 
         matched = False
         data = event.get(self.kwargs.selection)
-
         with self.condition_read_lock:
             for condition in self.kwargs.conditions + self.disk_conditions:
+
                 if self.pool.hasQueue(condition["queue"]):
                     try:
                         result = condition["compiled"].first(data)
