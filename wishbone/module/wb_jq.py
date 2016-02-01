@@ -23,7 +23,8 @@
 #
 
 from wishbone import Actor
-from jq import jq
+# from jq import jq
+import pyjq
 from jsonschema import validate
 
 import os
@@ -243,12 +244,18 @@ class JQ(Actor):
 
         if self.kwargs.location == "":
             self.logging.info("No rules directory defined, not reading rules from disk.")
+            self.compileRules()
         else:
             self.logging.info("Rules directoy '%s' defined." % (self.kwargs.location))
             self.monitor_location = ReadRulesDisk(self.logging, self.kwargs.location)
             self.disk_conditions = self.monitor_location.readDirectory()
             self.logging.info("Read %s rules from disk and %s defined in config." % (len(self.disk_conditions), len(self.kwargs.conditions)))
             self.sendToBackground(self.monitorRuleDirectory)
+
+    def compileRules(self):
+
+        for condition in self.kwargs.conditions + self.disk_conditions:
+            condition["compiled"] = pyjq.compile(condition["expression"])
 
     def monitorRuleDirectory(self):
 
@@ -262,6 +269,7 @@ class JQ(Actor):
                 with self.condition_read_lock:
                     if cmp(self.disk_conditions, fresh_conditions) != 0:
                         self.disk_conditions = fresh_conditions
+                        self.compileRules()
                         self.logging.info("Read %s rules from disk and %s defined in config." % (len(self.disk_conditions), len(self.kwargs.conditions)))
             except Exception as err:
                 self.logging.warning("Problem reading rules directory.  Reason: %s" % (err))
@@ -276,7 +284,7 @@ class JQ(Actor):
             for condition in self.kwargs.conditions + self.disk_conditions:
                 if self.pool.hasQueue(condition["queue"]):
                     try:
-                        result = jq(condition["expression"]).transform(data)
+                        result = condition["compiled"].first(data)
                     except Exception as err:
                         self.logging.error("Skipped invalid jq expression '%s'. Reason: %s" % (condition["name"], err.message.replace("\n", " -> ")))
                         continue
