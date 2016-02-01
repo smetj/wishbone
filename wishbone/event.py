@@ -90,7 +90,7 @@ class Event(object):
     def __init__(self, data=None):
 
         self.data = {
-            "@timestamp": arrow.now(),
+            "@timestamp": time.time(),
             "@version": 1,
             "@data": data,
             "@tmp": {

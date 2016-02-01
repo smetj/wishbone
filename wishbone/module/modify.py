@@ -25,6 +25,7 @@
 from wishbone import Actor
 from copy import deepcopy
 import re
+import arrow
 
 VALID_EXPRESSIONS = ["add_item",
                      "copy",
@@ -232,7 +233,7 @@ class Modify(Actor):
 
     def command_time(self, event, destination_key, f):
 
-        result = event.get("@timestamp").format(f)
+        result = arrow.get(event.get("@timestamp")).format(f)
         event.set(result, destination_key)
         return event
 
