@@ -42,7 +42,7 @@ class JSONDecode(Actor):
            |  The destination key to store the Python <dict>.
            |  Use an empty string to refer to the complete event.
 
-        - unicode(bool)(False)
+        - unicode(bool)(True)
            |  When True, converts strings to unicode otherwise regular string.
 
 
@@ -55,7 +55,7 @@ class JSONDecode(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, actor_config, source="@data", destination="@data", unicode=False):
+    def __init__(self, actor_config, source="@data", destination="@data", unicode=True):
 
         Actor.__init__(self, actor_config)
 
