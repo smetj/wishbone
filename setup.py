@@ -101,10 +101,6 @@ class PyTest(TestCommand):
         errcode = pytest.main(self.test_args)
         sys.exit(errcode)
 
-
-
-
-
 setup(
     name=PROJECT,
     version=VERSION,
@@ -117,7 +113,7 @@ setup(
 
     url='https://github.com/smetj/wishbone',
     download_url='https://github.com/smetj/wishbone/tarball/master',
-    dependency_links = dependency_links,
+    dependency_links=dependency_links,
     classifiers=['Development Status :: 5 - Production/Stable',
                  'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
                  'Programming Language :: Python',
