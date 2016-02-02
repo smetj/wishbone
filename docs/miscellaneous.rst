@@ -5,20 +5,21 @@ Miscellaneous
 Profiling
 ---------
 
-If want to profile Wishbone to locate a performance issue you can
-start the Wishbone server in debug mode using the *--profile* option.
+If you want to profile a Wishbone server to locate a performance issue or
+identify a bottleneck you can start the server in *debug* mode using the
+*--profile* option.
 
 ::
 
     $ wishbone debug --config test.yaml --profile
 
 
-This starts the Wishbone in profile modus staying in foreground collecting
-statistics which can be loaded and viewed afterwards in Chrome's "Developer
-Tools".
+Pressing CTRL+C will stop the server and dump the profile file named
+*"wishbone_<pid>_.cpuprofile"* in the current working directory.
 
-Pressing CTRL+C will stop the server and dump a file named
-*wishbone_<pid>_.cpuprofile*.
+The profile file can be loaded into Chrome's "Developer Tools" for further
+analysis.
+
 
 .. image:: chrome.png
     :width: 25%
