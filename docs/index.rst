@@ -62,10 +62,8 @@ Running a server:
     [smetj@dev-container ~]$
 
 
-Contents:
-
 .. toctree::
-    :maxdepth: 2
+    :hidden:
 
     introduction
     installation/index
@@ -74,6 +72,6 @@ Contents:
     miscellaneous
 
 
-.. _servers: server.html
-.. _modules: builtin%20modules.html
-.. _Bootstrap files: bootstrap%20files.html
+.. _servers: server/index.html
+.. _modules: modules/builtin%20modules.html
+.. _Bootstrap files: server/bootstrap%20files.html
