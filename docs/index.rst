@@ -71,13 +71,8 @@ Contents:
     installation/index
     server/index
     modules/index
-    misc/index
+    miscellaneous
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
 
 .. _servers: server.html
 .. _modules: builtin%20modules.html
