@@ -50,6 +50,7 @@ class Log(object):
 
         return "Log(%s)" % (self.__dict__)
 
+
 class Metric(object):
 
     '''
@@ -77,6 +78,7 @@ class Metric(object):
     def dump(self):
 
         return self.__dict__
+
 
 class Event(object):
 
@@ -222,8 +224,7 @@ class Event(object):
         :return: None
         """
         for k, v in merge_dct.iteritems():
-            if (k in dct and isinstance(dct[k], dict)
-                    and isinstance(merge_dct[k], dict)):
+            if k in dct and isinstance(dct[k], dict) and isinstance(merge_dct[k], dict):
                 self.dict_merge(dct[k], merge_dct[k])
             else:
                 dct[k] = merge_dct[k]
@@ -237,7 +238,7 @@ class Event(object):
         '''
 
         out = dict().fromkeys(org)
-        for k,v in org.iteritems():
+        for k, v in org.iteritems():
             try:
                 out[k] = v.copy()   # dicts, sets
             except AttributeError:
@@ -247,4 +248,3 @@ class Event(object):
                     out[k] = v      # ints
 
         return out
-
