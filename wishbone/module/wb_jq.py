@@ -23,7 +23,6 @@
 #
 
 from wishbone import Actor
-# from jq import jq
 import pyjq
 from jsonschema import validate
 
@@ -88,6 +87,7 @@ SCHEMA_DISK = {
     "required": ["expression", "queue"],
     "additionalProperties": False
 }
+
 
 class JQ(Actor):
 
