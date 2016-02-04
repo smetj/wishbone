@@ -64,6 +64,9 @@ class ElasticSearchOut(Actor):
         - interval(int)(5)
            |  The buffer time flush interval.
 
+        - flush_size(int)(100)
+           |  The flush size.
+
     Queues:
 
         - inbox
@@ -71,7 +74,7 @@ class ElasticSearchOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, selection="@data", hosts=["localhost:9200"], use_ssl=False, verify_certs=False, index="wishbone", doc_type="wishbone", interval=5):
+    def __init__(self, actor_config, selection="@data", hosts=["localhost:9200"], use_ssl=False, verify_certs=False, index="wishbone", doc_type="wishbone", interval=5, flush_size=100):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.pool.createQueue("bulk")
@@ -84,11 +87,9 @@ class ElasticSearchOut(Actor):
 
     def consume(self, event):
 
-        try:
-            self.pool.queue.bulk.put(event)
-        except QueueFull:
-            self.pool.queue.inbox.rescue(event)
-            self.logging.debug("Flushing batch of %s docs after reaching batch size." % (self.pool.queue.bulk.size()))
+        self.pool.queue.bulk.put(event)
+        if self.pool.queue.bulk.size() == self.kwargs.flush_size:
+            self.logging.debug("Flushing batch of %s docs after reaching batch size." % (self.kwargs.flush_size))
             self.flush()
 
     def flush(self):
@@ -101,3 +102,4 @@ class ElasticSearchOut(Actor):
             if self.pool.queue.bulk.size() > 0:
                 self.logging.debug("Flushing batch of %s docs after reaching timeout." % (self.pool.queue.bulk.size()))
                 self.flush()
+
