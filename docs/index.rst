@@ -2,10 +2,6 @@
 Wishbone
 ========
 
-.. image:: logo.png
-    :align: right
-    :width: 25%
-
 **A Python framework to build composable event pipeline servers with minimal effort.**
 
 https://github.com/smetj/wishbone
