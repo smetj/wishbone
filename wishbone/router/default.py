@@ -23,8 +23,7 @@
 #
 
 from wishbone.actor import ActorConfig
-from wishbone.module.funnel import Funnel
-from wishbone.error import ModuleInitFailure, NoSuchModule, QueueConnected
+from wishbone.error import ModuleInitFailure, NoSuchModule
 from gevent import signal, event, sleep, spawn
 import multiprocessing
 import importlib
@@ -151,7 +150,7 @@ class Default(multiprocessing.Process):
 
         self.initiate_stop.wait()
         for module in self.module_pool.list():
-            if module.name not in self.getChildren("@logs") + ["@logs"] and not module.stopped:
+            if module.name not in self.getChildren("_logs") + ["_logs"] and not module.stopped:
                 module.stop()
 
         while not self.__logsEmpty():
