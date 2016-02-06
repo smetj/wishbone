@@ -30,6 +30,7 @@ Misc:
 - Rework configuration handling
 - Misc performance improvements
 - Changed Metric and Log named tuples into Class
+- Special funnel modules renamed to '_metrics' and '_logs'.
 
 
 Version 1.1.1
