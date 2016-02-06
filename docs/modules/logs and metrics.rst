@@ -16,16 +16,16 @@ Each module inherits an instance of :py:class:`wishbone.Logging`.
 
 When modules are loaded and initialized, :py:class:`wishbone.router.Default`
 will automatically connect the *logs* queue of all modules to a
-:py:class:`wishbone.module.Funnel` instance called **@logs**. This module
+:py:class:`wishbone.module.Funnel` instance called **_logs**. This module
 centralizes the logs of all modules.
 
-If the user decides not to connect queue *@logs.outbox* to another queue then
+If the user decides not to connect queue *_logs.outbox* to another queue then
 Wishbone will automatically initialize additional modules to it logs to either
 SYSLOG or STDOUT depending on it's started to run in the background (--start)
 or foreground (--debug) respectively.
 
 If you would like to send the centralized logs to another location you can
-achieve this by connecting queue *@logs.outbox* to other modules.
+achieve this by connecting queue *_logs.outbox* to other modules.
 
 
 Metrics
@@ -43,13 +43,13 @@ the defined interval (see cli option --frequency).
 
 When modules are loaded and initialized, :py:class:`wishbone.router.Default`
 will automatically connect the *metrics* queue of all modules to a
-:py:class:`wishbone.module.funnel.Funnel` instance called **@metrics**. This module
+:py:class:`wishbone.module.funnel.Funnel` instance called **_metrics**. This module
 centralizes the metrics of all modules.
 
-By default the **@metrics.outbox** queue is not connected to another module
-(in contrary to **@logs.outbox**) therefor all metric data is lost by default.
+By default the **_metrics.outbox** queue is not connected to another module
+(in contrary to **_logs.outbox**) therefor all metric data is lost by default.
 If however you would like to process the Wishbone metrics externally you can
-hook up the necessary modules to **@metrics.outbox** to achieve the desired
+hook up the necessary modules to **_metrics.outbox** to achieve the desired
 result.
 
 
