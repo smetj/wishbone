@@ -93,7 +93,12 @@ class ElasticSearchOut(Actor):
             self.flush()
 
     def flush(self):
-        bulk(self.elasticsearch, [{"_index": self.kwargs.index, "_type": self.kwargs.doc_type, "_source": e.get(self.kwargs.selection)} for e in self.pool.queue.bulk.dump()])
+        try:
+            bulk(self.elasticsearch, [{"_index": self.kwargs.index, "_type": self.kwargs.doc_type, "_source": e.get(self.kwargs.selection)} for e in self.pool.queue.bulk.dump()])
+        except Exception as err:
+            self.logging.error("Failed to bulk submit messages to '%s'. Reason: %s" % (self.kwargs.hosts, err))
+            for e in self.pool.queue.bulk.dump():
+                self.submit(e, self.pool.queue.failed)
 
     def __flushTimer(self):
 
@@ -102,4 +107,3 @@ class ElasticSearchOut(Actor):
             if self.pool.queue.bulk.size() > 0:
                 self.logging.debug("Flushing batch of %s docs after reaching timeout." % (self.pool.queue.bulk.size()))
                 self.flush()
-
