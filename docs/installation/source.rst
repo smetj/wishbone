@@ -5,11 +5,14 @@ Source
 Wishbone source can be downloaded from http://github.com/smetj/wishbone
 
 
-Prerequisites:
---------------
+.. note::
+   The fololwing dependencies are required
 
-- automake >=1.11.2
-- Typical build tools like configure, make, gcc ...
+   - automake >=1.11.2
+   - libtool
+   - gcc-c++, gcc, make
+   - python-dev
+   - cython
 
 
 **Stable**
