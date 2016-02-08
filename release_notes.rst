@@ -9,7 +9,9 @@ Feature:
 - New internal data format.
 - Adding SO_REUSEPORT for wishbone.input.httpserver
 - Allow Logger() to easily monkey patch existing logger calls
-- Added --graph option show layout.
+- Added --graph option in --debug mode to show layout.
+- Added --graph_enable_sys option in --debug mode to switch log
+  and metric queue/module inclusion.
 - Added support to provide description to the module section of
   the bootstrap file.
 - Added support to output modules to select which part of the event
