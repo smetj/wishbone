@@ -6,6 +6,7 @@ Python
    The following dependencies are required
 
    - automake >=1.11.2
+   - autoconf >= 2.64
    - libtool
    - gcc-c++, gcc, make
    - python-dev
