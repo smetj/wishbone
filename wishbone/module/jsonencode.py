@@ -35,7 +35,11 @@ class JSONEncode(Actor):
 
     Parameters:
 
-        n/a
+        - source(str)("@data")
+            | The data to convert.
+
+        - destination(str)("@data")
+            | The location to write the JSON string to.
 
 
     Queues:
@@ -47,7 +51,7 @@ class JSONEncode(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, actor_config):
+    def __init__(self, actor_config, source='@data', destination='@data'):
 
         Actor.__init__(self, actor_config)
 
@@ -57,5 +61,7 @@ class JSONEncode(Actor):
 
     def consume(self, event):
 
-        event.set(dumps(event.get()))
+        data = event.get(self.kwargs.source)
+        data = dumps(data)
+        event.set(data, self.kwargs.destination)
         self.submit(event, self.pool.queue.outbox)
