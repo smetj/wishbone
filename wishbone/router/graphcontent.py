@@ -85,7 +85,7 @@ var options = {
 
 class VisJSData():
 
-    def __init__(self):
+    def __init__(self, ignore_logging=False, ingore_metrics=False):
 
         self.id = 0
         self.nodes = {}
@@ -96,42 +96,42 @@ class VisJSData():
         if ".input." in module_name or ".output." in module_name:
             shape = "square"
             color = {
-              "border": 'red',
-              "background": '#D2E5FF',
-              "highlight": {
-                "border": '#2B7CE9',
-                "background": '#D2E5FF'
-              },
-              "hover": {
-                "border": '#2B7CE9',
-                "background": '#D2E5FF'
-              }
+                "border": 'red',
+                "background": '#D2E5FF',
+                "highlight": {
+                    "border": '#2B7CE9',
+                    "background": '#D2E5FF'
+                },
+                "hover": {
+                    "border": '#2B7CE9',
+                    "background": '#D2E5FF'
+                }
             }
         else:
             shape = "dot"
             color = {
-              "border": '#2B7CE9',
-              "background": '#D2E5FF',
-              "highlight": {
                 "border": '#2B7CE9',
-                "background": '#D2E5FF'
-              },
-              "hover": {
-                "border": '#2B7CE9',
-                "background": '#D2E5FF'
-              }
+                "background": '#D2E5FF',
+                "highlight": {
+                    "border": '#2B7CE9',
+                    "background": '#D2E5FF'
+                },
+                "hover": {
+                    "border": '#2B7CE9',
+                    "background": '#D2E5FF'
+                }
             }
 
         if instance_name not in self.nodes.keys():
             self.nodes[instance_name] = {"id": self.id,
-                                "label": instance_name,
-                                "shape": shape,
-                                "size": 20,
-                                "color": color,
-                                "title": "Module: %s</br>Description: %s" % (module_name, description),
-                                "shadow": True,
-                                "font.size": 20
-                                }
+                                         "label": instance_name,
+                                         "shape": shape,
+                                         "size": 20,
+                                         "color": color,
+                                         "title": "Module: %s</br>Description: %s" % (module_name, description),
+                                         "shadow": True,
+                                         "font.size": 20
+                                         }
             self.id += 1
 
     def addQueue(self, module, name):
