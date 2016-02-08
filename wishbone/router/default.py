@@ -189,6 +189,10 @@ class Default(multiprocessing.Process):
 
         for name, instance in self.config.modules.iteritems():
             pmodule = self.module_manager.getModuleByName(instance.module)
+
+            if instance.description == "":
+                instance.description = pmodule.__doc__.split("\n")[0].replace('*', '')
+
             actor_config = ActorConfig(name, self.size, self.frequency, lookup_modules, instance.description)
 
             self.__registerModule(pmodule, actor_config, instance.arguments)
@@ -252,20 +256,26 @@ class GraphWebserver():
         self.js_data = VisJSData()
 
         for c in self.config["routingtable"]:
+            if self.config["modules"][c.source_module]["context"] not in ["_logs", "_metrics"] and self.config["modules"][c.destination_module]["context"] not in ["_logs", "_metrics"]:
+                self.js_data.addModule(instance_name=c.source_module,
+                                       module_name=self.config["modules"][c.source_module]["module"],
+                                       description=self.module_pool.getModule(c.source_module).description)
 
-            self.js_data.addModule(instance_name=c.source_module,
-                                   module_name=self.config["modules"][c.source_module]["module"],
-                                   description=self.module_pool.getModule(c.source_module).description)
+                self.js_data.addModule(instance_name=c.destination_module,
+                                       module_name=self.config["modules"][c.destination_module]["module"],
+                                       description=self.module_pool.getModule(c.destination_module).description)
 
-            self.js_data.addModule(instance_name=c.destination_module,
-                                   module_name=self.config["modules"][c.destination_module]["module"],
-                                   description=self.module_pool.getModule(c.destination_module).description)
-
-            self.js_data.addQueue(c.source_module, c.source_queue)
-            self.js_data.addQueue(c.destination_module, c.destination_queue)
-            self.js_data.addEdge("%s.%s" % (c.source_module, c.source_queue), "%s.%s" % (c.destination_module, c.destination_queue))
+                self.js_data.addQueue(c.source_module, c.source_queue)
+                self.js_data.addQueue(c.destination_module, c.destination_queue)
+                self.js_data.addEdge("%s.%s" % (c.source_module, c.source_queue), "%s.%s" % (c.destination_module, c.destination_queue))
 
     def start(self):
+
+        print "#####################################################"
+        print "#                                                   #"
+        print "# Caution: Started webserver on port 8088           #"
+        print "#                                                   #"
+        print "#####################################################"
         spawn(self.setupWebserver)
 
     def stop(self):
