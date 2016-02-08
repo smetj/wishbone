@@ -40,8 +40,6 @@ start the Wishbone instance.
       --module_path MODULE_PATH
                             A comma separated list of directories to search and
                             find Wishbone modules.
-      --graph               When enabled starts a webserver on 8088 showing a
-                            graph of connected modules and queues.
 
 
 ------------------
@@ -58,7 +56,7 @@ STDOUT.  The running instance can be stopped gracefully with CTRL+C
     usage: wishbone debug [-h] [--config CONFIG] [--instances INSTANCES]
                           [--queue-size QUEUE_SIZE] [--frequency FREQUENCY]
                           [--id IDENTIFICATION] [--module_path MODULE_PATH]
-                          [--graph] [--profile]
+                          [--graph] [--graph_include_sys] [--profile]
 
     Starts a Wishbone instance in foreground and writes logs to STDOUT.
 
@@ -78,6 +76,8 @@ STDOUT.  The running instance can be stopped gracefully with CTRL+C
                             find Wishbone modules.
       --graph               When enabled starts a webserver on 8088 showing a
                             graph of connected modules and queues.
+      --graph_include_sys   When enabled includes logs and metrics related queues
+                            modules and queues to graph layout.
       --profile             When enabled profiles the process and dumps a profile
                             file in the current directory. The profile file can be
                             loaded in Chrome developer tools.
@@ -210,7 +210,7 @@ Displays the docstring of the requested module.
     .--.--.--|__.-----|  |--|  |--.-----.-----.-----.
     |  |  |  |  |__ --|     |  _  |  _  |     |  -__|
     |________|__|_____|__|__|_____|_____|__|__|_____|
-                                       version 1.2.0
+                                       version 2.1.0
 
     Build composable event pipeline servers with minimal effort.
 
@@ -219,7 +219,7 @@ Displays the docstring of the requested module.
     wishbone.flow.fanout
     ====================
 
-    Version: 1.2.0
+    Version: 2.1.0
 
     Forward each incoming message to all connected queues.
     ------------------------------------------------------
@@ -229,16 +229,14 @@ Displays the docstring of the requested module.
 
         Parameters:
 
-            - deep_copy(bool)(True)
-               |  make sure that each incoming event is submitted
-               |  to the outgoing queues as a seperate event and not a
-               |  reference.
+            n/a
 
 
         Queues:
 
             inbox
              |  Outgoing events.
+
 
 
 
