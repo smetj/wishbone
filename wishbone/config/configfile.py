@@ -86,15 +86,15 @@ class ConfigFile(object):
         self.__addMetricFunnel()
         self.load(filename)
 
-    def addModule(self, name, module, arguments={}, description=""):
+    def addModule(self, name, module, arguments={}, description="", context="configfile"):
 
         if name.startswith('_'):
             raise Exception("Module instance names cannot start with _.")
 
         if name not in self.config["modules"]:
-            self.config["modules"][name] = {'description': description, 'module': module, 'arguments': arguments}
-            self.addConnection(name, "logs", "_logs", name)
-            self.addConnection(name, "metrics", "_metrics", name)
+            self.config["modules"][name] = {'description': description, 'module': module, 'arguments': arguments, 'context': context}
+            self.addConnection(name, "logs", "_logs", name, context="_logs")
+            self.addConnection(name, "metrics", "_metrics", name, context="_metrics")
 
         else:
             raise Exception("Module instance name '%s' is already taken." % (name))
@@ -106,12 +106,12 @@ class ConfigFile(object):
         else:
             raise Exception("Uplook instance name '%s' is already taken." % (name))
 
-    def addConnection(self, source_module, source_queue, destination_module, destination_queue):
+    def addConnection(self, source_module, source_queue, destination_module, destination_queue, context="configfile"):
 
         connected = self.__queueConnected(source_module, source_queue)
 
         if not connected:
-            self.config["routingtable"].append(AttrDict({"source_module": source_module, "source_queue": source_queue, "destination_module": destination_module, "destination_queue": destination_queue}))
+            self.config["routingtable"].append(AttrDict({"source_module": source_module, "source_queue": source_queue, "destination_module": destination_module, "destination_queue": destination_queue, "context": context}))
         else:
             raise Exception("Cannot connect '%s.%s' to '%s.%s'. Reason: %s." % (source_module, source_queue, destination_module, destination_queue, connected))
 
@@ -178,23 +178,23 @@ class ConfigFile(object):
 
     def __addLogFunnel(self):
 
-        self.config["modules"]["_logs"] = {'description': "Centralizes the logs of all modules.", 'module': "wishbone.flow.funnel", "arguments": {}}
+        self.config["modules"]["_logs"] = {'description': "Centralizes the logs of all modules.", 'module': "wishbone.flow.funnel", "arguments": {}, "context": "_logs"}
 
     def __addMetricFunnel(self):
 
-        self.config["modules"]["_metrics"] = {'description': "Centralizes the metrics of all modules.", 'module': "wishbone.flow.funnel", "arguments": {}}
+        self.config["modules"]["_metrics"] = {'description': "Centralizes the metrics of all modules.", 'module': "wishbone.flow.funnel", "arguments": {}, "context": "_metrics"}
 
     def _setupLoggingSTDOUT(self):
 
         if not self.__queueConnected("_logs", "outbox"):
-            self.config["modules"]["_logs_format"] = {'description': "Create a human readable log format.", 'module': "wishbone.encode.humanlogformat", "arguments": {}}
-            self.addConnection("_logs", "outbox", "_logs_format", "inbox")
-            self.config["modules"]["_logs_stdout"] = {'description': "Prints all incoming logs to STDOUT.", 'module': "wishbone.output.stdout", "arguments": {}}
-            self.addConnection("_logs_format", "outbox", "_logs_stdout", "inbox")
+            self.config["modules"]["_logs_format"] = {'description': "Create a human readable log format.", 'module': "wishbone.encode.humanlogformat", "arguments": {}, "context": "_logs"}
+            self.addConnection("_logs", "outbox", "_logs_format", "inbox", context="_logs")
+            self.config["modules"]["_logs_stdout"] = {'description': "Prints all incoming logs to STDOUT.", 'module': "wishbone.output.stdout", "arguments": {}, "context": "_logs"}
+            self.addConnection("_logs_format", "outbox", "_logs_stdout", "inbox", context="_logs")
 
     def _setupLoggingSYSLOG(self):
 
         if not self.__queueConnected("_logs", "outbox"):
-            self.config["modules"]["_logs_syslog"] = {'description': "Writes all incoming messags to syslog.", 'module': "wishbone.output.syslog", "arguments": {}}
-            self.addConnection("_logs", "outbox", "_logs_syslog", "inbox")
+            self.config["modules"]["_logs_syslog"] = {'description': "Writes all incoming messags to syslog.", 'module': "wishbone.output.syslog", "arguments": {}, "context": "_logs"}
+            self.addConnection("_logs", "outbox", "_logs_syslog", "inbox", context="_logs")
 

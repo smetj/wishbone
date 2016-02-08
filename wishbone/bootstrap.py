@@ -68,6 +68,8 @@ class BootStrap():
         debug.add_argument('--id', type=str, dest='identification', default=None, help='An identification string.')
         debug.add_argument('--module_path', type=str, dest='module_path', default=None, help='A comma separated list of directories to search and find Wishbone modules.')
         debug.add_argument('--graph', action="store_true", help='When enabled starts a webserver on 8088 showing a graph of connected modules and queues.')
+        debug.add_argument('--graph_include_sys', action="store_true", help='When enabled includes logs and metrics related queues modules and queues to graph layout.')
+
         debug.add_argument('--profile', action="store_true", help='When enabled profiles the process and dumps a profile file in the current directory. The profile file can be loaded in Chrome developer tools.')
 
         stop = subparsers.add_parser('stop', description="Tries to gracefully stop the Wishbone instance.")
@@ -113,7 +115,7 @@ class Dispatch():
 
         return template.render(version=get_distribution('wishbone').version)
 
-    def debug(self, command, config, instances, queue_size, frequency, identification, module_path, graph, profile):
+    def debug(self, command, config, instances, queue_size, frequency, identification, module_path, graph, graph_include_sys, profile):
         '''
         Handles the Wishbone debug command.
         '''
@@ -138,13 +140,13 @@ class Dispatch():
             if profile:
                 from wishbone.utils.py2devtools import Profiler
                 with Profiler():
-                    Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph).start()
+                    Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph, graph_include_sys=graph_include_sys).start()
             else:
-                Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph).start()
+                Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph, graph_include_sys=graph_include_sys).start()
 
         else:
             for instance in range(instances):
-                processes.append(Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, process=True, graph=graph).start())
+                processes.append(Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, process=True).start())
             pids = [str(p.pid) for p in processes]
             print(("\nInstances started in foreground with pid %s\n" % (", ".join(pids))))
             for proc in processes:

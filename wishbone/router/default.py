@@ -84,7 +84,7 @@ class Default(multiprocessing.Process):
 
     '''
 
-    def __init__(self, router_config, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False, graph=False):
+    def __init__(self, router_config, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False, graph=False, graph_include_sys=False):
 
         if process:
             multiprocessing.Process.__init__(self)
@@ -97,6 +97,7 @@ class Default(multiprocessing.Process):
         self.stdout_logging = stdout_logging
         self.process = process
         self.graph = graph
+        self.graph_include_sys = graph_include_sys
 
         self.module_pool = ModulePool()
 
@@ -238,7 +239,7 @@ class Default(multiprocessing.Process):
         self.__running = True
 
         if self.graph:
-            self.graph = GraphWebserver(self.config, self.module_pool, self.__block)
+            self.graph = GraphWebserver(self.config, self.module_pool, self.__block, self.graph_include_sys)
             self.graph.start()
 
         for module in self.module_pool.list():
@@ -249,14 +250,14 @@ class Default(multiprocessing.Process):
 
 class GraphWebserver():
 
-    def __init__(self, config, module_pool, block):
+    def __init__(self, config, module_pool, block, include_sys):
         self.config = config
         self.module_pool = module_pool
         self.block = block
         self.js_data = VisJSData()
 
         for c in self.config["routingtable"]:
-            if self.config["modules"][c.source_module]["context"] not in ["_logs", "_metrics"] and self.config["modules"][c.destination_module]["context"] not in ["_logs", "_metrics"]:
+            if self.__include(include_sys, self.config["modules"][c.source_module]["context"], self.config["modules"][c.destination_module]["context"]):
                 self.js_data.addModule(instance_name=c.source_module,
                                        module_name=self.config["modules"][c.source_module]["module"],
                                        description=self.module_pool.getModule(c.source_module).description)
@@ -268,6 +269,15 @@ class GraphWebserver():
                 self.js_data.addQueue(c.source_module, c.source_queue)
                 self.js_data.addQueue(c.destination_module, c.destination_queue)
                 self.js_data.addEdge("%s.%s" % (c.source_module, c.source_queue), "%s.%s" % (c.destination_module, c.destination_queue))
+
+    def __include(self, include_sys, source_module_context, destination_module_context):
+
+        if include_sys:
+            return True
+        elif source_module_context not in ["_logs", "_metrics"] and destination_module_context not in ["_logs", "_metrics"]:
+            return True
+        else:
+            return False
 
     def start(self):
 
