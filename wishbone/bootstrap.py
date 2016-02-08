@@ -59,7 +59,6 @@ class BootStrap():
         start.add_argument('--frequency', type=int, dest='frequency', default=1, help='The metric frequency.')
         start.add_argument('--id', type=str, dest='identification', default=None, help='An identification string.')
         start.add_argument('--module_path', type=str, dest='module_path', default=None, help='A comma separated list of directories to search and find Wishbone modules.')
-        start.add_argument('--graph', action="store_true", help='When enabled starts a webserver on 8088 showing a graph of connected modules and queues.')
 
         debug = subparsers.add_parser('debug', description="Starts a Wishbone instance in foreground and writes logs to STDOUT.")
         debug.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
@@ -190,7 +189,7 @@ class Dispatch():
         except Exception as err:
             print("Failed to load module %s.%s.%s. Reason: %s" % (category, group, module, err))
 
-    def start(self, command, config, instances, pid, queue_size, frequency, identification, module_path, graph):
+    def start(self, command, config, instances, pid, queue_size, frequency, identification, module_path):
         '''
         Handles the Wishbone start command.
         '''
@@ -207,11 +206,11 @@ class Dispatch():
                 sys.stdout.write("\nWishbone instance started with pid %s\n" % (os.getpid()))
                 sys.stdout.flush()
                 pid_file.create([os.getpid()])
-                Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, graph=graph).start()
+                Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False).start()
             else:
                 processes = []
                 for instance in range(instances):
-                    processes.append(Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, process=True, graph=graph).start())
+                    processes.append(Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, process=True).start())
                 pids = [str(p.pid) for p in processes]
                 print(("\n%s Wishbone instances started in background with pid %s\n" % (len(pids), ", ".join(pids))))
                 pid_file.create(pids)
