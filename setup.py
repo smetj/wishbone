@@ -68,7 +68,7 @@ if os.environ.get("READTHEDOCS", False):
 
 else:
     dependency_links = [
-        'https://github.com/smetj/pyjq/tree/master#egg=pyjq-1.1'
+        'https://github.com/smetj/pyjq/tarball/master#egg=pyjq-1.1'
     ]
 
 # Deps pulled in by other modules
