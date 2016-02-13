@@ -113,6 +113,7 @@ class AMQPOut(Actor):
         self.channel.basic_publish(message,
                                    exchange=self.kwargs.exchange,
                                    routing_key=self.kwargs.routing_key)
+        sleep(0)
 
     def setupConnectivity(self):
 
