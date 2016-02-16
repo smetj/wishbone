@@ -188,7 +188,7 @@ wishbone.flow.fanout
 --------
 
 wishbone.flow.jq
--------------------
+----------------
 .. autoclass:: wishbone.module.wb_jq.JQ
 
 --------

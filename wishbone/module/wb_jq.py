@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  jq.py
+#  wb_jq.py
 #
 #  Copyright 2016 Jelle Smet <development@smetj.net>
 #
