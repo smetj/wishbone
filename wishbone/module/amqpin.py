@@ -84,6 +84,9 @@ class AMQPIn(Actor):
         - queue_declare(bool)(true)
            |  Whether to actually declare the queue.
 
+        - queue_lazy(bool)(false)
+            |  When true <queue> is a lazy queue.
+
         - routing_key(str)("")
            |  The routing key to use in case of a "topic" exchange.
            | When the exchange is type "direct" the routing key is always equal
@@ -111,7 +114,7 @@ class AMQPIn(Actor):
     def __init__(self, actor_config, host="localhost", port=5672, vhost="/", user="guest", password="guest",
                  exchange="", exchange_type="direct", exchange_durable=False, exchange_auto_delete=True, exchange_passive=False,
                  queue="wishbone", queue_durable=False, queue_exclusive=False, queue_auto_delete=True, queue_declare=True,
-                 routing_key="", prefetch_count=1, no_ack=False):
+                 routing_key="", prefetch_count=1, no_ack=False, queue_lazy=False):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("outbox")
@@ -121,6 +124,9 @@ class AMQPIn(Actor):
         self.connection = None
 
     def preHook(self):
+        self.__arguments = {}
+        if self.kwargs.queue_lazy:
+            self.__arguments["x-queue-mode"] = "lazy"
         self.sendToBackground(self.drain)
         self.sendToBackground(self.handleAcknowledgements)
         self.sendToBackground(self.handleAcknowledgementsCancel)
@@ -134,18 +140,41 @@ class AMQPIn(Actor):
 
         while self.loop():
             try:
-                # if not hasattr(self.connection, 'is_alive') or (hasattr(self.connection, 'is_alive') and not self.connection.is_alive()):
-                self.connection = amqp_connection(host=self.kwargs.host, port=self.kwargs.port, virtual_host=self.kwargs.vhost, userid=self.kwargs.user, password=self.kwargs.password)
+                self.connection = amqp_connection(
+                                    host=self.kwargs.host,
+                                    port=self.kwargs.port,
+                                    virtual_host=self.kwargs.vhost,
+                                    userid=self.kwargs.user,
+                                    password=self.kwargs.password
+                                    )
                 self.channel = self.connection.channel()
+
                 if self.kwargs.exchange != "":
-                    self.channel.exchange_declare(self.kwargs.exchange, self.kwargs.exchange_type, durable=self.kwargs.exchange_durable, auto_delete=self.kwargs.exchange_auto_delete, passive=self.kwargs.exchange_passive)
+                    self.channel.exchange_declare(
+                        self.kwargs.exchange,
+                        self.kwargs.exchange_type,
+                        durable=self.kwargs.exchange_durable,
+                        auto_delete=self.kwargs.exchange_auto_delete,
+                        passive=self.kwargs.exchange_passive
+                    )
                     self.logging.debug("Declared exchange %s." % (self.kwargs.exchange))
 
                 if self.kwargs.queue_declare:
-                    self.channel.queue_declare(self.kwargs.queue, durable=self.kwargs.queue_durable, exclusive=self.kwargs.queue_exclusive, auto_delete=self.kwargs.queue_auto_delete)
+                    self.channel.queue_declare(
+                        self.kwargs.queue,
+                        durable=self.kwargs.queue_durable,
+                        exclusive=self.kwargs.queue_exclusive,
+                        auto_delete=self.kwargs.queue_auto_delete,
+                        arguments=self.__arguments
+                    )
                     self.logging.debug("Declared queue %s." % (self.kwargs.queue))
+
                 if self.kwargs.exchange != "":
-                    self.channel.queue_bind(self.kwargs.queue, self.kwargs.exchange, routing_key=self.kwargs.routing_key)
+                    self.channel.queue_bind(
+                        self.kwargs.queue,
+                        self.kwargs.exchange,
+                        routing_key=self.kwargs.routing_key
+                    )
                     self.logging.debug("Bound queue %s to exchange %s." % (self.kwargs.queue, self.kwargs.exchange))
 
                 self.channel.basic_qos(prefetch_size=0, prefetch_count=self.kwargs.prefetch_count, a_global=False)
@@ -163,6 +192,7 @@ class AMQPIn(Actor):
         while self.loop():
             try:
                 self.connection.drain_events()
+                sleep(0)
             except Exception as err:
                 self.logging.error("Problem connecting to broker.  Reason: %s" % (err))
                 self.setupConnectivity()

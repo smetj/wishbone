@@ -75,7 +75,10 @@ class AMQPOut(Actor):
            |  Declare a durable exchange.
 
         - queue(str)("")
-           |  The queue to declare and to submit messages to.
+           |  The queue to declare and bind to <exchange>. This will also the
+           |  the destination queue of the submitted messages unless
+           |  <routing_key> is set to another value and <exchange_type> is
+           |  "topic".
 
         - queue_durable(bool)(false)
            |  Declare a durable queue.
@@ -85,6 +88,15 @@ class AMQPOut(Actor):
 
         - queue_auto_delete(bool)(true)
            |  Whether to autodelete the queue.
+
+        - queue_lazy(bool)(false)
+            |  When true <queue> is a lazy queue.
+
+        - routing_key(str)("")
+           |  The routing key to use when submitting messages.
+
+        - delivery_mode(int)(1)
+           |  Sets the delivery mode of the messages.
 
 
     Queues:
@@ -97,7 +109,7 @@ class AMQPOut(Actor):
                  host="localhost", port=5672, vhost="/", user="guest", password="guest",
                  exchange="", exchange_type="direct", exchange_durable=False,
                  queue="", queue_durable=False, queue_exclusive=False, queue_auto_delete=True,
-                 routing_key=""):
+                 routing_key="", delivery_mode=1, queue_lazy=False):
 
         Actor.__init__(self, actor_config)
 
@@ -105,11 +117,20 @@ class AMQPOut(Actor):
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
+        self.__arguments = {}
+        if self.kwargs.queue_lazy:
+            self.__arguments["x-queue-mode"] = "lazy"
         self.sendToBackground(self.setupConnectivity)
 
     def consume(self, event):
 
-        message = basic_message.Message(body=str(event.get(self.kwargs.selection)))
+        data = str(event.get(self.kwargs.selection))
+
+        message = basic_message.Message(
+                    body=data,
+                    delivery_mode=self.kwargs.delivery_mode
+                    )
+
         self.channel.basic_publish(message,
                                    exchange=self.kwargs.exchange,
                                    routing_key=self.kwargs.routing_key)
@@ -128,13 +149,29 @@ class AMQPOut(Actor):
                 self.channel = self.connection.channel()
 
                 if self.kwargs.exchange != "":
-                    self.channel.exchange_declare(self.kwargs.exchange, self.kwargs.exchange_type, durable=self.kwargs.exchange_durable)
+                    self.channel.exchange_declare(
+                        self.kwargs.exchange,
+                        self.kwargs.exchange_type,
+                        durable=self.kwargs.exchange_durable
+                    )
                     self.logging.debug("Declared exchange %s." % (self.kwargs.exchange))
+
                 if self.kwargs.queue != "":
-                    self.channel.queue_declare(self.kwargs.queue, durable=self.kwargs.queue_durable, exclusive=self.kwargs.queue_exclusive, auto_delete=self.kwargs.queue_auto_delete)
+                    self.channel.queue_declare(
+                        self.kwargs.queue,
+                        durable=self.kwargs.queue_durable,
+                        exclusive=self.kwargs.queue_exclusive,
+                        auto_delete=self.kwargs.queue_auto_delete,
+                        arguments=self.__arguments
+                    )
                     self.logging.debug("Declared queue %s." % (self.kwargs.queue))
+
                 if self.kwargs.exchange != "" and self.kwargs.queue != "":
-                    self.channel.queue_bind(self.kwargs.queue, self.kwargs.exchange, routing_key=self.kwargs.routing_key)
+                    self.channel.queue_bind(
+                        self.kwargs.queue,
+                        self.kwargs.exchange,
+                        routing_key=self.kwargs.routing_key
+                    )
                     self.logging.debug("Bound queue %s to exchange %s." % (self.kwargs.queue, self.kwargs.exchange))
 
                 self.logging.info("Connected to broker.")
