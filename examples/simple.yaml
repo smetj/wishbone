@@ -2,8 +2,6 @@
 lookups:
   randomword:
     module: wishbone.lookup.randomword
-  randombool:
-    module: wishbone.lookup.randombool
   event:
     module: wishbone.lookup.event
 
@@ -18,8 +16,8 @@ modules:
   modify:
     module: wishbone.function.modify
     arguments:
-      set:
-        "@tmp.modify.greeting": "Hello, today's word is: "
+      expressions:
+        - set: ["Hello, a random world from the English dictionary is: ", "@tmp.modify.greeting"]
 
   output:
     module: wishbone.output.stdout
