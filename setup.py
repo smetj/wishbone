@@ -64,7 +64,7 @@ install_requires = ['gevent==1.1rc4',
 
 if os.environ.get("READTHEDOCS", False):
     dependency_links = []
-    # install_requires.remove('pyjq==1.0')
+    install_requires.remove('pyjq==1.0')
 
 else:
     dependency_links = [
