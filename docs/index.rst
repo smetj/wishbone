@@ -22,7 +22,7 @@ connected to each other:
 .. image:: intro.png
     :align: right
 
-.. literalinclude:: examples/test_setup.yaml
+.. literalinclude:: static/test_setup.yaml
    :language: yaml
 
 
@@ -31,32 +31,42 @@ Running a server:
 .. code-block:: sh
 
     [smetj@dev-container ~]$ wishbone debug --config simple.yaml
-    2014-08-06T23:17:41 wishbone[6609]: debug metrics_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-08-06T23:17:41 wishbone[6609]: debug metrics_funnel: preHook() found, executing
-    2014-08-06T23:17:41 wishbone[6609]: debug logs_funnel: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-08-06T23:17:41 wishbone[6609]: debug logs_funnel: preHook() found, executing
-    2014-08-06T23:17:41 wishbone[6609]: debug mixing: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-08-06T23:17:41 wishbone[6609]: debug mixing: preHook() found, executing
-    2014-08-06T23:17:41 wishbone[6609]: debug input: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-08-06T23:17:41 wishbone[6609]: debug input: preHook() found, executing
-    2014-08-06T23:17:41 wishbone[6609]: debug output1: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-08-06T23:17:41 wishbone[6609]: debug output2: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-08-06T23:17:41 wishbone[6609]: debug log_stdout: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-08-06T23:17:41 wishbone[6609]: debug log_format: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-08-06T23:17:41 wishbone[6609]: debug syslog: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2014-08-06T23:17:41 wishbone[6609]: debug syslog: preHook() found, executing
-    I am number one: test
-    I am number two: test
-    I am number one: test
-    I am number two: test
-    I am number one: test
-    I am number two: test
-    I am number one: test
-    ^C2014-08-06T23:18:09 wishbone[6609]: debug syslog: postHook() found, executing
-    2014-08-06T23:18:09 wishbone[6609]: debug syslog: postHook() found, executing
-    2014-08-06T23:18:09 wishbone[6609]: informational input: Stopped producing events.
-    [smetj@dev-container ~]$
-
+    Instance started in foreground with pid 5434
+    2016-02-17T20:42:59 wishbone[5434]: debug output2: Connected queue output2.logs to _logs.output2
+    2016-02-17T20:42:59 wishbone[5434]: debug output2: Connected queue output2.metrics to _metrics.output2
+    2016-02-17T20:42:59 wishbone[5434]: debug output2: preHook() found, executing
+    2016-02-17T20:42:59 wishbone[5434]: debug output2: Initialized.
+    2016-02-17T20:42:59 wishbone[5434]: debug output2: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2016-02-17T20:42:59 wishbone[5434]: debug output1: Connected queue output1.logs to _logs.output1
+    2016-02-17T20:42:59 wishbone[5434]: debug output1: Connected queue output1.metrics to _metrics.output1
+    2016-02-17T20:42:59 wishbone[5434]: debug output1: preHook() found, executing
+    2016-02-17T20:42:59 wishbone[5434]: debug output1: Initialized.
+    2016-02-17T20:42:59 wishbone[5434]: debug output1: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2016-02-17T20:42:59 wishbone[5434]: debug input: Connected queue input.logs to _logs.input
+    2016-02-17T20:42:59 wishbone[5434]: debug input: Connected queue input.metrics to _metrics.input
+    2016-02-17T20:42:59 wishbone[5434]: debug input: Connected queue input.outbox to mixing.inbox
+    2016-02-17T20:42:59 wishbone[5434]: debug input: preHook() found, executing
+    2016-02-17T20:42:59 wishbone[5434]: debug input: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    2016-02-17T20:42:59 wishbone[5434]: debug mixing: Connected queue mixing.logs to _logs.mixing
+    2016-02-17T20:42:59 wishbone[5434]: debug mixing: Connected queue mixing.metrics to _metrics.mixing
+    2016-02-17T20:42:59 wishbone[5434]: debug mixing: Connected queue mixing.one to output1.inbox
+    2016-02-17T20:42:59 wishbone[5434]: debug mixing: Connected queue mixing.two to output2.inbox
+    2016-02-17T20:42:59 wishbone[5434]: debug mixing: preHook() found, executing
+    2016-02-17T20:42:59 wishbone[5434]: debug mixing: Started with max queue size of 100 events and metrics interval of 1 seconds.
+    I am output #2: seawater's
+    I am output #1: hinders
+    I am output #2: stigmatism
+    I am output #1: damnedest
+    I am output #2: ejects
+    I am output #1: legates
+    I am output #2: lobos
+    I am output #1: punctures
+    I am output #2: port
+    I am output #1: condominium's
+    I am output #2: banqueted
+    I am output #1: bucker
+    I am output #2: efficiencies
+    ... snip ...
 
 .. toctree::
     :hidden:
