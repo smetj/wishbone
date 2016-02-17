@@ -22,7 +22,7 @@
 #
 #
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 import sys
 import os
@@ -57,18 +57,18 @@ install_requires = ['gevent==1.1rc4',
                     'elasticsearch==1.6.0',
                     'importlib==1.0.3',
                     'uplook==0.4.1',
-                    'pyjq==1.0']
+                    'pyjq==1.1']
 
 # Dirty hack to make readthedocs build the docs
 # For some reason mocking out jq as documented is not working
 
 if os.environ.get("READTHEDOCS", False):
     dependency_links = []
-    install_requires.remove('pyjq==1.0')
+    install_requires.remove('pyjq==1.1')
 
 else:
     dependency_links = [
-        'https://github.com/smetj/pyjq/tarball/master#egg=pyjq-1.0'
+        'https://github.com/smetj/pyjq/tarball/master#egg=pyjq-1.1'
     ]
 
 # Deps pulled in by other modules
@@ -132,6 +132,7 @@ setup(
     provides=[],
     install_requires=install_requires,
     namespace_packages=[],
+    packages=find_packages(),
     package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/sse.html', 'data/banner.tmpl']},
     zip_safe=False,
     entry_points={
