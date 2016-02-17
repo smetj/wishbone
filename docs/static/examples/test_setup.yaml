@@ -1,0 +1,32 @@
+lookups:
+  randomword:
+    module: wishbone.lookup.randomword
+
+modules:
+  input:
+    module: wishbone.input.testevent
+    description: I generate a random word.
+    arguments:
+      message: ~~randomword()
+
+  mixing:
+    module: wishbone.flow.roundrobin
+    description: I roundrobin incoming messages
+
+  output1:
+    module: wishbone.output.stdout
+    description: I write incoming messages to stdout.
+    arguments:
+      prefix: "I am output #1: "
+
+  output2:
+    module: wishbone.output.stdout
+    description: I write incoming messages to stdout.
+    arguments:
+      prefix: "I am output #2: "
+
+routingtable:
+  - input.outbox  -> mixing.inbox
+  - mixing.one    -> output1.inbox
+  - mixing.two    -> output2.inbox
+...

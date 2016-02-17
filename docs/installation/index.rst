@@ -17,7 +17,6 @@ Wishbone works on python 2.7+ and PyPy 2.3.1+
     python
     source
     docker
-    verify installation
 
 
 .. _semantic versioning: http://semver.org/
