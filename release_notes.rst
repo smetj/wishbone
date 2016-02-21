@@ -1,6 +1,14 @@
 Wishbone changelog
 ==================
 
+Version 2.1.1
+~~~~~~~~~~~~~
+
+Feature:
+
+- Added wishbone.input.fresh
+
+
 Version 2.1.0
 ~~~~~~~~~~~~~
 
