@@ -167,6 +167,7 @@ setup(
             'amqp = wishbone.module.amqpin:AMQPIn',
             'dictgenerator = wishbone.module.dictgenerator:DictGenerator',
             'disk = wishbone.module.diskin:DiskIn',
+            'fresh = wishbone.module.fresh:Fresh',
             'httpclient = wishbone.module.httpinclient:HTTPInClient',
             'httpserver = wishbone.module.httpinserver:HTTPInServer',
             'namedpipe = wishbone.module.namedpipein:NamedPipeIn',
