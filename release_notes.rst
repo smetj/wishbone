@@ -7,6 +7,7 @@ Version 2.1.1
 Feature:
 
 - Added wishbone.input.fresh
+- Added support for default value in copy command of wishbone.function.modify
 
 
 Version 2.1.0
