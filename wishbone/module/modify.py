@@ -77,10 +77,11 @@ class Modify(Actor):
 
       - **copy**::
 
-          copy: [<source_key>, <destination_key>]
+          copy: [<source_key>, <destination_key>, <default_value>]
 
-        Copies and overwrites the content of *<source_key>* to
-        *<destination_key>*.
+        Copies *<source_key>* to *<destination_key>* and overwrites
+        *<destination_key>* when it exists.  If <source_key> does not exist,
+        <default_value> is taken instead.
 
 
       - **del_item**::
@@ -193,9 +194,12 @@ class Modify(Actor):
         event.get(key).append(item)
         return event
 
-    def command_copy(self, event, source, destination):
+    def command_copy(self, event, source, destination, default_value):
 
-        event.copy(source, destination)
+        try:
+            event.copy(source, destination)
+        except KeyError:
+            event.set(default_value, destination)
         return event
 
     def command_del_item(self, event, item, key):
