@@ -96,6 +96,24 @@ def test_file_load():
     assert getter(match.pool.queue.file).get()["file"] == "one two three"
     shutil.rmtree('/tmp/wishbone_tests')
 
+def test_additinal_values():
+
+    rule = {"regex": {
+        "condition": [
+            {"regex": "re:.*?two.*"}
+        ],
+        "queue": [
+            {"regex": {
+                "one": 1
+                }
+            }
+        ]
+    }}
+
+    actor = generate_actor(rule)
+    e = Event({"regex": "one two three"})
+    actor.pool.queue.inbox.put(e)
+    assert getter(actor.pool.queue.regex).get("@tmp.match.one") == 1
 
 def test_regex():
 
