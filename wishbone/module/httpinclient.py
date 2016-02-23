@@ -52,6 +52,9 @@ class HTTPInClient(Actor):
         - interval(int)(60)
            |  The interval in seconds between each request.
 
+        - allow_redirects(bool(False)
+           |  Allow redirects.
+
 
    Queues:
 
@@ -65,7 +68,7 @@ class HTTPInClient(Actor):
 
     '''
 
-    def __init__(self, actor_config, url="http://localhost", username=None, password=None, interval=60):
+    def __init__(self, actor_config, url="http://localhost", username=None, password=None, interval=60, allow_redirects=False):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
 
@@ -80,7 +83,7 @@ class HTTPInClient(Actor):
         while self.loop():
 
             try:
-                response = requests.get(url, auth=(self.kwargs.username, self.kwargs.password))
+                response = requests.get(url, auth=(self.kwargs.username, self.kwargs.password), allow_redirects=self.kwargs.allow_redirects)
             except Exception as err:
                 self.logging.warn("Problem requesting resource.  Reason: %s" % (err))
                 sleep(1)
