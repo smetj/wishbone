@@ -93,7 +93,7 @@ class Match(Actor):
 
 
     This example combines multiple conditions and stores 4 variables under
-    event["header"][self.name] while submitting the event to the modules'
+    @tmp.<self.name> while submitting the event to the modules'
     **email** queue.
 
     ::
@@ -219,14 +219,13 @@ class Match(Actor):
             for rule in self.__active_rules:
                 e = deepcopy(event)
                 if self.evaluateCondition(self.__active_rules[rule]["condition"], e.get()):
-                    e.set('@tmp.%s.rule' % (self.name), rule)
+                    e.set(rule, '@tmp.%s.rule' % (self.name))
                     for queue in self.__active_rules[rule]["queue"]:
                         event_copy = deepcopy(e)
                         for name in queue:
                             if queue[name] is not None:
                                 for key, value in queue[name].iteritems():
-                                    event.set(value, '@tmp.%s.%s' % (self.name, key))
-                                # event_copy["header"][self.name].update(queue[name])
+                                    event_copy.set(value, '@tmp.%s.%s' % (self.name, key))
                             self.submit(event_copy, self.pool.getQueue(name))
                 else:
                     e.set(rule, "@tmp.%s.rule" % (self.name))
