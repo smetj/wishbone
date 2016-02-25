@@ -296,10 +296,11 @@ class JQ(Actor):
                         self.logging.error("Skipped invalid jq expression '%s'. Reason: %s" % (condition["name"], err.message.replace("\n", " -> ")))
                         continue
 
-                    if isinstance(result, bool):
+                    if isinstance(result, bool) or result is None:
                         if result:
                             matched = True
                             e = event.clone()
+                            e.set("@tmp.%s.rule" % (self.name), condition["name"])
                             if "payload" in condition:
                                 for key, value in condition["payload"].iteritems():
                                     e.set(value, key)
