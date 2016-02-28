@@ -1,7 +1,7 @@
 Wishbone changelog
 ==================
 
-Version 2.1.0
+Version 1.2.0
 ~~~~~~~~~~~~~
 
 Feature:
