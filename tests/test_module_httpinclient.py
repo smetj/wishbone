@@ -25,15 +25,17 @@
 from wishbone.module.httpinclient import HTTPInClient
 from wishbone.actor import ActorConfig
 from utils import getter
+from gevent import sleep
 
 
-def test_module_jsonencode():
+def test_module_httpinclient():
 
-    actor_config = ActorConfig('jsonencode', 100, 1, {}, "")
-    http = HTTPInClient(actor_config, url="http://www.google.com", interval=1)
+    actor_config = ActorConfig('httpinclient', 100, 1, {}, "")
+    http = HTTPInClient(actor_config, url="http://www.google.com", interval=1, allow_redirects=True)
 
     http.pool.queue.outbox.disableFallThrough()
     http.start()
 
+    sleep(3)
     one = getter(http.pool.queue.outbox)
     assert "Google" in one.get()
