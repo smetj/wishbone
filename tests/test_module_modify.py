@@ -50,13 +50,20 @@ def test_module_add_item():
 
 def test_module_copy():
 
-    a = get_actor({"copy": ["@data", "@tmp.copy"]})
+    a = get_actor({"copy": ["@data", "@tmp.copy", "n/a"]})
     e = Event({"greeting": "hi"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
     assert "hi" == one.get('@tmp.copy')["greeting"]
     assert id(one.get("@data")) != id(one.get("@tmp.copy"))
 
+def test_module_copy_default():
+
+    a = get_actor({"copy": ["does.not.exist", "@tmp.copy", "default"]})
+    e = Event({"greeting": "hi"})
+    a.pool.queue.inbox.put(e)
+    one = getter(a.pool.queue.outbox)
+    assert "default" == one.get('@tmp.copy')
 
 def test_module_del_item():
 

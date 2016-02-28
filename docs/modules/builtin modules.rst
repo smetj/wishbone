@@ -23,6 +23,12 @@ wishbone.input.disk
 
 --------
 
+wishbone.input.fresh
+-------------------
+.. autoclass:: wishbone.module.fresh.Fresh
+
+--------
+
 wishbone.input.gearman
 ----------------------
 .. autoclass:: wishbone.module.gearmanin.GearmanIn

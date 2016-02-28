@@ -237,14 +237,17 @@ class Event(object):
         /deepcopy-is-a-pig-for-simple-data/
         '''
 
-        out = dict().fromkeys(org)
-        for k, v in org.iteritems():
-            try:
-                out[k] = v.copy()   # dicts, sets
-            except AttributeError:
+        if isinstance(org, dict):
+            out = dict().fromkeys(org)
+            for k, v in org.iteritems():
                 try:
-                    out[k] = v[:]   # lists, tuples, strings, unicode
-                except TypeError:
-                    out[k] = v      # ints
+                    out[k] = v.copy()   # dicts, sets
+                except AttributeError:
+                    try:
+                        out[k] = v[:]   # lists, tuples, strings, unicode
+                    except TypeError:
+                        out[k] = v      # ints
 
-        return out
+            return out
+        else:
+            return org
