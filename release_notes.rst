@@ -13,6 +13,7 @@ Features:
 Bugs:
 
 - Misc event data handling bugs.
+- Fixed bug in
 
 Version 2.1.0
 ~~~~~~~~~~~~~
