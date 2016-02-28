@@ -1,10 +1,24 @@
 Wishbone changelog
 ==================
 
-Version 1.2.0
+Version 2.1.1
 ~~~~~~~~~~~~~
 
-Feature:
+Features:
+
+- Added wishbone.input.fresh
+- Added support for default value in copy command of wishbone.function.modify
+- Added allow_follow to wishbone.input.httpinclient
+
+Bugs:
+
+- Misc event data handling bugs.
+- Fixed bug in
+
+Version 2.1.0
+~~~~~~~~~~~~~
+
+Features:
 
 - New internal data format.
 - Adding SO_REUSEPORT for wishbone.input.httpserver

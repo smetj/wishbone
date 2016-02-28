@@ -69,6 +69,32 @@ def test_module_jq_basic():
     assert one.get() == {"greeting": "hello"}
 
 
+def test_module_jq_payload():
+
+    condition = {
+        "name": "test",
+        "expression": '.greeting | test( "hello")',
+        "queue": "outbox",
+        "payload": {
+            '@tmp.one': 1
+        }
+    }
+
+    actor_config = ActorConfig('jq', 100, 1, {}, "")
+    jq = JQ(actor_config, conditions=[condition])
+
+    jq.pool.createQueue('outbox')
+    jq.pool.queue.inbox.disableFallThrough()
+    jq.pool.queue.outbox.disableFallThrough()
+    jq.start()
+
+    e = Event({"greeting": "hello"})
+
+    jq.pool.queue.inbox.put(e)
+    one = getter(jq.pool.queue.outbox)
+    assert one.get('@tmp.one') == 1
+
+
 def test_module_jq_bad_jq_expression():
 
     condition = {
