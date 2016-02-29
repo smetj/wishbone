@@ -34,9 +34,9 @@ if "PyPy" in sys.version:
     os.environ["with_gmp"] = "no"
 
 PROJECT = 'wishbone'
-VERSION = '2.1.1'
+VERSION = '2.1.2'
 
-install_requires = ['gevent==1.1rc4',
+install_requires = ['gevent==1.1rc5',
                     'greenlet==0.4.9',
                     'argparse==1.3.0',
                     'prettytable==0.7.2',
