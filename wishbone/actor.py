@@ -107,7 +107,6 @@ class Actor():
         return Wishbone_Event()
 
     def doEventLookup(self, name):
-        (n, t, k) = name.split('.')
 
         try:
             return self.current_event.get(name)
