@@ -40,23 +40,29 @@ class HTTPOutClient(Actor):
            |  The part of the event to submit externally.
            |  Use an empty string to refer to the complete event.
 
-        - method(str)("PUT")
+        - method(str)("PUT")*
            |  The http method to use. PUT/POST
 
-        - content_type(str)("application/json")
+        - content_type(str)("application/json")*
            |  The content type to use.
 
-        - accept(str)("text/plain")
+        - accept(str)("text/plain")*
            |  The accept value to use.
 
         - url(str)("http://localhost")
            |  The url to submit the data to
 
-        - username(str)
+        - username(str)*
            |  The username to authenticate
 
-        - password(str)
+        - password(str)*
            |  The password to authenticate
+
+        - allow_redirects(bool)(False)
+           |  Allow redirects.
+
+        - timeout(float)(10)*
+           |  The maximum amount of time in seconds the request is allowed to take.
 
 
     Queues:
@@ -68,7 +74,7 @@ class HTTPOutClient(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, config, selection="@data", method="PUT", content_type="application/json", accept="text/plain", url="https://localhost", username=None, password=None):
+    def __init__(self, config, selection="@data", method="PUT", content_type="application/json", accept="text/plain", url="https://localhost", username=None, password=None, timeout=10):
 
         Actor.__init__(self, config)
         self.pool.createQueue("inbox")
@@ -98,8 +104,23 @@ class HTTPOutClient(Actor):
 
     def __put(self, data):
 
-        return requests.put(self.kwargs.url, data=data, auth=(self.kwargs.username, self.kwargs.password), headers={'Content-type': self.kwargs.content_type, 'Accept': self.kwargs.accept})
+        return requests.put(
+          self.kwargs.url,
+          data=data,
+          auth=(self.kwargs.username, self.kwargs.password),
+          headers={'Content-type': self.kwargs.content_type, 'Accept': self.kwargs.accept},
+          allow_redirects=self.kwargs.allow_redirects,
+          timeout=self.kwargs.timeout
+        )
 
     def __post(self, data):
 
-        return requests.post(self.kwargs.url, data=data, auth=(self.kwargs.username, self.kwargs.password), headers={'Content-type': self.kwargs.content_type, 'Accept': self.kwargs.accept})
+        return requests.post(
+          self.kwargs.url,
+          data=data,
+          auth=(self.kwargs.username, self.kwargs.password),
+          headers={'Content-type': self.kwargs.content_type, 'Accept': self.kwargs.accept},
+          allow_redirects=self.kwargs.allow_redirects,
+          timeout=self.kwargs.timeout
+        )
+
