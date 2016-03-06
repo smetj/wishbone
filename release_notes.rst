@@ -4,7 +4,9 @@ Wishbone changelog
 Version 2.1.2
 ~~~~~~~~~~~~~
 
+Features:
 
+- Added timeout and redirect support for wishbone.output.
 
 Version 2.1.1
 ~~~~~~~~~~~~~
@@ -13,7 +15,8 @@ Features:
 
 - Added wishbone.input.fresh
 - Added support for default value in copy command of wishbone.function.modify
-- Added allow_follow to wishbone.input.httpinclient
+- Added allow_follow and time support to wishbone.input.httpclient
+- Added allow_follow and time support to wishbone.output.http
 
 Bugs:
 
