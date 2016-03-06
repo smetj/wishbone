@@ -52,8 +52,11 @@ class HTTPInClient(Actor):
         - interval(int)(60)
            |  The interval in seconds between each request.
 
-        - allow_redirects(bool(False)
+        - allow_redirects(bool)(False)
            |  Allow redirects.
+
+        - timeout(float)(10)
+           |  The maximum amount of time in seconds the request is allowed to take.
 
 
    Queues:
@@ -68,7 +71,7 @@ class HTTPInClient(Actor):
 
     '''
 
-    def __init__(self, actor_config, url="http://localhost", username=None, password=None, interval=60, allow_redirects=False):
+    def __init__(self, actor_config, url="http://localhost", username=None, password=None, interval=60, allow_redirects=False, timeout=10):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
 
@@ -81,11 +84,17 @@ class HTTPInClient(Actor):
 
     def scheduler(self, url):
         while self.loop():
-
             try:
-                response = requests.get(url, auth=(self.kwargs.username, self.kwargs.password), allow_redirects=self.kwargs.allow_redirects)
+                response = requests.get(
+                    url,
+                    auth=(self.kwargs.username, self.kwargs.password),
+                    allow_redirects=self.kwargs.allow_redirects,
+                    timeout=self.kwargs.timeout
+                )
+            except requests.exceptions.Timeout:
+                self.logging.warning("Timeout occurred fetching resource.")
             except Exception as err:
-                self.logging.warn("Problem requesting resource.  Reason: %s" % (err))
+                self.logging.warning("Problem requesting resource.  Reason: %s" % (err))
                 sleep(1)
             else:
                 event = Event(response.text)

@@ -39,3 +39,20 @@ def test_module_httpinclient():
     sleep(3)
     one = getter(http.pool.queue.outbox)
     assert "Google" in one.get()
+
+
+def test_module_httpinclientTimeout():
+
+    actor_config = ActorConfig('httpinclient', 100, 1, {}, "")
+    http = HTTPInClient(actor_config, url="http://www.github.com", interval=1, allow_redirects=True, timeout=0.001)
+
+    http.pool.queue.outbox.disableFallThrough()
+    http.start()
+
+    sleep(3)
+    try:
+        getter(http.pool.queue.failed)
+    except Exception:
+        assert True
+    else:
+        assert False
