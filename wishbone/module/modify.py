@@ -33,6 +33,7 @@ VALID_EXPRESSIONS = ["add_item",
                      "delete",
                      "extract",
                      "lowercase",
+                     "replace",
                      "set",
                      "template",
                      "uppercase",
@@ -123,6 +124,13 @@ class Modify(Actor):
           lowercase: [<key>]
 
         Turns the string stored under *<key>* to lowercase.
+
+
+      - **replace**::
+
+          replace: [<regex>, <value>, <key>]
+
+        replaces every occurance of <regex> of the value stored in <key> with <value>
 
 
       - **set**::
@@ -222,6 +230,12 @@ class Modify(Actor):
     def command_lowercase(self, event, key):
 
         event.set(event.get(key).lower(), key)
+        return event
+
+    def command_replace(self, event, regex, value, key):
+
+        result = re.sub(regex, value, event.get(key))
+        event.set(result, key)
         return event
 
     def command_set(self, event, value, key):
