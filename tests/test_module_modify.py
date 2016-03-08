@@ -136,3 +136,11 @@ def test_module_time():
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
 
+
+def test_module_replace():
+
+    a = get_actor({"replace": ["\d", "X", "@data"]})
+    e = Event("hello 123 hello")
+    a.pool.queue.inbox.put(e)
+    one = getter(a.pool.queue.outbox)
+    assert one.get('@data') == "hello XXX hello"
