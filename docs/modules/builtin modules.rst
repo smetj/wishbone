@@ -11,6 +11,12 @@ wishbone.input.amqp
 
 --------
 
+wishbone.input.cron
+-------------------------
+.. autoclass:: wishbone.module.cron.Cron
+
+--------
+
 wishbone.input.dictgenerator
 ----------------------------
 .. autoclass:: wishbone.module.dictgenerator.DictGenerator
