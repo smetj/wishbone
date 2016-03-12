@@ -57,7 +57,8 @@ install_requires = ['gevent==1.1rc5',
                     'elasticsearch==1.6.0',
                     'importlib==1.0.3',
                     'uplook==0.4.1',
-                    'pyjq==1.1']
+                    'pyjq==1.1',
+                    'cronex==0.1.0']
 
 # Dirty hack to make readthedocs build the docs
 # For some reason mocking out jq as documented is not working
@@ -165,6 +166,7 @@ setup(
         ],
         'wishbone.input': [
             'amqp = wishbone.module.amqpin:AMQPIn',
+            'cron =  wishbone.module.cron:Cron',
             'dictgenerator = wishbone.module.dictgenerator:DictGenerator',
             'disk = wishbone.module.diskin:DiskIn',
             'fresh = wishbone.module.fresh:Fresh',
