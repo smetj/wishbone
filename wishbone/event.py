@@ -70,6 +70,12 @@ class Bulk(object):
                 pass
         return result
 
+    def size(self):
+        '''
+        Returns the number of elements stored in the bulk.
+        '''
+
+        return len(self.__events)
 
 class Log(object):
 
