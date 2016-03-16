@@ -68,3 +68,9 @@ class MissingKey(Exception):
 
 class MissingNamespace(Exception):
     pass
+
+class BulkFull(Exception):
+    pass
+
+class InvalidData(Exception):
+    pass
