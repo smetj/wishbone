@@ -27,7 +27,7 @@ from os import getpid
 from colorama import init, Fore, Back, Style
 from gevent import monkey; monkey.patch_sys(stdin=True, stdout=True, stderr=True)
 import sys
-
+from wishbone.event import Bulk
 
 class Format():
 
@@ -43,8 +43,8 @@ class Format():
         else:
             self.pid = self.__returnNoPid
 
-    def do(self, event):
-        return self.pid(self.counter(event.get(self.selection)))
+    def do(self, data):
+        return self.pid(self.counter(data))
 
     # def __returnComplete(self, event):
     #     return event.raw(complete=True)
@@ -52,18 +52,18 @@ class Format():
     # def __returnIncomplete(self, event):
     #     return event.get('@data')
 
-    def __returnCounter(self, event):
+    def __returnCounter(self, data):
         self.countervalue += 1
-        return "%s - %s" % (self.countervalue, event)
+        return "%s - %s" % (self.countervalue, data)
 
-    def __returnNoCounter(self, event):
-        return event
+    def __returnNoCounter(self, data):
+        return data
 
-    def __returnNoPid(self, event):
-        return event
+    def __returnNoPid(self, data):
+        return data
 
-    def __returnPid(self, event):
-        return "PID-%s: %s" % (self.pid_value, event)
+    def __returnPid(self, data):
+        return "PID-%s: %s" % (self.pid_value, data)
 
 
 class STDOUT(Actor):
@@ -121,11 +121,16 @@ class STDOUT(Actor):
         init(autoreset=True)
 
     def consume(self, event):
+        if isinstance(event, Bulk):
+            data = event.dumpFieldAsList(self.kwargs.selection)
+            data = "\n".join(data)
+        else:
+            data = event.get(self.kwargs.selection)
 
         sys.stdout.write("%s%s%s%s%s\n" % (getattr(Fore, self.kwargs.foreground_color),
                                            getattr(Back, self.kwargs.background_color),
                                            getattr(Style, self.kwargs.color_style),
-                                           self.kwargs.prefix, self.format.do(event)))
+                                           self.kwargs.prefix, self.format.do(data)))
         sys.stdout.flush()
 
     def __validateInput(self, f, b, s):

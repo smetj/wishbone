@@ -24,6 +24,7 @@
 
 from wishbone import Actor
 from gevent import socket
+from gevent.event import Bulk
 
 
 class TCPOut(Actor):
@@ -69,9 +70,11 @@ class TCPOut(Actor):
 
     def consume(self, event):
 
-        data = event.get(self.kwargs.selection)
-        if isinstance(data, list):
-            data = self.kwargs.delimiter.join(data)
+        if isinstance(event, Bulk):
+            data = Bulk.dumpFieldsAsList(self.kwargs.selection)
+            data = "\n".join(data)
+        else:
+            data = event.get(self.kwargs.selection)
 
         connection = self.setupConnection()
         connection.sendall(str(data) + self.kwargs.delimiter)
