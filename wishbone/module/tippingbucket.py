@@ -34,7 +34,11 @@ class TippingBucket(Actor):
     Aggregates multiple incoming events into bulk usually prior to submitting
     to an output module.
 
-    Flushing the buffer can be done in various ways.
+    Flushing the buffer can be done in various ways:
+
+      - The age of the bucket exceeds <bucket_age>.
+      - The size of the bucket reaches <bucket_size>.
+      - Any event arrives in queue <flush>.
 
 
     Parameters:
@@ -56,6 +60,11 @@ class TippingBucket(Actor):
         - outbox
            |  A description of the queue
 
+        - flush
+
+           |  Flushes the Bulk on receive messages despite the bulk being full
+           |  or expired.
+
     '''
 
     def __init__(self, actor_config, bucket_size=100, bucket_age=10):
@@ -63,7 +72,9 @@ class TippingBucket(Actor):
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
+        self.pool.createQueue("flush")
         self.registerConsumer(self.consume, "inbox")
+        self.registerConsumer(self.messageFlusher, "flush")
 
     def preHook(self):
 
@@ -82,8 +93,8 @@ class TippingBucket(Actor):
 
     def createEmptyBucket(self):
 
-        self._timer = self.kwargs.bucket_age
         self.bucket = Bulk(self.kwargs.bucket_size)
+        self.resetTimer()
 
     def flushBucket(self):
 
@@ -91,6 +102,21 @@ class TippingBucket(Actor):
             sleep(1)
             self._timer -= 1
             if self._timer == 0:
-                self.logging.info("Bucket age expired after %s s.  Forwarded." % (self.kwargs.bucket_age))
-                self.submit(self.bucket, self.pool.queue.outbox)
-                self.createEmptyBucket()
+                if self.bucket.size > 0:
+                    self.logging.info("Bucket age expired after %s s.  Forwarded." % (self.kwargs.bucket_age))
+                    self.submit(self.bucket, self.pool.queue.outbox)
+                    self.createEmptyBucket()
+                else:
+                    self.resetTimer()
+
+    def messageFlusher(self, event):
+
+        self.logging.info("Recieved message in <flush> queue.  Flushing bulk.")
+        self.submit(self.bucket, self.pool.queue.outbox)
+        self.createEmptyBucket()
+
+    def resetTimer(self):
+
+        self._timer = self.kwargs.bucket_age
+
+
