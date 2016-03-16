@@ -7,6 +7,9 @@ Version 2.1.2
 Features:
 
 - Added timeout and redirect support for wishbone.output.
+- Added wishbone.input.cron
+- Added wishbone.flow.tippingbucket
+- Added Bulk event type
 
 Version 2.1.1
 ~~~~~~~~~~~~~
