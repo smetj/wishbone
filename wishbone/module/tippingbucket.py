@@ -27,6 +27,7 @@ from wishbone.event import Bulk
 from wishbone.error import BulkFull
 from gevent import sleep
 
+
 class TippingBucket(Actor):
 
     '''**Aggregates multiple events into bulk.**
