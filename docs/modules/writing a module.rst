@@ -12,7 +12,7 @@ The following example module evaluates whether an integer is between a
 *minimum* and a *maximum* value.  Depending whether that's a case the event
 will be submitted to the appropriate queue.
 
-.. literalinclude:: ../static/biggerandsmaller.py
+.. literalinclude:: ../static/examples/biggerandsmaller.py
    :language: python
    :linenos:
 
