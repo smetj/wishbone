@@ -2,9 +2,35 @@
 Wishbone
 ========
 
-**A Python framework to build composable event pipeline servers with minimal effort.**
+**A Python framework to build composable event pipeline middleware with minimal effort.**
 
 https://github.com/smetj/wishbone
+
+.. image:: intro.png
+    :align: right
+
+
+Why should I use it?
+====================
+
+You need a server to accept data from A, process it and submit it to B.
+
+Off the shelve you can:
+
+- Make use of the many `builtin modules`_
+- Manage and run servers on `command line`_
+- Bootstrap servers using `config files`_
+- Shape powerful event processing functionality `without programming`_
+- Convert and ship Wishbone server `logs and metrics`_ to your liking
+- Flexibly deal with errors
+- Construct versatile infra related patterns
+- Easily adapt and extend functionality to respond to ever changing infra environments
+- Make the processed events "tangible"
+
+And when you really need custom functionality:
+
+Focus on creating the actual solution in Python whilst benefiting from all of the above...
+
 
 Bootstrap a  server
 ===================
@@ -18,9 +44,6 @@ Wishbone `servers`_ are started with bootstrap file:
 
 `Bootstrap files`_ define the modules_ to initialize and how these should be
 connected to each other:
-
-.. image:: intro.png
-    :align: right
 
 .. literalinclude:: static/test_setup.yaml
    :language: yaml
@@ -81,3 +104,9 @@ Running a server:
 .. _servers: server/index.html
 .. _modules: modules/builtin%20modules.html
 .. _Bootstrap files: server/bootstrap%20files.html
+.. _builtin modules: modules/builtin%20modules.html
+.. _command line: server/index.html
+..  server/bootstrap%20files.html
+.. _logs and metrics: modules/logs%20and%20metrics.html
+.. _focus on the fun stuff, programming the solution in Python.: modules/writing%20a%20module.html
+.. _config files: server/bootstrap%20files.html
