@@ -143,6 +143,7 @@ setup(
             'funnel = wishbone.module.funnel:Funnel',
             'match = wishbone.module.match:Match',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
+            'tippingbucket = wishbone.module.tippingbucket:TippingBucket',
             'ttl = wishbone.module.ttl:TTL',
             'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate',
             'jq = wishbone.module.wb_jq:JQ'
