@@ -29,7 +29,7 @@ from gevent import sleep
 
 class TippingBucket(Actor):
 
-    '''**Aggregates multple events into bulk.**
+    '''**Aggregates multiple events into bulk.**
 
     Aggregates multiple incoming events into bulk usually prior to submitting
     to an output module.
