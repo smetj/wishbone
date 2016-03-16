@@ -217,6 +217,12 @@ wishbone.flow.roundrobin
 
 --------
 
+wishbone.flow.tippingbucket
+---------------------------
+.. autoclass:: wishbone.module.tippingbucket.TippingBucket
+
+--------
+
 wishbone.flow.ttl
 -----------------
 .. autoclass:: wishbone.module.ttl.TTL
