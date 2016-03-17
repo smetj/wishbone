@@ -75,12 +75,12 @@ class TippingBucket(Actor):
         self.pool.createQueue("outbox")
         self.pool.createQueue("flush")
         self.registerConsumer(self.consume, "inbox")
-        self.registerConsumer(self.messageFlusher, "flush")
+        self.registerConsumer(self.flushBufferIncomingMessage, "flush")
 
     def preHook(self):
 
         self.createEmptyBucket()
-        self.sendToBackground(self.flushBucket)
+        self.sendToBackground(self.flushBucketTimer)
 
     def consume(self, event):
 
@@ -88,8 +88,7 @@ class TippingBucket(Actor):
             self.bucket.append(event)
         except BulkFull:
             self.logging.info("Bucket full after %s events.  Forwarded." % (self.kwargs.bucket_size))
-            self.submit(self.bucket, self.pool.queue.outbox)
-            self.bucket = Bulk(self.kwargs.bucket_size)
+            self.flushBuffer()
             self.bucket.append(event)
 
     def createEmptyBucket(self):
@@ -97,7 +96,11 @@ class TippingBucket(Actor):
         self.bucket = Bulk(self.kwargs.bucket_size)
         self.resetTimer()
 
-    def flushBucket(self):
+    def flushBucketTimer(self):
+
+        '''
+        Flushes the buffer when <bucket_age> has expired.
+        '''
 
         while self.loop():
             sleep(1)
@@ -105,19 +108,30 @@ class TippingBucket(Actor):
             if self._timer == 0:
                 if self.bucket.size > 0:
                     self.logging.info("Bucket age expired after %s s.  Forwarded." % (self.kwargs.bucket_age))
-                    self.submit(self.bucket, self.pool.queue.outbox)
-                    self.createEmptyBucket()
+                    self.flushBuffer()
                 else:
                     self.resetTimer()
 
-    def messageFlusher(self, event):
+    def flushBuffer(self):
+        '''
+        Flushes the buffer.
+        '''
 
-        self.logging.info("Recieved message in <flush> queue.  Flushing bulk.")
         self.submit(self.bucket, self.pool.queue.outbox)
         self.createEmptyBucket()
 
+    def flushBufferIncomingMessage(self, event):
+        '''
+        Called on each incoming messages of <flush> queue.
+        Flushes the buffer.
+        '''
+
+        self.logging.info("Recieved message in <flush> queue.  Flushing bulk.")
+        self.flushBuffer()
+
     def resetTimer(self):
+        '''
+        Resets the buffer expiry countdown to its configured value.
+        '''
 
         self._timer = self.kwargs.bucket_age
-
-
