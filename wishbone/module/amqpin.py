@@ -69,6 +69,9 @@ class AMQPIn(Actor):
            |  If set, the server will not create the exchange. The client can use
            |  this to check whether an exchange exists without modifying the server state.
 
+        - exchange_arguments(dict)({})
+           |  Additional arguments for exchange declaration.
+
         - queue(str)("wishbone")
            |  The queue to declare and ultimately consume.
 
@@ -84,8 +87,8 @@ class AMQPIn(Actor):
         - queue_declare(bool)(true)
            |  Whether to actually declare the queue.
 
-        - queue_lazy(bool)(false)
-            |  When true <queue> is a lazy queue.
+        - queue_arguments(dict)({})
+           |  Additional arguments for queue declaration.
 
         - routing_key(str)("")
            |  The routing key to use in case of a "topic" exchange.
@@ -113,8 +116,10 @@ class AMQPIn(Actor):
 
     def __init__(self, actor_config, host="localhost", port=5672, vhost="/", user="guest", password="guest",
                  exchange="", exchange_type="direct", exchange_durable=False, exchange_auto_delete=True, exchange_passive=False,
+                 exchange_arguments={},
                  queue="wishbone", queue_durable=False, queue_exclusive=False, queue_auto_delete=True, queue_declare=True,
-                 routing_key="", prefetch_count=1, no_ack=False, queue_lazy=False):
+                 queue_arguments={},
+                 routing_key="", prefetch_count=1, no_ack=False):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("outbox")
@@ -124,9 +129,8 @@ class AMQPIn(Actor):
         self.connection = None
 
     def preHook(self):
-        self.__arguments = {}
-        if self.kwargs.queue_lazy:
-            self.__arguments["x-queue-mode"] = "lazy"
+        self._queue_arguments = dict(self.kwargs.queue_arguments)
+        self._exchange_arguments = dict(self.kwargs.exchange_arguments)
         self.sendToBackground(self.drain)
         self.sendToBackground(self.handleAcknowledgements)
         self.sendToBackground(self.handleAcknowledgementsCancel)
@@ -155,7 +159,8 @@ class AMQPIn(Actor):
                         self.kwargs.exchange_type,
                         durable=self.kwargs.exchange_durable,
                         auto_delete=self.kwargs.exchange_auto_delete,
-                        passive=self.kwargs.exchange_passive
+                        passive=self.kwargs.exchange_passive,
+                        arguments=self._exchange_arguments
                     )
                     self.logging.debug("Declared exchange %s." % (self.kwargs.exchange))
 
@@ -165,7 +170,7 @@ class AMQPIn(Actor):
                         durable=self.kwargs.queue_durable,
                         exclusive=self.kwargs.queue_exclusive,
                         auto_delete=self.kwargs.queue_auto_delete,
-                        arguments=self.__arguments
+                        arguments=self._queue_arguments
                     )
                     self.logging.debug("Declared queue %s." % (self.kwargs.queue))
 
