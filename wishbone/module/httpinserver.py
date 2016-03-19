@@ -66,6 +66,11 @@ class HTTPInServer(Actor):
             |  See https://lwn.net/Articles/542629/
             |  Required when running multiple Wishbone instances.
 
+        - response(str)("ok")*
+            |  The value of the response.  Can be a lookup function.
+            |  This value is also stored under @tmp.<module>.response
+
+
     Queues:
 
         - outbox
@@ -79,7 +84,10 @@ class HTTPInServer(Actor):
     The root resource "/" is mapped the <outbox> queue.
     '''
 
-    def __init__(self, actor_config, address="0.0.0.0", port=19283, keyfile=None, certfile=None, ca_certs=None, delimiter=None, poolsize=1000, so_reuseport=False):
+    def __init__(self, actor_config,
+        address="0.0.0.0", port=19283, poolsize=1000, so_reuseport=False,
+        keyfile=None, certfile=None, ca_certs=None,
+        delimiter=None, response="ok" ):
         Actor.__init__(self, actor_config)
 
         if self.kwargs.delimiter is None:
@@ -97,6 +105,8 @@ class HTTPInServer(Actor):
 
     def consume(self, env, start_response):
 
+        resp = self.kwargs.response
+
         try:
             try:
                 queue = self.__validateQueueName(env['PATH_INFO'])
@@ -108,10 +118,11 @@ class HTTPInServer(Actor):
                 counter = 0
                 for line in self.delimit(env["wsgi.input"]):
                     event = Event(line)
+                    event.set(resp, '@tmp.%s.response' % (self.name))
                     self.submit(event, self.pool.getQueue(queue))
                     counter += 1
                 start_response('200 OK', [('Content-Type', 'text/plain')])
-                return "Submitted %s event(s) to queue '%s'." % (counter, queue)
+                return resp
             elif env["REQUEST_METHOD"] == "GET":
                 start_response('200 OK', [('Content-Type', 'text/plain')])
                 return "OK"
@@ -202,4 +213,3 @@ class HTTPInServer(Actor):
         sock.bind((self.kwargs.address, self.kwargs.port))
         sock.listen(50)
         return sock
-
