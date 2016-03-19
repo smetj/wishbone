@@ -149,3 +149,24 @@ def etcd(base="http://127.0.0.1:2379/v2/keys"):
         except Exception as err:
             raise NoSuchValue(str(err))
     return etcdLookup
+
+def uuid():
+    '''Returns a uuid value.
+
+    This function returns a uuid value.
+
+    - Parameters to initialize the function:
+
+        None
+
+    - Parameters to call the function:
+
+        None
+    '''
+
+    from uuid import uuid4
+
+    def uuidLookup():
+        return str(uuid4())
+
+    return uuidLookup
