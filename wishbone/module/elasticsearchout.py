@@ -23,10 +23,10 @@
 #
 
 from wishbone import Actor
-from wishbone.error import QueueFull
 from gevent import sleep
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
+from wishbone.event import Bulk
 
 
 class ElasticSearchOut(Actor):
@@ -61,12 +61,6 @@ class ElasticSearchOut(Actor):
         - doc_type(str)("wishbone")
            |  The document type
 
-        - interval(int)(5)
-           |  The buffer time flush interval.
-
-        - flush_size(int)(100)
-           |  The flush size.
-
     Queues:
 
         - inbox
@@ -74,11 +68,9 @@ class ElasticSearchOut(Actor):
 
     '''
 
-    def __init__(self, actor_config, selection="@data", hosts=["localhost:9200"], use_ssl=False, verify_certs=False, index="wishbone", doc_type="wishbone", interval=5, flush_size=100):
+    def __init__(self, actor_config, selection="@data", hosts=["localhost:9200"], use_ssl=False, verify_certs=False, index="wishbone", doc_type="wishbone"):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
-        self.pool.createQueue("bulk")
-        self.pool.queue.bulk.disableFallThrough()
         self.registerConsumer(self.consume, "inbox")
 
     def preHook(self):
@@ -87,23 +79,15 @@ class ElasticSearchOut(Actor):
 
     def consume(self, event):
 
-        self.pool.queue.bulk.put(event)
-        if self.pool.queue.bulk.size() == self.kwargs.flush_size:
-            self.logging.debug("Flushing batch of %s docs after reaching batch size." % (self.kwargs.flush_size))
-            self.flush()
+        if isinstance(event, Bulk):
+            bulk(
+                self.elasticsearch,
+                [{"_index": self.kwargs.index, "_type": self.kwargs.doc_type, "_source": e.get(self.kwargs.selection)} for e in event.dumpFieldAsList(self.kwargs.selection)]
+            )
+        else:
+            self.elasticsearch.index(
+                index=self.kwargs.index,
+                doc_type=self.kwargs.doc_type,
+                body=str(event.get(self.kwargs.selection))
+            )
 
-    def flush(self):
-        try:
-            bulk(self.elasticsearch, [{"_index": self.kwargs.index, "_type": self.kwargs.doc_type, "_source": e.get(self.kwargs.selection)} for e in self.pool.queue.bulk.dump()])
-        except Exception as err:
-            self.logging.error("Failed to bulk submit messages to '%s'. Reason: %s" % (self.kwargs.hosts, err))
-            for e in self.pool.queue.bulk.dump():
-                self.submit(e, self.pool.queue.failed)
-
-    def __flushTimer(self):
-
-        while self.loop():
-            sleep(self.kwargs.interval)
-            if self.pool.queue.bulk.size() > 0:
-                self.logging.debug("Flushing batch of %s docs after reaching timeout." % (self.pool.queue.bulk.size()))
-                self.flush()

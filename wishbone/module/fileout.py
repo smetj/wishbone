@@ -24,6 +24,7 @@
 
 
 from wishbone import Actor
+from wishbone.event import Bulk
 from gevent.os import make_nonblocking
 import arrow
 
@@ -74,7 +75,13 @@ class FileOut(Actor):
         make_nonblocking(self.file)
 
     def consume(self, event):
-        self.file.write("%s%s\n" % (self.getTimestamp(), str(event.get(self.kwargs.selection))))
+
+        if isinstance(event, Bulk):
+            data = event.dumpFieldAsString(self.kwargs.selection)
+        else:
+            data = str(event.get(self.kwargs.selection))
+
+        self.file.write("%s%s\n" % (self.getTimestamp(), data))
         self.file.flush()
 
     def returnTimestamp(self):

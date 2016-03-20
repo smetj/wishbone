@@ -28,6 +28,7 @@ from gevent.wsgi import WSGIServer
 from flask import Flask, Response, render_template_string
 from gevent.queue import Queue
 from uuid import uuid4
+from wishbone.event import Bulk
 import os
 
 
@@ -58,12 +59,6 @@ class ServerSentEvents(Actor):
 
     When the event header contains:
 
-    event.header.<self.name>.destination then the event
-    can be consumed from http://host/<destination>
-
-    When the event header does not contain this value then
-    the event can be consumed from http://host/
-
     If nobody is consuming events then they're lost.
     If <show_last> is set to True, then the last known value
     can be consumed by the client.
@@ -92,6 +87,9 @@ class ServerSentEvents(Actor):
            |  The time in seconds to send keep-alive
            |  messages to the client.
 
+        - destination(str)("")*
+           |  The endpoint from which the event can be consumed.
+
 
     Queues:
 
@@ -100,7 +98,7 @@ class ServerSentEvents(Actor):
 
     '''
 
-    def __init__(self, actor_config, selection="@data", bind="0.0.0.0", port=19283, show_last=False, keepalive=False, keepalive_interval=5):
+    def __init__(self, actor_config, selection="@data", bind="0.0.0.0", port=19283, show_last=False, keepalive=False, keepalive_interval=5, destination=""):
 
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
@@ -152,18 +150,20 @@ class ServerSentEvents(Actor):
         return r
 
     def consume(self, event):
-        try:
-            destination = event.get('@tmp.%s.destination' % (self.name))
-        except KeyError:
-            destination = ''
+
+        if isinstance(event, Bulk):
+            data = event.dumpFieldAsString(self.kwargs.selection)
+        else:
+            data = str(event.get(self.kwargs.selection))
 
         try:
-            for q in self.session_queues[destination]:
-                self.session_queues[destination][q].put(str(event.get(self.kwargs.selection)))
+            for q in self.session_queues[self.kwargs.destination]:
+                self.session_queues[self.kwargs.destination][q].put(data)
         except KeyError:
-            if destination == '':
-                destination = '/'
-            self.logging.warning("No clients are listening on %s" % destination)
+            if self.kwargs.destination == '':
+                self.logging.warning("No clients are listening on /")
+            else:
+                self.logging.warning("No clients are listening on %s" % self.kwargs.destination)
 
     def __deleteSessionQueue(self, name, i):
         try:

@@ -28,7 +28,7 @@ from wishbone import Actor
 from amqp.connection import Connection as amqp_connection
 from amqp import basic_message
 from gevent import sleep
-
+from wishbone.event import Bulk
 
 class AMQPOut(Actor):
 
@@ -138,7 +138,10 @@ class AMQPOut(Actor):
 
     def consume(self, event):
 
-        data = str(event.get(self.kwargs.selection))
+        if isinstance(event, Bulk):
+            data = event.dumpFieldAsString(self.kwargs.selection)
+        else:
+            data = str(event.get(self.kwargs.selection))
 
         message = basic_message.Message(
                     body=data,
