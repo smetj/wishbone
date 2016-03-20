@@ -31,7 +31,7 @@ EVENT_RESERVED = ["@timestamp", "@version", "@data", "@tmp", "@errors"]
 
 class Bulk(object):
 
-    def __init__(self, max_size=None):
+    def __init__(self, max_size=None, delimiter="\n"):
         self.__events = []
         self.max_size = max_size
 
@@ -69,6 +69,20 @@ class Bulk(object):
             except KeyError:
                 pass
         return result
+
+    def dumpFieldAsString(self, field="@data"):
+        '''
+        Returns a string joining <field> of each event with <self.delimiter>.
+        Events with a missing field are skipped.
+        '''
+
+        result = []
+        for event in self.dump():
+            try:
+                result.append(event.get(field))
+            except KeyError:
+                pass
+        return self.kwargs.delimiter.join(result)
 
     def size(self):
         '''
