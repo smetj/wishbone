@@ -27,7 +27,7 @@ from wishbone import Actor
 from gevent import monkey; monkey.patch_socket()
 from email.mime.text import MIMEText
 import smtplib
-
+form wishbone.event import Bulk
 
 class EmailOut(Actor):
 
@@ -70,8 +70,13 @@ class EmailOut(Actor):
 
     def consume(self, event):
 
+        if isinstance(event, Bulk):
+            data = event.dumpFieldAsString(self.kwargs.selection)
+        else:
+            data = str(event.get(self.kwargs.selection))
+
         try:
-            message = MIMEText(str(event.get(self.kwargs.selection)))
+            message = MIMEText(data)
             message["Subject"] = self.kwargs.subject
             message["From"] = self.kwargs.from_address
             message["To"] = ",".join(self.kwargs.to)

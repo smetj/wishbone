@@ -24,6 +24,7 @@
 
 from gevent import monkey; monkey.patch_socket()
 from wishbone import Actor
+from wishbone.event import Bulk
 import requests
 
 
@@ -94,8 +95,13 @@ class HTTPOutClient(Actor):
 
     def consume(self, event):
 
+        if isinstance(event, Bulk):
+            data = event.dumpFieldAsString(self.kwargs.selection)
+        else:
+            data = str(event.get(self.kwargs.selection))
+
         try:
-            response = self.submitToResource(event.get(self.kwargs.selection))
+            response = self.submitToResource(data)
             response.raise_for_status()
         except Exception as err:
             self.logging.error("Failed to submit data.  Reason: %s" % (err))
