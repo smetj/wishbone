@@ -23,6 +23,7 @@
 #
 
 from wishbone import Actor
+from wishbone.event import Bulk
 from gevent import socket
 
 
@@ -67,8 +68,10 @@ class UDPOut(Actor):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def consume(self, event):
-        data = event.get(self.kwargs.selection)
-        if isinstance(data, list):
-            data = self.kwargs.delimiter.join(data)
+
+        if isinstance(event, Bulk):
+            data = Bulk.dumpFieldsAsString(self.kwargs.selection)
+        else:
+            data = event.get(self.kwargs.selection)
 
         self.socket.sendto(str(data), (self.kwargs.host, self.kwargs.port))

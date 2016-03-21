@@ -24,6 +24,7 @@
 
 
 from wishbone import Actor
+from wishbone.event import Bulk
 import zmq.green as zmq
 
 
@@ -83,9 +84,9 @@ class ZMQPushOut(Actor):
 
     def consume(self, event):
 
-        data = event.get(self.kwargs.selection)
-        try:
-            # self.socket.send(event.data, flags=zmq.NOBLOCK)
-            self.socket.send(data)
-        except Exception as err:
-            self.logging.error("Failed to submit message.  Reason: %s" % (err))
+        if isinstance(event, Bulk):
+            data = event.dumpFieldAsString(self.kwargs.selection)
+        else:
+            data = str(event.get(self.kwargs.selection))
+
+        self.socket.send(data)
