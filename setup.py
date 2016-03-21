@@ -139,6 +139,7 @@ setup(
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
         'wishbone.flow': [
+            'deserialize = wishbone.module.deserialize:Deserialize',
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
             'match = wishbone.module.match:Match',
@@ -160,7 +161,6 @@ setup(
             'json = wishbone.module.jsondecode:JSONDecode'
         ],
         'wishbone.function': [
-            'deserialize = wishbone.module.deserialize:Deserialize',
             'modify = wishbone.module.modify:Modify',
             'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
             'template = wishbone.module.template:Template'
