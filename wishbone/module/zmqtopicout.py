@@ -24,6 +24,7 @@
 
 
 from wishbone import Actor
+from wishbone.event import Bulk
 import zmq.green as zmq
 
 
@@ -72,8 +73,9 @@ class ZMQTopicOut(Actor):
 
     def consume(self, event):
 
-        data = event.get(self.kwargs.selection)
-        try:
-            self.socket.send("%s %s" % (self.kwargs.topic, data))
-        except Exception as err:
-            raise ("Failed to submit message.  Reason %s" % (err))
+        if isinstance(event, Bulk):
+            data = event.dumpFieldAsString(self.kwargs.selection)
+        else:
+            data = str(event.get(self.kwargs.selection))
+
+        self.socket.send("%s %s" % (self.kwargs.topic, data))
