@@ -35,10 +35,11 @@ class ElasticSearchOut(Actor):
 
     Submits data to Elasticsearch.
 
-    Documents are indexed in bulk.  The number of messages per bulk insert is
-    alligned to --queue-size.  If a number of messages sit in the buffer for
-    longer than <interval> seconds, the buffer will be flushed despite not
-    reaching the --queue-size number of messages.
+    Events are indexed one by one.
+
+    Events can be indexed in bulk to increase throughput when incoming events
+    are type <Bulk>.  Bulk objects consist out of multiple events and are
+    created by the <wishbone.flow.tippingbucket> module.
 
     Parameters:
 
@@ -90,4 +91,3 @@ class ElasticSearchOut(Actor):
                 doc_type=self.kwargs.doc_type,
                 body=str(event.get(self.kwargs.selection))
             )
-
