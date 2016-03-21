@@ -12,6 +12,10 @@ Features:
 - Added wishbone.flow.tippingbucket
 - Added Bulk event type
 
+Misc:
+
+- Moved wishbone.function.deserialize to wishbone.flow.deserialize
+
 Version 2.1.1
 ~~~~~~~~~~~~~
 
