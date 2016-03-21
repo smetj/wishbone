@@ -24,10 +24,11 @@
 
 
 from wishbone import Actor
+from wishbone.event import Bulk
 from gevent import monkey; monkey.patch_socket()
 from email.mime.text import MIMEText
 import smtplib
-form wishbone.event import Bulk
+
 
 class EmailOut(Actor):
 
