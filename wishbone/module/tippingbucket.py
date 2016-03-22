@@ -62,7 +62,6 @@ class TippingBucket(Actor):
            |  A description of the queue
 
         - flush
-
            |  Flushes the Bulk on receive messages despite the bulk being full
            |  or expired.
 
