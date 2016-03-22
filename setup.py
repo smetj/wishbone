@@ -55,7 +55,6 @@ install_requires = ['gevent==1.1rc5',
                     'elasticsearch==1.6.0',
                     'importlib==1.0.3',
                     'uplook==0.4.1',
-                    'pyjq==2.0.0',
                     'cronex==0.1.0']
 
 # Dirty hack to make readthedocs build the docs
@@ -148,8 +147,7 @@ setup(
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
             'tippingbucket = wishbone.module.tippingbucket:TippingBucket',
             'ttl = wishbone.module.ttl:TTL',
-            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate',
-            'jq = wishbone.module.wb_jq:JQ'
+            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate'
         ],
         'wishbone.encode': [
             'graphite = wishbone.module.graphite:Graphite',
