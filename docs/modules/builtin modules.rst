@@ -29,18 +29,6 @@ wishbone.input.disk
 
 --------
 
-wishbone.input.fresh
--------------------
-.. autoclass:: wishbone.module.fresh.Fresh
-
---------
-
-wishbone.input.gearman
-----------------------
-.. autoclass:: wishbone.module.gearmanin.GearmanIn
-
---------
-
 wishbone.input.httpclient
 -------------------------
 .. autoclass:: wishbone.module.httpinclient.HTTPInClient
@@ -196,6 +184,12 @@ wishbone.flow.funnel
 wishbone.flow.fanout
 --------------------
 .. autoclass:: wishbone.module.fanout.Fanout
+
+--------
+
+wishbone.input.fresh
+-------------------
+.. autoclass:: wishbone.module.fresh.Fresh
 
 --------
 

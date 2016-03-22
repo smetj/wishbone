@@ -15,7 +15,9 @@ Features:
 Misc:
 
 - Moved wishbone.function.deserialize to wishbone.flow.deserialize
-- Moves wishbone.input.fresh to wishbone.flow.fresh
+- Moved wishbone.input.fresh to wishbone.flow.fresh
+- Moved wishbone.input.gearman to separate repo/package (https://github.com/smetj/wishbone-input-gearman)
+
 
 Version 2.1.1
 ~~~~~~~~~~~~~
