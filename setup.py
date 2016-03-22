@@ -57,20 +57,23 @@ install_requires = ['gevent==1.1rc5',
                     'elasticsearch==1.6.0',
                     'importlib==1.0.3',
                     'uplook==0.4.1',
-                    'pyjq==1.1',
+                    'pyjq==2.0.0',
                     'cronex==0.1.0']
 
 # Dirty hack to make readthedocs build the docs
 # For some reason mocking out jq as documented is not working
 
-if os.environ.get("READTHEDOCS", False):
-    dependency_links = []
-    install_requires.remove('pyjq==1.1')
+# if os.environ.get("READTHEDOCS", False):
+#     dependency_links = []
+#     install_requires.remove('pyjq==1.1')
 
-else:
-    dependency_links = [
-        'https://github.com/smetj/pyjq/tarball/master#egg=pyjq-1.1'
-    ]
+# else:
+#     dependency_links = [
+#         'https://github.com/smetj/pyjq/tarball/master#egg=pyjq-1.1'
+#     ]
+
+dependency_links = [
+]
 
 # Deps pulled in by other modules
 # 'lockfile==0.10.2'
