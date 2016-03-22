@@ -97,7 +97,6 @@ class Actor():
         self.pool.getQueue(source).disableFallThrough()
         self.logging.debug("Connected queue %s.%s to %s.%s" % (self.name, source, destination_module.name, destination_queue))
 
-
     def doEventLookup(self, name):
 
         try:
