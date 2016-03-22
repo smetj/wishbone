@@ -15,6 +15,7 @@ Features:
 Misc:
 
 - Moved wishbone.function.deserialize to wishbone.flow.deserialize
+- Moves wishbone.input.fresh to wishbone.flow.fresh
 
 Version 2.1.1
 ~~~~~~~~~~~~~
