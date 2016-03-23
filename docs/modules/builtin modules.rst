@@ -242,12 +242,6 @@ wishbone.function.template
 Encode modules
 **************
 
-wishbone.encode.graphite
-------------------------
-.. autoclass:: wishbone.module.graphite.Graphite
-
---------
-
 wishbone.encode.humanlogformat
 ------------------------------
 .. autoclass:: wishbone.module.humanlogformat.HumanLogFormat
