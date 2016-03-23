@@ -33,7 +33,7 @@ import sys
 
 class HumanLogFormat(Actor):
 
-    '''**Converts Wishbone log events into human readable form.**
+    '''**Converts the internal log format into human readable form.**
 
     Logs are formated from the internal wishbone format into a more
     pleasing human readable format suited for STDOUT or a logfile.
