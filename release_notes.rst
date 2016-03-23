@@ -16,8 +16,9 @@ Misc:
 
 - Moved wishbone.function.deserialize to wishbone.flow.deserialize
 - Moved wishbone.input.fresh to wishbone.flow.fresh
-- Moved wishbone.input.gearman to separate repo/package (https://github.com/smetj/wishbone-input-gearman)
-- Moved wishbone.flow.jq to seprate repo/package (https://github.com/smetj/wishbone-flow-jq)
+- Moved wishbone.input.gearman to repo/package (https://github.com/smetj/wishbone-input-gearman)
+- Moved wishbone.flow.jq to repo/package (https://github.com/smetj/wishbone-flow-jq)
+- Moved wishbone.flow.jsonvalidate to repo/package (https://github.com/smetj/wishbone-flow-jsonvalidate)
 
 Version 2.1.1
 ~~~~~~~~~~~~~
