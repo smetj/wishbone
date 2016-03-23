@@ -46,10 +46,10 @@ class Syslog(Actor):
            |  The part of the event to submit externally.
            |  Use an empty string to refer to the complete event.
 
-        - level(int)(5)
+        - level(int)(5)*
            |  The loglevel.
 
-        - ident(str)(<script_name>)
+        - ident(str)(<script_name>)*
            |  The syslog id string.
            |  If not provided the script name is used.
 
