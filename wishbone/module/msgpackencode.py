@@ -28,9 +28,7 @@ import msgpack
 
 class MSGPackEncode(Actor):
     '''
-    **Encodes Python objects to MSGPack format.**
-
-    Encodes the payload or complete events to MSGPack format.
+    **Converts Python dict data structures to MSGPack format.**
 
     Parameters:
 
