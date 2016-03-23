@@ -146,7 +146,6 @@ setup(
             'ttl = wishbone.module.ttl:TTL'
         ],
         'wishbone.encode': [
-            'graphite = wishbone.module.graphite:Graphite',
             'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
             'influxdb = wishbone.module.influxdb:InfluxDB',
             'msgpack = wishbone.module.msgpackencode:MSGPackEncode',
