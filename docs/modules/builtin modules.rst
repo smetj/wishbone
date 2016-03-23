@@ -193,18 +193,6 @@ wishbone.input.fresh
 
 --------
 
-wishbone.flow.jq
-----------------
-.. autoclass:: wishbone.module.wb_jq.JQ
-
---------
-
-wishbone.flow.match
--------------------
-.. autoclass:: wishbone.module.match.Match
-
---------
-
 wishbone.flow.roundrobin
 ------------------------
 .. autoclass:: wishbone.module.roundrobin.RoundRobin
