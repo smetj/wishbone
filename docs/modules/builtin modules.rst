@@ -223,11 +223,6 @@ wishbone.flow.ttl
 
 --------
 
-wishbone.funtion.validatejson
------------------------------
-.. autoclass:: wishbone.module.jsonvalidate.JSONValidate
-
-
 
 Function modules
 ****************
