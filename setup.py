@@ -46,7 +46,6 @@ install_requires = ['gevent==1.1rc5',
                     'pyzmq==14.7.0',
                     'amqp==1.4.9',
                     'jinja2==2.8',
-                    'jsonschema==2.5.1',
                     'flask==0.10.1',
                     'gevent_inotifyx==0.1.1',
                     'requests==2.7.0',
@@ -146,8 +145,7 @@ setup(
             'match = wishbone.module.match:Match',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
             'tippingbucket = wishbone.module.tippingbucket:TippingBucket',
-            'ttl = wishbone.module.ttl:TTL',
-            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate'
+            'ttl = wishbone.module.ttl:TTL'
         ],
         'wishbone.encode': [
             'graphite = wishbone.module.graphite:Graphite',
