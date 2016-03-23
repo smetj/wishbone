@@ -19,6 +19,7 @@ Misc:
 - Moved wishbone.input.gearman to repo/package (https://github.com/smetj/wishbone-input-gearman)
 - Moved wishbone.flow.jq to repo/package (https://github.com/smetj/wishbone-flow-jq)
 - Moved wishbone.flow.jsonvalidate to repo/package (https://github.com/smetj/wishbone-flow-jsonvalidate)
+- Moved wishbone.flow.match to repo/package (https://github.com/smetj/wishbone-flow-match)
 
 Version 2.1.1
 ~~~~~~~~~~~~~
