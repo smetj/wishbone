@@ -248,12 +248,6 @@ wishbone.encode.humanlogformat
 
 --------
 
-wishbone.encode.influxdb
-------------------------
-.. autoclass:: wishbone.module.influxdb.InfluxDB
-
---------
-
 wishbone.encode.json
 --------------------
 .. autoclass:: wishbone.module.jsonencode.JSONEncode
