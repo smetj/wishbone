@@ -21,6 +21,7 @@ Misc:
 - Moved wishbone.flow.jsonvalidate to repo/package (https://github.com/smetj/wishbone-flow-jsonvalidate)
 - Moved wishbone.flow.match to repo/package (https://github.com/smetj/wishbone-flow-match)
 - Moved wishbone.encode.graphite to repo/package (https://github.com/smetj/wishbone-encode-graphite)
+- Moved wishbone.encode.influxdb to repo/package (https://github.com/smetj/wishbone-encode-influxdb)
 
 Version 2.1.1
 ~~~~~~~~~~~~~
