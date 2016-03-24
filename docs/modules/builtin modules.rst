@@ -254,12 +254,6 @@ wishbone.encode.json
 
 --------
 
-wishbone.encode.msgpack
------------------------
-.. autoclass:: wishbone.module.msgpackencode.MSGPackEncode
-
-
-
 Decode modules
 **************
 
