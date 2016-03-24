@@ -146,11 +146,9 @@ setup(
         ],
         'wishbone.encode': [
             'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
-            'msgpack = wishbone.module.msgpackencode:MSGPackEncode',
             'json = wishbone.module.jsonencode:JSONEncode'
         ],
         'wishbone.decode': [
-            'msgpack = wishbone.module.msgpackdecode:MSGPackDecode',
             'json = wishbone.module.jsondecode:JSONDecode'
         ],
         'wishbone.function': [
