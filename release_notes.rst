@@ -24,6 +24,7 @@ Misc:
 - Moved wishbone.encode.influxdb to repo/package (https://github.com/smetj/wishbone-encode-influxdb)
 - Moved wishbone.encode.msgpack to repo/package (https://github.com/smetj/wishbone-encode-msgpack)
 - Moved wishbone.decode.msgpack to repo/package (https://github.com/smetj/wishbone-decode-msgpack)
+- Moved wishbone.output.http to repo/package (https://github.com/smetj/wishbone-output-http)
 
 
 Version 2.1.1
