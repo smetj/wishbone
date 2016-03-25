@@ -140,6 +140,7 @@ setup(
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
             'fresh = wishbone.module.fresh:Fresh',
+            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
             'tippingbucket = wishbone.module.tippingbucket:TippingBucket',
             'ttl = wishbone.module.ttl:TTL'
@@ -152,9 +153,7 @@ setup(
             'json = wishbone.module.jsondecode:JSONDecode'
         ],
         'wishbone.function': [
-            'modify = wishbone.module.modify:Modify',
-            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
-            'template = wishbone.module.template:Template'
+            'modify = wishbone.module.modify:Modify'
         ],
         'wishbone.input': [
             'amqp = wishbone.module.amqpin:AMQPIn',
