@@ -14,17 +14,38 @@ Features:
 
 Misc:
 
-- Moved wishbone.function.deserialize to wishbone.flow.deserialize
-- Moved wishbone.input.fresh to wishbone.flow.fresh
-- Moved wishbone.input.gearman to repo/package (https://github.com/smetj/wishbone-input-gearman)
-- Moved wishbone.flow.jq to repo/package (https://github.com/smetj/wishbone-flow-jq)
-- Moved wishbone.flow.jsonvalidate to repo/package (https://github.com/smetj/wishbone-flow-jsonvalidate)
-- Moved wishbone.flow.match to repo/package (https://github.com/smetj/wishbone-flow-match)
-- Moved wishbone.encode.graphite to repo/package (https://github.com/smetj/wishbone-encode-graphite)
-- Moved wishbone.encode.influxdb to repo/package (https://github.com/smetj/wishbone-encode-influxdb)
-- Moved wishbone.encode.msgpack to repo/package (https://github.com/smetj/wishbone-encode-msgpack)
-- Moved wishbone.decode.msgpack to repo/package (https://github.com/smetj/wishbone-decode-msgpack)
-- Moved wishbone.output.http to repo/package (https://github.com/smetj/wishbone-output-http)
+Moved many buildin modules to separate package/release on Github.
+- moved wishbone-decode-msgpack to Github as a separate module.
+- moved wishbone-encode-flatten to Github as a separate module.
+- moved wishbone-encode-graphite to Github as a separate module.
+- moved wishbone-encode-influxdb to Github as a separate module.
+- moved wishbone-encode-msgpack to Github as a separate module.
+- moved wishbone-flow-jq to Github as a separate module.
+- moved wishbone-flow-jsonvalidate to Github as a separate module.
+- moved wishbone-flow-match to Github as a separate module.
+- moved wishbone-function-template to Github as a separate module.
+- moved wishbone-input-amqp to Github as a separate module.
+- moved wishbone-input-disk to Github as a separate module.
+- moved wishbone-input-gearman to Github as a separate module.
+- moved wishbone-input-httpclient to Github as a separate module.
+- moved wishbone-input-httpserver to Github as a separate module.
+- moved wishbone-input-namedpipe to Github as a separate module.
+- moved wishbone-input-tcp to Github as a separate module.
+- moved wishbone-input-udp to Github as a separate module.
+- moved wishbone-input-zmqpull to Github as a separate module.
+- moved wishbone-input-zmqtopic to Github as a separate module.
+- moved wishbone-output-amqp to Github as a separate module.
+- moved wishbone-output-disk to Github as a separate module.
+- moved wishbone-output-elasticsearch to Github as a separate module.
+- moved wishbone-output-email to Github as a separate module.
+- moved wishbone-output-file to Github as a separate module.
+- moved wishbone-output-http to Github as a separate module.
+- moved wishbone-output-sse to Github as a separate module.
+- moved wishbone-output-tcp to Github as a separate module.
+- moved wishbone-output-udp to Github as a separate module.
+- moved wishbone-output-uds to Github as a separate module.
+- moved wishbone-output-zmqpush to Github as a separate module.
+- moved wishbone-output-zmqtopic to Github as a separate module.
 
 
 Version 2.1.1
