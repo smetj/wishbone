@@ -29,7 +29,7 @@ import sys
 PROJECT = 'wishbone'
 VERSION = '2.1.2'
 
-install_requires = ['gevent==1.1rc5',
+install_requires = ['gevent==1.1',
                     'greenlet==0.4.9',
                     'argparse==1.3.0',
                     'prettytable==0.7.2',
