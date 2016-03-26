@@ -25,13 +25,6 @@
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 import sys
-import os
-
-# Required to make pycrypto compile with PyPy
-# https://github.com/dlitz/pycrypto/pull/59
-if "PyPy" in sys.version:
-    print("We are running PyPY, disable gmp to prevent pycrypto build error.")
-    os.environ["with_gmp"] = "no"
 
 PROJECT = 'wishbone'
 VERSION = '2.1.2'
@@ -42,43 +35,15 @@ install_requires = ['gevent==1.1rc5',
                     'prettytable==0.7.2',
                     'python-daemon==1.6',
                     'pyyaml==3.11',
-                    'pyzmq==14.7.0',
-                    'amqp==1.4.9',
-                    'jinja2==2.8',
                     'jsonschema==2.5.1',
-                    'flask==0.10.1',
                     'colorama==0.3.3',
                     'arrow==0.6.0',
-                    'elasticsearch==1.6.0',
                     'importlib==1.0.3',
                     'uplook==0.4.1',
                     'cronex==0.1.0']
 
-# Dirty hack to make readthedocs build the docs
-# For some reason mocking out jq as documented is not working
-
-# if os.environ.get("READTHEDOCS", False):
-#     dependency_links = []
-#     install_requires.remove('pyjq==1.1')
-
-# else:
-#     dependency_links = [
-#         'https://github.com/smetj/pyjq/tarball/master#egg=pyjq-1.1'
-#     ]
-
 dependency_links = [
 ]
-
-# Deps pulled in by other modules
-# 'lockfile==0.10.2'
-# 'MarkupSafe==0.23'
-# 'repoze.lru==0.6',
-# 'werkzeug==0.10.4',
-# 'itsdangerous==0.24',
-# 'inotifyx==0.2.2',
-# 'six==1.9.0',
-# 'python-dateutil==2.4.2',
-# 'urllib3==1.12',
 
 try:
     with open('README.rst', 'rt') as f:
@@ -156,46 +121,14 @@ setup(
             'modify = wishbone.module.modify:Modify'
         ],
         'wishbone.input': [
-            'amqp = wishbone.module.amqpin:AMQPIn',
             'cron =  wishbone.module.cron:Cron',
             'dictgenerator = wishbone.module.dictgenerator:DictGenerator',
-            'disk = wishbone.module.diskin:DiskIn',
-            'httpclient = wishbone.module.httpinclient:HTTPInClient',
-            'httpserver = wishbone.module.httpinserver:HTTPInServer',
-            'namedpipe = wishbone.module.namedpipein:NamedPipeIn',
-            'tcp = wishbone.module.tcpin:TCPIn',
-            'testevent = wishbone.module.testevent:TestEvent',
-            'udp = wishbone.module.udpin:UDPIn',
-            'zeromq_topic = wishbone.module.zmqtopicin:ZMQTopicIn',
-            'zeromq_pull = wishbone.module.zmqpullin:ZMQPullIn'
+            'testevent = wishbone.module.testevent:TestEvent'
         ],
         'wishbone.output': [
-            'amqp = wishbone.module.amqpout:AMQPOut',
-            'disk = wishbone.module.diskout:DiskOut',
-            'elasticsearch = wishbone.module.elasticsearchout:ElasticSearchOut',
-            'email = wishbone.module.emailout:EmailOut',
-            'file = wishbone.module.fileout:FileOut',
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
-            'syslog = wishbone.module.wbsyslog:Syslog',
-            'tcp = wishbone.module.tcpout:TCPOut',
-            'udp = wishbone.module.udpout:UDPOut',
-            'uds = wishbone.module.udsout:UDSOut',
-            'sse = wishbone.module.sse:ServerSentEvents',
-            'zeromq_topic = wishbone.module.zmqtopicout:ZMQTopicOut',
-            'zeromq_push = wishbone.module.zmqpushout:ZMQPushOut'
-        ],
-        'wishbone.contrib.flow': [
-        ],
-        'wishbone.contrib.encode': [
-        ],
-        'wishbone.contrib.decode': [
-        ],
-        'wishbone.contrib.function': [
-        ],
-        'wishbone.contrib.input': [
-        ],
-        'wishbone.contrib.output': [
+            'syslog = wishbone.module.wbsyslog:Syslog'
         ]
     }
 )
