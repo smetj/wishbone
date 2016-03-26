@@ -37,7 +37,6 @@ from wishbone.utils import PIDFile
 from gevent import signal
 from daemon import DaemonContext
 from pkg_resources import get_distribution
-from jinja2 import Template
 
 
 class BootStrap():
@@ -111,9 +110,9 @@ class Dispatch():
         '''Generates the Wishbone ascii header.'''
 
         with open("%s/data/banner.tmpl" % (os.path.dirname(__file__))) as f:
-            template = Template(''.join(f.readlines()))
+            template = ''.join(f.readlines()).format(version=get_distribution('wishbone').version)
 
-        return template.render(version=get_distribution('wishbone').version)
+        return template
 
     def debug(self, command, config, instances, queue_size, frequency, identification, module_path, graph, graph_include_sys, profile):
         '''
