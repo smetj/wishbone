@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '2.1.2'
+VERSION = '2.1.3'
 
 install_requires = ['gevent==1.1',
                     'greenlet==0.4.9',
