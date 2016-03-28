@@ -27,6 +27,9 @@ Features:
   which defines the part of the event which is actually submitted to   the
   external service.
 
+* Should inspect each incoming event whether it is of type
+  :py:class:`wishbone.event.Event` or :py:class:`wishbone.event.Bulk` and
+  handle bulk events accordingly.
 
 Flow modules
 ------------
@@ -42,7 +45,13 @@ Features:
 Encode modules
 --------------
 
-`Encode modules`_ convert a Python data structure in another data format.
+`Encode modules`_ convert:
+
+* a Python data structure stored in :py:class:`wishbone.event.Event`
+* :py:class:`wishbone.event.Metric`
+* :py:class:`wishbone.event.Log`
+
+ into another data format.
 
 Features:
 
@@ -52,7 +61,11 @@ Features:
 Decode modules
 --------------
 
-`Decode modules`_ convert some format into a Python data structure.
+`Decode modules`_ convert some format into either:
+
+* a Python data structure stored in :py:class:`wishbone.event.Event`
+* :py:class:`wishbone.event.Metric`
+* :py:class:`wishbone.event.Log`
 
 Features:
 

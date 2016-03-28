@@ -97,17 +97,7 @@ class Actor():
         self.pool.getQueue(source).disableFallThrough()
         self.logging.debug("Connected queue %s.%s to %s.%s" % (self.name, source, destination_module.name, destination_queue))
 
-    def createEvent(self):
-
-        '''
-        Convenience function which returns an empty Wishbone event with the
-        current namespace already set.
-        '''
-
-        return Wishbone_Event()
-
     def doEventLookup(self, name):
-        (n, t, k) = name.split('.')
 
         try:
             return self.current_event.get(name)
