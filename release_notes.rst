@@ -1,6 +1,53 @@
 Wishbone changelog
 ==================
 
+Version 2.1.2
+~~~~~~~~~~~~~
+
+Features:
+
+- Added timeout and redirect support for wishbone.output.http
+- Added timeout and redirect support for wishbone.input.http
+- Added wishbone.input.cron
+- Added wishbone.flow.tippingbucket
+- Added Bulk event type
+
+Misc:
+
+Moved many buildin modules to separate package/release on Github.
+- moved wishbone-decode-msgpack to Github as a separate module.
+- moved wishbone-encode-flatten to Github as a separate module.
+- moved wishbone-encode-graphite to Github as a separate module.
+- moved wishbone-encode-influxdb to Github as a separate module.
+- moved wishbone-encode-msgpack to Github as a separate module.
+- moved wishbone-flow-jq to Github as a separate module.
+- moved wishbone-flow-jsonvalidate to Github as a separate module.
+- moved wishbone-flow-match to Github as a separate module.
+- moved wishbone-function-template to Github as a separate module.
+- moved wishbone-input-amqp to Github as a separate module.
+- moved wishbone-input-disk to Github as a separate module.
+- moved wishbone-input-gearman to Github as a separate module.
+- moved wishbone-input-httpclient to Github as a separate module.
+- moved wishbone-input-httpserver to Github as a separate module.
+- moved wishbone-input-namedpipe to Github as a separate module.
+- moved wishbone-input-tcp to Github as a separate module.
+- moved wishbone-input-udp to Github as a separate module.
+- moved wishbone-input-zmqpull to Github as a separate module.
+- moved wishbone-input-zmqtopic to Github as a separate module.
+- moved wishbone-output-amqp to Github as a separate module.
+- moved wishbone-output-disk to Github as a separate module.
+- moved wishbone-output-elasticsearch to Github as a separate module.
+- moved wishbone-output-email to Github as a separate module.
+- moved wishbone-output-file to Github as a separate module.
+- moved wishbone-output-http to Github as a separate module.
+- moved wishbone-output-sse to Github as a separate module.
+- moved wishbone-output-tcp to Github as a separate module.
+- moved wishbone-output-udp to Github as a separate module.
+- moved wishbone-output-uds to Github as a separate module.
+- moved wishbone-output-zmqpush to Github as a separate module.
+- moved wishbone-output-zmqtopic to Github as a separate module.
+
+
 Version 2.1.1
 ~~~~~~~~~~~~~
 
@@ -8,7 +55,8 @@ Features:
 
 - Added wishbone.input.fresh
 - Added support for default value in copy command of wishbone.function.modify
-- Added allow_follow to wishbone.input.httpinclient
+- Added allow_follow and time support to wishbone.input.httpclient
+- Added allow_follow and time support to wishbone.output.http
 
 Bugs:
 

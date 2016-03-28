@@ -23,9 +23,11 @@ Modules typically have, but are **not** limited to, an **inbox**, **outbox**,
 
     module types
     events
+    bulk events
     logs and metrics
     writing a module
     builtin modules
+    external modules
 
 
 .. _greenlets: https://greenlet.readthedocs.org/en/latest/

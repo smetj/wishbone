@@ -25,62 +25,25 @@
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 import sys
-import os
-
-# Required to make pycrypto compile with PyPy
-# https://github.com/dlitz/pycrypto/pull/59
-if "PyPy" in sys.version:
-    print("We are running PyPY, disable gmp to prevent pycrypto build error.")
-    os.environ["with_gmp"] = "no"
 
 PROJECT = 'wishbone'
-VERSION = '2.1.1'
+VERSION = '2.1.2'
 
-install_requires = ['gevent==1.1rc4',
+install_requires = ['gevent==1.1',
                     'greenlet==0.4.9',
                     'argparse==1.3.0',
                     'prettytable==0.7.2',
                     'python-daemon==1.6',
                     'pyyaml==3.11',
-                    'msgpack-python==0.4.7',
-                    'pyzmq==14.7.0',
-                    'amqp==1.4.9',
-                    'jinja2==2.8',
                     'jsonschema==2.5.1',
-                    'gearman==2.0.2',
-                    'pycrypto==2.6.1',
-                    'flask==0.10.1',
-                    'gevent_inotifyx==0.1.1',
-                    'requests==2.7.0',
                     'colorama==0.3.3',
                     'arrow==0.6.0',
-                    'elasticsearch==1.6.0',
                     'importlib==1.0.3',
                     'uplook==0.4.1',
-                    'pyjq==1.1']
+                    'cronex==0.1.0']
 
-# Dirty hack to make readthedocs build the docs
-# For some reason mocking out jq as documented is not working
-
-if os.environ.get("READTHEDOCS", False):
-    dependency_links = []
-    install_requires.remove('pyjq==1.1')
-
-else:
-    dependency_links = [
-        'https://github.com/smetj/pyjq/tarball/master#egg=pyjq-1.1'
-    ]
-
-# Deps pulled in by other modules
-# 'lockfile==0.10.2'
-# 'MarkupSafe==0.23'
-# 'repoze.lru==0.6',
-# 'werkzeug==0.10.4',
-# 'itsdangerous==0.24',
-# 'inotifyx==0.2.2',
-# 'six==1.9.0',
-# 'python-dateutil==2.4.2',
-# 'urllib3==1.12',
+dependency_links = [
+]
 
 try:
     with open('README.rst', 'rt') as f:
@@ -133,79 +96,39 @@ setup(
     install_requires=install_requires,
     namespace_packages=[],
     packages=find_packages(),
-    package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/sse.html', 'data/banner.tmpl']},
+    package_data={'': ['data/wordlist.txt', 'data/LICENCE', 'data/banner.tmpl']},
     zip_safe=False,
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
         'wishbone.flow': [
+            'deserialize = wishbone.module.deserialize:Deserialize',
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
-            'match = wishbone.module.match:Match',
+            'fresh = wishbone.module.fresh:Fresh',
+            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
-            'ttl = wishbone.module.ttl:TTL',
-            'jsonvalidate = wishbone.module.jsonvalidate:JSONValidate',
-            'jq = wishbone.module.wb_jq:JQ'
+            'tippingbucket = wishbone.module.tippingbucket:TippingBucket',
+            'ttl = wishbone.module.ttl:TTL'
         ],
         'wishbone.encode': [
-            'graphite = wishbone.module.graphite:Graphite',
             'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
-            'influxdb = wishbone.module.influxdb:InfluxDB',
-            'msgpack = wishbone.module.msgpackencode:MSGPackEncode',
             'json = wishbone.module.jsonencode:JSONEncode'
         ],
         'wishbone.decode': [
-            'msgpack = wishbone.module.msgpackdecode:MSGPackDecode',
             'json = wishbone.module.jsondecode:JSONDecode'
         ],
         'wishbone.function': [
-            'deserialize = wishbone.module.deserialize:Deserialize',
-            'modify = wishbone.module.modify:Modify',
-            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
-            'template = wishbone.module.template:Template'
+            'modify = wishbone.module.modify:Modify'
         ],
         'wishbone.input': [
-            'amqp = wishbone.module.amqpin:AMQPIn',
+            'cron =  wishbone.module.cron:Cron',
             'dictgenerator = wishbone.module.dictgenerator:DictGenerator',
-            'disk = wishbone.module.diskin:DiskIn',
-            'fresh = wishbone.module.fresh:Fresh',
-            'httpclient = wishbone.module.httpinclient:HTTPInClient',
-            'httpserver = wishbone.module.httpinserver:HTTPInServer',
-            'namedpipe = wishbone.module.namedpipein:NamedPipeIn',
-            'tcp = wishbone.module.tcpin:TCPIn',
-            'testevent = wishbone.module.testevent:TestEvent',
-            'udp = wishbone.module.udpin:UDPIn',
-            'gearman = wishbone.module.gearmanin:GearmanIn',
-            'zeromq_topic = wishbone.module.zmqtopicin:ZMQTopicIn',
-            'zeromq_pull = wishbone.module.zmqpullin:ZMQPullIn'
+            'testevent = wishbone.module.testevent:TestEvent'
         ],
         'wishbone.output': [
-            'amqp = wishbone.module.amqpout:AMQPOut',
-            'disk = wishbone.module.diskout:DiskOut',
-            'elasticsearch = wishbone.module.elasticsearchout:ElasticSearchOut',
-            'email = wishbone.module.emailout:EmailOut',
-            'file = wishbone.module.fileout:FileOut',
-            'http = wishbone.module.httpoutclient:HTTPOutClient',
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
-            'syslog = wishbone.module.wbsyslog:Syslog',
-            'tcp = wishbone.module.tcpout:TCPOut',
-            'udp = wishbone.module.udpout:UDPOut',
-            'uds = wishbone.module.udsout:UDSOut',
-            'sse = wishbone.module.sse:ServerSentEvents',
-            'zeromq_topic = wishbone.module.zmqtopicout:ZMQTopicOut',
-            'zeromq_push = wishbone.module.zmqpushout:ZMQPushOut'
-        ],
-        'wishbone.contrib.flow': [
-        ],
-        'wishbone.contrib.encode': [
-        ],
-        'wishbone.contrib.decode': [
-        ],
-        'wishbone.contrib.function': [
-        ],
-        'wishbone.contrib.input': [
-        ],
-        'wishbone.contrib.output': [
+            'syslog = wishbone.module.wbsyslog:Syslog'
         ]
     }
 )

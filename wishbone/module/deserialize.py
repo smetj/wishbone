@@ -23,21 +23,28 @@
 #
 
 from wishbone import Actor
+from wishbone.event import Bulk
 
 
 class Deserialize(Actor):
 
-    '''**Creates new events from an array.**
+    '''**Deserializes Bulk events or arrays.**
 
-    Takes an array and creates a new event out of each item of the array.
+    When incoming data is a Bulk object the content will be forwarded as
+    single events again.
+
+    When the incoming data is a single and <source> is a list/array a new
+    event is created from each element of the array.
 
     Parameters:
 
         - source(str)("@data")
            |  The source of the array.
+           |  (Ignored when incoming type is Bulk)
 
         - destination(str)("@data")
            |  The destination key to store the array item.
+           |  (Ignored when incoming type is Bulk)
 
     Queues:
 
@@ -58,14 +65,19 @@ class Deserialize(Actor):
 
     def consume(self, event):
 
-        data = event.get(self.kwargs.source)
-
-        if isinstance(data, list):
-            for item in data:
-                e = event.clone()
-                e.set(True, "@tmp.%s.generated_by" % (self.name))
-                e.set("", self.kwargs.destination)
-                e.set(item, self.kwargs.destination)
+        if isinstance(event, Bulk):
+            for e in event.dump():
                 self.submit(e, self.pool.queue.outbox)
+            self.logging.debug("Expanded Bulk event into %s events." % (event.size()))
         else:
-            raise Exception("%s does not appear to contain an array." % (self.kwargs.source))
+            data = event.get(self.kwargs.source)
+
+            if isinstance(data, list):
+                for item in data:
+                    e = event.clone()
+                    e.set(True, "@tmp.%s.generated_by" % (self.name))
+                    e.set("", self.kwargs.destination)
+                    e.set(item, self.kwargs.destination)
+                    self.submit(e, self.pool.queue.outbox)
+            else:
+                raise Exception("%s does not appear to contain an array." % (self.kwargs.source))

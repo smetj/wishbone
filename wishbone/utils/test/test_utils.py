@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_module_graphite.py
+#  utils.py
 #
 #  Copyright 2016 Jelle Smet <development@smetj.net>
 #
@@ -22,27 +22,17 @@
 #
 #
 
-from wishbone.event import Event
-from wishbone.module.graphite import Graphite
-from wishbone.actor import ActorConfig
-from utils import getter
-from wishbone.event import Metric
+from wishbone.error import QueueEmpty
+from gevent import sleep
 
-
-def test_module_graphite():
-
-    actor_config = ActorConfig('graphite', 100, 1, {}, "")
-    graphite = Graphite(actor_config, template='{type}.{source}.{name} {value} {time}')
-    graphite.pool.queue.inbox.disableFallThrough()
-    graphite.pool.queue.outbox.disableFallThrough()
-    graphite.start()
-
-    e = Event('test')
-    m = Metric(1381002603.726132, "wishbone", "hostname", "queue.outbox.in_rate", 0, "", ())
-    e.set(m)
-
-    graphite.pool.queue.inbox.put(e)
-    one = getter(graphite.pool.queue.outbox)
-
-    assert one.get() == "wishbone.hostname.queue.outbox.in_rate 0 1381002603.73"
-
+def getter(queue):
+    counter = 0
+    while True:
+        counter += 1
+        if counter >= 5:
+            raise Exception("No event from queue")
+        else:
+            try:
+                return queue.get(block=False)
+            except QueueEmpty:
+                sleep(0.1)

@@ -16,13 +16,13 @@ Wishbone `servers`_ are started with bootstrap file:
     $ wishbone start --config eventprocessor.yaml
 
 
-`Bootstrap files`_ define the modules_ to initialize and how these should be
+`Bootstrap files`_ define the `builtin`_ and `external`_ modules to initialize and how these should be
 connected to each other:
 
 .. image:: intro.png
     :align: right
 
-.. literalinclude:: static/test_setup.yaml
+.. literalinclude:: static/examples/test_setup.yaml
    :language: yaml
 
 
@@ -79,5 +79,6 @@ Running a server:
 
 
 .. _servers: server/index.html
-.. _modules: modules/builtin%20modules.html
+.. _builtin: modules/builtin%20modules.html
+.. _external: modules/external%20modules.html
 .. _Bootstrap files: server/bootstrap%20files.html
