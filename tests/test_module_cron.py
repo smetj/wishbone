@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_module_msgpackencode.py
+#  test_module_cron.py
 #
 #  Copyright 2016 Jelle Smet <development@smetj.net>
 #
@@ -23,22 +23,19 @@
 #
 
 from wishbone.event import Event
-from wishbone.module.msgpackencode import MSGPackEncode
+from wishbone.module.cron import Cron
 from wishbone.actor import ActorConfig
 from utils import getter
 
 
-def test_module_msgpackencode():
+def test_module_cron_default():
 
-    actor_config = ActorConfig('msgpackencode', 100, 1, {}, "")
-    msgpackencode = MSGPackEncode(actor_config)
+    actor_config = ActorConfig('cron', 100, 1, {}, "")
+    cron = Cron(actor_config, '*/1 * * * *')
+    cron.pool.queue.outbox.disableFallThrough()
+    cron.start()
 
-    msgpackencode.pool.queue.inbox.disableFallThrough()
-    msgpackencode.pool.queue.outbox.disableFallThrough()
-    msgpackencode.start()
+    one = getter(cron.pool.queue.outbox)
+    cron.stop()
 
-    e = Event([1, 2, 3])
-
-    msgpackencode.pool.queue.inbox.put(e)
-    one = getter(msgpackencode.pool.queue.outbox)
-    assert one.get() == '\x93\x01\x02\x03'
+    assert one.get() == "wishbone"

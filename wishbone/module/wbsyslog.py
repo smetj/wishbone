@@ -24,6 +24,7 @@
 
 from wishbone import Actor
 from wishbone.event import Log
+from wishbone.event import Bulk
 import syslog
 import sys
 import os
@@ -45,10 +46,10 @@ class Syslog(Actor):
            |  The part of the event to submit externally.
            |  Use an empty string to refer to the complete event.
 
-        - level(int)(5)
+        - level(int)(5)*
            |  The loglevel.
 
-        - ident(str)(<script_name>)
+        - ident(str)(<script_name>)*
            |  The syslog id string.
            |  If not provided the script name is used.
 
@@ -70,7 +71,12 @@ class Syslog(Actor):
 
     def consume(self, event):
 
-        d = event.get(self.kwargs.selection)
+        if isinstance(event, Bulk):
+            data = event.dumpFieldAsString(self.kwargs.selection)
+        else:
+            data = str(event.get(self.kwargs.selection))
+
+        d = event.get(data)
         if isinstance(d, Log):
             syslog.syslog(d.level, "%s: %s" % (d.module, d.message))
         else:

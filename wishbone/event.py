@@ -24,9 +24,72 @@
 
 import arrow
 import time
+from wishbone.error import BulkFull, InvalidData
 
 EVENT_RESERVED = ["@timestamp", "@version", "@data", "@tmp", "@errors"]
 
+
+class Bulk(object):
+
+    def __init__(self, max_size=None, delimiter="\n"):
+        self.__events = []
+        self.max_size = max_size
+
+    def append(self, event):
+        '''
+        Appends an event to the bulk object.
+        '''
+
+        if isinstance(event, Event):
+            if self.max_size is None or len(self.__events) < self.max_size:
+                self.__events.append(event)
+            else:
+                    raise BulkFull("Max number of events (%s) is reached." % (self.max_size))
+        else:
+            raise InvalidData()
+
+    def dump(self):
+        '''
+        Returns an iterator returning all contained events
+        '''
+
+        for event in self.__events:
+            yield event
+
+    def dumpFieldAsList(self, field="@data"):
+        '''
+        Returns a list containing a specific field of each stored event.
+        Events with a missing field are skipped.
+        '''
+
+        result = []
+        for event in self.dump():
+            try:
+                result.append(event.get(field))
+            except KeyError:
+                pass
+        return result
+
+    def dumpFieldAsString(self, field="@data"):
+        '''
+        Returns a string joining <field> of each event with <self.delimiter>.
+        Events with a missing field are skipped.
+        '''
+
+        result = []
+        for event in self.dump():
+            try:
+                result.append(event.get(field))
+            except KeyError:
+                pass
+        return self.kwargs.delimiter.join(result)
+
+    def size(self):
+        '''
+        Returns the number of elements stored in the bulk.
+        '''
+
+        return len(self.__events)
 
 class Log(object):
 
