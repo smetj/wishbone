@@ -1,7 +1,7 @@
 Wishbone changelog
 ==================
 
-Version 2.1.2
+Version 2.1.3
 ~~~~~~~~~~~~~
 
 Features:
@@ -46,6 +46,11 @@ Moved many buildin modules to separate package/release on Github.
 - moved wishbone-output-uds to Github as a separate module.
 - moved wishbone-output-zmqpush to Github as a separate module.
 - moved wishbone-output-zmqtopic to Github as a separate module.
+
+Version 2.1.2
+~~~~~~~~~~~~~
+
+Skipped due to upload done to pypi by accident.
 
 
 Version 2.1.1
