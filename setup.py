@@ -39,7 +39,7 @@ install_requires = ['gevent==1.1',
                     'colorama==0.3.3',
                     'arrow==0.6.0',
                     'importlib==1.0.3',
-                    'uplook==0.4.1',
+                    'uplook==0.4.2',
                     'cronex==0.1.0']
 
 dependency_links = [
