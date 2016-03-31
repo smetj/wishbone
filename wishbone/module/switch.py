@@ -40,7 +40,7 @@ class Switch(Actor):
     Forwards or drops incoming events depending on the value of <switch>.
     When True, events are forwarded otherwise they're simply dropped.
 
-    The value of <switch> can be set with a lookup value or by sending an event to the <switch> queue with a value stored under *@tmp.<instance_name>.switch*
+    The value of <switch> can be set with a lookup value or by sending an event to the <switch> queue with a value stored under *@data*
 
 
     Parameters:
@@ -97,13 +97,13 @@ class Switch(Actor):
         prefix = "<switch> queue received event"
 
         try:
-            name = event.get("@tmp.%s.switch" % (self.name))
+            name = event.get("@data")
             if self.pool.hasQueue(name):
                 self.kwargs.outgoing = name
-                self.logging.info("%s. Outgoing messages forwarded to queue '%s'." % (prefix, event.get('@tmp.<%s>.switch')))
+                self.logging.info("%s. Outgoing messages forwarded to queue '%s'." % (prefix, name))
             else:
-                self.logging.error("%s but module has no queue named '%s'." % (prefix, event.get('@tmp.<%s>.switch')))
+                self.logging.error("%s but module has no queue named '%s'." % (prefix, name))
         except KeyError:
-            self.logging.error("%s but has no value key %s." % (prefix, event.get('@tmp.<%s>.switch')))
+            self.logging.error("%s but has no value key @data." % (prefix))
         else:
-            self.logging.info("Switching outgoing queue to '%s' based on event arriving to the 'switch' queue.")
+            self.logging.info("Switching outgoing queue to '%s' based on event arriving to the 'switch' queue.", name)
