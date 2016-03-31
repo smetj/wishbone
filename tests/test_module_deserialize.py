@@ -25,7 +25,7 @@
 from wishbone.event import Event
 from wishbone.module.deserialize import Deserialize
 from wishbone.actor import ActorConfig
-from utils import getter
+from wishbone.utils.test import getter
 
 
 def test_module_deserialize_deserialize():
