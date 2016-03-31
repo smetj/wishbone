@@ -26,14 +26,6 @@ from uplook.errors import NoSuchValue
 class EventLookup():
     pass
 
-
-
-
-
-
-
-
-
 def choice(values):
     '''Returns a random element from the provided array.
 
@@ -57,7 +49,6 @@ def choice(values):
         return choice_array(values)
 
     return lookup
-
 
 def cycle(values):
     '''Cycles through the provided array returning the next element.
@@ -83,7 +74,6 @@ def cycle(values):
 
     return lookup
 
-
 def etcd(base="http://127.0.0.1:2379/v2/keys"):
 
     import requests
@@ -100,7 +90,6 @@ def etcd(base="http://127.0.0.1:2379/v2/keys"):
         except Exception as err:
             raise NoSuchValue(str(err))
     return etcdLookup
-
 
 def event():
     '''Returns the requested event header value.
@@ -121,7 +110,6 @@ def event():
     '''
 
     return EventLookup()
-
 
 def randombool():
     '''Returns True or False.
@@ -144,7 +132,6 @@ def randombool():
 
     return randomBool
 
-
 def randominteger(min=0, max=100):
     '''Returns a random integer.
 
@@ -165,7 +152,6 @@ def randominteger(min=0, max=100):
         return randint(min, max)
 
     return randomInteger
-
 
 def randomword(filename=None):
     '''Returns a random word.
@@ -207,7 +193,6 @@ def randomword(filename=None):
                     pass
 
     return RandomWord(filename).pickWord
-
 
 def uuid():
     '''Returns a uuid value.
