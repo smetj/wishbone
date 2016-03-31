@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '2.1.3'
+VERSION = '2.1.4'
 
 install_requires = ['gevent==1.1',
                     'greenlet==0.4.9',
@@ -107,6 +107,7 @@ setup(
             'fresh = wishbone.module.fresh:Fresh',
             'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
+            'switch = wishbone.module.switch:Switch',
             'tippingbucket = wishbone.module.tippingbucket:TippingBucket',
             'ttl = wishbone.module.ttl:TTL'
         ],
