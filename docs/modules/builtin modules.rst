@@ -82,6 +82,12 @@ wishbone.flow.roundrobin
 
 --------
 
+wishbone.flow.switch
+---------------------------
+.. autoclass:: wishbone.module.switch.Switch
+
+--------
+
 wishbone.flow.tippingbucket
 ---------------------------
 .. autoclass:: wishbone.module.tippingbucket.TippingBucket
