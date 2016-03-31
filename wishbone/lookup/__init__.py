@@ -89,6 +89,7 @@ def randomword(filename=None):
 
     return RandomWord(filename).pickWord
 
+
 def choice(values):
     '''Returns a random element from the provided array.
 
@@ -112,6 +113,32 @@ def choice(values):
         return choice_array(values)
 
     return lookup
+
+
+def cycle(values):
+    '''Cycles through the provided array returning the next element.
+
+    This function rotates through the elements in the provided array always
+    returning the next element.  The order is fixed and when the end is
+    reached the first element is returned again.
+
+    - Parameters to initialize the function:
+
+        - values(list)(None): An array of elements to cycle through/
+
+    - Parameters to call the function:
+
+        None
+    '''
+    from itertools import cycle as cycle_array
+    c = cycle_array(values)
+
+    def lookup():
+
+        return c.next()
+
+    return lookup
+
 
 def randombool():
     '''Returns True or False.
