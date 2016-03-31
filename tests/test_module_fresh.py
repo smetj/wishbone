@@ -25,7 +25,7 @@
 from wishbone.event import Event
 from wishbone.module.fresh import Fresh
 from wishbone.actor import ActorConfig
-from utils import getter
+from wishbone.utils.test import getter
 from gevent import sleep
 
 

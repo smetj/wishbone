@@ -25,7 +25,7 @@
 
 from wishbone.module.dictgenerator import DictGenerator
 from wishbone.actor import ActorConfig
-from utils import getter
+from wishbone.utils.test import getter
 
 
 def test_module_dictgenerator_keys():

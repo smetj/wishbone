@@ -26,7 +26,7 @@ from wishbone.event import Event
 from wishbone.event import Log
 from wishbone.module.humanlogformat import HumanLogFormat
 from wishbone.actor import ActorConfig
-from utils import getter
+from wishbone.utils.test import getter
 
 
 def test_module_humanlogformat():
