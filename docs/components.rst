@@ -43,11 +43,18 @@ Components
 .. autoclass:: wishbone.event.Metric
     :members:
 
-.. autofunction:: wishbone.lookup.event
+.. autofunction:: wishbone.lookup.choice
 
-.. autofunction:: wishbone.lookup.randomword
+.. autofunction:: wishbone.lookup.cycle
+
+.. autofunction:: wishbone.lookup.etcd
+
+.. autofunction:: wishbone.lookup.event
 
 .. autofunction:: wishbone.lookup.randombool
 
 .. autofunction:: wishbone.lookup.randominteger
 
+.. autofunction:: wishbone.lookup.randomword
+
+.. autofunction:: wishbone.lookup.uuid
