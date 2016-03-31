@@ -25,7 +25,7 @@
 from wishbone.event import Event
 from wishbone.module.modify import Modify
 from wishbone.actor import ActorConfig
-from utils import getter
+from wishbone.utils.test import getter
 
 
 def get_actor(expression):
