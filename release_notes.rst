@@ -1,6 +1,17 @@
 Wishbone changelog
 ==================
 
+Version 2.1.4
+~~~~~~~~~~~~~
+
+Features:
+
+- Added builtin module wishbone.flow.switch
+- Added lookup value "choice"
+- Added lookup value "cycle"
+- Updated uplook to 1.4.2
+
+
 Version 2.1.3
 ~~~~~~~~~~~~~
 
