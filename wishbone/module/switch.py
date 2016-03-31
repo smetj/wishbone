@@ -34,20 +34,14 @@ class Switch(Actor):
 
     Forwards incoming events to the queue with name <outgoing>.
 
-    The value of <outgoing> can be set using a lookup function or by sending an event to
-
-
-    Forwards or drops incoming events depending on the value of <switch>.
-    When True, events are forwarded otherwise they're simply dropped.
-
-    The value of <switch> can be set with a lookup value or by sending an event to the <switch> queue with a value stored under *@data*
+    The value of <outgoing> can be set with a lookup value or by sending an
+    event to the <switch> queue with a value stored under *@data*.
 
 
     Parameters:
 
-        - switch(bool)(True)*
-            |  When <True> events are forwarded to <outbox>.
-            |  When <False> events are dropped.
+        - outgoing(str)("outbox")*
+            |  The name of the queue to submit incoming events to.
 
 
     Queues:
