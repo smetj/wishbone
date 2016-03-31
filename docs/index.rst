@@ -22,7 +22,7 @@ connected to each other:
 .. image:: intro.png
     :align: right
 
-.. literalinclude:: static/test_setup.yaml
+.. literalinclude:: static/examples/test_setup.yaml
    :language: yaml
 
 
