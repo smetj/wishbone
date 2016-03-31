@@ -74,6 +74,7 @@ class Switch(Actor):
         self.pool.createQueue("inbox")
         self.pool.createQueue("switch")
         self.pool.createQueue("outbox")
+        self.pool.queue.switch.disableFallThrough()
         self.registerConsumer(self.consume, "inbox")
         self.registerConsumer(self.switch, "switch")
 
@@ -95,7 +96,6 @@ class Switch(Actor):
     def switch(self, event):
 
         prefix = "<switch> queue received event"
-
         try:
             name = event.get("@data")
             if self.pool.hasQueue(name):
