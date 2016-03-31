@@ -89,6 +89,29 @@ def randomword(filename=None):
 
     return RandomWord(filename).pickWord
 
+def choice(values):
+    '''Returns a random element from the provided array.
+
+    This function returns a random element from the provided array.
+
+    - Parameters to initialize the function:
+
+        - values(list)(None): An array of elements to choose from
+
+    - Parameters to call the function:
+
+        None
+
+
+    '''
+
+    from random import choice as choice_array
+
+    def lookup():
+
+        return choice_array(values)
+
+    return lookup
 
 def randombool():
     '''Returns True or False.
@@ -133,6 +156,7 @@ def randominteger(min=0, max=100):
 
     return randomInteger
 
+
 def etcd(base="http://127.0.0.1:2379/v2/keys"):
 
     import requests
@@ -149,6 +173,7 @@ def etcd(base="http://127.0.0.1:2379/v2/keys"):
         except Exception as err:
             raise NoSuchValue(str(err))
     return etcdLookup
+
 
 def uuid():
     '''Returns a uuid value.
