@@ -11,6 +11,10 @@ Features:
 - Added lookup value "cycle"
 - Updated uplook to 0.4.2
 
+Bugfix:
+
+- Fix failing error handling with Bulk events.
+
 
 Version 2.1.3
 ~~~~~~~~~~~~~
