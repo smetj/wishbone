@@ -26,6 +26,7 @@ from wishbone.queue import QueuePool
 from wishbone.logging import Logging
 from wishbone.event import Event as Wishbone_Event
 from wishbone.event import Metric
+from wishbone.event import Bulk
 from wishbone.error import QueueConnected, ModuleInitFailure
 from wishbone.lookup import EventLookup
 from uplook.errors import NoSuchValue
@@ -201,7 +202,12 @@ class Actor():
             except Exception as err:
                 exc_type, exc_value, exc_traceback = exc_info()
                 info = (traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value))
-                event.set(info, "@errors.%s" % (self.name))
+
+                if isinstance(event, Wishbone_Event):
+                    event.set(info, "@errors.%s" % (self.name))
+                elif(event, Bulk):
+                    event.error = info
+
                 self.logging.error("%s" % (err))
                 self.submit(event, self.pool.queue.failed)
             else:
