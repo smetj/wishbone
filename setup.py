@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '2.1.3'
+VERSION = '2.1.4'
 
 install_requires = ['gevent==1.1',
                     'greenlet==0.4.9',
@@ -39,7 +39,7 @@ install_requires = ['gevent==1.1',
                     'colorama==0.3.3',
                     'arrow==0.6.0',
                     'importlib==1.0.3',
-                    'uplook==0.4.1',
+                    'uplook==0.4.2',
                     'cronex==0.1.0']
 
 dependency_links = [
@@ -56,7 +56,7 @@ class PyTest(TestCommand):
 
     def finalize_options(self):
         TestCommand.finalize_options(self)
-        self.test_args = []
+        self.test_args = ["tests/"]
         self.test_suite = True
 
     def run_tests(self):
@@ -107,6 +107,7 @@ setup(
             'fresh = wishbone.module.fresh:Fresh',
             'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
+            'switch = wishbone.module.switch:Switch',
             'tippingbucket = wishbone.module.tippingbucket:TippingBucket',
             'ttl = wishbone.module.ttl:TTL'
         ],

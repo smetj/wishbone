@@ -13,10 +13,14 @@ initialized in the `lookups section`_ of the bootstrap file.
 Wishbone comes with a set of builtin lookup modules:
 
 
-- :py:func:`wishbone.lookup.randomword`
+- :py:func:`wishbone.lookup.choice`
+- :py:func:`wishbone.lookup.cycle`
+- :py:func:`wishbone.lookup.etcd`
+- :py:func:`wishbone.lookup.event`
 - :py:func:`wishbone.lookup.randombool`
 - :py:func:`wishbone.lookup.randominteger`
-- :py:func:`wishbone.lookup.event`
+- :py:func:`wishbone.lookup.randomword`
+- :py:func:`wishbone.lookup.uuid`
 
 
 **Importing modules**
