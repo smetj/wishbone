@@ -1,6 +1,21 @@
 Wishbone changelog
 ==================
 
+Version 2.1.4
+~~~~~~~~~~~~~
+
+Features:
+
+- Added builtin module wishbone.flow.switch
+- Added lookup value "choice"
+- Added lookup value "cycle"
+- Updated uplook to 0.4.2
+
+Bugfix:
+
+- Fix failing error handling with Bulk events.
+- Fix dumpFieldAsString() method of Bulk object.
+
 Version 2.1.3
 ~~~~~~~~~~~~~
 

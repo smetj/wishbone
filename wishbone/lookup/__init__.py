@@ -26,6 +26,70 @@ from uplook.errors import NoSuchValue
 class EventLookup():
     pass
 
+def choice(values):
+    '''Returns a random element from the provided array.
+
+    This function returns a random element from the provided array.
+
+    - Parameters to initialize the function:
+
+        - values(list)(None): An array of elements to choose from
+
+    - Parameters to call the function:
+
+        None
+
+
+    '''
+
+    from random import choice as choice_array
+
+    def lookup():
+
+        return choice_array(values)
+
+    return lookup
+
+def cycle(values):
+    '''Cycles through the provided array returning the next element.
+
+    This function rotates through the elements in the provided array always
+    returning the next element.  The order is fixed and when the end is
+    reached the first element is returned again.
+
+    - Parameters to initialize the function:
+
+        - values(list)(None): An array of elements to cycle through/
+
+    - Parameters to call the function:
+
+        None
+    '''
+    from itertools import cycle as cycle_array
+    c = cycle_array(values)
+
+    def lookup():
+
+        return c.next()
+
+    return lookup
+
+def etcd(base="http://127.0.0.1:2379/v2/keys"):
+
+    import requests
+
+    base = base.rstrip('/')
+
+    def etcdLookup(key):
+        key = key.lstrip('/')
+
+        try:
+            response = requests.get('%s/%s' % (base, key))
+            response.raise_for_status()
+            return response.json()["node"]["value"]
+        except Exception as err:
+            raise NoSuchValue(str(err))
+    return etcdLookup
 
 def event():
     '''Returns the requested event header value.
@@ -47,6 +111,47 @@ def event():
 
     return EventLookup()
 
+def randombool():
+    '''Returns True or False.
+
+    Returns True or False randomly.
+
+    - Parameters to initialize the function:
+
+        None
+
+    - Parameters to call the function:
+
+        None
+    '''
+
+    from random import getrandbits
+
+    def randomBool():
+        return bool(getrandbits(1))
+
+    return randomBool
+
+def randominteger(min=0, max=100):
+    '''Returns a random integer.
+
+    Returns a random integer between <min> and <max>.
+
+    - Parameters to initialize the function:
+
+        - min(int)(0): The minimum value
+        - max(int)(0): The maximum value
+
+    - Parameters to call the function:
+
+        None
+    '''
+    from random import randint
+
+    def randomInteger():
+        return randint(min, max)
+
+    return randomInteger
 
 def randomword(filename=None):
     '''Returns a random word.
@@ -88,67 +193,6 @@ def randomword(filename=None):
                     pass
 
     return RandomWord(filename).pickWord
-
-
-def randombool():
-    '''Returns True or False.
-
-    Returns True or False randomly.
-
-    - Parameters to initialize the function:
-
-        None
-
-    - Parameters to call the function:
-
-        None
-    '''
-
-    from random import getrandbits
-
-    def randomBool():
-        return bool(getrandbits(1))
-
-    return randomBool
-
-
-def randominteger(min=0, max=100):
-    '''Returns a random integer.
-
-    Returns a random integer between <min> and <max>.
-
-    - Parameters to initialize the function:
-
-        - min(int)(0): The minimum value
-        - max(int)(0): The maximum value
-
-    - Parameters to call the function:
-
-        None
-    '''
-    from random import randint
-
-    def randomInteger():
-        return randint(min, max)
-
-    return randomInteger
-
-def etcd(base="http://127.0.0.1:2379/v2/keys"):
-
-    import requests
-
-    base = base.rstrip('/')
-
-    def etcdLookup(key):
-        key = key.lstrip('/')
-
-        try:
-            response = requests.get('%s/%s' % (base, key))
-            response.raise_for_status()
-            return response.json()["node"]["value"]
-        except Exception as err:
-            raise NoSuchValue(str(err))
-    return etcdLookup
 
 def uuid():
     '''Returns a uuid value.

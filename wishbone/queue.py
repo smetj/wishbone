@@ -84,7 +84,7 @@ class QueuePool():
         try:
             return getattr(self.queue, name)
         except:
-            raise QueueMissing
+            raise QueueMissing("Module has no queue %s." %(name))
 
     def join(self):
         '''Blocks until all queues in the pool are empty.'''

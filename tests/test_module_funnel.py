@@ -25,8 +25,7 @@
 from wishbone.event import Event
 from wishbone.module.funnel import Funnel
 from wishbone.actor import ActorConfig
-
-from utils import getter
+from wishbone.utils.test import getter
 
 
 def test_module_funnel():
