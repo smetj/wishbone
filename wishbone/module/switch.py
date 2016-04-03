@@ -28,21 +28,23 @@ from wishbone.error import ModuleInitFailure, ReservedName
 
 class Switch(Actor):
 
-    '''**Forwards events to the desired queue.**
+    '''**Switch outgoing queues while forwarding events.**
 
-    Forwards events to the desired outgoing queue.
+    Forwards events to the desired outgoing queue based on the value of
+    <outgoing>.
 
-    Forwards incoming events to the queue with name <outgoing>.
+    The value of <outgoing> can be dynamically set in 2 ways:
 
-    The value of <outgoing> can be set with a lookup value or by sending an
-    event to the <switch> queue with a value stored under *@data*.
+        - Using a lookup value.
+
+        - By sending an event to the <switch> queue with the value of
+          <outgoing> stored under *@data*.
 
 
     Parameters:
 
         - outgoing(str)("outbox")*
             |  The name of the queue to submit incoming events to.
-
 
     Queues:
 
