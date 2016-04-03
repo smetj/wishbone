@@ -14,7 +14,7 @@ Features:
 Bugfix:
 
 - Fix failing error handling with Bulk events.
-
+- Fix dumpFieldAsString() method of Bulk object.
 
 Version 2.1.3
 ~~~~~~~~~~~~~
