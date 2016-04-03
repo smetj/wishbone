@@ -34,6 +34,7 @@ class Bulk(object):
     def __init__(self, max_size=None, delimiter="\n"):
         self.__events = []
         self.max_size = max_size
+        self.error = None
 
     def append(self, event):
         '''
@@ -90,6 +91,7 @@ class Bulk(object):
         '''
 
         return len(self.__events)
+
 
 class Log(object):
 
