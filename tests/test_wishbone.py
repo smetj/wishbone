@@ -24,6 +24,7 @@
 
 from wishbone import QueuePool
 from wishbone import Queue
+from wishbone.utils.test import getter
 
 
 def test_listQueues():
