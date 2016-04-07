@@ -38,8 +38,8 @@ class Fanout(Actor):
 
     Queues:
 
-        inbox
-         |  Outgoing events.
+        - inbox:
+           |  Incoming messages
 
     '''
 

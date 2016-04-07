@@ -37,7 +37,8 @@ class Funnel(Actor):
 
     Queues:
 
-        outbox:     Outgoing events.
+        - outbox:
+           |  Outgoing messages
 
     '''
 
