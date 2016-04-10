@@ -116,5 +116,3 @@ class Fresh(Actor):
             sleep(1)
             seconds -= 1
 
-
-
