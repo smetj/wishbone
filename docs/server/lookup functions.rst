@@ -17,6 +17,7 @@ Wishbone comes with a set of builtin lookup modules:
 - :py:func:`wishbone.lookup.cycle`
 - :py:func:`wishbone.lookup.etcd`
 - :py:func:`wishbone.lookup.event`
+- :py:func:`wishbone.lookup.pid`
 - :py:func:`wishbone.lookup.randombool`
 - :py:func:`wishbone.lookup.randominteger`
 - :py:func:`wishbone.lookup.randomword`
