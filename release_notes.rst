@@ -7,6 +7,7 @@ Version 2.1.5
 Features
 
 - wishbone.flow.fresh Added support for repeat and recovery messages
+- Added wishbone.lookup.getpid lookup function
 
 Bugfix:
 
