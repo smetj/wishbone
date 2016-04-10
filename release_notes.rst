@@ -1,6 +1,16 @@
 Wishbone changelog
 ==================
 
+Version 2.1.5
+~~~~~~~~~~~~~
+
+Features
+
+- wishbone.flow.fresh Added support for repeat and recovery messages
+
+Bugfix:
+
+
 Version 2.1.4
 ~~~~~~~~~~~~~
 

@@ -61,4 +61,41 @@ def test_module_fresh_timeout():
     one = getter(fresh.pool.queue.timeout)
     fresh.stop()
 
-    assert one.get() == "wishbone"
+    assert one.get() == "timeout"
+
+def test_module_fresh_recovery():
+
+    actor_config = ActorConfig('fresh', 100, 1, {}, "")
+    fresh = Fresh(actor_config, timeout=1)
+    fresh.pool.queue.inbox.disableFallThrough()
+    fresh.pool.queue.outbox.disableFallThrough()
+    fresh.pool.queue.timeout.disableFallThrough()
+
+    fresh.start()
+    sleep(1)
+    one = getter(fresh.pool.queue.timeout)
+    event = Event("test")
+    fresh.pool.queue.inbox.put(event)
+    sleep(1)
+    two = getter(fresh.pool.queue.timeout)
+    fresh.stop()
+
+    assert two.get() == "recovery"
+
+def test_module_fresh_repeat():
+
+    actor_config = ActorConfig('fresh', 100, 1, {}, "")
+    fresh = Fresh(actor_config, timeout=1, repeat_interval=1)
+    fresh.pool.queue.inbox.disableFallThrough()
+    fresh.pool.queue.outbox.disableFallThrough()
+    fresh.pool.queue.timeout.disableFallThrough()
+
+    fresh.start()
+    sleep(1)
+    getter(fresh.pool.queue.timeout)
+    sleep(1.5)
+    one = getter(fresh.pool.queue.timeout)
+    fresh.stop()
+
+    assert one.get() == "timeout"
+
