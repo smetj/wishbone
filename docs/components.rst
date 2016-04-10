@@ -51,6 +51,8 @@ Components
 
 .. autofunction:: wishbone.lookup.event
 
+.. autofunction:: wishbone.lookup.getpid
+
 .. autofunction:: wishbone.lookup.randombool
 
 .. autofunction:: wishbone.lookup.randominteger
