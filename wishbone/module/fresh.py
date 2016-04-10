@@ -31,25 +31,29 @@ class Fresh(Actor):
 
     '''**Generates a new event unless an event came through in the last x time.**
 
-    This module just forwards events without modifying them. The moment a
-    message is forwarded, the time counter is reset to its defined <timeout>
-    value. If however the counter expires because no new messages have passed
-    through in x time, a new message is generated with the defined <payload>.
+    This module forwards events without modifying them. If an event has been
+    forwarded it resets the timeout counter back to <timeout>.  If the timeout
+    counter reaches zero because no messages have passed through, an event
+    with <timeout_payload> is generated and submitted to the module's
+    <timeout> queue.  When the a timeout_payload has been sent and the event
+    stream recovers, a new event with <recovery_payload> is generated and
+    submitted to the <timeout> queue.
 
     Parameters:
 
-        - payload(int/float/str/obj/list/...)("wishbone")
-           |  The data a generated event must contain.
+        - timeout_payload(int/float/str/obj/list/...)("timeout")
+           |  The data a timeout event contains.
 
-        - key(str)("@data")
-           |  The location to store <payload>
+        - recovery_payload(int/float/str/obj/list/...)("recovery")
+            |  The data a recovery event contains
 
         - timeout(int)(60)
-           |  The time in seconds Puts an incremental number for each event in front
-           |  of each event.
+           |  The max time in seconds allowed to not to receive events.
 
-        - payload_queue(str)("timeout")
-           |  The name of the queue to submit the newly generated event to.
+        - repeat_interval(int)(60)
+
+           |  The interval time to resend the <payload> event in case
+           |  <timeout> has expired and
 
     Queues:
 
@@ -59,18 +63,19 @@ class Fresh(Actor):
         - inbox
            |  Incoming events.
 
-        - <payload_queue>
-           |  Newly generated events due to timeout.
+        - timeout
+           |  timeout and recovery events.
     '''
 
-    def __init__(self, actor_config, payload="wishbone", key="@data", timeout=60, payload_queue="timeout"):
+    def __init__(self, actor_config, timeout_payload="timeout", recovery_payload="recovery", timeout=60, repeat_interval=60):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
-        self.pool.createQueue(self.kwargs.payload_queue)
+        self.pool.createQueue("timeout")
         self.registerConsumer(self.consume, "inbox")
         self._counter = self.kwargs.timeout
+        self._incoming = False
 
     def preHook(self):
 
@@ -88,12 +93,28 @@ class Fresh(Actor):
                 self._counter -= 1
                 sleep(1)
             else:
+                self.logging.info("Timeout of %s seconds expired.  Generated timeout event.")
+                self._incoming = False
+                while self.loop() and not self._incoming:
+                    e = Event()
+                    e.set(self.kwargs.timeout_payload)
+                    self.submit(e, self.pool.queue.timeout)
+                    self._sleeper(self.kwargs.repeat_interval)
+                self.logging.info("Incoming data resumed. Sending recovery event.")
                 e = Event()
-                e.set(self.kwargs.payload, self.kwargs.key)
-                self.submit(e, getattr(self.pool.queue, self.kwargs.payload_queue))
-                self.logging.info("Timeout of %s seconds expired.  Generting event and submit to queue %s." % (self.kwargs.timeout, self.kwargs.payload_queue))
-                self._resetTimeout()
+                e.set(self.kwargs.recovery_payload)
+                self.submit(e, self.pool.queue.timeout)
 
     def _resetTimeout(self):
 
         self._counter = self.kwargs.timeout
+        self._incoming = True
+
+    def _sleeper(self, seconds):
+
+        while self.loop() and seconds > 0 and not self._incoming:
+            sleep(1)
+            seconds -= 1
+
+
+
