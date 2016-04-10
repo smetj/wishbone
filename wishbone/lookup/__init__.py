@@ -111,6 +111,26 @@ def event():
 
     return EventLookup()
 
+def pid():
+    '''Returns the PID of the current process.
+
+    - Parameters to initialize the function:
+
+        None
+
+    - Parameters to call the function:
+
+        None
+    '''
+
+    from os import getpid
+
+    def getPid():
+
+        return getpid()
+
+    return getPid
+
 def randombool():
     '''Returns True or False.
 
