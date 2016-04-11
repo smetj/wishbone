@@ -93,7 +93,7 @@ class Fresh(Actor):
                 self._counter -= 1
                 sleep(1)
             else:
-                self.logging.info("Timeout of %s seconds expired.  Generated timeout event.")
+                self.logging.info("Timeout of %s seconds expired.  Generated timeout event." % (self.kwargs.timeout))
                 self._incoming = False
                 while self.loop() and not self._incoming:
                     e = Event()
@@ -115,4 +115,3 @@ class Fresh(Actor):
         while self.loop() and seconds > 0 and not self._incoming:
             sleep(1)
             seconds -= 1
-
