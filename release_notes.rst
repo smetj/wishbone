@@ -8,6 +8,8 @@ Features
 
 - wishbone.flow.fresh Added support for repeat and recovery messages
 - Added wishbone.lookup.getpid lookup function
+- Switched to UpLook 0.4.3
+- Switched to gevent 1.1.1
 
 Bugfix:
 
