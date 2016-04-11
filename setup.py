@@ -29,7 +29,7 @@ import sys
 PROJECT = 'wishbone'
 VERSION = '2.1.4'
 
-install_requires = ['gevent==1.1',
+install_requires = ['gevent==1.1.1',
                     'greenlet==0.4.9',
                     'argparse==1.3.0',
                     'prettytable==0.7.2',
@@ -39,7 +39,7 @@ install_requires = ['gevent==1.1',
                     'colorama==0.3.3',
                     'arrow==0.6.0',
                     'importlib==1.0.3',
-                    'uplook==0.4.2',
+                    'uplook==0.4.3',
                     'cronex==0.1.0']
 
 dependency_links = [
