@@ -2,7 +2,7 @@ arrow==0.6.0
 colorama==0.3.3
 cronex==0.1.0
 functools32==3.2.3.post2
-gevent==1.1.0
+gevent==1.1.1
 greenlet==0.4.9
 importlib==1.0.3
 jsonschema==2.5.1
@@ -12,5 +12,5 @@ python-daemon==1.6
 python-dateutil==2.5.2
 PyYAML==3.11
 six==1.10.0
-uplook==0.4.2
+uplook==0.4.3
 wishbone==2.1.4
