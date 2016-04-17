@@ -101,5 +101,3 @@ class Switch(Actor):
                 self.logging.error("%s but module has no queue named '%s'." % (prefix, name))
         except KeyError:
             self.logging.error("%s but has no value key @data." % (prefix))
-        else:
-            self.logging.info("Switching outgoing queue to '%s' based on event arriving to the 'switch' queue.", name)
