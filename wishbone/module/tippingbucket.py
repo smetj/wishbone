@@ -56,14 +56,14 @@ class TippingBucket(Actor):
     Queues:
 
         - inbox
-           |  A description of the queue
+           |  Incoming events
 
         - outbox
-           |  A description of the queue
+           |  Outgoing bulk events
 
         - flush
-           |  Flushes the Bulk on receive messages despite the bulk being full
-           |  or expired.
+           |  Flushes the buffer on incoming events despite the bulk being
+           |  full (bucket_size) or expired (bucket_age).
 
     '''
 
