@@ -1,1 +1,1 @@
-wishbone==2.1.3
+wishbone==2.1.5
