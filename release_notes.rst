@@ -11,8 +11,6 @@ Features
 - Switched to UpLook 0.4.3
 - Switched to gevent 1.1.1
 
-Bugfix:
-
 
 Version 2.1.4
 ~~~~~~~~~~~~~
