@@ -72,7 +72,7 @@ class RoundRobin(Actor):
         self.submit(event, queue)
 
     def __chooseNextQueue(self):
-        return self.cycle.next()
+        return next(self.cycle)
 
     def __chooseRandomQueue(self):
         index = randint(0, len(self.destination_queues)-1)

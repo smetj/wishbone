@@ -112,7 +112,7 @@ class Actor():
         '''Returns the queue name <queue> is connected to.'''
 
         if queue is None:
-            return [self.__children[q] for q in self.__children.keys()]
+            return [self.__children[q] for q in list(self.__children.keys())]
         else:
             return self.__children[queue]
 
@@ -217,8 +217,7 @@ class Actor():
 
         self.__current_event = {}
         args = {}
-
-        for key, value in inspect.currentframe(2).f_locals.iteritems():
+        for key, value in list(inspect.getouterframes(inspect.currentframe())[2][0].f_locals.items()):
             if key == "self" or isinstance(value, ActorConfig):
                 next
             else:
@@ -244,7 +243,7 @@ class Actor():
         hostname = socket.gethostname()
         while self.loop():
             for queue in self.pool.listQueues(names=True):
-                for metric, value in self.pool.getQueue(queue).stats().iteritems():
+                for metric, value in list(self.pool.getQueue(queue).stats().items()):
                     metric = Metric(time=time(),
                                     type="wishbone",
                                     source=hostname,

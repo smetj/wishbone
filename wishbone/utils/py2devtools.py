@@ -46,7 +46,7 @@ class Node(object):
         res = {
             'functionName': self.name,
             'hitCount': self.hitCount,
-            'children': [c.serialize() for c in self.children.values()],
+            'children': [c.serialize() for c in list(self.children.values())],
             'scriptId': '1',
             'url': '',
             'lineNumber': 1,
@@ -126,18 +126,18 @@ class Profiler(object):
     def __enter__(self):
         sys.setprofile(self._profile)
         self.started = timeit.default_timer()
-        print ""
-        print "########################################"
-        print "#                                      #"
-        print "# Wishbone is running in profile mode. #"
-        print "# This has a performance impact.       #"
-        print "#                                      #"
-        print "########################################"
-        print ""
+        print("")
+        print("########################################")
+        print("#                                      #")
+        print("# Wishbone is running in profile mode. #")
+        print("# This has a performance impact.       #")
+        print("#                                      #")
+        print("########################################")
+        print("")
 
     def __exit__(self, type, value, traceback):
         sys.setprofile(None)
         filename = './wishbone_%s_.cpuprofile' % getpid()
         with open(filename, 'w') as f:
             f.write(self.output())
-            print "Written profile file '%s'." % (filename)
+            print("Written profile file '%s'." % (filename))

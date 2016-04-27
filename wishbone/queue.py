@@ -54,7 +54,7 @@ class QueuePool():
         else:
             blacklist = ['failed', 'success', 'logs', 'metrics']
 
-        for m in self.queue.__dict__.keys():
+        for m in list(self.queue.__dict__.keys()):
             if m not in blacklist:
                 if not names:
                     yield getattr(self.queue, m)
