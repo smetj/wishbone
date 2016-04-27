@@ -46,7 +46,7 @@ class ModulePool():
     def list(self):
         '''Returns a generator returning all module instances.'''
 
-        for m in self.module.__dict__.keys():
+        for m in list(self.module.__dict__.keys()):
             yield self.module.__dict__[m]
 
     def getModule(self, name):
@@ -185,10 +185,10 @@ class Default(multiprocessing.Process):
 
         lookup_modules = {}
 
-        for name, instance in self.config.lookups.iteritems():
+        for name, instance in self.config.lookups.items():
             lookup_modules[name] = self.__registerLookupModule(instance.module, **instance.arguments)
 
-        for name, instance in self.config.modules.iteritems():
+        for name, instance in self.config.modules.items():
             pmodule = self.module_manager.getModuleByName(instance.module)
 
             if instance.description == "":
@@ -281,11 +281,11 @@ class GraphWebserver():
 
     def start(self):
 
-        print "#####################################################"
-        print "#                                                   #"
-        print "# Caution: Started webserver on port 8088           #"
-        print "#                                                   #"
-        print "#####################################################"
+        print("#####################################################")
+        print("#                                                   #")
+        print("# Caution: Started webserver on port 8088           #")
+        print("#                                                   #")
+        print("#####################################################")
         spawn(self.setupWebserver)
 
     def stop(self):

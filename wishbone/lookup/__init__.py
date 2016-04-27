@@ -70,7 +70,7 @@ def cycle(values):
 
     def lookup():
 
-        return c.next()
+        return next(c)
 
     return lookup
 
@@ -199,7 +199,7 @@ def randomword(filename=None):
             self.wordlist = self.readWordlist()
 
         def readWordlist(self):
-            with open("%s/../data/wordlist.txt" % (os.path.dirname(__file__))) as f:
+            with open("%s/../data/wordlist.txt" % (os.path.dirname(__file__)), encoding="utf8") as f:
                 return f.readlines()
 
         def pickWord(self):
@@ -208,7 +208,7 @@ def randomword(filename=None):
             while True:
                 word = choice(self.wordlist).rstrip()
                 try:
-                    return word.encode("ascii", "ignore")
+                    return word.encode("latin-1", "ignore")
                 except:
                     pass
 

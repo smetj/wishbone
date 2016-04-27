@@ -13,7 +13,7 @@ __all__ = ['AttrDict', 'merge']
 
 
 # Python 2
-PY2, STRING = (True, basestring) if version_info < (3,) else (False, str)
+PY2, STRING = (True, str) if version_info < (3,) else (False, str)
 
 
 class AttrDict(MutableMapping):
@@ -49,7 +49,7 @@ class AttrDict(MutableMapping):
 
         self.__setattr__('_mapping', mapping, force=True)
 
-        for key, value in mapping.iteritems() if PY2 else mapping.items():
+        for key, value in iter(mapping.items()) if PY2 else list(mapping.items()):
             if self._valid_name(key):
                 setattr(self, key, value)
 
@@ -68,21 +68,21 @@ class AttrDict(MutableMapping):
         In python 2.X returns a list of (key, value) pairs as 2-tuples.
         In python 3.X returns an iterator over the (key, value) pairs.
         """
-        return self._mapping.items()
+        return list(self._mapping.items())
 
     def keys(self):
         """
         In python 2.X returns a list of keys in the mapping.
         In python 3.X returns an iterator over the mapping's keys.
         """
-        return self._mapping.keys()
+        return list(self._mapping.keys())
 
     def values(self):
         """
         In python 2.X returns a list of values in the mapping.
         In python 3.X returns an iterator over the mapping's values.
         """
-        return self._mapping.values()
+        return list(self._mapping.values())
 
     def _set(self, key, value):
         """
@@ -244,7 +244,7 @@ class AttrDict(MutableMapping):
         """
         Create a string representation of the AttrDict.
         """
-        return u"AttrDict({0})".format(repr(self._mapping))
+        return "AttrDict({0})".format(repr(self._mapping))
 
     def __missing__(self, key):
         """
@@ -317,7 +317,7 @@ class AttrDict(MutableMapping):
             """
             Iterate over (key, value) 2-tuples in the mapping
             """
-            for key, value in self._mapping.iteritems():
+            for key, value in self._mapping.items():
                 if isinstance(value, dict):
                     yield key, self._build(value, recursive=self._recursive)
                 else:
@@ -327,13 +327,13 @@ class AttrDict(MutableMapping):
             """
             Iterate over keys in the mapping
             """
-            return self._mapping.iterkeys()
+            return iter(self._mapping.keys())
 
         def itervalues(self):
             """
             Iterate over values in the mapping
             """
-            for value in self._mapping.itervalues():
+            for value in self._mapping.values():
                 if isinstance(value, dict):
                     yield self._build(value, recursive=self._recursive)
                 else:
@@ -392,7 +392,7 @@ def load(*filenames, **kwargs):
     load_function = kwargs.pop('load_function', json.load)
 
     if kwargs:
-        raise TypeError("unknown options: {0}".format(kwargs.keys()))
+        raise TypeError("unknown options: {0}".format(list(kwargs.keys())))
 
     settings = AttrDict()
 

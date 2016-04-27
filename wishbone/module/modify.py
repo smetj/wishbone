@@ -263,9 +263,9 @@ class Modify(Actor):
     def __extractExpr(self, e):
 
         assert isinstance(e, dict), "The expression should be a dict."
-        assert len(e.keys()) == 1, "The expression should only contain 1 value"
+        assert len(list(e.keys())) == 1, "The expression should only contain 1 value"
 
-        c = e.keys()[0]
+        c = list(e.keys())[0]
         assert c in VALID_EXPRESSIONS, "'%s' is an invalid expression." % c
 
         assert isinstance(e[c], list), "The expression value must be a list."
