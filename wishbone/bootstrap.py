@@ -178,17 +178,17 @@ class Dispatch():
             version = module_manager.getModuleVersion(category, group, module)
             header = "%s.%s.%s" % (category, group, module)
             print("")
-            print("="*len(header))
+            print(("="*len(header)))
             print(header)
-            print("="*len(header))
+            print(("="*len(header)))
             print("")
-            print("Version: %s" % (version))
+            print(("Version: %s" % (version)))
             print("")
             print(title)
-            print("-"*len(title))
-            print(module_manager.getModuleDoc(category, group, module))
+            print(("-"*len(title)))
+            print((module_manager.getModuleDoc(category, group, module)))
         except Exception as err:
-            print("Failed to load module %s.%s.%s. Reason: %s" % (category, group, module, err))
+            print(("Failed to load module %s.%s.%s. Reason: %s" % (category, group, module, err)))
 
     def start(self, command, config, instances, pid, queue_size, frequency, identification, module_path):
         '''
@@ -274,10 +274,11 @@ class Dispatch():
 
 
 def main():
-    try:
-        BootStrap()
-    except Exception as err:
-        print("Failed to bootstrap instance.  Reason: %s" % (err))
+    BootStrap()
+#    try:
+#        BootStrap()
+#    except Exception as err:
+#        print(("Failed to bootstrap instance.  Reason: %s" % (err)))
 
 if __name__ == '__main__':
     main()

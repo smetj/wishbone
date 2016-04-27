@@ -31,9 +31,8 @@ VERSION = '2.1.5'
 
 install_requires = ['gevent==1.1.1',
                     'greenlet==0.4.9',
-                    'argparse==1.3.0',
                     'prettytable==0.7.2',
-                    'python-daemon==1.6',
+                    'python-daemon==2.1.1',
                     'pyyaml==3.11',
                     'jsonschema==2.5.1',
                     'colorama==0.3.3',

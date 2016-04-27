@@ -55,7 +55,7 @@ class JSONDecode(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, actor_config, source="@data", destination="@data", unicode=True):
+    def __init__(self, actor_config, source="@data", destination="@data", str=True):
 
         Actor.__init__(self, actor_config)
 
@@ -65,7 +65,7 @@ class JSONDecode(Actor):
 
     def preHook(self):
 
-        if self.kwargs.unicode:
+        if self.kwargs.str:
             self.convert = self.doUnicode
         else:
             self.convert = self.doNoUnicode
@@ -91,7 +91,7 @@ class JSONDecode(Actor):
 
     def _byteify(self, data, ignore_dicts=False):
         # if this is a unicode string, return its string representation
-        if isinstance(data, unicode):
+        if isinstance(data, str):
             return data.encode('utf-8')
         # if this is a list of values, return list of byteified values
         if isinstance(data, list):
@@ -101,7 +101,7 @@ class JSONDecode(Actor):
         if isinstance(data, dict) and not ignore_dicts:
             return {
                 self._byteify(key, ignore_dicts=True): self._byteify(value, ignore_dicts=True)
-                for key, value in data.iteritems()
+                for key, value in data.items()
             }
         # if it's anything else, return it in its original form
         return data

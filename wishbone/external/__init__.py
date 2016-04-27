@@ -22,4 +22,4 @@
 #
 #
 
-from attrdict import AttrDict
+from .attrdict import AttrDict

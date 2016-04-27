@@ -119,7 +119,7 @@ class DictGenerator(Actor):
     def getDictGeneratedKeys(self):
 
         d = {}
-        for x in xrange(0, randint(self.kwargs.min_elements, self.kwargs.max_elements)):
+        for x in range(0, randint(self.kwargs.min_elements, self.kwargs.max_elements)):
             d[self.generateKey()] = self.generateValue()
         return d
 
