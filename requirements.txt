@@ -1,6 +1,7 @@
 arrow==0.6.0
 colorama==0.3.3
 cronex==0.1.0
+docutils==0.12
 functools32==3.2.3.post2
 gevent==1.1.1
 greenlet==0.4.9
@@ -8,8 +9,10 @@ importlib==1.0.3
 jsonschema==2.5.1
 lockfile==0.12.2
 prettytable==0.7.2
-python-daemon==1.6
-python-dateutil==2.5.2
+py==1.4.31
+pytest==2.9.1
+python-daemon==2.1.1
+python-dateutil==2.5.3
 PyYAML==3.11
 six==1.10.0
 uplook==0.4.3
