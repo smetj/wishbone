@@ -46,5 +46,4 @@ def test_module_deserialize_deserialize():
     assert one.get() == {"one": 1}
     assert two.get() == {"two": 2}
     assert three.get() == {"three": 3}
-    print three.dump(complete=True)
     assert three.get('@tmp.deserialize.generated_by') == True

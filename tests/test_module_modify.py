@@ -125,7 +125,6 @@ def test_module_template():
     e = Event({"language": "German", "word": "gutten Tag"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    print one.dump(complete=True)
     assert one.get('result') == "Good day in German is gutten Tag."
 
 
@@ -139,7 +138,7 @@ def test_module_time():
 
 def test_module_replace():
 
-    a = get_actor({"replace": ["\d", "X", "@data"]})
+    a = get_actor({"replace": ['\d', "X", "@data"]})
     e = Event("hello 123 hello")
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
