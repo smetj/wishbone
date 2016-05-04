@@ -1,4 +1,5 @@
 arrow==0.6.0
+attrdict==2.0.0
 colorama==0.3.3
 cronex==0.1.0
 docutils==0.12
@@ -16,4 +17,4 @@ python-dateutil==2.5.3
 PyYAML==3.11
 six==1.10.0
 uplook==0.4.3
-wishbone==2.1.5
+wishbone==2.2.0
