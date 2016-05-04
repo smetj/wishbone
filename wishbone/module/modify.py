@@ -234,7 +234,8 @@ class Modify(Actor):
 
     def command_replace(self, event, regex, value, key):
 
-        result = re.sub("{}".format(regex), value, str(event.get(key)).encode('string-escape'))
+        result = re.sub("{}".format(regex), value, str(event.get(key)))
+        print("XXXXX", result)
         event.set(str(result), key)
         return event
 
