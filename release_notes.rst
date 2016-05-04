@@ -1,10 +1,18 @@
 Wishbone changelog
 ==================
 
+Version 2.2.0
+~~~~~~~~~~~~~
+
+Features:
+
+- Python3 support
+
+
 Version 2.1.5
 ~~~~~~~~~~~~~
 
-Features
+Features:
 
 - wishbone.flow.fresh Added support for repeat and recovery messages
 - Added wishbone.lookup.getpid lookup function
