@@ -7,7 +7,8 @@ Version 2.2.0
 Features:
 
 - Python3 support
-
+- Removed wishbone.flow.loglevelfilter module
+- "." is now also a valid selector to return a complete event
 
 Version 2.1.5
 ~~~~~~~~~~~~~
