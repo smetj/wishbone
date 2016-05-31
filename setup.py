@@ -32,7 +32,7 @@ VERSION = '2.2.0'
 install_requires = ['gevent==1.1.1',
                     'greenlet==0.4.9',
                     'prettytable==0.7.2',
-                    'python-daemon==2.1.1',
+                    'python_daemon==2.1.1',
                     'pyyaml==3.11',
                     'jsonschema==2.5.1',
                     'colorama==0.3.3',
