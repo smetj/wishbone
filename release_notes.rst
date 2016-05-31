@@ -50,7 +50,8 @@ Features:
 
 Misc:
 
-Moved many buildin modules to separate package/release on Github.
+Moved many buildin modules to separate package/release on Github:
+
 - moved wishbone-decode-msgpack to Github as a separate module.
 - moved wishbone-encode-flatten to Github as a separate module.
 - moved wishbone-encode-graphite to Github as a separate module.
