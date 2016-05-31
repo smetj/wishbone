@@ -9,6 +9,7 @@ Features:
 - Python3 support
 - Removed wishbone.flow.loglevelfilter module
 - "." is now also a valid selector to return a complete event
+- Added Event().has() function to validate existence of key.
 
 Version 2.1.5
 ~~~~~~~~~~~~~
