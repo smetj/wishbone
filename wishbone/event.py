@@ -235,6 +235,21 @@ class Event(object):
             except:
                 raise KeyError(key)
 
+    def has(self, key="@data"):
+        '''
+        Returns a boot indicating the event has <key>
+
+        :param str key: The name of the key to check
+        :return: Bool
+        '''
+
+        try:
+            self.get(key)
+        except KeyError:
+            return False
+        else:
+            return True
+
     def set(self, value, key="@data"):
         '''
         Sets the value of <key>.
