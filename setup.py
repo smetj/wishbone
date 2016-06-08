@@ -32,13 +32,13 @@ VERSION = '2.2.0'
 install_requires = ['gevent==1.1.1',
                     'greenlet==0.4.9',
                     'prettytable==0.7.2',
-                    'python_daemon==2.1.1',
+                    'python-daemon==2.1.1',
                     'pyyaml==3.11',
                     'jsonschema==2.5.1',
                     'colorama==0.3.3',
                     'arrow==0.6.0',
                     'importlib==1.0.3',
-                    'uplook==0.4.3',
+                    'uplook==1.0.0',
                     'cronex==0.1.0',
                     'attrdict==2.0.0']
 
