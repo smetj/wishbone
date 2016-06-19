@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  pid.py
 #
 #  Copyright 2016 Jelle Smet <development@smetj.net>
 #
@@ -22,24 +22,26 @@
 #
 #
 
-from .event import EventLookup
-
-from .choice import Choice
-from .cycle import Cycle
-from .etcd import ETCD
-from .event import Event
-from .pid import PID
-from .random_bool import RandomBool
-from .random_integer import RandomInteger
-from .random_word import RandomWord
-from .get_uuid import GetUUID
+from os import getpid
 
 
+class PID(object):
 
+    '''
+    **Returns the PID of the current process.**
 
+    - Parameters to initialize the function:
 
+        None
 
+    - Parameters to call the function:
 
+        None
+    '''
 
+    def __init__(self):
+        self.pid = getpid()
 
+    def lookup(self):
 
+        return self.pid
