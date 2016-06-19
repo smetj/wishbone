@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  choice.py
 #
 #  Copyright 2016 Jelle Smet <development@smetj.net>
 #
@@ -22,24 +22,31 @@
 #
 #
 
-from .event import EventLookup
-
-from .choice import Choice
-from .cycle import Cycle
-from .etcd import ETCD
-from .event import Event
-from .pid import PID
-from .random_bool import RandomBool
-from .random_integer import RandomInteger
-from .random_word import RandomWord
-from .get_uuid import GetUUID
+from random import choice as choice_array
 
 
+class Choice(object):
+
+    '''
+    **Returns a random element from the provided array.**
+
+    This function returns a random element from the provided array.
+
+    - Parameters to initialize the function:
+
+        - values(list)(None): An array of elements to choose from
+
+    - Parameters to call the function:
+
+        None
 
 
+    '''
 
+    def __init__(self, array):
 
+        self.array = array
 
+    def lookup(self):
 
-
-
+        return choice_array(self.array)

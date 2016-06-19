@@ -31,8 +31,8 @@ from wishbone.error import ModuleInitFailure, NoSuchModule
 class ModuleManager():
 
     def __init__(self,
-                 categories=["wishbone", "wishbone.contrib"],
-                 groups=["flow", "encode", "decode", "function", "input", "output"]):
+                 categories=["wishbone", "wishbone_contrib"],
+                 groups=["flow", "encode", "decode", "function", "input", "output", "lookup"]):
         self.categories = categories
         self.groups = groups
 
@@ -57,20 +57,14 @@ class ModuleManager():
         else:
             return m
 
-    def getModulesList(self, category=None):
+    def getModuleList(self):
 
-        if category is None:
-            for category in self.categories:
-                for group in self.groups:
-                    group_name = "%s.%s" % (category, group)
-                    groups = [m.name for m in pkg_resources.iter_entry_points(group=group_name)]
-                    for m in sorted(groups):
-                        yield (category, group, m)
-        else:
-            groups = [m.name for m in pkg_resources.iter_entry_points(group=category)]
-            for m in sorted(groups):
-                (c, g) = (category.split('.'))
-                yield (c, g, m)
+        for category in self.categories:
+            for group in self.groups:
+                group_name = "%s.%s" % (category, group)
+                groups = [m.name for m in pkg_resources.iter_entry_points(group=group_name)]
+                for m in sorted(groups):
+                    yield (category, group, m)
 
     def getModuleByName(self, name):
 
@@ -95,18 +89,16 @@ class ModuleManager():
         except Exception as err:
             return "Unknown. Reason: %s" % (err)
 
-    def getModuleTable(self, category=None, group=None, include_groups=[]):
+    def getModuleTable(self):
 
-        table = self.__getTable()
+        table = self.__getModuleTable()
 
         category_header = None
         group_header = None
-        all_items = list(self.getModulesList())
-
-        for g in include_groups:
-            all_items += list(self.getModulesList(g))
+        all_items = list(self.getModuleList())
 
         for (category, group, module) in all_items:
+
             title = self.getModuleTitle(category, group, module)
             version = self.getModuleVersion(category, group, module)
             if category_header == category:
@@ -140,7 +132,7 @@ class ModuleManager():
 
             raise ModuleInitFailure('%s is not a valid name structure.  Should be x.x.x' % name)
 
-    def __getTable(self):
+    def __getModuleTable(self):
 
         t = PrettyTable(["Category", "Group", "Module", "Version", "Description"])
         t.align["Category"] = "l"
@@ -150,3 +142,5 @@ class ModuleManager():
         t.align["Description"] = "l"
 
         return t
+
+

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  random_integer.py
 #
 #  Copyright 2016 Jelle Smet <development@smetj.net>
 #
@@ -22,24 +22,30 @@
 #
 #
 
-from .event import EventLookup
 
-from .choice import Choice
-from .cycle import Cycle
-from .etcd import ETCD
-from .event import Event
-from .pid import PID
-from .random_bool import RandomBool
-from .random_integer import RandomInteger
-from .random_word import RandomWord
-from .get_uuid import GetUUID
+from random import randint
 
 
+class RandomInteger(object):
+    '''**Returns a random integer.**
 
+    Returns a random integer between <min> and <max>.
 
+    - Parameters to initialize the function:
 
+        - min(int)(0): The minimum value
+        - max(int)(0): The maximum value
 
+    - Parameters to call the function:
 
+        None
+    '''
 
+    def __init__(self, minimum=0, maximum=0):
 
+        self.minimum = minimum
+        self.maximum = maximum
 
+    def lookup(self):
+
+        return randint(min, max)
