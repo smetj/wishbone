@@ -23,7 +23,7 @@
 #
 
 from wishbone.actor import ActorConfig
-from wishbone.error import ModuleInitFailure, NoSuchModule
+from wishbone.error import ModuleInitFailure, NoSuchModule, FunctionInitFailure
 from gevent import signal, event, sleep, spawn
 import multiprocessing
 import importlib
@@ -221,8 +221,8 @@ class Default(multiprocessing.Process):
                     if hasattr(l, "lookup"):
                         return l.lookup
                     else:
-                        raise Exception("Lookup module '%s' does not seem to have a 'lookup' method" % (l.module_name))
-        raise Exception("Lookup module '%s' does not exist." % (module))
+                        raise FunctionInitFailure("Lookup module '%s' does not seem to have a 'lookup' method" % (l.module_name))
+        raise FunctionInitFailure("Lookup module '%s' does not exist." % (module))
 
     def __registerModule(self, module, actor_config, arguments={}):
         '''Initializes the wishbone module module.'''
