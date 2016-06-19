@@ -77,19 +77,12 @@ class BootStrap():
         kill = subparsers.add_parser('kill', description="Kills the Wishbone processes immediately.")
         kill.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
 
-        llist = subparsers.add_parser('list', description="Lists the available Wishbone modules.")
-        llist.add_argument('--group', type=str, dest='group', default=None, help='List the modules of this group type.')
+        subparsers.add_parser('list', description="Lists the available Wishbone modules and lookup.")
 
         show = subparsers.add_parser('show', description="Shows the details of a module.")
         show.add_argument('--module', type=str, required=True, help='Shows the documentation of the module. ')
 
         arguments = vars(parser.parse_args())
-
-        if arguments["command"] == "list":
-            if arguments["group"] is not None:
-                arguments["include_groups"] = [arguments["group"]]
-            else:
-                arguments["include_groups"] = include_groups
 
         dispatch = Dispatch()
         getattr(dispatch, arguments["command"])(**arguments)
@@ -151,11 +144,17 @@ class Dispatch():
             for proc in processes:
                 proc.join()
 
-    def list(self, command, group, category=None, include_groups=[]):
+    def list(self, command):
 
-        print((self.generateHeader()))
-        print("Available modules:")
-        print((ModuleManager().getModuleTable(category, group, include_groups)))
+        categories = ["wishbone", "wishbone_contrib"]
+        groups = ["flow", "encode", "decode", "function", "input", "output"]
+
+        print(self.generateHeader())
+        print("Available event modules:")
+        print(ModuleManager(categories=categories, groups=groups).getModuleTable())
+        print("\n")
+        print("Available lookup function modules:")
+        print(ModuleManager(categories=categories, groups=["lookup"]).getModuleTable())
 
     def show(self, command, module):
         '''
@@ -166,7 +165,8 @@ class Dispatch():
         module_manager.validateModuleName(module)
         module_manager.exists(module)
 
-        print((self.generateHeader()))
+        print(self.generateHeader())
+
         try:
             (category, group, module) = module.split('.')
         except ValueError:
@@ -274,10 +274,11 @@ class Dispatch():
 
 
 def main():
-    try:
-        BootStrap()
-    except Exception as err:
-        print(("Failed to bootstrap instance.  Reason: %s" % (err)))
+    BootStrap()
+   # try:
+   #     BootStrap()
+   # except Exception as err:
+   #     print(("Failed to bootstrap instance.  Reason: %s" % (err)))
 
 if __name__ == '__main__':
     main()

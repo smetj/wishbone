@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  etcd.py
 #
 #  Copyright 2016 Jelle Smet <development@smetj.net>
 #
@@ -22,24 +22,37 @@
 #
 #
 
-from .event import EventLookup
-
-from .choice import Choice
-from .cycle import Cycle
-from .etcd import ETCD
-from .event import Event
-from .pid import PID
-from .random_bool import RandomBool
-from .random_integer import RandomInteger
-from .random_word import RandomWord
-from .get_uuid import GetUUID
+import requests
+from uplook.errors import NoSuchValue
 
 
+class ETCD(object):
 
+    '''
+    **Returns a value from etcd.**
 
+    Returns a value from an etcd instance.
 
+    - Parameters to initialize the function:
 
+        - base(str)("/v2/keys"): The base part of the endpoint.
 
+    - Parameters to call the function:
 
+        - key(str)(): The name of the key to request.
+    '''
 
+    def __init__(self, base="/v2/keys"):
 
+        self.base = base.rstrip('/')
+
+    def lookup(self, key):
+
+        key = key.lstrip('/')
+
+        try:
+            response = requests.get('%s/%s' % (self.base, key))
+            response.raise_for_status()
+            return response.json()["node"]["value"]
+        except Exception as err:
+            raise NoSuchValue(str(err))

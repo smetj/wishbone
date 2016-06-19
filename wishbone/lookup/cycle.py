@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  cycle.py
 #
 #  Copyright 2016 Jelle Smet <development@smetj.net>
 #
@@ -22,24 +22,31 @@
 #
 #
 
-from .event import EventLookup
-
-from .choice import Choice
-from .cycle import Cycle
-from .etcd import ETCD
-from .event import Event
-from .pid import PID
-from .random_bool import RandomBool
-from .random_integer import RandomInteger
-from .random_word import RandomWord
-from .get_uuid import GetUUID
+from itertools import cycle as cycle_array
 
 
+class Cycle(object):
 
+    '''
+    **Cycles through the provided array returning the next element.**
 
+    This function rotates through the elements in the provided array always
+    returning the next element.  The order is fixed and when the end is
+    reached the first element is returned again.
 
+    - Parameters to initialize the function:
 
+        - values(list)(None): An array of elements to cycle through/
 
+    - Parameters to call the function:
 
+        None
+    '''
 
+    def __init__(self, values):
 
+        self.c = cycle_array(values)
+
+    def lookup(self):
+
+        return next(self.c)

@@ -31,7 +31,7 @@ from gevent import pywsgi
 import json
 from .graphcontent import GRAPHCONTENT
 from .graphcontent import VisJSData
-
+from pkg_resources import iter_entry_points
 
 class Container():
     pass
@@ -214,10 +214,15 @@ class Default(multiprocessing.Process):
 
     def __registerLookupModule(self, module, **kwargs):
 
-        base = ".".join(module.split('.')[0:-1])
-        function = module.split('.')[-1]
-        m = importlib.import_module(base)
-        return getattr(m, function)(**kwargs)
+        for group in ["wishbone.lookup", "wishbone_contrib.lookup"]:
+            for entry_point in iter_entry_points(group=group, name=None):
+                if entry_point.module_name == module:
+                    l = entry_point.load()(**kwargs)
+                    if hasattr(l, "lookup"):
+                        return l.lookup
+                    else:
+                        raise Exception("Lookup module '%s' does not seem to have a 'lookup' method" % (l.module_name))
+        raise Exception("Lookup module '%s' does not exist." % (module))
 
     def __registerModule(self, module, actor_config, arguments={}):
         '''Initializes the wishbone module module.'''
