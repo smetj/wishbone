@@ -59,6 +59,8 @@ class ReservedName(Exception):
 class ModuleInitFailure(Exception):
     pass
 
+class FunctionInitFailure(Exception):
+    pass
 
 class NoSuchModule(Exception):
     pass
