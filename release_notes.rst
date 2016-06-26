@@ -10,6 +10,9 @@ Features:
 - Removed wishbone.flow.loglevelfilter module
 - "." is now also a valid selector to return a complete event
 - Added Event().has() function to validate existence of key.
+- Event lookups now support default values if key does not exist.
+- Event lookup functions are now first class Wishbone lookup modules.
+
 
 Version 2.1.5
 ~~~~~~~~~~~~~

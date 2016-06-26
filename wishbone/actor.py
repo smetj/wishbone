@@ -102,10 +102,12 @@ class Actor():
 
         try:
             return self.current_event.get(name)
-        except AttributeError:
-            return "You should use a dynamic lookup ~~ for header lookups. "
-        except KeyError:
-            self.logging.debug("There is no lookup value with name '%s'." % (name))
+        except AttributeError, KeyError:
+            # No event has passed through this module.  Most likely this is an
+            # input module which creates its own events. Therefor there is
+            # nothing to lookup yet and there for we rely up UpLook to return
+            # the default value for this lookup if any.
+            self.logging.debug("There is no lookup value with name '%s' Falling back to default lookup value if any." % (name))
             raise NoSuchValue
 
     def getChildren(self, queue=None):
@@ -228,7 +230,7 @@ class Actor():
             if name not in self.config.lookup:
                 raise ModuleInitFailure("A lookup function '%s' was defined but no lookup function with that name registered." % (name))
             else:
-                if isinstance(self.config.lookup[name], EventLookup):
+                if self.config.lookup[name].im_class == EventLookup:
                     uplook.registerLookup(name, self.doEventLookup)
                 else:
                     uplook.registerLookup(name, self.config.lookup[name])
