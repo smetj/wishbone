@@ -29,18 +29,24 @@ import sys
 PROJECT = 'wishbone'
 VERSION = '2.2.0'
 
-install_requires = ['gevent==1.1.1',
-                    'greenlet==0.4.9',
-                    'prettytable==0.7.2',
-                    'python-daemon==2.1.1',
-                    'pyyaml==3.11',
-                    'jsonschema==2.5.1',
-                    'colorama==0.3.3',
-                    'arrow==0.6.0',
-                    'importlib==1.0.3',
-                    'uplook==1.0.0',
-                    'cronex==0.1.0',
-                    'attrdict==2.0.0']
+install_requires = [
+    'arrow==0.7.0',
+    'attrdict==2.0.0',
+    'colorama==0.3.7',
+    'cronex==0.1.0',
+    'docutils==0.12',
+    'gevent==1.1.1',
+    'greenlet==0.4.9',
+    'importlib==1.0.3',
+    'jsonschema==2.5.1',
+    'lockfile==0.12.2',
+    'prettytable==0.7.2',
+    'python-daemon==2.1.1',
+    'python-dateutil==2.5.3',
+    'PyYAML==3.11',
+    'six==1.10.0',
+    'uplook==1.0.0'
+]
 
 dependency_links = [
 ]
@@ -130,6 +136,17 @@ setup(
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog'
+        ],
+        'wishbone.lookup': [
+            'choice = wishbone.lookup.choice:Choice',
+            'cycle = wishbone.lookup.cycle:Cycle',
+            'etcd = wishbone.lookup.etcd:ETCD',
+            'event = wishbone.lookup.event:Event',
+            'pid = wishbone.lookup.pid:PID',
+            'random_bool = wishbone.lookup.random_bool:RandomBool',
+            'random_integer = wishbone.lookup.random_integer:RandomInteger',
+            'random_word = wishbone.lookup.random_word:RandomWord',
+            'uuid = wishbone.lookup.get_uuid:GetUUID'
         ]
     }
 )
