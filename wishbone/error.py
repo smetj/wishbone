@@ -59,20 +59,30 @@ class ReservedName(Exception):
 class ModuleInitFailure(Exception):
     pass
 
+
 class FunctionInitFailure(Exception):
     pass
+
 
 class NoSuchModule(Exception):
     pass
 
+
 class MissingKey(Exception):
     pass
+
 
 class MissingNamespace(Exception):
     pass
 
+
 class BulkFull(Exception):
     pass
 
+
 class InvalidData(Exception):
+    pass
+
+
+class ModuleNotReady(Exception):
     pass
