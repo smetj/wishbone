@@ -141,7 +141,7 @@ setup(
             'choice = wishbone.lookup.choice:Choice',
             'cycle = wishbone.lookup.cycle:Cycle',
             'etcd = wishbone.lookup.etcd:ETCD',
-            'event = wishbone.lookup.event:Event',
+            'event = wishbone.lookup.event:EventLookup',
             'pid = wishbone.lookup.pid:PID',
             'random_bool = wishbone.lookup.random_bool:RandomBool',
             'random_integer = wishbone.lookup.random_integer:RandomInteger',

@@ -27,7 +27,6 @@ from .event import EventLookup
 from .choice import Choice
 from .cycle import Cycle
 from .etcd import ETCD
-from .event import Event
 from .pid import PID
 from .random_bool import RandomBool
 from .random_integer import RandomInteger

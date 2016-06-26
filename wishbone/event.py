@@ -229,8 +229,8 @@ class Event(object):
         if key is None or key is "" or key is ".":
             return self.data
         else:
-            path = key.split('.')
             try:
+                path = key.split('.')
                 return travel(path, self.data)
             except:
                 raise KeyError(key)

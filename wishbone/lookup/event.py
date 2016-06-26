@@ -23,11 +23,7 @@
 #
 
 
-class EventLookup():
-    pass
-
-
-class Event(object):
+class EventLookup(object):
 
     '''
     **Returns the requested event header value.**
@@ -51,6 +47,4 @@ class Event(object):
         pass
 
     def lookup(self):
-
-        return EventLookup()
-
+        pass
