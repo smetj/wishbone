@@ -102,7 +102,9 @@ class Actor():
 
         try:
             return self.current_event.get(name)
-        except AttributeError, KeyError:
+        except AttributeError:
+            return ""
+        except KeyError:
             # No event has passed through this module.  Most likely this is an
             # input module which creates its own events. Therefor there is
             # nothing to lookup yet and there for we rely up UpLook to return
