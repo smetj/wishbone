@@ -13,5 +13,5 @@ python-daemon==2.1.1
 python-dateutil==2.5.3
 PyYAML==3.11
 six==1.10.0
-uplook==1.0.0
+uplook==1.1.0
 wishbone==2.2.0

@@ -45,7 +45,7 @@ install_requires = [
     'python-dateutil==2.5.3',
     'PyYAML==3.11',
     'six==1.10.0',
-    'uplook==1.0.0'
+    'uplook==1.1.0'
 ]
 
 dependency_links = [
