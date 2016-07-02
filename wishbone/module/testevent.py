@@ -46,6 +46,9 @@ class TestEvent(Actor):
         - numbered(bool)
            |  When true, appends a sequential number to the end.
 
+        - additional_values(dict)({})
+           |  A dictionary of key/value to add to the event.
+
 
     Queues:
 
@@ -53,7 +56,7 @@ class TestEvent(Actor):
            |  Contains the generated events.
     '''
 
-    def __init__(self, actor_config, interval=1, message="test", numbered=False):
+    def __init__(self, actor_config, interval=1, message="test", numbered=False, additional_values={}):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
 
@@ -76,7 +79,10 @@ class TestEvent(Actor):
 
         while self.loop():
             message = self.generateMessage(self.kwargs.message)
-            self.submit(Event(message), self.pool.queue.outbox)
+            event = Event(message)
+            for key, value in self.kwargs.additional_values.items():
+                event.set(value, key)
+            self.submit(event, self.pool.queue.outbox)
             self.sleep()
 
         self.logging.info("Stopped producing events.")
