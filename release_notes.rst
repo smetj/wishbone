@@ -14,6 +14,7 @@ Features:
 - Event lookup functions are now first class Wishbone lookup modules.
 - wishbone.flow.tippingbucket can now bulk aggregate events on an event key.
 - wishbone.input.testevent can now set arbitrary event values.
+- switches to UpLook 1.1.0
 
 Version 2.1.5
 ~~~~~~~~~~~~~
