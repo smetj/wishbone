@@ -48,4 +48,4 @@ class RandomInteger(object):
 
     def lookup(self):
 
-        return randint(min, max)
+        return randint(self.minimum, self.maximum)
