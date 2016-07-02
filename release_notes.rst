@@ -12,7 +12,8 @@ Features:
 - Added Event().has() function to validate existence of key.
 - Event lookups now support default values if key does not exist.
 - Event lookup functions are now first class Wishbone lookup modules.
-
+- wishbone.flow.tippingbucket can now bulk aggregate events on an event key.
+- wishbone.input.testevent can now set arbitrary event values.
 
 Version 2.1.5
 ~~~~~~~~~~~~~
