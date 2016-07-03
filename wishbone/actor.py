@@ -42,7 +42,41 @@ import traceback
 import inspect
 
 Greenlets = namedtuple('Greenlets', "consumer generic log metric")
-ActorConfig = namedtuple('ActorConfig', 'name size frequency lookup description')
+
+class ActorConfig(object):
+
+    '''
+    A configuration object pass to a Wishbone actor.
+
+    This is a simple object which holds a set of attributes (with some sane
+    defaults) a Wishbone Actor expects.
+
+    Attributes:
+        name (str): The name identifying the actor instance.
+        size (int): The size of the Actor instance's queues.
+        frequency (int): The time in seconds to generate metrics.
+        lookup (dict): A dictionary of lookup methods.
+        description (str): A short free form discription of the actor instance.
+
+    '''
+
+    def __init__(self, name, size=100, frequency=1, lookup={}, description="A Wishbone actor."):
+
+        '''
+
+        Args:
+            name (str): The name identifying the actor instance.
+            size (int): The size of the Actor instance's queues.
+            frequency (int): The time in seconds to generate metrics.
+            lookup (dict): A dictionary of lookup methods.
+            description (str): A short free form discription of the actor instance.
+
+        '''
+        self.name = name
+        self.size = size
+        self.frequency = frequency
+        self.lookup = lookup
+        self.description = description
 
 
 class Actor():
