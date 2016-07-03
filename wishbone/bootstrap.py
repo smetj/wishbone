@@ -123,7 +123,6 @@ class Dispatch():
 
         signal(2, stopSequence)
 
-        module_manager = ModuleManager()
         router_config = ConfigFile(config, 'STDOUT').dump()
 
         if instances == 1:
@@ -132,13 +131,13 @@ class Dispatch():
             if profile:
                 from wishbone.utils.py2devtools import Profiler
                 with Profiler():
-                    Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph, graph_include_sys=graph_include_sys).start()
+                    Default(router_config, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph, graph_include_sys=graph_include_sys).start()
             else:
-                Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph, graph_include_sys=graph_include_sys).start()
+                Default(router_config, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph, graph_include_sys=graph_include_sys).start()
 
         else:
             for instance in range(instances):
-                processes.append(Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, process=True).start())
+                processes.append(Default(router_config, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, process=True).start())
             pids = [str(p.pid) for p in processes]
             print(("\nInstances started in foreground with pid %s\n" % (", ".join(pids))))
             for proc in processes:
@@ -198,7 +197,6 @@ class Dispatch():
         if module_path is not None:
             self.__expandSearchPath(module_path)
 
-        module_manager = ModuleManager()
         router_config = ConfigFile(config, 'SYSLOG').dump()
         pid_file = PIDFile(pid)
 
@@ -207,11 +205,11 @@ class Dispatch():
                 sys.stdout.write("\nWishbone instance started with pid %s\n" % (os.getpid()))
                 sys.stdout.flush()
                 pid_file.create([os.getpid()])
-                Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False).start()
+                Default(router_config, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False).start()
             else:
                 processes = []
                 for instance in range(instances):
-                    processes.append(Default(router_config, module_manager, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, process=True).start())
+                    processes.append(Default(router_config, size=queue_size, frequency=frequency, identification=identification, stdout_logging=False, process=True).start())
                 pids = [str(p.pid) for p in processes]
                 print(("\n%s Wishbone instances started in background with pid %s\n" % (len(pids), ", ".join(pids))))
                 pid_file.create(pids)
