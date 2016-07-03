@@ -24,6 +24,7 @@
 
 from wishbone.actor import ActorConfig
 from wishbone.error import ModuleInitFailure, NoSuchModule, FunctionInitFailure
+from wishbone import ModuleManager
 from gevent import signal, event, sleep, spawn
 import multiprocessing
 import importlib
@@ -68,8 +69,6 @@ class Default(multiprocessing.Process):
 
         - router_config(obj)            : The router setup configuration.
 
-        - module_manager(obj)           : A Wishbone ModuleManager object instance.
-
         - size(int)(100)                : The size of all queues.
 
         - frequency(int)(1)             : The frequency at which metrics are produced.
@@ -84,13 +83,13 @@ class Default(multiprocessing.Process):
 
     '''
 
-    def __init__(self, router_config, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False, graph=False, graph_include_sys=False):
+    def __init__(self, router_config, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False, graph=False, graph_include_sys=False):
 
         if process:
             multiprocessing.Process.__init__(self)
             self.daemon = True
         self.config = router_config
-        self.module_manager = module_manager
+        self.module_manager = ModuleManager()
         self.size = size
         self.frequency = frequency
         self.identification = identification
