@@ -22,6 +22,9 @@
 #
 #
 
+class Lookup(object):
+    pass
+
 from .event import EventLookup
 
 from .choice import Choice

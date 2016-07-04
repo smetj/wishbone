@@ -26,7 +26,8 @@ import pkg_resources
 import re
 from prettytable import PrettyTable
 from wishbone.error import NoSuchModule, InvalidModule
-from wishbone import Actor, Lookup
+from wishbone import Actor
+from wishbone.lookup import Lookup
 
 
 class ModuleManager():

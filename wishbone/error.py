@@ -83,6 +83,8 @@ class BulkFull(Exception):
 class InvalidData(Exception):
     pass
 
+class InvalidModule(Exception):
+    pass
 
 class ModuleNotReady(Exception):
     pass
