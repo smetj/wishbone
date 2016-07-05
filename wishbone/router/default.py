@@ -83,7 +83,7 @@ class Default(multiprocessing.Process):
 
     '''
 
-    def __init__(self, router_config, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False, graph=False, graph_include_sys=False):
+    def __init__(self, router_config=None, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False, graph=False, graph_include_sys=False):
 
         if process:
             multiprocessing.Process.__init__(self)
@@ -104,8 +104,7 @@ class Default(multiprocessing.Process):
         self.__block = event.Event()
         self.__block.clear()
 
-        signal(2, self.initiateStop)
-        signal(15, self.__noop)
+        self.__signal2 = signal(2, self.initiateStop)
 
         self.initiate_stop = event.Event()
         self.initiate_stop.clear()
@@ -125,8 +124,12 @@ class Default(multiprocessing.Process):
                     children.append(name)
                     lookupChildren(name, children)
 
-        lookupChildren(module, children)
-        return children
+        try:
+            lookupChildren(module, children)
+        except NoSuchModule:
+            return []
+        else:
+            return children
 
     def isRunning(self):
         return self.__running
@@ -161,8 +164,9 @@ class Default(multiprocessing.Process):
 
         self.__running = False
         self.__block.set()
+        self.__signal2.cancel()
 
-    def __connect(self, source, destination):
+    def connectQueue(self, source, destination):
         '''Connects one queue to the other.
 
         For convenience, the syntax of the queues is <modulename>.<queuename>
@@ -195,7 +199,7 @@ class Default(multiprocessing.Process):
 
             actor_config = ActorConfig(name, self.size, self.frequency, lookup_modules, instance.description)
 
-            self.__registerModule(pmodule, actor_config, instance.arguments)
+            self.registerModule(pmodule, actor_config, instance.arguments)
 
         self.__setupConnections()
 
@@ -223,7 +227,7 @@ class Default(multiprocessing.Process):
                         raise FunctionInitFailure("Lookup module '%s' does not seem to have a 'lookup' method" % (l.module_name))
         raise FunctionInitFailure("Lookup module '%s' does not exist." % (module))
 
-    def __registerModule(self, module, actor_config, arguments={}):
+    def registerModule(self, module, actor_config, arguments={}):
         '''Initializes the wishbone module module.'''
 
         try:
@@ -235,11 +239,13 @@ class Default(multiprocessing.Process):
         '''Setup all connections as defined by configuration_manager'''
 
         for route in self.config.routingtable:
-            self.__connect("%s.%s" % (route.source_module, route.source_queue), "%s.%s" % (route.destination_module, route.destination_queue))
+            self.connectQueue("%s.%s" % (route.source_module, route.source_queue), "%s.%s" % (route.destination_module, route.destination_queue))
 
     def __start(self):
 
-        self.__initConfig()
+        if self.config is not None:
+            self.__initConfig()
+
         self.__running = True
 
         if self.graph:
