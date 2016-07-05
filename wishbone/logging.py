@@ -25,6 +25,7 @@
 
 from wishbone.event import Event, Log
 from wishbone.error import QueueFull
+from __future__ import print_function
 from time import time
 from os import getpid
 from gevent import sleep
@@ -61,17 +62,19 @@ class Logging():
     def __init__(self, name, q):
         self.name = name
         self.logs = q
+        self.__queue_full_message = False
 
     def __log(self, level, message):
 
         event = Event(Log(time(), level, getpid(), self.name, message))
 
-        while True:
-            try:
-                self.logs.put(event)
-                break
-            except QueueFull:
-                sleep(0.1)
+        try:
+            self.logs.put(event)
+        except QueueFull:
+            if not self.__queue_full_message:
+                print("Log queue full for module '%s'. Dropping messages" % (self.name))
+            else:
+                self.__queue_full_message = True
 
     def emergency(self, message, *args, **kwargs):
         """Generates a log message with priority emergency(0).
