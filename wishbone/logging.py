@@ -23,12 +23,11 @@
 #
 #
 
+from __future__ import print_function
 from wishbone.event import Event, Log
 from wishbone.error import QueueFull
-from __future__ import print_function
 from time import time
 from os import getpid
-from gevent import sleep
 
 
 class MockLogger():
