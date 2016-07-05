@@ -127,10 +127,14 @@ class STDOUT(Actor):
         else:
             data = event.get(self.kwargs.selection)
 
-        sys.stdout.write("%s%s%s%s%s\n" % (getattr(Fore, self.kwargs.foreground_color),
-                                           getattr(Back, self.kwargs.background_color),
-                                           getattr(Style, self.kwargs.color_style),
-                                           self.kwargs.prefix, self.format.do(data)))
+        output = "%s%s%s%s%s\n" % (
+            getattr(Fore, self.kwargs.foreground_color),
+            getattr(Back, self.kwargs.background_color),
+            getattr(Style, self.kwargs.color_style),
+            self.kwargs.prefix,
+            self.format.do(data)
+        )
+        sys.stdout.write(output)
         sys.stdout.flush()
 
     def __validateInput(self, f, b, s):
