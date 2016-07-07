@@ -15,6 +15,7 @@ Features:
 - wishbone.flow.tippingbucket can now bulk aggregate events on an event key.
 - wishbone.input.testevent can now set arbitrary event values.
 - switches to UpLook 1.1.0
+- Drop logs when module's log queue is full and not consumed.
 
 Version 2.1.5
 ~~~~~~~~~~~~~

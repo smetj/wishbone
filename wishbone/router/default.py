@@ -22,17 +22,19 @@
 #
 #
 
+from gevent import monkey; monkey.patch_os()
+from gevent.signal import signal
 from wishbone.actor import ActorConfig
 from wishbone.error import ModuleInitFailure, NoSuchModule, FunctionInitFailure
 from wishbone import ModuleManager
-from gevent import signal, event, sleep, spawn
+from gevent import event, sleep, spawn
 import multiprocessing
-import importlib
 from gevent import pywsgi
 import json
 from .graphcontent import GRAPHCONTENT
 from .graphcontent import VisJSData
 from pkg_resources import iter_entry_points
+
 
 class Container():
     pass
@@ -75,45 +77,61 @@ class Default(multiprocessing.Process):
 
         - identification                : A string identifying this instance in logging.
 
-        - stdout_logging(bool)(True)    : When True all logs are written to STDOUT.
-
         - background(bool)(False)       : When True, sends the router to background in a
                                           separate process.
 
 
     '''
 
+<<<<<<< Updated upstream
     def __init__(self, router_config, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False, graph=False, graph_include_sys=False):
+=======
+    def __init__(self, router_config=None, size=100, frequency=1, identification="wishbone", process=False, graph=False, graph_include_sys=False):
+>>>>>>> Stashed changes
 
         if process:
             multiprocessing.Process.__init__(self)
             self.daemon = True
-        self.config = router_config
+
         self.module_manager = ModuleManager()
+        self.router_config = router_config
         self.size = size
         self.frequency = frequency
         self.identification = identification
-        self.stdout_logging = stdout_logging
         self.process = process
         self.graph = graph
         self.graph_include_sys = graph_include_sys
 
         self.module_pool = ModulePool()
-
-        self.__running = False
-        self.__block = event.Event()
-        self.__block.clear()
-
-        signal(2, self.initiateStop)
-        signal(15, self.__noop)
-
-        self.initiate_stop = event.Event()
-        self.initiate_stop.clear()
-        spawn(self.stop)
+        self.__block = True
 
     def block(self):
         '''Blocks until stop() is called.'''
-        self.__block.wait()
+
+<<<<<<< Updated upstream
+        signal(2, self.initiateStop)
+        signal(15, self.__noop)
+=======
+        while self.__block:
+            sleep(0.5)
+>>>>>>> Stashed changes
+
+    def connectQueue(self, source, destination):
+        '''Connects one queue to the other.
+
+        For convenience, the syntax of the queues is <modulename>.<queuename>
+        For example:
+
+            stdout.inbox
+        '''
+
+        (source_module, source_queue) = source.split('.')
+        (destination_module, destination_queue) = destination.split('.')
+
+        source = self.module_pool.getModule(source_module)
+        destination = self.module_pool.getModule(destination_module)
+
+        source.connect(source_queue, destination, destination_queue)
 
     def getChildren(self, module):
         children = []
@@ -131,6 +149,14 @@ class Default(multiprocessing.Process):
     def isRunning(self):
         return self.__running
 
+    def registerModule(self, module, actor_config, arguments={}):
+        '''Initializes the wishbone module module.'''
+
+        try:
+            setattr(self.module_pool.module, actor_config.name, module(actor_config, **arguments))
+        except Exception as err:
+            raise ModuleInitFailure("Problem loading module %s.  Reason: %s" % (actor_config.name, err))
+
     def start(self):
         '''Starts all registered modules.'''
 
@@ -141,19 +167,15 @@ class Default(multiprocessing.Process):
         else:
             self.__start()
 
-    def initiateStop(self, *args, **kwargs):
-
-        self.initiate_stop.set()
-
     def stop(self):
         '''Stops all modules.'''
 
-        self.initiate_stop.wait()
         for module in self.module_pool.list():
             if module.name not in self.getChildren("_logs") + ["_logs"] and not module.stopped:
                 module.stop()
 
         while not self.__logsEmpty():
+<<<<<<< Updated upstream
             sleep(0.1)
 
         # This gives an error when starting in background, no idea why
@@ -178,16 +200,20 @@ class Default(multiprocessing.Process):
         destination = self.module_pool.getModule(destination_module)
 
         source.connect(source_queue, destination, destination_queue)
+=======
+            sleep(0.5)
+        self.__block = False
+>>>>>>> Stashed changes
 
     def __initConfig(self):
         '''Setup all modules and routes.'''
 
         lookup_modules = {}
 
-        for name, instance in self.config.lookups.items():
+        for name, instance in self.router_config.lookups.items():
             lookup_modules[name] = self.__registerLookupModule(instance.module, **instance.arguments)
 
-        for name, instance in self.config.modules.items():
+        for name, instance in self.router_config.modules.items():
             pmodule = self.module_manager.getModuleByName(instance.module)
 
             if instance.description == "":
@@ -208,9 +234,6 @@ class Default(multiprocessing.Process):
         else:
             return True
 
-    def __noop(self, *args, **kwargs):
-        pass
-
     def __registerLookupModule(self, module, **kwargs):
 
         for group in ["wishbone.lookup", "wishbone_contrib.lookup"]:
@@ -223,6 +246,7 @@ class Default(multiprocessing.Process):
                         raise FunctionInitFailure("Lookup module '%s' does not seem to have a 'lookup' method" % (l.module_name))
         raise FunctionInitFailure("Lookup module '%s' does not exist." % (module))
 
+<<<<<<< Updated upstream
     def __registerModule(self, module, actor_config, arguments={}):
         '''Initializes the wishbone module module.'''
 
@@ -240,34 +264,55 @@ class Default(multiprocessing.Process):
     def __start(self):
 
         self.__initConfig()
+=======
+    def __setupConnections(self):
+        '''Setup all connections as defined by configuration_manager'''
+
+        for route in self.router_config.routingtable:
+            self.connectQueue("%s.%s" % (route.source_module, route.source_queue), "%s.%s" % (route.destination_module, route.destination_queue))
+
+    def __start(self):
+
+        if self.router_config is not None:
+            self.__initConfig()
+
+>>>>>>> Stashed changes
         self.__running = True
 
         if self.graph:
-            self.graph = GraphWebserver(self.config, self.module_pool, self.__block, self.graph_include_sys)
+            self.graph = GraphWebserver(self.router_config, self.module_pool, self.__block, self.graph_include_sys)
             self.graph.start()
 
         for module in self.module_pool.list():
             module.start()
 
-        self.block()
+        # If we run in multiprocessing.Process we should prevent from exiting
+        if self.process:
+            signal(10, self.__signalShutdown)
+            self.block()
+
+    def __signalShutdown(self, *args, **kwargs):
+
+        self.stop()
+
 
 
 class GraphWebserver():
 
     def __init__(self, config, module_pool, block, include_sys):
-        self.config = config
+        self.router_config = config
         self.module_pool = module_pool
         self.block = block
         self.js_data = VisJSData()
 
-        for c in self.config["routingtable"]:
-            if self.__include(include_sys, self.config["modules"][c.source_module]["context"], self.config["modules"][c.destination_module]["context"]):
+        for c in self.router_config["routingtable"]:
+            if self.__include(include_sys, self.router_config["modules"][c.source_module]["context"], self.router_config["modules"][c.destination_module]["context"]):
                 self.js_data.addModule(instance_name=c.source_module,
-                                       module_name=self.config["modules"][c.source_module]["module"],
+                                       module_name=self.router_config["modules"][c.source_module]["module"],
                                        description=self.module_pool.getModule(c.source_module).description)
 
                 self.js_data.addModule(instance_name=c.destination_module,
-                                       module_name=self.config["modules"][c.destination_module]["module"],
+                                       module_name=self.router_config["modules"][c.destination_module]["module"],
                                        description=self.module_pool.getModule(c.destination_module).description)
 
                 self.js_data.addQueue(c.source_module, c.source_queue)
@@ -297,12 +342,12 @@ class GraphWebserver():
 
     def loop(self):
 
-        return not self.block.isSet()
+        return self.__block
 
     def getMetrics(self):
 
         def getConnectedModuleQueue(m, q):
-            for c in self.config["routingtable"]:
+            for c in self.router_config["routingtable"]:
                 if c.source_module == m and c.source_queue == q:
                     return (c.destination_module, c.destination_queue)
             return (None, None)
