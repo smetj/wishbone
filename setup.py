@@ -111,7 +111,6 @@ setup(
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
             'fresh = wishbone.module.fresh:Fresh',
-            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
             'switch = wishbone.module.switch:Switch',
             'tippingbucket = wishbone.module.tippingbucket:TippingBucket',
