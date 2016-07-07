@@ -22,8 +22,7 @@
 #
 #
 
-
-
+from gevent import monkey; monkey.patch_os()
 import argparse
 import os
 # http://stackoverflow.com/questions/4554271/how-to-avoid-excessive-stat-etc-localtime-calls-in-strftime-on-linux
@@ -115,33 +114,64 @@ class Dispatch():
         if module_path is not None:
             self.__expandSearchPath(module_path)
 
-        processes = []
+        routers = []
 
-        def stopSequence(*args, **kwargs):
-            for proc in processes:
-                proc.stop()
+        def stopSequenceMethod(*args, **kwargs):
+            for router in routers:
+                router.stop()
 
-        signal(2, stopSequence)
+        def stopSequenceSignal(*args, **kwargs):
+            for router in routers:
+                os.kill(router.pid, 10)
 
         router_config = ConfigFile(config, 'STDOUT').dump()
 
         if instances == 1:
+            signal(2, stopSequenceMethod)
             sys.stdout.write("\nInstance started in foreground with pid %s\n" % (os.getpid()))
 
             if profile:
                 from wishbone.utils.py2devtools import Profiler
                 with Profiler():
-                    Default(router_config, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph, graph_include_sys=graph_include_sys).start()
+                    router = Default(
+                        router_config,
+                        size=queue_size,
+                        frequency=frequency,
+                        identification=identification,
+                        graph=graph,
+                        graph_include_sys=graph_include_sys
+                    )
+                    router.start()
+                    routers.append(router)
+                    router.block()
             else:
-                Default(router_config, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, graph=graph, graph_include_sys=graph_include_sys).start()
+                router = Default(
+                    router_config,
+                    size=queue_size,
+                    frequency=frequency,
+                    identification=identification,
+                    graph=graph,
+                    graph_include_sys=graph_include_sys
+                )
+                router.start()
+                routers.append(router)
+                router.block()
 
         else:
+            signal(2, stopSequenceSignal)
             for instance in range(instances):
-                processes.append(Default(router_config, size=queue_size, frequency=frequency, identification=identification, stdout_logging=True, process=True).start())
-            pids = [str(p.pid) for p in processes]
+                router = Default(
+                    router_config,
+                    size=queue_size,
+                    frequency=frequency,
+                    identification=identification,
+                    process=True)
+                routers.append(router.start())
+
+            pids = [str(p.pid) for p in routers]
             print(("\nInstances started in foreground with pid %s\n" % (", ".join(pids))))
-            for proc in processes:
-                proc.join()
+            for proc in routers:
+                proc.block()
 
     def list(self, command):
 
