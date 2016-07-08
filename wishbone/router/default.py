@@ -22,13 +22,10 @@
 #
 #
 
-from gevent import monkey; monkey.patch_os()
-from gevent.signal import signal
 from wishbone.actor import ActorConfig
 from wishbone.error import ModuleInitFailure, NoSuchModule, FunctionInitFailure
 from wishbone import ModuleManager
 from gevent import event, sleep, spawn
-import multiprocessing
 from gevent import pywsgi
 import json
 from .graphcontent import GRAPHCONTENT
@@ -65,7 +62,8 @@ class Default(object):
 
     '''The default Wishbone router.
 
-    Holds all Wishbone modules and connections.
+    A Wishbone router is responsible for shoveling the messages from one
+    module to the other.
 
     Args:
         config (obj): The router setup configuration.
@@ -89,7 +87,6 @@ class Default(object):
         self.__block.clear()
 
     def block(self):
-
         '''Blocks until stop() is called and the shutdown process ended.'''
 
         self.__block.wait()
@@ -101,6 +98,10 @@ class Default(object):
         For example:
 
             stdout.inbox
+
+        Args:
+            source (str): The source queue in <module.queue_name> syntax
+            destination (str): The destination queue in <module.queue_name> syntax
         '''
 
         (source_module, source_queue) = source.split('.')
@@ -112,6 +113,14 @@ class Default(object):
         source.connect(source_queue, destination, destination_queue)
 
     def getChildren(self, module):
+        '''Returns all the connected child modules
+
+        Args:
+            module (str): The name of the module.
+
+        Returns:
+            list: A list of module names.
+        '''
         children = []
 
         def lookupChildren(module, children):
@@ -129,7 +138,13 @@ class Default(object):
             return children
 
     def registerModule(self, module, actor_config, arguments={}):
-        '''Initializes the wishbone module module.'''
+        '''Initializes the wishbone module module.
+
+        Args:
+            module (Actor): A Wishbone module object (not initialized)
+            actor_config (ActorConfig): The module's actor configuration
+            arguments (dict): The parameters to initialize the module.
+        '''
 
         try:
             setattr(self.module_pool.module, actor_config.name, module(actor_config, **arguments))
@@ -137,7 +152,7 @@ class Default(object):
             raise ModuleInitFailure("Problem loading module %s.  Reason: %s" % (actor_config.name, err))
 
     def stop(self):
-        '''Stops all modules.'''
+        '''Stops all running modules.'''
 
         for module in self.module_pool.list():
             if module.name not in self.getChildren("_logs") + ["_logs"] and not module.stopped:
@@ -146,13 +161,11 @@ class Default(object):
         while not self.__logsEmpty():
             sleep(0.1)
 
-        # This gives an error when starting in background, no idea why
-        # self.module_pool.module.wishbone_logs.stop()
-
         self.__running = False
         self.__block.set()
 
     def start(self):
+        '''Starts all registered modules.'''
 
         if self.config is not None:
             self.__initConfig()
@@ -194,6 +207,16 @@ class Default(object):
             return True
 
     def __registerLookupModule(self, module, **kwargs):
+        '''Registers a lookupmodule
+
+        Args:
+            module (Looup): The lookup module (not initialized)
+            **kwargs (dict): The parameters used to initiolize the lookup module.
+
+        Raises:
+            FunctionInitFailure: An error occurred loading and initializing the module.
+
+        '''
 
         for group in ["wishbone.lookup", "wishbone_contrib.lookup"]:
             for entry_point in iter_entry_points(group=group, name=None):
