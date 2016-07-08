@@ -113,7 +113,7 @@ class ModuleManager():
             if issubclass(m, Actor) or issubclass(m, Lookup):
                 return m
             else:
-                raise InvalidModule("'%s.%s.%s' is not a valid wishbone actor or lookup module.")
+                raise InvalidModule("'%s.%s.%s' is not a valid wishbone actor or lookup module." % (category, group, name))
 
     def getModuleByName(self, name):
         '''
@@ -136,7 +136,7 @@ class ModuleManager():
         if issubclass(m, Actor) or issubclass(m, Lookup):
             return m
         else:
-            raise InvalidModule("'%s.%s.%s' is not a valid wishbone actor or lookup module.")
+            raise InvalidModule("'%s.%s.%s' is not a valid wishbone actor or lookup module." % (category, group, name))
 
     def getModuleList(self):
         '''
