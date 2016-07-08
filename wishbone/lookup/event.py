@@ -22,8 +22,10 @@
 #
 #
 
+from wishbone.lookup import Lookup
 
-class EventLookup(object):
+
+class EventLookup(Lookup):
 
     '''
     **Returns the requested event header value.**

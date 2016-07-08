@@ -22,10 +22,11 @@
 #
 #
 
+from wishbone.lookup import Lookup
 from random import choice as choice_array
 
 
-class Choice(object):
+class Choice(Lookup):
 
     '''
     **Returns a random element from the provided array.**
