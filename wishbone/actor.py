@@ -191,6 +191,7 @@ class Actor():
         '''Executes a function and sends it to the background.'''
 
         self.greenlets.generic.append(spawn(function, *args, **kwargs))
+        sleep()
 
     def stop(self):
         '''Stops the loop lock and waits until all registered consumers have exit otherwise kills them.'''

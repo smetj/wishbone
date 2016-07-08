@@ -28,6 +28,7 @@ from colorama import init, Fore, Back, Style
 import sys
 from wishbone.event import Bulk
 
+
 class Format():
 
     def __init__(self, selection, counter, pid):
