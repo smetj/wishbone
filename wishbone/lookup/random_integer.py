@@ -22,11 +22,11 @@
 #
 #
 
-
+from wishbone.lookup import Lookup
 from random import randint
 
 
-class RandomInteger(object):
+class RandomInteger(Lookup):
     '''**Returns a random integer.**
 
     Returns a random integer between <min> and <max>.

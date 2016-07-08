@@ -22,10 +22,11 @@
 #
 #
 
+from wishbone.lookup import Lookup
 from itertools import cycle as cycle_array
 
 
-class Cycle(object):
+class Cycle(Lookup):
 
     '''
     **Cycles through the provided array returning the next element.**

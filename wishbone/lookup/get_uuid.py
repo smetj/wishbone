@@ -22,10 +22,11 @@
 #
 #
 
+from wishbone.lookup import Lookup
 from uuid import uuid4
 
 
-class GetUUID(object):
+class GetUUID(Lookup):
 
     '''
     **Returns a uuid value.**

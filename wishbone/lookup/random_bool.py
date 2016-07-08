@@ -22,9 +22,10 @@
 #
 #
 
+from wishbone.lookup import Lookup
 from random import getrandbits
 
-class RandomBool(object):
+class RandomBool(Lookup):
 
     '''
     **Randomly returns True or False**
