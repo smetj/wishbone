@@ -22,10 +22,11 @@
 #
 #
 
+from wishbone.lookup import Lookup
 from os import getpid
 
 
-class PID(object):
+class PID(Lookup):
 
     '''
     **Returns the PID of the current process.**

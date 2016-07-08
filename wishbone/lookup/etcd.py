@@ -22,11 +22,12 @@
 #
 #
 
+from wishbone.lookup import Lookup
 import requests
 from uplook.errors import NoSuchValue
 
 
-class ETCD(object):
+class ETCD(Lookup):
 
     '''
     **Returns a value from etcd.**
