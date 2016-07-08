@@ -37,6 +37,7 @@ from gevent import signal
 from gevent.event import Event
 from daemon import DaemonContext
 from pkg_resources import get_distribution
+from setproctitle import setproctitle
 
 
 
@@ -102,7 +103,7 @@ class Dispatch():
         self.pid = kwargs.get("pid", None)
         self.queue_size = kwargs.get("queue_size", None)
         self.frequency = kwargs.get("frequency", None)
-        self.id = kwargs.get("id", None)
+        self.identification = kwargs.get("identification", None)
         self.module_path = kwargs.get("module_path", None)
         self.graph = kwargs.get("graph", None)
         self.graph_include_sys = kwargs.get("graph_include_sys", None)
@@ -117,11 +118,14 @@ class Dispatch():
     def initializeRouter(self, config):
 
         def startRouter():
+            if self.identification is not None:
+                setproctitle(self.identification)
+
             router = Default(
                 config,
                 size=self.queue_size,
                 frequency=self.frequency,
-                identification=self.id,
+                identification=self.identification,
                 graph=self.graph,
                 graph_include_sys=self.graph_include_sys
             )
@@ -239,7 +243,7 @@ class Dispatch():
         router_config = ConfigFile(self.config, 'SYSLOG').dump()
         pid_file = PIDFile(self.pid)
 
-        with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, files_preserve=self.__getCurrentFD(), detach_process=True):
+        with DaemonContext(stdout=sys.stdout, stderr=sys.stderr, detach_process=True):
             if self.instances == 1:
                 sys.stdout.write("\nWishbone instance started with pid %s\n" % (os.getpid()))
                 sys.stdout.flush()
@@ -255,9 +259,10 @@ class Dispatch():
                         )
                     )
 
-            pids = [str(p.pid) for p in self.routers]
-            print(("\nInstances started in foreground with pid %s\n" % (", ".join(pids))))
-            pid_file.create(pids)
+                pids = [str(p.pid) for p in self.routers]
+                print(("\nInstances started in foreground with pid %s\n" % (", ".join(pids))))
+                pid_file.create(pids)
+
             self.bootstrapBlock()
 
     def stop(self):

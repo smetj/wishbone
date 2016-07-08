@@ -44,6 +44,7 @@ install_requires = [
     'python-daemon==2.1.1',
     'python-dateutil==2.5.3',
     'PyYAML==3.11',
+    'setproctitle==1.1.10',
     'six==1.10.0',
     'uplook==1.1.0'
 ]

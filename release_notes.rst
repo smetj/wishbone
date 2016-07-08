@@ -6,16 +6,21 @@ Version 2.2.0
 
 Features:
 
-- Python3 support
-- Removed wishbone.flow.loglevelfilter module
 - "." is now also a valid selector to return a complete event
 - Added Event().has() function to validate existence of key.
 - Event lookups now support default values if key does not exist.
 - Event lookup functions are now first class Wishbone lookup modules.
 - wishbone.flow.tippingbucket can now bulk aggregate events on an event key.
 - wishbone.input.testevent can now set arbitrary event values.
-- switches to UpLook 1.1.0
 - Drop logs when module's log queue is full and not consumed.
+- Setting --id now alters the proc title to simplify process identification
+
+Misc:
+
+- Python3 support
+- Code refactor of bootstrap and process handling.
+- Removed wishbone.flow.loglevelfilter module
+- switches to UpLook 1.1.0
 
 Version 2.1.5
 ~~~~~~~~~~~~~
