@@ -36,6 +36,7 @@ install_requires = [
     'cronex==0.1.0',
     'docutils==0.12',
     'gevent==1.1.1',
+    'gipc==0.6.0',
     'greenlet==0.4.9',
     'importlib==1.0.3',
     'jsonschema==2.5.1',
@@ -46,7 +47,7 @@ install_requires = [
     'PyYAML==3.11',
     'setproctitle==1.1.10',
     'six==1.10.0',
-    'uplook==1.1.0'
+    'uplook==1.1.0',
 ]
 
 dependency_links = [
