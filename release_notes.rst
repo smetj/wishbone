@@ -15,6 +15,11 @@ Features:
 - Drop logs when module's log queue is full and not consumed.
 - Setting --id now alters the proc title to simplify process identification
 
+Bugfixes:
+
+- Loading lookup modules was based on module name instead of entrypoint name
+- Fixed bug in event data handling of wishbone.output.syslog
+
 Misc:
 
 - Python3 support
