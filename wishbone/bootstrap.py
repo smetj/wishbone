@@ -40,7 +40,6 @@ from pkg_resources import get_distribution
 from setproctitle import setproctitle
 
 
-
 class BootStrap():
 
     '''
@@ -133,7 +132,6 @@ class Dispatch():
             router.start()
             e.wait()
             router.stop()
-
 
         e = Event()
         e.clear()
