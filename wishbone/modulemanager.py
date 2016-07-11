@@ -158,8 +158,6 @@ class ModuleManager():
                 for m in sorted(groups):
                     yield (category, group, m)
 
-
-
     def getModuleDoc(self, category, group, name):
         '''
         Returns the docstring of module `category`.`group`.`name`
