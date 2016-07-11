@@ -220,7 +220,7 @@ class Default(object):
 
         for group in ["wishbone.lookup", "wishbone_contrib.lookup"]:
             for entry_point in iter_entry_points(group=group, name=None):
-                if entry_point.module_name == module:
+                if "%s.%s" % (group, entry_point.name) == module:
                     l = entry_point.load()(**kwargs)
                     if hasattr(l, "lookup"):
                         return l.lookup
