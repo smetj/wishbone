@@ -42,8 +42,7 @@ from setproctitle import setproctitle
 
 class BootStrap():
 
-    '''
-    Parses command line arguments and bootstraps the Wishbone instance.
+    '''Parses command line arguments and bootstraps the Wishbone instance.
     '''
 
     def __init__(self, description="Wishbone bootstrap server. Build composable event pipeline servers with minimal effort.", include_groups=[]):
@@ -91,8 +90,7 @@ class BootStrap():
 
 class Dispatch():
 
-    '''
-    Handles the Wishbone instance commands.
+    '''Handles the Wishbone commands, processes and daemons.
     '''
 
     def __init__(self, **kwargs):
@@ -115,6 +113,17 @@ class Dispatch():
             self.__expandSearchPath(self.module_path)
 
     def initializeRouter(self, config):
+        '''Initializes a Router instance using the provided config object.
+
+        This function blocks until signal(2) is received after which it
+        continues and executes the router's stop() method.
+
+        The idea is that you can spawn this function to the background to have
+        multiple parallel instances.
+
+        Args:
+            config (Wishbone.config.configfile:ConfigFile): The router configuration
+        '''
 
         def startRouter():
             if self.identification is not None:
@@ -145,6 +154,8 @@ class Dispatch():
             startRouter()
 
     def bootstrapBlock(self):
+        '''Helper function which blocks untill all running routers have stopped.
+        '''
 
         while True:
             try:
@@ -155,7 +166,8 @@ class Dispatch():
                 pass
 
     def generateHeader(self):
-        '''Generates the Wishbone ascii header.'''
+        '''Generates the Wishbone ascii header.
+        '''
 
         with open("%s/data/banner.tmpl" % (os.path.dirname(__file__))) as f:
             template = ''.join(f.readlines()).format(version=get_distribution('wishbone').version)
@@ -163,8 +175,7 @@ class Dispatch():
         return template
 
     def debug(self):
-        '''
-        Handles the Wishbone debug command.
+        '''Maps to the CLI command and starts Wishbone in foreground.
         '''
 
         router_config = ConfigFile(self.config, 'STDOUT').dump()
@@ -188,6 +199,8 @@ class Dispatch():
             self.bootstrapBlock()
 
     def list(self):
+        '''Maps to the CLI command and lists all Wishbone entrypoint modules it can find.
+        '''
 
         categories = ["wishbone", "wishbone_contrib"]
         groups = ["flow", "encode", "decode", "function", "input", "output"]
@@ -200,8 +213,7 @@ class Dispatch():
         print(ModuleManager(categories=categories, groups=["lookup"]).getModuleTable())
 
     def show(self):
-        '''
-        Shows the help message of a module.
+        '''Maps to the CLI command and shows the docstring of the Wishbone module.
         '''
 
         module_manager = ModuleManager()
@@ -234,8 +246,7 @@ class Dispatch():
             print(("Failed to load module %s.%s.%s. Reason: %s" % (category, group, self.module, err)))
 
     def start(self):
-        '''
-        Handles the Wishbone start command.
+        '''Maps to the CLI command and starts one or more Wishbone processes in background.
         '''
 
         router_config = ConfigFile(self.config, 'SYSLOG').dump()
@@ -264,8 +275,7 @@ class Dispatch():
             self.bootstrapBlock()
 
     def stop(self):
-        '''
-        Handles the Wishbone stop command.
+        '''Maps to the CLI command and stop the running Wishbone processes.
         '''
 
         try:
@@ -281,37 +291,6 @@ class Dispatch():
         except Exception as err:
             print("")
             print(("Failed to stop instances.  Reason: %s" % (err)))
-
-    def __stopSequence(self):
-        '''
-        Calls the stop() function of each instance.
-        '''
-
-        if not self.__stopping:
-            # TODO: Weird hack, otherwise when trapping signal(2) this function is
-            #      executed many times.
-            self.__stopping = True
-            for instance in self.routers:
-                if hasattr(instance, "stop"):
-                    instance.stop()
-
-    def __getCurrentFD(self):
-        '''
-        returns a list with filedescriptors in use.
-        '''
-
-        try:
-            return [int(x) for x in os.listdir("/proc/self/fd")]
-        except Exception as err:
-            print(("Failed to get active filedescriptors.  Reason: %s." % (err)))
-            sys.exit(1)
-
-    def __alive(self, pid):
-        try:
-            os.kill(pid, 0)
-            return True
-        except:
-            False
 
     def __expandSearchPath(self, module_path):
         for d in module_path.split(','):
