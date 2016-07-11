@@ -24,4 +24,3 @@
 
 
 from .configfile import ConfigFile
-from .routerconfig import RouterConfig
