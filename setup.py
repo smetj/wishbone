@@ -148,7 +148,7 @@ setup(
             'random_bool = wishbone.lookup.random_bool:RandomBool',
             'random_integer = wishbone.lookup.random_integer:RandomInteger',
             'random_word = wishbone.lookup.random_word:RandomWord',
-            'uuid = wishbone.lookup.get_uuid:GetUUID'
+            'random_uuid = wishbone.lookup.random_uuid:RandomUUID'
         ]
     }
 )
