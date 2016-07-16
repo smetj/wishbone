@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  random_uuid.py
 #
 #  Copyright 2016 Jelle Smet <development@smetj.net>
 #
@@ -22,26 +22,26 @@
 #
 #
 
-class Lookup(object):
-    pass
-
-from .event import EventLookup
-
-from .choice import Choice
-from .cycle import Cycle
-from .etcd import ETCD
-from .pid import PID
-from .random_bool import RandomBool
-from .random_integer import RandomInteger
-from .random_word import RandomWord
-from .random_uuid import RandomUUID
+from wishbone.lookup import Lookup
+from uuid import uuid4
 
 
+class RandomUUID(Lookup):
 
+    '''
+    **Returns a uuid value.**
 
+    This function returns a uuid value.
 
+    - Parameters to initialize the function:
 
+        None
 
+    - Parameters to call the function:
 
+        None
+    '''
 
+    def lookup(self):
 
+        return str(uuid4())
