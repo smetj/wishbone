@@ -51,12 +51,12 @@ Components
 
 .. autofunction:: wishbone.lookup.event
 
-.. autofunction:: wishbone.lookup.getpid
+.. autofunction:: wishbone.lookup.pid
 
-.. autofunction:: wishbone.lookup.randombool
+.. autofunction:: wishbone.lookup.random_bool
 
-.. autofunction:: wishbone.lookup.randominteger
+.. autofunction:: wishbone.lookup.random_integer
 
-.. autofunction:: wishbone.lookup.randomword
+.. autofunction:: wishbone.lookup.random_word
 
-.. autofunction:: wishbone.lookup.uuid
+.. autofunction:: wishbone.lookup.random_uuid

@@ -2,82 +2,93 @@
 Wishbone
 ========
 
-**A Python framework to build composable event pipeline servers with minimal effort.**
+**A Python framework to build event stream processing servers**
 
 https://github.com/smetj/wishbone
 
-Bootstrap a  server
-===================
+What?
+=====
 
-Wishbone `servers`_ are started with bootstrap file:
+Wishbone is Python framework geared towards building event stream servers by
+combining and connecting `event modules`_, into a
+processing pipeline.
 
-.. code-block:: sh
+The Wishbone Python module comes with a set of useful *event* and *lookup
+modules* with different functionalities included.  Developing custom modules
+is easy using the Actor baseclass which takes care of the boring things so
+development effort is focused to the actual problem solving.
 
-    $ wishbone start --config eventprocessor.yaml
+Wishbone's aim is to provide a fun and flexible framework to build creative
+solutions in an operations context with short development time for custom
+functionality.
+
+How?
+====
+
+Servers can be created directly in Python or by bootstrapping a server using a
+YAML file directly from CLI.
+
+In the following example we create a server which just prints **"Hello
+world!"** to stdout.  For this we connect the wishbone.module.testevent to
+wishbone.module.stdout and continuously print the message to the screen.
+
+In Python
+---------
+
+.. code-block:: python
+
+    from wishbone.module.testevent import TestEvent
+    from wishbone.module.stdout import STDOUT
+    from wishbone.router import Default
+    from wishbone.actor import ActorConfig
+
+    input_config = ActorConfig("input")
+    output_config = ActorConfig("output")
+
+    router = Default()
+    router.registerModule(TestEvent, input_config, {"message": "Hello world!"})
+    router.registerModule(STDOUT, output_config)
+    router.connectQueue("input.outbox", "output.inbox")
+    router.start()
+    try:
+        router.block()
+    except KeyboardInterrupt:
+        router.stop()
 
 
-`Bootstrap files`_ define the `builtin`_ and `external`_ modules to initialize and how these should be
-connected to each other:
+Using a bootstrap file
+----------------------
 
-.. image:: intro.png
-    :align: right
+.. code-block:: YAML
 
-.. literalinclude:: static/examples/test_setup.yaml
-   :language: yaml
+    modules:
+      input:
+        module: wishbone.input.testevent
+        arguments:
+          message : Hello World!
+
+      stdout:
+        module: wishbone.output.stdout
+
+    routingtable:
+      - input.outbox            -> stdout.inbox
 
 
-Running a server:
+The server can be started and stopped using the wishbone CLI:
 
-.. code-block:: sh
+.. code-block:: bash
 
-    [smetj@dev-container ~]$ wishbone debug --config simple.yaml
-    Instance started in foreground with pid 5434
-    2016-02-17T20:42:59 wishbone[5434]: debug output2: Connected queue output2.logs to _logs.output2
-    2016-02-17T20:42:59 wishbone[5434]: debug output2: Connected queue output2.metrics to _metrics.output2
-    2016-02-17T20:42:59 wishbone[5434]: debug output2: preHook() found, executing
-    2016-02-17T20:42:59 wishbone[5434]: debug output2: Initialized.
-    2016-02-17T20:42:59 wishbone[5434]: debug output2: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2016-02-17T20:42:59 wishbone[5434]: debug output1: Connected queue output1.logs to _logs.output1
-    2016-02-17T20:42:59 wishbone[5434]: debug output1: Connected queue output1.metrics to _metrics.output1
-    2016-02-17T20:42:59 wishbone[5434]: debug output1: preHook() found, executing
-    2016-02-17T20:42:59 wishbone[5434]: debug output1: Initialized.
-    2016-02-17T20:42:59 wishbone[5434]: debug output1: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2016-02-17T20:42:59 wishbone[5434]: debug input: Connected queue input.logs to _logs.input
-    2016-02-17T20:42:59 wishbone[5434]: debug input: Connected queue input.metrics to _metrics.input
-    2016-02-17T20:42:59 wishbone[5434]: debug input: Connected queue input.outbox to mixing.inbox
-    2016-02-17T20:42:59 wishbone[5434]: debug input: preHook() found, executing
-    2016-02-17T20:42:59 wishbone[5434]: debug input: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    2016-02-17T20:42:59 wishbone[5434]: debug mixing: Connected queue mixing.logs to _logs.mixing
-    2016-02-17T20:42:59 wishbone[5434]: debug mixing: Connected queue mixing.metrics to _metrics.mixing
-    2016-02-17T20:42:59 wishbone[5434]: debug mixing: Connected queue mixing.one to output1.inbox
-    2016-02-17T20:42:59 wishbone[5434]: debug mixing: Connected queue mixing.two to output2.inbox
-    2016-02-17T20:42:59 wishbone[5434]: debug mixing: preHook() found, executing
-    2016-02-17T20:42:59 wishbone[5434]: debug mixing: Started with max queue size of 100 events and metrics interval of 1 seconds.
-    I am output #2: seawater's
-    I am output #1: hinders
-    I am output #2: stigmatism
-    I am output #1: damnedest
-    I am output #2: ejects
-    I am output #1: legates
-    I am output #2: lobos
-    I am output #1: punctures
-    I am output #2: port
-    I am output #1: condominium's
-    I am output #2: banqueted
-    I am output #1: bucker
-    I am output #2: efficiencies
-    ... snip ...
+    $ wishbone debug --config hello_world.yaml
+
+
 
 .. toctree::
     :hidden:
 
-    introduction
-    installation/index
-    server/index
-    modules/index
-    miscellaneous
+    event_modules/index
 
 
+.. _event modules: modules/index.html
 .. _servers: server/index.html
 .. _builtin: modules/builtin%20modules.html
 .. _external: modules/external%20modules.html
