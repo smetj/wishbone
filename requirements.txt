@@ -4,9 +4,9 @@ colorama==0.3.7
 cronex==0.1.0
 docutils==0.12
 functools32==3.2.3.post2
-gevent==1.1.1
+gevent==1.1.2
 gipc==0.6.0
-greenlet==0.4.9
+greenlet==0.4.10
 importlib==1.0.3
 jsonschema==2.5.1
 lockfile==0.12.2
