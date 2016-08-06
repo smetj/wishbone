@@ -66,7 +66,6 @@ class Logging():
     def __log(self, level, message):
 
         event = Event(Log(time(), level, getpid(), self.name, message))
-
         try:
             self.logs.put(event)
         except QueueFull:
