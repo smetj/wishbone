@@ -135,7 +135,6 @@ def test_module_time():
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
 
-
 def test_module_replace():
 
     a = get_actor({"replace": ['\d', "X", "@data"]})
@@ -143,3 +142,11 @@ def test_module_replace():
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
     assert one.get('@data') == "hello XXX hello"
+
+def test_module_join():
+
+    a = get_actor({"join": ['@data', ",", "@tmp.joined"]})
+    e = Event(["one", "two", "three"])
+    a.pool.queue.inbox.put(e)
+    one = getter(a.pool.queue.outbox)
+    assert one.get('@tmp.joined') == "one,two,three"

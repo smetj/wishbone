@@ -32,6 +32,7 @@ VALID_EXPRESSIONS = ["add_item",
                      "del_item",
                      "delete",
                      "extract",
+                     "join",
                      "lowercase",
                      "replace",
                      "set",
@@ -117,6 +118,12 @@ class Modify(Actor):
           result::
 
             {"@data":{"test:"one;two", extract:{"first": "one", "second": "two"}}}
+
+      - **join**::
+
+          join: [<array>, <join>, <destination>]
+
+        Joins an array into a string using the <join> value.
 
 
       - **lowercase**::
@@ -225,6 +232,12 @@ class Modify(Actor):
 
         matches = re.match(regex, event.get(source))
         event.set(matches.groupdict(), destination)
+        return event
+
+    def command_join(self, event, array, j, destination):
+
+        result = j.join(event.get(array))
+        event.set(result, destination)
         return event
 
     def command_lowercase(self, event, key):
