@@ -34,6 +34,7 @@ VALID_EXPRESSIONS = ["add_item",
                      "extract",
                      "join",
                      "lowercase",
+                     "merge",
                      "replace",
                      "set",
                      "template",
@@ -131,6 +132,12 @@ class Modify(Actor):
           lowercase: [<key>]
 
         Turns the string stored under *<key>* to lowercase.
+
+      - **merge**::
+
+          merge: [<object_one>, <object_two>, <destination>]
+
+        Merges 2 arrays into <destination>
 
 
       - **replace**::
@@ -243,6 +250,11 @@ class Modify(Actor):
     def command_lowercase(self, event, key):
 
         event.set(event.get(key).lower(), key)
+        return event
+
+    def command_merge(self, event, one, two, destination):
+        result = event.get(one) + event.get(two)
+        event.set(result, destination)
         return event
 
     def command_replace(self, event, regex, value, key):
