@@ -150,3 +150,13 @@ def test_module_join():
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
     assert one.get('@tmp.joined') == "one,two,three"
+
+def test_module_merge():
+
+    a = get_actor({"merge": ['@tmp.one', '@tmp.two', '@data']})
+    e = Event()
+    e.set(["one"], "@tmp.one")
+    e.set(["two"], "@tmp.two")
+    a.pool.queue.inbox.put(e)
+    one = getter(a.pool.queue.outbox)
+    assert one.get() == ["one", "two"]
