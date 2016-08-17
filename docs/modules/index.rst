@@ -15,7 +15,7 @@ Modules typically have, but are not limited to, an **inbox**, **outbox**,
 **success** and **failed** queue.
 
 *Event modules* are typically initialized and held within a
-*:py:class:`wishbone.router.Default` instance.
+:py:class:`wishbone.router.Default` instance.
 
 .. autoclass:: wishbone.Actor
     :members:
@@ -34,12 +34,7 @@ Modules typically have, but are not limited to, an **inbox**, **outbox**,
     :hidden:
 
     module types
-    events
-    bulk events
     logs and metrics
     writing a module
-    builtin modules
-    external modules
-
 
 .. _greenlets: https://greenlet.readthedocs.org/en/latest/

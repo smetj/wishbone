@@ -7,8 +7,7 @@ Wishbone has 6 different module types builtin.
 Input modules
 -------------
 
-`Input modules`_ take data in from the outside world into the Wishbone
-framework.
+Input modules take data in from the outside world into the Wishbone framework.
 
 Features:
 
@@ -19,7 +18,7 @@ Features:
 Output modules
 --------------
 
-`Output modules`_ submit data to an external service.
+Output modules submit data to an external service.
 
 Features:
 
@@ -34,7 +33,7 @@ Features:
 Flow modules
 ------------
 
-`Flow modules`_ apply logic on incoming messages to determine which queue to
+Flow modules apply logic on incoming messages to determine which queue to
 `submit the data to.  They do not really alter events in transit.
 
 Features:
@@ -45,7 +44,7 @@ Features:
 Encode modules
 --------------
 
-`Encode modules`_ convert:
+Encode modules convert:
 
 * a Python data structure stored in :py:class:`wishbone.event.Event`
 * :py:class:`wishbone.event.Metric`
@@ -61,7 +60,7 @@ Features:
 Decode modules
 --------------
 
-`Decode modules`_ convert some format into either:
+Decode modules convert some format into either:
 
 * a Python data structure stored in :py:class:`wishbone.event.Event`
 * :py:class:`wishbone.event.Metric`
@@ -75,7 +74,7 @@ Features:
 Function modules
 ----------------
 
-`Function modules`_ alter events in transit
+Function modules alter events in transit
 
 Features:
 
