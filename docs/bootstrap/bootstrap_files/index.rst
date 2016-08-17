@@ -1,9 +1,13 @@
+:tocdepth: 1
 ===============
 Bootstrap Files
 ===============
 
-Bootstrap files are YAML formatted configuration files used to start a
-Wishbone server on command line.
+.. _bootstrapfiles:
+
+  *Bootstrap files are YAML formatted configuration files describing the
+  modules to initialize and how they are connected used to start a   Wishbone
+  server on command line.*
 
 A bootstrap file contains the configuration of all the lookup functions and
 modules to initialize and how they are connected to each other.
@@ -141,13 +145,6 @@ the desired flow.
 The section consists out of a list of entries containing a source
 queue, a separator -> and a destination queue.
 
-A queue can only be connected to 1 single queue.
-
-.. warning::
-
-  If you need to have *"one to many"* or *"many to one"* connections then you
-  can use the  :py:class:`wishbone.module.Fanout` and
-  :py:class:`wishbone.module.Fanout` modules.
 
 
 .. _UpLook: https://github.com/smetj/uplook
