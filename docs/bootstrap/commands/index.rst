@@ -1,8 +1,18 @@
-======
-Server
-======
+:tocdepth: 1
+=====================
+Wishbone CLI commands
+=====================
 
-**start**
+start
+-----
+Starts Wishbone in the background
+
+Example:
+
+.. code:: sh
+
+    $ wishbone start --config /etc/wishbone_bootstrap.yaml --pid /var/run/wishbone.pid
+
 
 The start command detaches the Wishbone server from console and runs it in the
 background.  This implies that logs are written to syslog unless specifically
@@ -42,9 +52,16 @@ start the Wishbone instance.
                             find Wishbone modules.
 
 
-------------------
+debug
+-----
+Starts Wishbone in foreground writing all logs to stdout.
 
-**debug**
+Example:
+
+.. code:: sh
+
+    $ wishbone debug --config /etc/wishbone_bootstrap.yaml --graph
+
 
 The debug command does pretty much the same as start just that it keeps the
 Wishbone instance in the foreground without detaching it.  Logs are written to
@@ -83,12 +100,16 @@ STDOUT.  The running instance can be stopped gracefully with CTRL+C
                             loaded in Chrome developer tools.
 
 
-
-------------------
-
-**stop**
-
+stop
+----
 Stops the Wishbone instance gracefully by sending SIGINT to all processes.
+
+Example:
+
+.. code:: sh
+
+    $ wishbone stop --pid /var/run/wishbone.pid
+
 
 .. code-block:: sh
 
@@ -102,9 +123,17 @@ Stops the Wishbone instance gracefully by sending SIGINT to all processes.
       --pid PID   The pidfile to use.
 
 
-------------------
 
-**kill**
+kill
+----
+Kills Wishbone using the provided pid file
+
+Example:
+
+.. code:: sh
+
+    $ wishbone kill --pid /var/run/wishbone.pid
+
 
 .. warning::
 
@@ -121,11 +150,17 @@ Stops the Wishbone instance gracefully by sending SIGINT to all processes.
       -h, --help  show this help message and exit
       --pid PID   The pidfile to use.
 
-------------------
 
-**list**
-
+list
+----
 Lists all installed Wishbone modules, given that they have the correct entry-points.
+
+Example:
+
+.. code:: sh
+
+    $ wishbone list
+
 
 .. code-block:: sh
 
@@ -195,11 +230,16 @@ Lists all installed Wishbone modules, given that they have the correct entry-poi
     +----------+----------+----------------+---------+----------------------------------------------------------------------------+
 
 
-------------------
-
-**show**
-
+show
+----
 Displays the docstring of the requested module.
+
+
+Example:
+
+.. code:: sh
+
+    $ wishbone show --module wishbone.flow.fanout
 
 
 .. code-block:: sh
@@ -236,12 +276,3 @@ Displays the docstring of the requested module.
 
             inbox
              |  Outgoing events.
-
-
-
-
-.. toctree::
-    :hidden:
-
-    lookup functions
-    bootstrap files

@@ -9,28 +9,32 @@ https://github.com/smetj/wishbone
 What?
 =====
 
-Wishbone is Python framework geared towards building event stream servers by
-combining and connecting `event modules`_, into a
-processing pipeline.
+Wishbone is a Python framework for building servers to read, process and write
+infinite event streams by combining and connecting modules into a `processing
+pipeline`_ through which `structured data`_ flows, changes, triggers logic and
+interacts with external services.
 
-The Wishbone Python module comes with a set of useful *event* and *lookup
-modules* with different functionalities included.  Developing custom modules
-is easy using the Actor baseclass which takes care of the boring things so
-development effort is focused to the actual problem solving.
+Wishbone can be used to implement solutions for a wide spectrum of tasks from
+building `mashup enablers`_ and `ETL servers`_ to `CEP`_ and `stream
+processing`_ servers.
 
-Wishbone's aim is to provide a fun and flexible framework to build creative
-solutions in an operations context with short development time for custom
-functionality.
+Wishbone comes with a set of useful `builtin event`_ and *lookup* modules with
+many more `external modules`_ available and ready to be used.
+
+The goal of the project is to provide a simple and pleasant yet solid and
+flexible framework which provides the user a toolbox to be creative building
+custom solutions with minimal effort and development time.
 
 How?
 ====
 
-Servers can be created directly in Python or by bootstrapping a server using a
-YAML file directly from CLI.
+Servers can be created directly in Python or by bootstrapping an instance
+using a YAML file directly from CLI.
 
-In the following example we create a server which just prints **"Hello
-world!"** to stdout.  For this we connect the wishbone.module.testevent to
-wishbone.module.stdout and continuously print the message to the screen.
+    *The following "hello world" example creates a server which continuously
+    prints "Hello world!" to STDOUT.*
+
+For this we connect `wishbone.input.testevent`_ to `wishbone.output.stdout`_:
 
 In Python
 ---------
@@ -85,11 +89,27 @@ The server can be started and stopped using the wishbone CLI:
 .. toctree::
     :hidden:
 
+    installation/index
     event_modules/index
+    lookup_modules/index
+    events/index
+    router/index
+    bootstrap/index
+    examples/index
 
 
-.. _event modules: modules/index.html
+.. _builtin event: event_modules/index.html
+.. _structured data: events/index.html
+.. _processing pipeline: router/index.html
+.. _bootstrap: bootstrap/index.html
+
 .. _servers: server/index.html
 .. _builtin: modules/builtin%20modules.html
-.. _external: modules/external%20modules.html
+.. _external modules: event_modules/external_modules/index.html
 .. _Bootstrap files: server/bootstrap%20files.html
+.. _wishbone.input.testevent: event_modules/builtin_modules/index.html#wishbone-input-testevent
+.. _wishbone.output.stdout: event_modules/builtin_modules/index.html#wishbone-output-stdout
+.. _mashup enablers: https://en.wikipedia.org/wiki/Mashup_(web_application_hybrid)#Mashup_enabler
+.. _ETL servers: https://en.wikipedia.org/wiki/Extract,_transform,_load
+.. _stream processing: https://en.wikipedia.org/wiki/Stream_processing
+.. _CEP: https://en.wikipedia.org/wiki/Complex_event_processing

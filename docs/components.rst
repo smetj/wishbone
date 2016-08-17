@@ -2,10 +2,12 @@
 Components
 ==========
 
-.. autoclass:: wishbone.router.Default
-    :members:
-
 .. autoclass:: wishbone.Actor
+    :members:
+    :show-inheritance:
+    :inherited-members:
+
+.. autoclass:: wishbone.actor.ActorConfig
     :members:
     :show-inheritance:
     :inherited-members:
