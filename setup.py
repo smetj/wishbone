@@ -42,7 +42,7 @@ install_requires = [
     'jsonschema==2.5.1',
     'lockfile==0.12.2',
     'prettytable==0.7.2',
-    'python-daemon==2.1.1',
+    'python-daemon',
     'python-dateutil==2.5.3',
     'PyYAML==3.11',
     'requests',
