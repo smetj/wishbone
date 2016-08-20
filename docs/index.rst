@@ -100,7 +100,7 @@ The server can be started and stopped using the wishbone CLI:
 
 .. _builtin event: event_modules/index.html
 .. _structured data: events/index.html
-.. _processing pipeline: router/index.html
+.. _processing pipeline: examples/event_pipeline/index.html
 .. _bootstrap: bootstrap/index.html
 
 .. _servers: server/index.html
