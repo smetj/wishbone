@@ -2,11 +2,6 @@
 Components
 ==========
 
-.. autoclass:: wishbone.Actor
-    :members:
-    :show-inheritance:
-    :inherited-members:
-
 .. autoclass:: wishbone.actor.ActorConfig
     :members:
     :show-inheritance:
@@ -33,16 +28,7 @@ Components
 .. autoclass:: wishbone.queue.QueuePool
     :members:
 
-.. autoclass:: wishbone.event.Event
-    :members:
-
-.. autoclass:: wishbone.event.Bulk
-    :members:
-
 .. autoclass:: wishbone.event.Log
-    :members:
-
-.. autoclass:: wishbone.event.Metric
     :members:
 
 .. autofunction:: wishbone.lookup.choice

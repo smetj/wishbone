@@ -20,7 +20,7 @@ Bootstrap files are loaded using the *--config* option:
 
 **Example bootstrap file**
 
-.. literalinclude:: ../static/static_dynamic.yaml
+.. literalinclude:: ../../static/examples/static_dynamic.yaml
    :language: yaml
    :linenos:
 
