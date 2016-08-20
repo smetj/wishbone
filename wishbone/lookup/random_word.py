@@ -54,7 +54,6 @@ class RandomWord(Lookup):
         else:
             self.filename = filename
 
-
         self.wordlist = self.readWordlist(filename)
 
     def readWordlist(self, location):
