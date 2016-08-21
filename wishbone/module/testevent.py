@@ -80,7 +80,7 @@ class TestEvent(Actor):
         while self.loop():
             message = self.generateMessage(self.kwargs.message)
             event = Event(message)
-            for key, value in self.kwargs.additional_values.items():
+            for key, value in list(self.kwargs.additional_values.items()):
                 event.set(value, key)
             self.submit(event, self.pool.queue.outbox)
             self.sleep()

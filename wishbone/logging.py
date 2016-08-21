@@ -23,7 +23,7 @@
 #
 #
 
-from __future__ import print_function
+
 from wishbone.event import Event, Log
 from wishbone.error import QueueFull
 from time import time

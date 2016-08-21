@@ -267,7 +267,7 @@ class Actor():
             if name not in self.config.lookup:
                 raise ModuleInitFailure("A lookup function '%s' was defined but no lookup function with that name registered." % (name))
             else:
-                if self.config.lookup[name].im_class == EventLookup:
+                if self.config.lookup[name].__self__.__class__ == EventLookup:
                     uplook.registerLookup(name, self.doEventLookup)
                 else:
                     uplook.registerLookup(name, self.config.lookup[name])
