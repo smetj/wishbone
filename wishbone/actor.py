@@ -42,7 +42,41 @@ import traceback
 import inspect
 
 Greenlets = namedtuple('Greenlets', "consumer generic log metric")
-ActorConfig = namedtuple('ActorConfig', 'name size frequency lookup description')
+
+class ActorConfig(object):
+
+    '''
+    A configuration object pass to a Wishbone actor.
+
+    This is a simple object which holds a set of attributes (with some sane
+    defaults) a Wishbone Actor expects.
+
+    Attributes:
+        name (str): The name identifying the actor instance.
+        size (int): The size of the Actor instance's queues.
+        frequency (int): The time in seconds to generate metrics.
+        lookup (dict): A dictionary of lookup methods.
+        description (str): A short free form discription of the actor instance.
+
+    '''
+
+    def __init__(self, name, size=100, frequency=1, lookup={}, description="A Wishbone actor."):
+
+        '''
+
+        Args:
+            name (str): The name identifying the actor instance.
+            size (int): The size of the Actor instance's queues.
+            frequency (int): The time in seconds to generate metrics.
+            lookup (dict): A dictionary of lookup methods.
+            description (str): A short free form discription of the actor instance.
+
+        '''
+        self.name = name
+        self.size = size
+        self.frequency = frequency
+        self.lookup = lookup
+        self.description = description
 
 
 class Actor():
@@ -103,16 +137,20 @@ class Actor():
         try:
             return self.current_event.get(name)
         except AttributeError:
-            return "You should use a dynamic lookup ~~ for header lookups. "
+            return ""
         except KeyError:
-            self.logging.debug("There is no lookup value with name '%s'." % (name))
+            # No event has passed through this module.  Most likely this is an
+            # input module which creates its own events. Therefor there is
+            # nothing to lookup yet and there for we rely up UpLook to return
+            # the default value for this lookup if any.
+            self.logging.debug("There is no lookup value with name '%s' Falling back to default lookup value if any." % (name))
             raise NoSuchValue
 
     def getChildren(self, queue=None):
         '''Returns the queue name <queue> is connected to.'''
 
         if queue is None:
-            return [self.__children[q] for q in self.__children.keys()]
+            return [self.__children[q] for q in list(self.__children.keys())]
         else:
             return self.__children[queue]
 
@@ -153,6 +191,7 @@ class Actor():
         '''Executes a function and sends it to the background.'''
 
         self.greenlets.generic.append(spawn(function, *args, **kwargs))
+        sleep()
 
     def stop(self):
         '''Stops the loop lock and waits until all registered consumers have exit otherwise kills them.'''
@@ -217,8 +256,7 @@ class Actor():
 
         self.__current_event = {}
         args = {}
-
-        for key, value in inspect.currentframe(2).f_locals.iteritems():
+        for key, value in list(inspect.getouterframes(inspect.currentframe())[2][0].f_locals.items()):
             if key == "self" or isinstance(value, ActorConfig):
                 next
             else:
@@ -229,7 +267,7 @@ class Actor():
             if name not in self.config.lookup:
                 raise ModuleInitFailure("A lookup function '%s' was defined but no lookup function with that name registered." % (name))
             else:
-                if isinstance(self.config.lookup[name], EventLookup):
+                if self.config.lookup[name].__self__.__class__ == EventLookup:
                     uplook.registerLookup(name, self.doEventLookup)
                 else:
                     uplook.registerLookup(name, self.config.lookup[name])
@@ -244,7 +282,7 @@ class Actor():
         hostname = socket.gethostname()
         while self.loop():
             for queue in self.pool.listQueues(names=True):
-                for metric, value in self.pool.getQueue(queue).stats().iteritems():
+                for metric, value in list(self.pool.getQueue(queue).stats().items()):
                     metric = Metric(time=time(),
                                     type="wishbone",
                                     source=hostname,

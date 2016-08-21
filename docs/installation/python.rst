@@ -2,23 +2,11 @@
 Python
 ======
 
-.. note::
-   The following dependencies are required
-
-   - automake >=1.11.2
-   - autoconf >= 2.64
-   - libtool
-   - gcc-c++, gcc, make
-   - python-dev
-   - cython
-
-
-To install the latest stable release from
-https://pypi.python.org/pypi/wishbone use *pip*:
+To install the latest stable release from `pypi`_ you can use *pip*:
 
 .. code-block:: sh
 
-    $ pip install wishbone --process-dependency-links
+    $ pip install wishbone
 
 
 or use *easy_install*:
@@ -28,3 +16,5 @@ or use *easy_install*:
 
     $ easy_install wishbone
 
+
+.. _pypi: https://pypi.io/project/wishbone/

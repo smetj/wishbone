@@ -12,8 +12,6 @@ Wishbone works on python 2.7+ and PyPy 2.3.1+
 - The development branch is where all development is done.
 
 .. toctree::
-    :hidden:
-
     python
     source
     docker

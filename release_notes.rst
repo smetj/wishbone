@@ -1,10 +1,36 @@
 Wishbone changelog
 ==================
 
+Version 2.2.0
+~~~~~~~~~~~~~
+
+Features:
+
+- "." is now also a valid selector to return a complete event
+- Added Event().has() function to validate existence of key.
+- Event lookups now support default values if key does not exist.
+- Event lookup functions are now first class Wishbone lookup modules.
+- wishbone.flow.tippingbucket can now bulk aggregate events on an event key.
+- wishbone.input.testevent can now set arbitrary event values.
+- Drop logs when module's log queue is full and not consumed.
+- Setting --id now alters the proc title to simplify process identification
+
+Bugfixes:
+
+- Loading lookup modules was based on module name instead of entrypoint name
+- Fixed bug in event data handling of wishbone.output.syslog
+
+Misc:
+
+- Python3 support
+- Code refactor of bootstrap and process handling.
+- Removed wishbone.flow.loglevelfilter module
+- switches to UpLook 1.1.0
+
 Version 2.1.5
 ~~~~~~~~~~~~~
 
-Features
+Features:
 
 - wishbone.flow.fresh Added support for repeat and recovery messages
 - Added wishbone.lookup.getpid lookup function
@@ -40,7 +66,8 @@ Features:
 
 Misc:
 
-Moved many buildin modules to separate package/release on Github.
+Moved many buildin modules to separate package/release on Github:
+
 - moved wishbone-decode-msgpack to Github as a separate module.
 - moved wishbone-encode-flatten to Github as a separate module.
 - moved wishbone-encode-graphite to Github as a separate module.

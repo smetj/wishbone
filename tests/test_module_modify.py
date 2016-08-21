@@ -125,7 +125,6 @@ def test_module_template():
     e = Event({"language": "German", "word": "gutten Tag"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    print one.dump(complete=True)
     assert one.get('result') == "Good day in German is gutten Tag."
 
 
@@ -136,11 +135,28 @@ def test_module_time():
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
 
-
 def test_module_replace():
 
-    a = get_actor({"replace": ["\d", "X", "@data"]})
+    a = get_actor({"replace": ['\d', "X", "@data"]})
     e = Event("hello 123 hello")
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
     assert one.get('@data') == "hello XXX hello"
+
+def test_module_join():
+
+    a = get_actor({"join": ['@data', ",", "@tmp.joined"]})
+    e = Event(["one", "two", "three"])
+    a.pool.queue.inbox.put(e)
+    one = getter(a.pool.queue.outbox)
+    assert one.get('@tmp.joined') == "one,two,three"
+
+def test_module_merge():
+
+    a = get_actor({"merge": ['@tmp.one', '@tmp.two', '@data']})
+    e = Event()
+    e.set(["one"], "@tmp.one")
+    e.set(["two"], "@tmp.two")
+    a.pool.queue.inbox.put(e)
+    one = getter(a.pool.queue.outbox)
+    assert one.get() == ["one", "two"]

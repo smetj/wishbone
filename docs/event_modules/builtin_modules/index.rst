@@ -70,12 +70,6 @@ wishbone.flow.funnel
 
 --------
 
-wishbone.function.loglevelfilter
---------------------------------
-.. autoclass:: wishbone.module.loglevelfilter.LogLevelFilter
-
---------
-
 wishbone.flow.roundrobin
 ------------------------
 .. autoclass:: wishbone.module.roundrobin.RoundRobin

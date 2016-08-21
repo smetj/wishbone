@@ -24,6 +24,26 @@
 
 import os
 from gevent import sleep
+from wishbone.error import ModuleNotReady
+
+
+class ModuleConnectionMock(object):
+
+    '''
+    A class which can be initially assigned to a variable which is going to
+    hold a future connection related object/method. If the actual connection
+    to the upstream server has not been finished yet, we have at least a
+    predictable error.
+    '''
+
+
+    def __init__(self, message="Not connected"):
+
+        self.message = message
+
+    def __getattr__(self, name):
+
+        raise ModuleNotReady(self.message)
 
 
 class PIDFile():
