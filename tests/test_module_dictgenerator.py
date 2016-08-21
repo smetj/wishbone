@@ -65,11 +65,11 @@ def test_module_dictgenerator_num_values():
 
     event = getter(dictgenerator.pool.queue.outbox)
 
-    for key, value in event.get().iteritems():
+    for key, value in event.get().items():
         assert isinstance(value, int)
 
-    assert isinstance(event.get().items()[0][1], int)
-    assert event.get().items()[0][1] >= 1 and event.get().items()[0][1] <= 2
+    assert isinstance(list(event.get().items())[0][1], int)
+    assert list(event.get().items())[0][1] >= 1 and list(event.get().items())[0][1] <= 2
 
 
 def test_module_dictgenerator_num_elements():

@@ -2,10 +2,7 @@
 Components
 ==========
 
-.. autoclass:: wishbone.router.Default
-    :members:
-
-.. autoclass:: wishbone.Actor
+.. autoclass:: wishbone.actor.ActorConfig
     :members:
     :show-inheritance:
     :inherited-members:
@@ -31,16 +28,7 @@ Components
 .. autoclass:: wishbone.queue.QueuePool
     :members:
 
-.. autoclass:: wishbone.event.Event
-    :members:
-
-.. autoclass:: wishbone.event.Bulk
-    :members:
-
 .. autoclass:: wishbone.event.Log
-    :members:
-
-.. autoclass:: wishbone.event.Metric
     :members:
 
 .. autofunction:: wishbone.lookup.choice
@@ -51,12 +39,12 @@ Components
 
 .. autofunction:: wishbone.lookup.event
 
-.. autofunction:: wishbone.lookup.getpid
+.. autofunction:: wishbone.lookup.pid
 
-.. autofunction:: wishbone.lookup.randombool
+.. autofunction:: wishbone.lookup.random_bool
 
-.. autofunction:: wishbone.lookup.randominteger
+.. autofunction:: wishbone.lookup.random_integer
 
-.. autofunction:: wishbone.lookup.randomword
+.. autofunction:: wishbone.lookup.random_word
 
-.. autofunction:: wishbone.lookup.uuid
+.. autofunction:: wishbone.lookup.random_uuid

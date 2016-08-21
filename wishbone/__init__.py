@@ -22,10 +22,10 @@
 #
 #
 
-from actor import Actor
-from queue import Queue
-from queue import QueuePool
-from logging import Logging
-from modulemanager import ModuleManager
+from .actor import Actor
+from .queue import Queue
+from .queue import QueuePool
+from .logging import Logging
+from .modulemanager import ModuleManager
 # from configurationfactory import ConfigurationFactory
-from event import Event
+from .event import Event

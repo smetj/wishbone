@@ -23,7 +23,8 @@
 #
 
 import yaml
-from wishbone.external.attrdict import AttrDict
+#from wishbone.external.attrdict import AttrDict
+from attrdict import AttrDict
 from jsonschema import validate
 
 SCHEMA = {
@@ -81,7 +82,7 @@ class ConfigFile(object):
 
     def __init__(self, filename, logstyle):
         self.logstyle = logstyle
-        self.config = {"lookups": {}, "modules": {}, "routingtable": []}
+        self.config = AttrDict({"lookups": AttrDict({}), "modules": AttrDict({}), "routingtable": []})
         self.__addLogFunnel()
         self.__addMetricFunnel()
         self.load(filename)
@@ -92,7 +93,7 @@ class ConfigFile(object):
             raise Exception("Module instance names cannot start with _.")
 
         if name not in self.config["modules"]:
-            self.config["modules"][name] = {'description': description, 'module': module, 'arguments': arguments, 'context': context}
+            self.config["modules"][name] = AttrDict({'description': description, 'module': module, 'arguments': arguments, 'context': context})
             self.addConnection(name, "logs", "_logs", name, context="_logs")
             self.addConnection(name, "metrics", "_metrics", name, context="_metrics")
 
@@ -102,7 +103,7 @@ class ConfigFile(object):
     def addLookup(self, name, module, arguments={}):
 
         if name not in self.config["lookups"]:
-            self.config["lookups"][name] = {"module": module, "arguments": arguments}
+            self.config["lookups"][name] = AttrDict({"module": module, "arguments": arguments})
         else:
             raise Exception("Uplook instance name '%s' is already taken." % (name))
 
@@ -116,7 +117,8 @@ class ConfigFile(object):
             raise Exception("Cannot connect '%s.%s' to '%s.%s'. Reason: %s." % (source_module, source_queue, destination_module, destination_queue, connected))
 
     def dump(self):
-        return AttrDict(self.config)
+
+        return AttrDict(self.config, recursive=True)
 
     def load(self, filename):
 
@@ -178,23 +180,23 @@ class ConfigFile(object):
 
     def __addLogFunnel(self):
 
-        self.config["modules"]["_logs"] = {'description': "Centralizes the logs of all modules.", 'module': "wishbone.flow.funnel", "arguments": {}, "context": "_logs"}
+        self.config["modules"]["_logs"] = AttrDict({'description': "Centralizes the logs of all modules.", 'module': "wishbone.flow.funnel", "arguments": {}, "context": "_logs"})
 
     def __addMetricFunnel(self):
 
-        self.config["modules"]["_metrics"] = {'description': "Centralizes the metrics of all modules.", 'module': "wishbone.flow.funnel", "arguments": {}, "context": "_metrics"}
+        self.config["modules"]["_metrics"] = AttrDict({'description': "Centralizes the metrics of all modules.", 'module': "wishbone.flow.funnel", "arguments": {}, "context": "_metrics"})
 
     def _setupLoggingSTDOUT(self):
 
         if not self.__queueConnected("_logs", "outbox"):
-            self.config["modules"]["_logs_format"] = {'description': "Create a human readable log format.", 'module': "wishbone.encode.humanlogformat", "arguments": {}, "context": "_logs"}
+            self.config["modules"]["_logs_format"] = AttrDict({'description': "Create a human readable log format.", 'module': "wishbone.encode.humanlogformat", "arguments": {}, "context": "_logs"})
             self.addConnection("_logs", "outbox", "_logs_format", "inbox", context="_logs")
-            self.config["modules"]["_logs_stdout"] = {'description': "Prints all incoming logs to STDOUT.", 'module': "wishbone.output.stdout", "arguments": {}, "context": "_logs"}
+            self.config["modules"]["_logs_stdout"] = AttrDict({'description': "Prints all incoming logs to STDOUT.", 'module': "wishbone.output.stdout", "arguments": {}, "context": "_logs"})
             self.addConnection("_logs_format", "outbox", "_logs_stdout", "inbox", context="_logs")
 
     def _setupLoggingSYSLOG(self):
 
         if not self.__queueConnected("_logs", "outbox"):
-            self.config["modules"]["_logs_syslog"] = {'description': "Writes all incoming messags to syslog.", 'module': "wishbone.output.syslog", "arguments": {}, "context": "_logs"}
+            self.config["modules"]["_logs_syslog"] = AttrDict({'description': "Writes all incoming messags to syslog.", 'module': "wishbone.output.syslog", "arguments": {}, "context": "_logs"})
             self.addConnection("_logs", "outbox", "_logs_syslog", "inbox", context="_logs")
 

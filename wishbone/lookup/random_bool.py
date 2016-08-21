@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  randombool.py
 #
 #  Copyright 2016 Jelle Smet <development@smetj.net>
 #
@@ -22,16 +22,23 @@
 #
 #
 
+from wishbone.lookup import Lookup
+from random import getrandbits
 
-class Lookup(object):
-    pass
+class RandomBool(Lookup):
 
-from .event import EventLookup
-from .choice import Choice
-from .cycle import Cycle
-from .etcd import ETCD
-from .pid import PID
-from .random_bool import RandomBool
-from .random_integer import RandomInteger
-from .random_word import RandomWord
-from .random_uuid import RandomUUID
+    '''
+    **Randomly returns True or False**
+
+    - Parameters to initialize the function:
+
+        None
+
+    - Parameters to call the function:
+
+        None
+    '''
+
+    def lookup(self):
+
+        return bool(getrandbits(1))

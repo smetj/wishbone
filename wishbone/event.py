@@ -226,14 +226,29 @@ class Event(object):
                     raise Exception()
             else:
                 return travel(path[1:], d[path[0]])
-        if key is None or key is "":
+        if key is None or key is "" or key is ".":
             return self.data
         else:
-            path = key.split('.')
             try:
+                path = key.split('.')
                 return travel(path, self.data)
             except:
                 raise KeyError(key)
+
+    def has(self, key="@data"):
+        '''
+        Returns a boot indicating the event has <key>
+
+        :param str key: The name of the key to check
+        :return: Bool
+        '''
+
+        try:
+            self.get(key)
+        except KeyError:
+            return False
+        else:
+            return True
 
     def set(self, value, key="@data"):
         '''
@@ -263,7 +278,7 @@ class Event(object):
         '''
 
         d = {}
-        for key, value in self.data.iteritems():
+        for key, value in list(self.data.items()):
             if key == "@tmp" and not complete:
                 continue
             if key == "@errors" and not complete:
@@ -290,7 +305,7 @@ class Event(object):
         :param merge_dct: dct merged into dct
         :return: None
         """
-        for k, v in merge_dct.iteritems():
+        for k, v in list(merge_dct.items()):
             if k in dct and isinstance(dct[k], dict) and isinstance(merge_dct[k], dict):
                 self.dict_merge(dct[k], merge_dct[k])
             else:
@@ -306,7 +321,7 @@ class Event(object):
 
         if isinstance(org, dict):
             out = dict().fromkeys(org)
-            for k, v in org.iteritems():
+            for k, v in list(org.items()):
                 try:
                     out[k] = v.copy()   # dicts, sets
                 except AttributeError:

@@ -23,14 +23,14 @@
 #
 
 from wishbone.actor import ActorConfig
-from wishbone.error import ModuleInitFailure, NoSuchModule
-from gevent import signal, event, sleep, spawn
-import multiprocessing
-import importlib
+from wishbone.error import ModuleInitFailure, NoSuchModule, FunctionInitFailure
+from wishbone import ModuleManager
+from gevent import event, sleep, spawn
 from gevent import pywsgi
 import json
 from .graphcontent import GRAPHCONTENT
 from .graphcontent import VisJSData
+from pkg_resources import iter_entry_points
 
 
 class Container():
@@ -46,7 +46,7 @@ class ModulePool():
     def list(self):
         '''Returns a generator returning all module instances.'''
 
-        for m in self.module.__dict__.keys():
+        for m in list(self.module.__dict__.keys()):
             yield self.module.__dict__[m]
 
     def getModule(self, name):
@@ -58,118 +58,50 @@ class ModulePool():
             raise NoSuchModule("Could not find module %s" % name)
 
 
-class Default(multiprocessing.Process):
+class Default(object):
 
     '''The default Wishbone router.
 
-    Holds all Wishbone modules and connections.
+    A Wishbone router is responsible for shoveling the messages from one
+    module to the other.
 
-    Arguments:
-
-        - router_config(obj)            : The router setup configuration.
-
-        - module_manager(obj)           : A Wishbone ModuleManager object instance.
-
-        - size(int)(100)                : The size of all queues.
-
-        - frequency(int)(1)             : The frequency at which metrics are produced.
-
-        - identification                : A string identifying this instance in logging.
-
-        - stdout_logging(bool)(True)    : When True all logs are written to STDOUT.
-
-        - background(bool)(False)       : When True, sends the router to background in a
-                                          separate process.
-
-
+    Args:
+        config (obj): The router setup configuration.
+        size (int): The size of all queues.
+        frequency (int)(1): The frequency at which metrics are produced.
+        identification (wishbone): A string identifying this instance in logging.
     '''
 
-    def __init__(self, router_config, module_manager, size=100, frequency=1, identification="wishbone", stdout_logging=True, process=False, graph=False, graph_include_sys=False):
+    def __init__(self, config=None, size=100, frequency=1, identification="wishbone", graph=False, graph_include_sys=False):
 
-        if process:
-            multiprocessing.Process.__init__(self)
-            self.daemon = True
-        self.config = router_config
-        self.module_manager = module_manager
+        self.module_manager = ModuleManager()
+        self.config = config
         self.size = size
         self.frequency = frequency
         self.identification = identification
-        self.stdout_logging = stdout_logging
-        self.process = process
         self.graph = graph
         self.graph_include_sys = graph_include_sys
 
         self.module_pool = ModulePool()
-
-        self.__running = False
         self.__block = event.Event()
         self.__block.clear()
 
-        signal(2, self.initiateStop)
-        signal(15, self.__noop)
-
-        self.initiate_stop = event.Event()
-        self.initiate_stop.clear()
-        spawn(self.stop)
-
     def block(self):
-        '''Blocks until stop() is called.'''
+        '''Blocks until stop() is called and the shutdown process ended.'''
+
         self.__block.wait()
 
-    def getChildren(self, module):
-        children = []
-
-        def lookupChildren(module, children):
-            for module in self.module_pool.getModule(module).getChildren():
-                name = module.split(".")[0]
-                if name not in children:
-                    children.append(name)
-                    lookupChildren(name, children)
-
-        lookupChildren(module, children)
-        return children
-
-    def isRunning(self):
-        return self.__running
-
-    def start(self):
-        '''Starts all registered modules.'''
-
-        if self.process:
-            self.run = self.__start
-            multiprocessing.Process.start(self)
-            return self
-        else:
-            self.__start()
-
-    def initiateStop(self, *args, **kwargs):
-
-        self.initiate_stop.set()
-
-    def stop(self):
-        '''Stops all modules.'''
-
-        self.initiate_stop.wait()
-        for module in self.module_pool.list():
-            if module.name not in self.getChildren("_logs") + ["_logs"] and not module.stopped:
-                module.stop()
-
-        while not self.__logsEmpty():
-            sleep(0.1)
-
-        # This gives an error when starting in background, no idea why
-        # self.module_pool.module.wishbone_logs.stop()
-
-        self.__running = False
-        self.__block.set()
-
-    def __connect(self, source, destination):
+    def connectQueue(self, source, destination):
         '''Connects one queue to the other.
 
         For convenience, the syntax of the queues is <modulename>.<queuename>
         For example:
 
             stdout.inbox
+
+        Args:
+            source (str): The source queue in <module.queue_name> syntax
+            destination (str): The destination queue in <module.queue_name> syntax
         '''
 
         (source_module, source_queue) = source.split('.')
@@ -180,15 +112,80 @@ class Default(multiprocessing.Process):
 
         source.connect(source_queue, destination, destination_queue)
 
+    def getChildren(self, module):
+        '''Returns all the connected child modules
+
+        Args:
+            module (str): The name of the module.
+
+        Returns:
+            list: A list of module names.
+        '''
+        children = []
+
+        def lookupChildren(module, children):
+            for module in self.module_pool.getModule(module).getChildren():
+                name = module.split(".")[0]
+                if name not in children:
+                    children.append(name)
+                    lookupChildren(name, children)
+
+        try:
+            lookupChildren(module, children)
+        except NoSuchModule:
+            return []
+        else:
+            return children
+
+    def registerModule(self, module, actor_config, arguments={}):
+        '''Initializes the wishbone module module.
+
+        Args:
+            module (Actor): A Wishbone module object (not initialized)
+            actor_config (ActorConfig): The module's actor configuration
+            arguments (dict): The parameters to initialize the module.
+        '''
+
+        try:
+            setattr(self.module_pool.module, actor_config.name, module(actor_config, **arguments))
+        except Exception as err:
+            raise ModuleInitFailure("Problem loading module %s.  Reason: %s" % (actor_config.name, err))
+
+    def stop(self):
+        '''Stops all running modules.'''
+
+        for module in self.module_pool.list():
+            if module.name not in self.getChildren("_logs") + ["_logs"] and not module.stopped:
+                module.stop()
+
+        while not self.__logsEmpty():
+            sleep(0.1)
+
+        self.__running = False
+        self.__block.set()
+
+    def start(self):
+        '''Starts all registered modules.'''
+
+        if self.config is not None:
+            self.__initConfig()
+
+        if self.graph:
+            self.graph = GraphWebserver(self.config, self.module_pool, self.__block, self.graph_include_sys)
+            self.graph.start()
+
+        for module in self.module_pool.list():
+            module.start()
+
     def __initConfig(self):
         '''Setup all modules and routes.'''
 
         lookup_modules = {}
 
-        for name, instance in self.config.lookups.iteritems():
+        for name, instance in list(self.config.lookups.items()):
             lookup_modules[name] = self.__registerLookupModule(instance.module, **instance.arguments)
 
-        for name, instance in self.config.modules.iteritems():
+        for name, instance in list(self.config.modules.items()):
             pmodule = self.module_manager.getModuleByName(instance.module)
 
             if instance.description == "":
@@ -196,7 +193,7 @@ class Default(multiprocessing.Process):
 
             actor_config = ActorConfig(name, self.size, self.frequency, lookup_modules, instance.description)
 
-            self.__registerModule(pmodule, actor_config, instance.arguments)
+            self.registerModule(pmodule, actor_config, instance.arguments)
 
         self.__setupConnections()
 
@@ -209,43 +206,33 @@ class Default(multiprocessing.Process):
         else:
             return True
 
-    def __noop(self, *args, **kwargs):
-        pass
-
     def __registerLookupModule(self, module, **kwargs):
+        '''Registers a lookupmodule
 
-        base = ".".join(module.split('.')[0:-1])
-        function = module.split('.')[-1]
-        m = importlib.import_module(base)
-        return getattr(m, function)(**kwargs)
+        Args:
+            module (Looup): The lookup module (not initialized)
+            **kwargs (dict): The parameters used to initiolize the lookup module.
 
-    def __registerModule(self, module, actor_config, arguments={}):
-        '''Initializes the wishbone module module.'''
+        Raises:
+            FunctionInitFailure: An error occurred loading and initializing the module.
 
-        try:
-            setattr(self.module_pool.module, actor_config.name, module(actor_config, **arguments))
-        except Exception as err:
-            raise ModuleInitFailure("Problem loading module %s.  Reason: %s" % (actor_config.name, err))
+        '''
+
+        for group in ["wishbone.lookup", "wishbone_contrib.lookup"]:
+            for entry_point in iter_entry_points(group=group, name=None):
+                if "%s.%s" % (group, entry_point.name) == module:
+                    l = entry_point.load()(**kwargs)
+                    if hasattr(l, "lookup"):
+                        return l.lookup
+                    else:
+                        raise FunctionInitFailure("Lookup module '%s' does not seem to have a 'lookup' method" % (l.module_name))
+        raise FunctionInitFailure("Lookup module '%s' does not exist." % (module))
 
     def __setupConnections(self):
         '''Setup all connections as defined by configuration_manager'''
 
         for route in self.config.routingtable:
-            self.__connect("%s.%s" % (route.source_module, route.source_queue), "%s.%s" % (route.destination_module, route.destination_queue))
-
-    def __start(self):
-
-        self.__initConfig()
-        self.__running = True
-
-        if self.graph:
-            self.graph = GraphWebserver(self.config, self.module_pool, self.__block, self.graph_include_sys)
-            self.graph.start()
-
-        for module in self.module_pool.list():
-            module.start()
-
-        self.block()
+            self.connectQueue("%s.%s" % (route.source_module, route.source_queue), "%s.%s" % (route.destination_module, route.destination_queue))
 
 
 class GraphWebserver():
@@ -281,11 +268,11 @@ class GraphWebserver():
 
     def start(self):
 
-        print "#####################################################"
-        print "#                                                   #"
-        print "# Caution: Started webserver on port 8088           #"
-        print "#                                                   #"
-        print "#####################################################"
+        print("#####################################################")
+        print("#                                                   #")
+        print("# Caution: Started webserver on port 8088           #")
+        print("#                                                   #")
+        print("#####################################################")
         spawn(self.setupWebserver)
 
     def stop(self):
@@ -293,7 +280,7 @@ class GraphWebserver():
 
     def loop(self):
 
-        return not self.block.isSet()
+        return self.__block
 
     def getMetrics(self):
 
