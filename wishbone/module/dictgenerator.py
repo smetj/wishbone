@@ -21,13 +21,16 @@
 #       MA 02110-1301, USA.
 #
 #
-
+from sys import version_info
 from random import choice, randint
 from gevent import sleep
 from wishbone import Actor
 from wishbone.event import Event
 import os
 
+
+if version_info[0] == 2:
+    from io import open
 
 class DictGenerator(Actor):
 
@@ -87,7 +90,7 @@ class DictGenerator(Actor):
         self.pool.createQueue("outbox")
 
     def readWordlist(self):
-        with open("%s/../data/wordlist.txt" % (os.path.dirname(__file__))) as f:
+        with open("%s/../data/wordlist.txt" % (os.path.dirname(__file__)), encoding="latin-1") as f:
             return f.readlines()
 
     def preHook(self):
@@ -119,7 +122,7 @@ class DictGenerator(Actor):
     def getDictGeneratedKeys(self):
 
         d = {}
-        for x in xrange(0, randint(self.kwargs.min_elements, self.kwargs.max_elements)):
+        for x in range(0, randint(self.kwargs.min_elements, self.kwargs.max_elements)):
             d[self.generateKey()] = self.generateValue()
         return d
 

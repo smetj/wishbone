@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  __init__.py
+#  random_integer.py
 #
 #  Copyright 2016 Jelle Smet <development@smetj.net>
 #
@@ -22,4 +22,30 @@
 #
 #
 
-from attrdict import AttrDict
+from wishbone.lookup import Lookup
+from random import randint
+
+
+class RandomInteger(Lookup):
+    '''**Returns a random integer.**
+
+    Returns a random integer between <min> and <max>.
+
+    - Parameters to initialize the function:
+
+        - min(int)(0): The minimum value
+        - max(int)(0): The maximum value
+
+    - Parameters to call the function:
+
+        None
+    '''
+
+    def __init__(self, minimum=0, maximum=0):
+
+        self.minimum = minimum
+        self.maximum = maximum
+
+    def lookup(self):
+
+        return randint(self.minimum, self.maximum)

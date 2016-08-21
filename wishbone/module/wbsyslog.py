@@ -72,15 +72,19 @@ class Syslog(Actor):
     def consume(self, event):
 
         if isinstance(event, Bulk):
-            data = event.dumpFieldAsString(self.kwargs.selection)
+            for e in event.dump():
+                data = e.get(self.kwargs.selection)
+                self.__writeLog(data)
         else:
-            data = str(event.get(self.kwargs.selection))
+            data = event.get(self.kwargs.selection)
+            self.__writeLog(data)
 
-        d = event.get(data)
-        if isinstance(d, Log):
-            syslog.syslog(d.level, "%s: %s" % (d.module, d.message))
+    def __writeLog(self, data):
+
+        if isinstance(data, Log):
+            syslog.syslog(data.level, "%s: %s" % (data.module, data.message))
         else:
-            syslog.syslog(self.kwargs.level, "%s: %s" % (self.kwargs.ident, str(d)))
+            syslog.syslog(self.kwargs.level, "%s: %s" % (self.kwargs.ident, str(data)))
 
     def postHook(self):
         syslog.closelog()

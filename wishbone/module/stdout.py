@@ -21,13 +21,13 @@
 #  MA 02110-1301, USA.
 #
 #
-
+from gevent import monkey; monkey.patch_sys(stdin=False, stdout=True, stderr=False)
 from wishbone import Actor
 from os import getpid
 from colorama import init, Fore, Back, Style
-from gevent import monkey; monkey.patch_sys(stdin=True, stdout=True, stderr=True)
 import sys
 from wishbone.event import Bulk
+
 
 class Format():
 
@@ -127,10 +127,14 @@ class STDOUT(Actor):
         else:
             data = event.get(self.kwargs.selection)
 
-        sys.stdout.write("%s%s%s%s%s\n" % (getattr(Fore, self.kwargs.foreground_color),
-                                           getattr(Back, self.kwargs.background_color),
-                                           getattr(Style, self.kwargs.color_style),
-                                           self.kwargs.prefix, self.format.do(data)))
+        output = "%s%s%s%s%s\n" % (
+            getattr(Fore, self.kwargs.foreground_color),
+            getattr(Back, self.kwargs.background_color),
+            getattr(Style, self.kwargs.color_style),
+            self.kwargs.prefix,
+            self.format.do(data)
+        )
+        sys.stdout.write(output)
         sys.stdout.flush()
 
     def __validateInput(self, f, b, s):

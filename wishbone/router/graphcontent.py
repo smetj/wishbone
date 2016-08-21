@@ -122,7 +122,7 @@ class VisJSData():
                 }
             }
 
-        if instance_name not in self.nodes.keys():
+        if instance_name not in list(self.nodes.keys()):
             self.nodes[instance_name] = {"id": self.id,
                                          "label": instance_name,
                                          "shape": shape,
@@ -136,7 +136,7 @@ class VisJSData():
 
     def addQueue(self, module, name):
 
-        if "%s.%s" % (module, name) not in self.nodes.keys():
+        if "%s.%s" % (module, name) not in list(self.nodes.keys()):
             self.nodes["%s.%s" % (module, name)] = {"id": self.id,
                                                     "label": name,
                                                     "shape": "dot",
@@ -160,6 +160,6 @@ class VisJSData():
 
     def dumpString(self):
 
-        nodes = json.dumps(list(self.nodes.itervalues()))
+        nodes = json.dumps(list(self.nodes.values()))
         edges = json.dumps(self.edges)
         return (nodes, edges)

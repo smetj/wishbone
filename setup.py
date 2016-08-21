@@ -27,20 +27,29 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '2.1.5'
+VERSION = '2.2.0'
 
-install_requires = ['gevent==1.1.1',
-                    'greenlet==0.4.9',
-                    'argparse==1.3.0',
-                    'prettytable==0.7.2',
-                    'python-daemon==1.6',
-                    'pyyaml==3.11',
-                    'jsonschema==2.5.1',
-                    'colorama==0.3.3',
-                    'arrow==0.6.0',
-                    'importlib==1.0.3',
-                    'uplook==0.4.3',
-                    'cronex==0.1.0']
+install_requires = [
+    'arrow==0.7.0',
+    'attrdict==2.0.0',
+    'colorama==0.3.7',
+    'cronex==0.1.0',
+    'docutils==0.12',
+    'gevent==1.1.2',
+    'gipc==0.6.0',
+    'greenlet==0.4.10',
+    'importlib==1.0.3',
+    'jsonschema==2.5.1',
+    'lockfile==0.12.2',
+    'prettytable==0.7.2',
+    'python-daemon',
+    'python-dateutil==2.5.3',
+    'PyYAML==3.11',
+    'requests',
+    'setproctitle==1.1.10',
+    'six==1.10.0',
+    'uplook==1.1.0',
+]
 
 dependency_links = [
 ]
@@ -81,6 +90,7 @@ setup(
                  'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
                  'Programming Language :: Python',
                  'Programming Language :: Python :: 2.7',
+                 'Programming Language :: Python :: 3.5',
                  'Programming Language :: Python :: Implementation :: PyPy',
                  'Intended Audience :: Developers',
                  'Intended Audience :: System Administrators',
@@ -105,7 +115,6 @@ setup(
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
             'fresh = wishbone.module.fresh:Fresh',
-            'loglevelfilter = wishbone.module.loglevelfilter:LogLevelFilter',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
             'switch = wishbone.module.switch:Switch',
             'tippingbucket = wishbone.module.tippingbucket:TippingBucket',
@@ -130,6 +139,17 @@ setup(
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog'
+        ],
+        'wishbone.lookup': [
+            'choice = wishbone.lookup.choice:Choice',
+            'cycle = wishbone.lookup.cycle:Cycle',
+            'etcd = wishbone.lookup.etcd:ETCD',
+            'event = wishbone.lookup.event:EventLookup',
+            'pid = wishbone.lookup.pid:PID',
+            'random_bool = wishbone.lookup.random_bool:RandomBool',
+            'random_integer = wishbone.lookup.random_integer:RandomInteger',
+            'random_word = wishbone.lookup.random_word:RandomWord',
+            'random_uuid = wishbone.lookup.random_uuid:RandomUUID'
         ]
     }
 )

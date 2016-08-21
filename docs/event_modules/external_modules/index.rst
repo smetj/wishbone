@@ -24,6 +24,7 @@ Input modules
 - `wishbone_input_livestatus`_
 - `wishbone_input_namedpipe`_
 - `wishbone_input_tcp`_
+- `wishbone_input_twitter`_
 - `wishbone_input_udp`_
 - `wishbone_input_zmqpull`_
 - `wishbone_input_zmqtopic`_
@@ -81,6 +82,7 @@ Decode modules
 .. _wishbone_input_livestatus: https://pypi.python.org/pypi?name=wishbone_input_livestatus&:action=display
 .. _wishbone_input_namedpipe: https://pypi.python.org/pypi?name=wishbone_input_namedpipe&:action=display
 .. _wishbone_input_tcp: https://pypi.python.org/pypi?name=wishbone_input_tcp&:action=display
+.. _wishbone_input_twitter: https://pypi.python.org/pypi?name=wishbone_input_twitter&:action=display
 .. _wishbone_input_udp: https://pypi.python.org/pypi?name=wishbone_input_udp&:action=display
 .. _wishbone_input_zmqpull: https://pypi.python.org/pypi?name=wishbone_input_zmqpull&:action=display
 .. _wishbone_input_zmqtopic: https://pypi.python.org/pypi?name=wishbone_input_zmqtopic&:action=display

@@ -2,14 +2,17 @@
 Events
 ======
 
-:py:class:`wishbone.event.Event` instances are used to transport data between
-:the queues of modules.
+
+
+    *wishbone.event.Event object instances are used to store and transport structured data
+    between module queues.*
+
 
 The `input modules`_ should initialize a :py:class:`wishbone.event.Event` instance to
 encapsulate the data they receive or generate.
 
 :py:class:`wishbone.event.Event` is a simple class used for data representation
-:including some convenience functions for data manipulation.
+including some convenience functions for data manipulation.
 
 **Examples**
 
@@ -72,5 +75,8 @@ Setting nested dictionary values can be done using dotted format.
 
 .. autoclass:: wishbone.event.Event
     :members:
+
+.. toctree::
+    bulk_events/index
 
 .. _input modules: module%20types.html#input-modules

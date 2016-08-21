@@ -32,7 +32,9 @@ VALID_EXPRESSIONS = ["add_item",
                      "del_item",
                      "delete",
                      "extract",
+                     "join",
                      "lowercase",
+                     "merge",
                      "replace",
                      "set",
                      "template",
@@ -118,12 +120,24 @@ class Modify(Actor):
 
             {"@data":{"test:"one;two", extract:{"first": "one", "second": "two"}}}
 
+      - **join**::
+
+          join: [<array>, <join>, <destination>]
+
+        Joins an array into a string using the <join> value.
+
 
       - **lowercase**::
 
           lowercase: [<key>]
 
         Turns the string stored under *<key>* to lowercase.
+
+      - **merge**::
+
+          merge: [<object_one>, <object_two>, <destination>]
+
+        Merges 2 arrays into <destination>
 
 
       - **replace**::
@@ -227,14 +241,25 @@ class Modify(Actor):
         event.set(matches.groupdict(), destination)
         return event
 
+    def command_join(self, event, array, j, destination):
+
+        result = j.join(event.get(array))
+        event.set(result, destination)
+        return event
+
     def command_lowercase(self, event, key):
 
         event.set(event.get(key).lower(), key)
         return event
 
+    def command_merge(self, event, one, two, destination):
+        result = event.get(one) + event.get(two)
+        event.set(result, destination)
+        return event
+
     def command_replace(self, event, regex, value, key):
 
-        result = re.sub("{}".format(regex), value, str(event.get(key)).encode('string-escape'))
+        result = re.sub("{}".format(regex), value, str(event.get(key)))
         event.set(str(result), key)
         return event
 
@@ -263,9 +288,9 @@ class Modify(Actor):
     def __extractExpr(self, e):
 
         assert isinstance(e, dict), "The expression should be a dict."
-        assert len(e.keys()) == 1, "The expression should only contain 1 value"
+        assert len(list(e.keys())) == 1, "The expression should only contain 1 value"
 
-        c = e.keys()[0]
+        c = list(e.keys())[0]
         assert c in VALID_EXPRESSIONS, "'%s' is an invalid expression." % c
 
         assert isinstance(e[c], list), "The expression value must be a list."
