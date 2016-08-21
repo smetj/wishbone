@@ -1,4 +1,4 @@
-arrow==0.7.0
+arrow==0.8.0
 attrdict==2.0.0
 colorama==0.3.7
 cronex==0.1.0
@@ -11,10 +11,10 @@ importlib==1.0.3
 jsonschema==2.5.1
 lockfile==0.12.2
 prettytable==0.7.2
-python-daemon==2.1.1
+python-daemon
 python-dateutil==2.5.3
 PyYAML==3.11
-requests==2.10.0
+requests
 setproctitle==1.1.10
 six==1.10.0
 uplook==1.1.0
