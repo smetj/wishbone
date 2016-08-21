@@ -101,7 +101,7 @@ class JSONDecode(Actor):
         if isinstance(data, dict) and not ignore_dicts:
             return {
                 self._byteify(key, ignore_dicts=True): self._byteify(value, ignore_dicts=True)
-                for key, value in data.items()
+                for key, value in list(data.items())
             }
         # if it's anything else, return it in its original form
         return data
