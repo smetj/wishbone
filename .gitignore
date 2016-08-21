@@ -46,4 +46,4 @@ docs/_build
 
 .eggs
 
-examples/
+examples/*
