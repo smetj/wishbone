@@ -278,7 +278,7 @@ class Event(object):
         '''
 
         d = {}
-        for key, value in self.data.items():
+        for key, value in list(self.data.items()):
             if key == "@tmp" and not complete:
                 continue
             if key == "@errors" and not complete:
@@ -305,7 +305,7 @@ class Event(object):
         :param merge_dct: dct merged into dct
         :return: None
         """
-        for k, v in merge_dct.items():
+        for k, v in list(merge_dct.items()):
             if k in dct and isinstance(dct[k], dict) and isinstance(merge_dct[k], dict):
                 self.dict_merge(dct[k], merge_dct[k])
             else:
@@ -321,7 +321,7 @@ class Event(object):
 
         if isinstance(org, dict):
             out = dict().fromkeys(org)
-            for k, v in org.items():
+            for k, v in list(org.items()):
                 try:
                     out[k] = v.copy()   # dicts, sets
                 except AttributeError:

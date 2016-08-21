@@ -205,12 +205,12 @@ class Dispatch():
         categories = ["wishbone", "wishbone_contrib"]
         groups = ["flow", "encode", "decode", "function", "input", "output"]
 
-        print(self.generateHeader())
+        print((self.generateHeader()))
         print("Available event modules:")
-        print(ModuleManager(categories=categories, groups=groups).getModuleTable())
+        print((ModuleManager(categories=categories, groups=groups).getModuleTable()))
         print("\n")
         print("Available lookup function modules:")
-        print(ModuleManager(categories=categories, groups=["lookup"]).getModuleTable())
+        print((ModuleManager(categories=categories, groups=["lookup"]).getModuleTable()))
 
     def show(self):
         '''Maps to the CLI command and shows the docstring of the Wishbone module.
@@ -220,7 +220,7 @@ class Dispatch():
         module_manager.validateModuleName(self.module)
         module_manager.exists(self.module)
 
-        print(self.generateHeader())
+        print((self.generateHeader()))
 
         try:
             (category, group, self.module) = self.module.split('.')

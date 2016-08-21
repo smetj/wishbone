@@ -140,4 +140,4 @@ class Profiler(object):
         filename = './wishbone_%s_.cpuprofile' % getpid()
         with open(filename, 'w') as f:
             f.write(self.output())
-            print("Written profile file '%s'." % (filename))
+            print(("Written profile file '%s'." % (filename)))

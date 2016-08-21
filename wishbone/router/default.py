@@ -182,10 +182,10 @@ class Default(object):
 
         lookup_modules = {}
 
-        for name, instance in self.config.lookups.items():
+        for name, instance in list(self.config.lookups.items()):
             lookup_modules[name] = self.__registerLookupModule(instance.module, **instance.arguments)
 
-        for name, instance in self.config.modules.items():
+        for name, instance in list(self.config.modules.items()):
             pmodule = self.module_manager.getModuleByName(instance.module)
 
             if instance.description == "":
