@@ -38,6 +38,7 @@ from wishbone.error import QueueFull
 from time import time
 from sys import exc_info
 from uplook import UpLook
+from itertools import cycle
 import traceback
 import inspect
 
@@ -188,10 +189,32 @@ class Actor():
         self.stopped = False
 
     def sendToBackground(self, function, *args, **kwargs):
-        '''Executes a function and sends it to the background.'''
+        '''Executes a function and sends it to the background.
 
-        self.greenlets.generic.append(spawn(function, *args, **kwargs))
-        sleep()
+        Background tasks are usually running indefinately. When such a
+        background task generates an error, it is automatically restarted and
+        an error is logged.
+        '''
+
+        def wrapIntoLoop():
+            while self.loop():
+                try:
+                    function(*args, **kwargs)
+                    # We want to break out of the loop if we get here because
+                    # it's the intention of function() to exit without errors.
+                    # Normally, background tasks run indefinately but in this
+                    # case the user opted not to for some reason so we should
+                    # obey that.
+                    break
+                except Exception as err:
+                    self.logging.error("Backgrounded function '%s' of module instance '%s' caused an error. This needs attention. Restarting it in 2 seconds. Reason: %s" % (
+                        function.__name__,
+                        self.name,
+                        err)
+                    )
+                    sleep(2)
+
+        self.greenlets.generic.append(spawn(wrapIntoLoop))
 
     def stop(self):
         '''Stops the loop lock and waits until all registered consumers have exit otherwise kills them.'''
