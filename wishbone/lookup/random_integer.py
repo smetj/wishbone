@@ -33,8 +33,8 @@ class RandomInteger(Lookup):
 
     - Parameters to initialize the function:
 
-        - min(int)(0): The minimum value
-        - max(int)(0): The maximum value
+        - minimum(int)(0): The minimum value
+        - maximum(int)(0): The maximum value
 
     - Parameters to call the function:
 
