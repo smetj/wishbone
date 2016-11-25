@@ -111,6 +111,7 @@ setup(
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
         'wishbone.flow': [
+            'acknowledge = wishbone.module.acknowledge:Acknowledge',
             'deserialize = wishbone.module.deserialize:Deserialize',
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
