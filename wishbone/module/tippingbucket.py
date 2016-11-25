@@ -41,7 +41,7 @@ class Bucket(object):
 
         self.bucket = None
         self.createEmptyBucket()
-        self.logging.info("Created new buffer with aggregation key '%s'." % (self.key))
+        self.logging.info("Created new bucket with aggregation key '%s'." % (self.key))
 
     def createEmptyBucket(self):
         self.bucket = Bulk(self.size)
@@ -58,7 +58,7 @@ class Bucket(object):
             self._timer -= 1
             if self._timer == 0:
                 if self.bucket.size() > 0:
-                    self.logging.info("Bucket age expired after %s s." % (self.age))
+                    self.logging.debug("Bucket age expired after %s s." % (self.age))
                     self.flush()
                 else:
                     self.resetTimer()
@@ -67,7 +67,7 @@ class Bucket(object):
         '''
         Flushes the buffer.
         '''
-        self.logging.info("Flushed bucket '%s' of size '%s'" % (self.key, self.bucket.size()))
+        self.logging.debug("Flushed bucket '%s' of size '%s'" % (self.key, self.bucket.size()))
         self.queue.put(self.bucket)
         self.createEmptyBucket()
 
@@ -77,7 +77,6 @@ class Bucket(object):
         '''
 
         self._timer = self.age
-
 
 
 class TippingBucket(Actor):
@@ -137,7 +136,7 @@ class TippingBucket(Actor):
         try:
             self.getBucket(self.kwargs.aggregation_key).bucket.append(event)
         except BulkFull:
-            self.logging.info("Bucket full after %s events." % (self.kwargs.bucket_size))
+            self.logging.debug("Bucket full after %s events." % (self.kwargs.bucket_size))
             self.getBucket(self.kwargs.aggregation_key).flush()
             self.getBucket(self.kwargs.aggregation_key).bucket.append(event)
 
@@ -153,6 +152,7 @@ class TippingBucket(Actor):
                 self.logging,
                 self.pool.queue.outbox,
                 self.loop)
+            self.sendToBackground(self.buckets[key].flushBucketTimer)
             return self.buckets[key]
 
     def flushIncomingMessage(self, event):
@@ -161,6 +161,6 @@ class TippingBucket(Actor):
         Flushes the buffer.
         '''
 
-        self.logging.info("Recieved message in <flush> queue.  Flushing all bulk buffers.")
+        self.logging.debug("Recieved message in <flush> queue.  Flushing all bulk buffers.")
         for index, bucket in self.buckets:
             bucket.flush()
