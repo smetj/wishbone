@@ -23,6 +23,33 @@
 #
 
 from wishbone import Actor
+from gevent.lock import Semaphore
+
+class AckList(object):
+
+    def __init__(self):
+
+        self.ack_table = []
+        self.lock = Semaphore()
+
+    def ack(self, value):
+
+        with self.lock:
+            if value in self.ack_table:
+                self.ack_table.remove(value)
+                return True
+            else:
+                return False
+
+    def unack(self, value):
+
+        with self.lock:
+            if value in self.ack_table:
+                return False
+            else:
+                self.ack_table.append(value)
+                return True
+
 
 
 class Acknowledge(Actor):
@@ -74,26 +101,29 @@ class Acknowledge(Actor):
         self.pool.createQueue("dropped")
         self.registerConsumer(self.consume, "inbox")
         self.registerConsumer(self.acknowledge, "acknowledge")
-        self.ack_table = []
+        self.ack_table = AckList()
 
     def consume(self, event):
 
         if self.kwargs.ack_value is None:
             self.logging.warning("Incoming event with <ack_value> %s does not seem to exist.  Returns a None value. Event passing through." % (self.ack_value_ref))
             self.pool.queue.outbox.put(event)
-        elif self.kwargs.ack_value in self.ack_table:
-            self.logging.debug("Event with unacknowledged <ack_value> '%s'. Sent to 'dropped' queue." % (self.kwargs.ack_value))
-            self.pool.queue.dropped.put(event)
-        else:
-            self.ack_table.append(self.kwargs.ack_value)
-            self.logging.debug("Added <ack_value> '%s' to table." % (self.kwargs.ack_value))
+        elif self.ack_table.unack(self.kwargs.ack_value):
+            self.logging.debug("Event unacknowledged with <ack_value> '%s'." % (self.kwargs.ack_value))
             self.pool.queue.outbox.put(event)
+        else:
+            self.logging.debug("Event with still unacknowledged <ack_value> '%s' send to <dropped> queue." % (self.kwargs.ack_value))
+            self.pool.queue.dropped.put(event)
+
 
     def acknowledge(self, event):
         if self.kwargs.ack_value is None:
             self.logging.warning("Incoming acknowledge event with <ack_value> %s does not seem to exist.  Returns a None value. Nothing to do." % (self.ack_value_ref))
-        elif self.kwargs.ack_value in self.ack_table:
+        elif self.ack_table.ack(self.kwargs.ack_value):
             self.logging.debug("Event acknowledged with <ack_value> '%s'." % (self.kwargs.ack_value))
-            self.ack_table.remove(self.kwargs.ack_value)
         else:
             self.logging.debug("Event with <ack_value> '%s' received but was not previously acknowledged." % (self.kwargs.ack_value))
+
+    def postHook(self):
+
+        self.logging.debug("The ack table has %s events unacknowledged." % (len(self.ack_table.ack_table)))
