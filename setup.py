@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '2.2.0'
+VERSION = '2.3.0'
 
 install_requires = [
     'arrow==0.7.0',
@@ -111,6 +111,7 @@ setup(
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
         'wishbone.flow': [
+            'acknowledge = wishbone.module.acknowledge:Acknowledge',
             'deserialize = wishbone.module.deserialize:Deserialize',
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',

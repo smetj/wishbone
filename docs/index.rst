@@ -96,6 +96,7 @@ The server can be started and stopped using the wishbone CLI:
     router/index
     bootstrap/index
     examples/index
+    miscellaneous
 
 
 .. _builtin event: event_modules/index.html

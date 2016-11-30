@@ -1,6 +1,24 @@
 Wishbone changelog
 ==================
 
+Version 2.3.0
+~~~~~~~~~~~~~
+
+Features:
+
+- Actor.sendToBackground() now wraps the backgrounded function into a retry
+  loop.
+
+Bugfixes:
+
+- Make wishbone.flow.tippingbucket log level less chatty
+- Make wishbone.flow.tippingbucket actually work.
+
+Misc:
+
+- Doc improvements and corrections.
+
+
 Version 2.2.0
 ~~~~~~~~~~~~~
 
