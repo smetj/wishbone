@@ -38,11 +38,11 @@ from wishbone.error import QueueFull
 from time import time
 from sys import exc_info
 from uplook import UpLook
-from itertools import cycle
 import traceback
 import inspect
 
 Greenlets = namedtuple('Greenlets', "consumer generic log metric")
+
 
 class ActorConfig(object):
 
