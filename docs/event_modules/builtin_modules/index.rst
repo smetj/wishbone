@@ -46,6 +46,12 @@ wishbone.output.syslog
 Flow modules
 ************
 
+wishbone.function.acknowledge
+-----------------------------
+.. autoclass:: wishbone.module.acknowledge.Acknowledge
+
+--------
+
 wishbone.function.deserialize
 -----------------------------
 .. autoclass:: wishbone.module.deserialize.Deserialize
