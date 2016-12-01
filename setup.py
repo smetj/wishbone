@@ -27,27 +27,21 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '2.3.0'
+VERSION = '2.3.1'
 
 install_requires = [
     'arrow==0.7.0',
     'attrdict==2.0.0',
     'colorama==0.3.7',
     'cronex==0.1.0',
-    'docutils==0.12',
     'gevent==1.1.2',
     'gipc==0.6.0',
-    'greenlet==0.4.10',
-    'importlib==1.0.3',
     'jsonschema==2.5.1',
-    'lockfile==0.12.2',
     'prettytable==0.7.2',
-    'python-daemon',
-    'python-dateutil==2.5.3',
+    'python-daemon-3K',
     'PyYAML==3.11',
     'requests',
     'setproctitle==1.1.10',
-    'six==1.10.0',
     'uplook==1.1.0',
 ]
 
