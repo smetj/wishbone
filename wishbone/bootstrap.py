@@ -49,6 +49,7 @@ class BootStrap():
 
         parser = argparse.ArgumentParser(description=description)
         subparsers = parser.add_subparsers(dest='command')
+        subparsers.required = True
 
         start = subparsers.add_parser('start', description="Starts a Wishbone instance and detaches to the background.  Logs are written to syslog.")
         start.add_argument('--config', type=str, dest='config', default='wishbone.cfg', help='The Wishbone bootstrap file to load.')
