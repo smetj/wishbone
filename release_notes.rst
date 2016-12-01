@@ -1,6 +1,16 @@
 Wishbone changelog
 ==================
 
+Version 2.3.1
+~~~~~~~~~~~~~
+
+Bugfixes:
+- Installing on python3 was not possible. Fixed related module imports
+
+Misc:
+- Cleaned up dependencies.
+
+
 Version 2.3.0
 ~~~~~~~~~~~~~
 

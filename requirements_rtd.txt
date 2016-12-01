@@ -1,2 +1,1 @@
-wishbone==2.1.5
 sphinxcontrib-napoleon
