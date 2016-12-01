@@ -45,7 +45,7 @@ MOCK_MODULES = ["gevent",  "gevent.lock", "gevent.pool", "gevent.fileobject", "g
                 "amqp", "amqp.connection", "gevent.hub", "gevent.wsgi", "gevent.queue",
                 "flask", "ReadRulesDisk", "gevent_inotifyx", "amqp.exceptions", "Event",
                 "uplook", "UpLook", "msgpack", "zmq", "zmq.green", "grequests", "gevent.os", "make_nonblocking",
-                "uplook.errors", "pyjq", "arrow", "cffi", "colorama", "cronex", "functools32", "importlib", "jsonschema",
+                "uplook.errors", "pyjq", "arrow", "cffi", "colorama", "cronex", "functools32", "jsonschema",
                 "lockfile", "prettytable", "python-daemon", "python-dateutil", "PyYAML", "readline" ]
 
 
