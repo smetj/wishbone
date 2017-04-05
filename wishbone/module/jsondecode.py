@@ -42,8 +42,11 @@ class JSONDecode(Actor):
            |  The destination key to store the Python <dict>.
            |  Use an empty string to refer to the complete event.
 
-        - unicode(bool)(True)
+        - str(bool)(True)
            |  When True, converts strings to unicode otherwise regular string.
+
+        - strict(bool)(True)
+           |  When False, the JSON decoder is less strict.
 
 
     Queues:
@@ -55,7 +58,7 @@ class JSONDecode(Actor):
            |  Outgoing messges
     '''
 
-    def __init__(self, actor_config, source="@data", destination="@data", str=True):
+    def __init__(self, actor_config, source="@data", destination="@data", str=True, strict=True):
 
         Actor.__init__(self, actor_config)
 
@@ -78,14 +81,14 @@ class JSONDecode(Actor):
         self.submit(event, self.pool.queue.outbox)
 
     def doUnicode(self, data):
-        return loads(data)
+        return loads(data, strict=self.kwargs.strict)
 
     def doNoUnicode(self, data):
         return self.json_loads_byteified(data)
 
     def json_loads_byteified(self, json_text):
         return self._byteify(
-            loads(json_text, object_hook=self._byteify),
+            loads(json_text, object_hook=self._byteify, strict=self.kwargs.strict),
             ignore_dicts=True
         )
 
@@ -95,7 +98,7 @@ class JSONDecode(Actor):
             return data.encode('utf-8')
         # if this is a list of values, return list of byteified values
         if isinstance(data, list):
-            return [ self._byteify(item, ignore_dicts=True) for item in data ]
+            return [self._byteify(item, ignore_dicts=True) for item in data]
         # if this is a dictionary, return dictionary of byteified keys and values
         # but only if we haven't already byteified it
         if isinstance(data, dict) and not ignore_dicts:
