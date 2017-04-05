@@ -42,3 +42,42 @@ def test_module_jsondecode_basic():
     jsondecode.pool.queue.inbox.put(e)
     one = getter(jsondecode.pool.queue.outbox)
     assert one.get() == ["one", "two", "three"]
+
+def test_module_jsondecode_strict():
+
+    actor_config = ActorConfig('jsondecode', 100, 1, {}, "")
+    jsondecode = JSONDecode(actor_config)
+
+    jsondecode.pool.queue.inbox.disableFallThrough()
+    jsondecode.pool.queue.outbox.disableFallThrough()
+    jsondecode.start()
+
+    e = Event('''{"one": "een\n"}''')
+
+    jsondecode.pool.queue.inbox.put(e)
+
+    try:
+        getter(jsondecode.pool.queue.outbox)
+    except Exception:
+        assert True
+    else:
+        assert False
+
+def test_module_jsondecode_nostrict():
+
+    actor_config = ActorConfig('jsondecode', 100, 1, {}, "")
+    jsondecode = JSONDecode(actor_config, strict=False)
+
+    jsondecode.pool.queue.inbox.disableFallThrough()
+    jsondecode.pool.queue.outbox.disableFallThrough()
+    jsondecode.start()
+
+    e = Event('''{"one": "een\n"}''')
+
+    jsondecode.pool.queue.inbox.put(e)
+
+    try:
+        event = getter(jsondecode.pool.queue.outbox)
+        assert event.get() == {'one': 'een\n'}
+    except Exception:
+        assert False
