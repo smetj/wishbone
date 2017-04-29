@@ -209,6 +209,21 @@ class Event(object):
             else:
                 del(self.data[key])
 
+    def format(self, template, key="@data"):
+        '''
+        Returns a formatted string using the provided template and key
+
+        :param str template: The template to apply
+        :param str key: The name of key providing the values for the template
+        :return: The completed template
+        :rtype: str
+        '''
+
+        try:
+            return template.format(**self.get(key))
+        except Exception:
+            return template
+
     def get(self, key="@data"):
         '''
         Returns the value of <key>.
