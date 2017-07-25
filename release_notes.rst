@@ -1,6 +1,13 @@
 Wishbone changelog
 ==================
 
+Version 2.3.2
+~~~~~~~~~~~~~
+
+Misc:
+- Added clone() method to bulk events.
+
+
 Version 2.3.1
 ~~~~~~~~~~~~~
 
