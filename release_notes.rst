@@ -1,11 +1,18 @@
 Wishbone changelog
 ==================
 
-Version 2.3.2
+Version 2.3.3
 ~~~~~~~~~~~~~
 
 Misc:
 - Added clone() method to bulk events.
+
+
+Version 2.3.2
+~~~~~~~~~~~~~
+
+Misc:
+- wishbone.module.jsondecode: allow optional strict decoding.
 
 
 Version 2.3.1
