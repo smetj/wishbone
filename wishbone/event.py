@@ -50,6 +50,15 @@ class Bulk(object):
         else:
             raise InvalidData()
 
+    def clone(self):
+        '''
+        Returns a cloned version of the Bulk event using deepcopy.
+        '''
+
+        e = Bulk()
+        e.__events = self.deepish_copy(self.__events)
+        return e
+
     def dump(self):
         '''
         Returns an iterator returning all contained events
@@ -93,6 +102,29 @@ class Bulk(object):
         '''
 
         return len(self.__events)
+
+    def deepish_copy(self, org):
+        '''
+        much, much faster than deepcopy, for a dict of the simple python types.
+
+        Blatantly ripped off from https://writeonly.wordpress.com/2009/05/07
+        /deepcopy-is-a-pig-for-simple-data/
+        '''
+
+        if isinstance(org, dict):
+            out = dict().fromkeys(org)
+            for k, v in list(org.items()):
+                try:
+                    out[k] = v.copy()   # dicts, sets
+                except AttributeError:
+                    try:
+                        out[k] = v[:]   # lists, tuples, strings, unicode
+                    except TypeError:
+                        out[k] = v      # ints
+
+            return out
+        else:
+            return org
 
 
 class Log(object):
