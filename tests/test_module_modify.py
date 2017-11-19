@@ -3,7 +3,7 @@
 #
 #  test_module_modify.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -41,51 +41,53 @@ def get_actor(expression):
 
 def test_module_add_item():
 
-    a = get_actor({"add_item": ["fubar", "@data"]})
+    a = get_actor({"add_item": ["fubar", "data"]})
     e = Event(["one", "two", "three"])
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert "fubar" in one.get('@data')
+    assert "fubar" in one.get('data')
 
 
 def test_module_copy():
 
-    a = get_actor({"copy": ["@data", "@tmp.copy", "n/a"]})
+    a = get_actor({"copy": ["data", "tmp.copy", "n/a"]})
     e = Event({"greeting": "hi"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert "hi" == one.get('@tmp.copy')["greeting"]
-    assert id(one.get("@data")) != id(one.get("@tmp.copy"))
+    assert "hi" == one.get('tmp.copy')["greeting"]
+    assert id(one.get("data")) != id(one.get("tmp.copy"))
+
 
 def test_module_copy_default():
 
-    a = get_actor({"copy": ["does.not.exist", "@tmp.copy", "default"]})
+    a = get_actor({"copy": ["does.not.exist", "tmp.copy", "default"]})
     e = Event({"greeting": "hi"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert "default" == one.get('@tmp.copy')
+    assert "default" == one.get('tmp.copy')
+
 
 def test_module_del_item():
 
-    a = get_actor({"del_item": ["fubar", "@data"]})
+    a = get_actor({"del_item": ["fubar", "data"]})
     e = Event(["one", "two", "three", "fubar"])
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert "fubar" not in one.get('@data')
+    assert "fubar" not in one.get('data')
 
 
 def test_module_delete():
 
-    a = get_actor({"delete": ["@data.two"]})
+    a = get_actor({"delete": ["data.two"]})
     e = Event({"one": 1, "two": 2})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert "two" not in one.get('@data').keys()
+    assert "two" not in one.get('data').keys()
 
 
 def test_module_extract():
 
-    a = get_actor({"extract": ["destination", "(?P<one>.*?)\ (?P<two>.*)\ (?P<three>.*)", "@data"]})
+    a = get_actor({"extract": ["destination", "(?P<one>.*?)\ (?P<two>.*)\ (?P<three>.*)", "data"]})
     e = Event("een twee drie")
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
@@ -94,11 +96,11 @@ def test_module_extract():
 
 def test_module_lowercase():
 
-    a = get_actor({"lowercase": ["@data.lower"]})
+    a = get_actor({"lowercase": ["data.lower"]})
     e = Event({"lower": "HELLO"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert one.get('@data.lower') == "hello"
+    assert one.get('data.lower') == "hello"
 
 
 def test_module_modify_set():
@@ -112,16 +114,16 @@ def test_module_modify_set():
 
 def test_module_uppercase():
 
-    a = get_actor({"uppercase": ["@data.upper"]})
+    a = get_actor({"uppercase": ["data.upper"]})
     e = Event({"upper": "hello"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert one.get('@data.upper') == "HELLO"
+    assert one.get('data.upper') == "HELLO"
 
 
 def test_module_template():
 
-    a = get_actor({"template": ["result", "Good day in {language} is {word}.", "@data"]})
+    a = get_actor({"template": ["result", "Good day in {language} is {word}.", "data"]})
     e = Event({"language": "German", "word": "gutten Tag"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
@@ -133,30 +135,33 @@ def test_module_time():
     a = get_actor({"time": ["epoch", "X"]})
     e = Event("hello")
     a.pool.queue.inbox.put(e)
-    one = getter(a.pool.queue.outbox)
+    getter(a.pool.queue.outbox)
+
 
 def test_module_replace():
 
-    a = get_actor({"replace": ['\d', "X", "@data"]})
+    a = get_actor({"replace": ['\d', "X", "data"]})
     e = Event("hello 123 hello")
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert one.get('@data') == "hello XXX hello"
+    assert one.get('data') == "hello XXX hello"
+
 
 def test_module_join():
 
-    a = get_actor({"join": ['@data', ",", "@tmp.joined"]})
+    a = get_actor({"join": ['data', ",", "tmp.joined"]})
     e = Event(["one", "two", "three"])
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert one.get('@tmp.joined') == "one,two,three"
+    assert one.get('tmp.joined') == "one,two,three"
+
 
 def test_module_merge():
 
-    a = get_actor({"merge": ['@tmp.one', '@tmp.two', '@data']})
+    a = get_actor({"merge": ['tmp.one', 'tmp.two', 'data']})
     e = Event()
-    e.set(["one"], "@tmp.one")
-    e.set(["two"], "@tmp.two")
+    e.set(["one"], "tmp.one")
+    e.set(["two"], "tmp.two")
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
     assert one.get() == ["one", "two"]

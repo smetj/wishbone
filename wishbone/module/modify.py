@@ -3,7 +3,7 @@
 #
 #  modify.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,8 @@
 #
 #
 
-from wishbone import Actor
+from wishbone.actor import Actor
+from wishbone.module import ProcessModule
 from copy import deepcopy
 import re
 import arrow
@@ -43,7 +44,7 @@ VALID_EXPRESSIONS = ["add_item",
                      ]
 
 
-class Modify(Actor):
+class Modify(ProcessModule):
 
     '''**Modify and manipulate datastructures.**
 
@@ -55,17 +56,17 @@ class Modify(Actor):
 
     For example::
 
-        {"set": ["hi", "@data.one"]}
+        {"set": ["hi", "data.one"]}
 
 
-    Sets the value *"hi"* to key *"@data.one"*.
+    Sets the value *"hi"* to key *"data.one"*.
 
     In the the YAML formatted bootstrap file that would look like::
 
         module: wishbone.function.modify
         arguments:
           expressions:
-            - set: [ "hi", "@data.one" ]
+            - set: [ "hi", "data.one" ]
 
 
     Valid expressions are:
@@ -110,15 +111,15 @@ class Modify(Actor):
         using *<regex>* and add the resulting matches to *<destination>*.
 
         The following example would extract the words "one" and "two" from
-        "@data.test" and add the to @data.extract:
+        "data.test" and add the to data.extract:
 
           expression::
 
-            extract: ["@data.extract", '(?P<first>.*?);(?P<second>.*)', "@data.test"]
+            extract: ["data.extract", '(?P<first>.*?);(?P<second>.*)', "data.test"]
 
           result::
 
-            {"@data":{"test:"one;two", extract:{"first": "one", "second": "two"}}}
+            {"data":{"test:"one;two", extract:{"first": "one", "second": "two"}}}
 
       - **join**::
 
@@ -174,7 +175,7 @@ class Modify(Actor):
 
           time: [<destination_key>, <format>]
 
-        Modifies the *<@timestamp>* value according the the *<format>* specification
+        Modifies the *<timestamp>* value according the the *<format>* specification
         and stores it into *<destination_key>*.
         See http://crsmithdev.com/arrow/#format for the format.
 
@@ -209,7 +210,7 @@ class Modify(Actor):
             except Exception as err:
                 self.logging.error("Failed to process expression '%s'. Reason: %s Skipped." % (expression, err))
 
-        self.submit(event, self.pool.queue.outbox)
+        self.submit(event, "outbox")
 
     def command_add_item(self, event, item, key):
 
@@ -276,7 +277,7 @@ class Modify(Actor):
 
     def command_time(self, event, destination_key, f):
 
-        result = arrow.get(event.get("@timestamp")).format(f)
+        result = arrow.get(event.get("timestamp")).format(f)
         event.set(result, destination_key)
         return event
 

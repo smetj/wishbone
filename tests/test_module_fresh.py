@@ -3,7 +3,7 @@
 #
 #  test_module_fresh.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@ def test_module_fresh_timeout():
 
     assert one.get() == "timeout"
 
+
 def test_module_fresh_recovery():
 
     actor_config = ActorConfig('fresh', 100, 1, {}, "")
@@ -73,7 +74,7 @@ def test_module_fresh_recovery():
 
     fresh.start()
     sleep(1)
-    one = getter(fresh.pool.queue.timeout)
+    getter(fresh.pool.queue.timeout)
     event = Event("test")
     fresh.pool.queue.inbox.put(event)
     sleep(1)
@@ -81,6 +82,7 @@ def test_module_fresh_recovery():
     fresh.stop()
 
     assert two.get() == "recovery"
+
 
 def test_module_fresh_repeat():
 
@@ -98,4 +100,3 @@ def test_module_fresh_repeat():
     fresh.stop()
 
     assert one.get() == "timeout"
-

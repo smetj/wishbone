@@ -2,7 +2,14 @@
 Source
 ======
 
+.. NOTE::
+
+    You really should install Wishbone inside `virtualenv`_ so you do not mess with
+    your OS Python packages.
+
 Wishbone source can be downloaded from http://github.com/smetj/wishbone
+
+CI builds can be seen here: https://travis-ci.org/smetj/wishbone
 
 
 **Stable**
@@ -34,3 +41,6 @@ Install the latest *development* release from the **development** branch.
 .. code-block:: sh
 
     $ python setup.py test
+
+
+.. _virtualenv: https://virtualenv.pypa.io/en/stable/
