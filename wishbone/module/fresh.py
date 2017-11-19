@@ -3,7 +3,7 @@
 #
 #  fresh.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,12 +22,13 @@
 #
 #
 
-from wishbone import Actor
+from wishbone.actor import Actor
+from wishbone.module import FlowModule
 from gevent import sleep
 from wishbone.event import Event
 
 
-class Fresh(Actor):
+class Fresh(FlowModule):
 
     '''**Generates a new event unless an event came through in the last x time.**
 
@@ -60,8 +61,8 @@ class Fresh(Actor):
         - inbox
            |  Incoming events.
 
-        - inbox
-           |  Incoming events.
+        - outbox
+           |  Outgoing events.
 
         - timeout
            |  timeout and recovery events.
@@ -83,7 +84,7 @@ class Fresh(Actor):
 
     def consume(self, event):
 
-        self.submit(event, self.pool.queue.outbox)
+        self.submit(event, "outbox")
         self._resetTimeout()
 
     def countDown(self):
@@ -98,12 +99,12 @@ class Fresh(Actor):
                 while self.loop() and not self._incoming:
                     e = Event()
                     e.set(self.kwargs.timeout_payload)
-                    self.submit(e, self.pool.queue.timeout)
+                    self.submit(e, "timeout")
                     self._sleeper(self.kwargs.repeat_interval)
                 self.logging.info("Incoming data resumed. Sending recovery event.")
                 e = Event()
                 e.set(self.kwargs.recovery_payload)
-                self.submit(e, self.pool.queue.timeout)
+                self.submit(e, "timeout")
 
     def _resetTimeout(self):
 

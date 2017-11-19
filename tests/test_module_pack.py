@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_module_tippingbucket.py
+#  test_module_pack.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,36 +22,38 @@
 #
 #
 
-from wishbone.event import Event, Bulk
-from wishbone.module.tippingbucket import TippingBucket
+from wishbone.event import Event
+from wishbone.module.pack import Pack
 from wishbone.actor import ActorConfig
 from wishbone.utils.test import getter
 from gevent import sleep
 
-def test_module_tippingbucket_size():
+
+def test_module_pack_size():
 
     # Wraps  10 events into a bulk event.
 
-    actor_config = ActorConfig('tippingbucket', 100, 1, {}, "")
-    bucket = TippingBucket(actor_config, bucket_size=10)
+    actor_config = ActorConfig('pack', 100, 1, {}, "", disable_exception_handling=True)
+    bucket = Pack(actor_config, bucket_size=10)
     bucket.pool.queue.inbox.disableFallThrough()
     bucket.pool.queue.outbox.disableFallThrough()
     bucket.start()
 
-    for c in range(0, 11):
+    for c in range(0, 15):
         bucket.pool.queue.inbox.put(Event(c))
 
     b = getter(bucket.pool.queue.outbox)
-    assert isinstance(b, Bulk)
-    assert b.size() == 10
+    assert b.isBulk()
+    assert len(b.data["data"]) == 10
     bucket.stop()
 
-def test_module_tippingbucket_time():
+
+def test_module_pack_time():
 
     # Bucket spills in 1 second
 
-    actor_config = ActorConfig('tippingbucket', 100, 1, {}, "")
-    bucket = TippingBucket(actor_config, bucket_age=1)
+    actor_config = ActorConfig('pack', 100, 1, {}, "", disable_exception_handling=True)
+    bucket = Pack(actor_config, bucket_age=1)
     bucket.pool.queue.inbox.disableFallThrough()
     bucket.pool.queue.outbox.disableFallThrough()
     bucket.start()
@@ -59,5 +61,5 @@ def test_module_tippingbucket_time():
     bucket.pool.queue.inbox.put(Event("hello"))
     sleep(1)
     b = getter(bucket.pool.queue.outbox)
-    assert b.size() == 1
+    assert len(b.data["data"]) == 1
     bucket.stop()

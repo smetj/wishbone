@@ -3,7 +3,7 @@
 #
 #  test_module_switch.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -49,9 +49,10 @@ def test_module_switch_default():
 
     switch.stop()
 
+
 def test_module_switch_event():
 
-    actor_config = ActorConfig('switch', 100, 1, {}, "")
+    actor_config = ActorConfig('switch', 100, 1, {}, "", disable_exception_handling=True)
 
     switch = Switch(actor_config, outgoing="one")
     switch.pool.queue.inbox.disableFallThrough()

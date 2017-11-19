@@ -3,7 +3,7 @@
 #
 #  null.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,12 +22,13 @@
 #
 #
 
-from wishbone import Actor
+from wishbone.actor import Actor
+from wishbone.module import OutputModule
 
 
-class Null(Actor):
+class Null(OutputModule):
 
-    '''**Purges incoming events.**
+    '''**Purges events.**
 
     Purges incoming events.
 
@@ -42,7 +43,7 @@ class Null(Actor):
            |  incoming events
     '''
 
-    def __init__(self, actor_config):
+    def __init__(self, actor_config, *args, selection=None, payload=None, **kwargs):
 
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")

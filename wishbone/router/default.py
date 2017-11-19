@@ -3,7 +3,7 @@
 #
 #  default.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,26 +22,22 @@
 #
 #
 
-from wishbone.actor import ActorConfig
-from wishbone.error import ModuleInitFailure, NoSuchModule, FunctionInitFailure
-from wishbone import ModuleManager
+from wishbone.actorconfig import ActorConfig
+from wishbone.error import ModuleInitFailure, NoSuchModule
+from wishbone.error import QueueConnected
+from wishbone.componentmanager import ComponentManager
 from gevent import event, sleep, spawn
 from gevent import pywsgi
-import json
 from .graphcontent import GRAPHCONTENT
 from .graphcontent import VisJSData
-from pkg_resources import iter_entry_points
-
-
-class Container():
-    pass
+from types import SimpleNamespace
 
 
 class ModulePool():
 
     def __init__(self):
 
-        self.module = Container()
+        self.module = SimpleNamespace()
 
     def list(self):
         '''Returns a generator returning all module instances.'''
@@ -57,24 +53,39 @@ class ModulePool():
         except AttributeError:
             raise NoSuchModule("Could not find module %s" % name)
 
+    def hasModule(self, name):
+        '''
+        Checks whether the module pool has this module.
+
+
+        Args:
+            name (str): The name of the module instance.
+
+        Returns
+            bool: True if module exists False if not.
+        '''
+
+        return name in self.module.__dict__.keys()
+
 
 class Default(object):
 
-    '''The default Wishbone router.
+    '''
+    The default Wishbone router.
 
-    A Wishbone router is responsible for shoveling the messages from one
-    module to the other.
+    A Wishbone router is responsible for organising the event flow between
+    modules.
 
     Args:
-        config (obj): The router setup configuration.
+        config (EasyDict): The router setup configuration.
         size (int): The size of all queues.
         frequency (int)(1): The frequency at which metrics are produced.
         identification (wishbone): A string identifying this instance in logging.
     '''
 
-    def __init__(self, config=None, size=100, frequency=1, identification="wishbone", graph=False, graph_include_sys=False):
+    def __init__(self, config=None, size=100, frequency=10, identification="wishbone", graph=False, graph_include_sys=False):
 
-        self.module_manager = ModuleManager()
+        self.component_manager = ComponentManager()
         self.config = config
         self.size = size
         self.frequency = frequency
@@ -85,6 +96,9 @@ class Default(object):
         self.module_pool = ModulePool()
         self.__block = event.Event()
         self.__block.clear()
+
+        self.__connections = {
+        }
 
     def block(self):
         '''Blocks until stop() is called and the shutdown process ended.'''
@@ -99,6 +113,9 @@ class Default(object):
 
             stdout.inbox
 
+        This type of router actually replaces the destination queue with the source
+        queue.
+
         Args:
             source (str): The source queue in <module.queue_name> syntax
             destination (str): The destination queue in <module.queue_name> syntax
@@ -107,13 +124,46 @@ class Default(object):
         (source_module, source_queue) = source.split('.')
         (destination_module, destination_queue) = destination.split('.')
 
-        source = self.module_pool.getModule(source_module)
-        destination = self.module_pool.getModule(destination_module)
+        if not self.module_pool.hasModule(source_module):
+            raise NoSuchModule("Module instance %s does not exist." % (source_module))
 
-        source.connect(source_queue, destination, destination_queue)
+        if not self.module_pool.hasModule(destination_module):
+            raise NoSuchModule("Module instance %s does not exist." % (destination_module))
+
+        result = self.__isConnectedTo(source)
+        if result is not None:
+            raise QueueConnected("Queue %s is already connected to %s." % (source, result))
+
+        result = self.__isConnectedTo(destination)
+        if result is not None:
+            raise QueueConnected("Queue %s is already connected to %s." % (destination, result))
+
+        self.__connections[source] = destination
+
+        source_module_instance = self.module_pool.getModule(source_module)
+        if not source_module_instance.pool.hasQueue(source_queue):
+            source_module_instance.pool.createSystemQueue(source_queue)
+            source_module_instance.logging.debug("Module instance '%s' has no queue '%s' so auto created." % (source_module, source_queue))
+
+        destination_module_instance = self.module_pool.getModule(destination_module)
+        if not destination_module_instance.pool.hasQueue(destination_queue):
+            destination_module_instance.pool.createSystemQueue(destination_queue)
+            destination_module_instance.logging.debug("Module instance '%s' has no queue '%s' so auto created." % (destination_module, destination_queue))
+
+        setattr(
+            destination_module_instance.pool.queue,
+            destination_queue,
+            source_module_instance.pool.getQueue(
+                source_queue
+            )
+        )
+
+        source_module_instance.pool.getQueue(source_queue).disableFallThrough()
+        source_module_instance.logging.debug("Connected queue %s to %s" % (source, destination))
 
     def getChildren(self, module):
-        '''Returns all the connected child modules
+        '''
+        Returns all the connected child modules
 
         Args:
             module (str): The name of the module.
@@ -121,41 +171,42 @@ class Default(object):
         Returns:
             list: A list of module names.
         '''
+
         children = []
 
-        def lookupChildren(module, children):
-            for module in self.module_pool.getModule(module).getChildren():
-                name = module.split(".")[0]
-                if name not in children:
-                    children.append(name)
-                    lookupChildren(name, children)
+        def travel(m):
+            for connection in self.__connections:
+                if connection.split('.')[0] == m:
+                    child = self.__connections[connection].split('.')[0]
+                    if child in children:
+                        continue
+                    else:
+                        children.append(child)
+                        travel(child)
 
-        try:
-            lookupChildren(module, children)
-        except NoSuchModule:
-            return []
-        else:
-            return children
+        travel(module)
+        return children
 
     def registerModule(self, module, actor_config, arguments={}):
-        '''Initializes the wishbone module module.
+        '''Initializes the wishbone module ``module``.
 
         Args:
-            module (Actor): A Wishbone module object (not initialized)
+            module (str): A Wishbone module component name.
             actor_config (ActorConfig): The module's actor configuration
             arguments (dict): The parameters to initialize the module.
         '''
 
         try:
-            setattr(self.module_pool.module, actor_config.name, module(actor_config, **arguments))
+            m = self.component_manager.getComponentByName(module)
+            setattr(self.module_pool.module, actor_config.name, m(actor_config, **arguments))
         except Exception as err:
-            raise ModuleInitFailure("Problem loading module %s.  Reason: %s" % (actor_config.name, err))
+            raise ModuleInitFailure("Problem loading module '%s'.  Reason: %s" % (actor_config.name, err))
 
     def stop(self):
         '''Stops all running modules.'''
 
         for module in self.module_pool.list():
-            if module.name not in self.getChildren("_logs") + ["_logs"] and not module.stopped:
+            if module.name not in list(self.getChildren("_logs")) + ["_logs"] and not module.stopped:
                 module.stop()
 
         while not self.__logsEmpty():
@@ -180,53 +231,81 @@ class Default(object):
     def __initConfig(self):
         '''Setup all modules and routes.'''
 
-        lookup_modules = {}
+        protocols = {}
+        for name, instance in list(self.config.protocols.items()):
+            protocols[name] = self.component_manager.getComponentByName(instance.protocol)(**instance.arguments)
 
-        for name, instance in list(self.config.lookups.items()):
-            lookup_modules[name] = self.__registerLookupModule(instance.module, **instance.arguments)
+        template_functions = {}
+        for name, instance in list(self.config.template_functions.items()):
+            template_functions[name] = self.component_manager.getComponentByName(instance.function)(**instance.arguments)
+
+        module_functions = {}
+        for name, instance in list(self.config.module_functions.items()):
+            module_functions[name] = self.component_manager.getComponentByName(instance.function)(**instance.arguments)
 
         for name, instance in list(self.config.modules.items()):
-            pmodule = self.module_manager.getModuleByName(instance.module)
+            mod_func = {}
+            for queue, queue_functions in list(instance.functions.items()):
+                mod_func[queue] = []
+                for queue_function in queue_functions:
+                    if queue_function in module_functions:
+                        mod_func[queue].append(module_functions[queue_function])
 
-            if instance.description == "":
-                instance.description = pmodule.__doc__.split("\n")[0].replace('*', '')
+            if instance.protocol is None:
+                protocol = None
+            elif instance.protocol not in protocols:
+                raise ModuleInitFailure("Protocol %s referenced but not available." % (instance.protocol))
+            else:
+                protocol = protocols[instance.protocol]
 
-            actor_config = ActorConfig(name, self.size, self.frequency, lookup_modules, instance.description)
+            actor_config = ActorConfig(
+                name=name,
+                size=self.size,
+                frequency=self.frequency,
+                template_functions=template_functions,
+                description=instance.description,
+                module_functions=mod_func,
+                identification=self.identification,
+                protocol=protocol,
+                io_event=instance.event
+            )
 
-            self.registerModule(pmodule, actor_config, instance.arguments)
+            self.registerModule(
+                instance.module,
+                actor_config,
+                instance.arguments
+            )
 
         self.__setupConnections()
+
+    def __isConnectedTo(self, queue):
+        '''
+        Returns the module.queue ``queue`` is connected to.
+
+        Args:
+            queue (str): The name of the queue in ``module.queue`` format.
+
+        Returns
+            str/None: The name of the queue which is connected.
+        '''
+
+        inverse = {v: k for k, v in self.__connections.items()}
+
+        if queue in self.__connections:
+            return self.__connections[queue]
+        elif queue in inverse:
+            return inverse[queue]
+        else:
+            return None
 
     def __logsEmpty(self):
         '''Checks each module whether any logs have stayed behind.'''
 
         for module in self.module_pool.list():
-            if not module.pool.queue.logs.size() == 0:
+            if not module.pool.queue._logs.size() == 0:
                 return False
         else:
             return True
-
-    def __registerLookupModule(self, module, **kwargs):
-        '''Registers a lookupmodule
-
-        Args:
-            module (Looup): The lookup module (not initialized)
-            **kwargs (dict): The parameters used to initiolize the lookup module.
-
-        Raises:
-            FunctionInitFailure: An error occurred loading and initializing the module.
-
-        '''
-
-        for group in ["wishbone.lookup", "wishbone_contrib.lookup"]:
-            for entry_point in iter_entry_points(group=group, name=None):
-                if "%s.%s" % (group, entry_point.name) == module:
-                    l = entry_point.load()(**kwargs)
-                    if hasattr(l, "lookup"):
-                        return l.lookup
-                    else:
-                        raise FunctionInitFailure("Lookup module '%s' does not seem to have a 'lookup' method" % (l.module_name))
-        raise FunctionInitFailure("Lookup module '%s' does not exist." % (module))
 
     def __setupConnections(self):
         '''Setup all connections as defined by configuration_manager'''
@@ -241,10 +320,17 @@ class GraphWebserver():
         self.config = config
         self.module_pool = module_pool
         self.block = block
+        self.include_sys = include_sys
         self.js_data = VisJSData()
 
         for c in self.config["routingtable"]:
-            if self.__include(include_sys, self.config["modules"][c.source_module]["context"], self.config["modules"][c.destination_module]["context"]):
+            if not self.include_sys and any([
+                    c.source_module.startswith('_'),
+                    c.destination_module.startswith('_'),
+                    c.source_queue.startswith('_'),
+                    c.destination_queue.startswith('_')]):
+                continue
+            else:
                 self.js_data.addModule(instance_name=c.source_module,
                                        module_name=self.config["modules"][c.source_module]["module"],
                                        description=self.module_pool.getModule(c.source_module).description)
@@ -256,15 +342,6 @@ class GraphWebserver():
                 self.js_data.addQueue(c.source_module, c.source_queue)
                 self.js_data.addQueue(c.destination_module, c.destination_queue)
                 self.js_data.addEdge("%s.%s" % (c.source_module, c.source_queue), "%s.%s" % (c.destination_module, c.destination_queue))
-
-    def __include(self, include_sys, source_module_context, destination_module_context):
-
-        if include_sys:
-            return True
-        elif source_module_context not in ["_logs", "_metrics"] and destination_module_context not in ["_logs", "_metrics"]:
-            return True
-        else:
-            return False
 
     def start(self):
 
@@ -282,31 +359,10 @@ class GraphWebserver():
 
         return self.__block
 
-    def getMetrics(self):
-
-        def getConnectedModuleQueue(m, q):
-            for c in self.config["routingtable"]:
-                if c.source_module == m and c.source_queue == q:
-                    return (c.destination_module, c.destination_queue)
-            return (None, None)
-
-        d = {"module": {}}
-        for module in self.module_pool.list():
-            d["module"][module.name] = {}
-            for queue in module.pool.listQueues(names=True):
-                d["module"][module.name]["queue"] = {queue: {"metrics": module.pool.getQueue(queue).stats()}}
-                (dest_mod, dest_q) = getConnectedModuleQueue(module.name, queue)
-                if dest_mod is not None and dest_q is not None:
-                    d["module"][module.name]["queue"] = {queue: {"connection": {"module": dest_mod, "queue": dest_q}}}
-        return json.dumps(d)
-
     def application(self, env, start_response):
         if env['PATH_INFO'] == '/':
             start_response('200 OK', [('Content-Type', 'text/html')])
-            return[GRAPHCONTENT % (self.js_data.dumpString()[0], self.js_data.dumpString()[1])]
-        elif env['PATH_INFO'] == '/metrics':
-            start_response('200 OK', [('Content-Type', 'text/html')])
-            return[self.getMetrics()]
+            return[str.encode(GRAPHCONTENT % (self.js_data.dumpString()[0], self.js_data.dumpString()[1]))]
         else:
             start_response('404 Not Found', [('Content-Type', 'text/html')])
             return [b'<h1>Not Found</h1>']

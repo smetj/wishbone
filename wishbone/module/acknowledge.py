@@ -3,7 +3,7 @@
 #
 #  acknowledge.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,11 +22,11 @@
 #
 #
 
-from wishbone import Actor
+from wishbone.module import FlowModule
 from gevent.lock import Semaphore
-from wishbone.lookup import EventLookup
 from random import SystemRandom
 import string
+
 
 class AckList(object):
 
@@ -54,56 +54,56 @@ class AckList(object):
                 return True
 
 
+class Acknowledge(FlowModule):
 
-class Acknowledge(Actor):
+    '''**Forwards or drops events by acknowleding values.**
 
-    '''**Lets events pass or not based on some event value present or not in a lookup table.**
+    This module stores the value of field ``ack_id`` from each incoming event.
+    Subsequent events with the same ``ack_id`` field value will be dropped
+    until it is removed by having it acknowledged.
 
-    This module stores a value <ack_id> from passing events in a list and
-    only let's events go through for which the <ack_id> value is not in the
-    list.
+    The ``ack_id`` can be acknowledged by sending the event to the
+    ``acknowledge`` queue.
 
-    <ack_id> can be removed from the list by sending the event into the
-    <acknowledge> queue.
+    The ``ack_id`` field value should be an unique value.
 
-    <ack_id> should some unique identifier to make sure that any following
-    <modules are not processing events with the same datastructure.
+    Typically, downstream modules's ``successful`` and/or ``failed`` queues are
+    sending events to the ``acknowledge`` queue.
 
-    Typically, downstream modules's <successful> and/or <failed> queues are
-    sending events to the <acknowledge> queue.
 
-    Parameters:
+    Module parameters:
 
-        - ack_id(EventLookup("@data"))
-           |  A value stored somewhere in the event which then acts as the
-           |  ack_id. It possibly makes only sense to define an EventLookup
-           |  value here.
+        :ack_id (data):
+             A unique value identifying the event.
 
     Queues:
 
-        - inbox
-           |  Incoming events
+        :inbox:
+            Incoming events
 
-        - outbox
-           |  Outgoing events
+        :outbox:
+            Outgoing events
 
-        - acknowledge
-            | Acknowledge events
+        :acknowledge:
+            Acknowledge events
 
-        - dropped
-            | Where events go to when unacknowledged
+        :dropped:
+            Where events go to when unacknowledged
+
+
+    Event variables:
+
+        :tmp.<name>.ack_id:
+            The location of the acknowledgement ID when coming in through the
+            inbox queue.
+
+
+
 
     '''
 
     def __init__(self, actor_config, ack_id=None):
-
-        if ack_id is None:
-            event_lookup_string = ''.join(SystemRandom().choice(string.ascii_lowercase) for _ in range(4))
-            actor_config.lookup[event_lookup_string] = EventLookup()
-            ack_id = "%s('@data')" % (event_lookup_string)
-
-        Actor.__init__(self, actor_config)
-        self.ack_id_ref = ack_id
+        FlowModule.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.pool.createQueue("outbox")
@@ -111,28 +111,42 @@ class Acknowledge(Actor):
         self.pool.createQueue("dropped")
         self.registerConsumer(self.consume, "inbox")
         self.registerConsumer(self.acknowledge, "acknowledge")
+
         self.ack_table = AckList()
 
     def consume(self, event):
 
         if self.kwargs.ack_id is None:
-            self.logging.warning("Incoming event with <ack_id> %s does not seem to exist.  Returns a None value. Event passing through." % (self.ack_id_ref))
-            self.pool.queue.outbox.put(event)
-        elif self.ack_table.unack(self.kwargs.ack_id):
-            self.logging.debug("Event unacknowledged with <ack_id> '%s'." % (self.kwargs.ack_id))
-            self.pool.queue.outbox.put(event)
+            ack_id = self.generateID()
         else:
-            self.logging.debug("Event with still unacknowledged <ack_id> '%s' send to <dropped> queue." % (self.kwargs.ack_id))
-            self.pool.queue.dropped.put(event)
+            ack_id = event.render(self.kwargs.ack_id)
 
+        if event.has("tmp.%s.ack_id" % (self.name)):
+            self.logging.warning("Event arriving to <inbox> with tmp.%s.ack_id already set.  Perhaps that should have been the <acknowledge> queue instead." % (self.name))
+        else:
+            event.set(ack_id, "tmp.%s.ack_id" % (self.name))
+
+            if self.ack_table.unack(ack_id):
+                self.submit(event, "outbox")
+            else:
+                self.logging.debug("Event with still unacknowledged <ack_id> '%s' send to <dropped> queue." % (ack_id))
+                self.submit(event, "dropped")
 
     def acknowledge(self, event):
-        if self.kwargs.ack_id is None:
-            self.logging.warning("Incoming acknowledge event with <ack_id> %s does not seem to exist.  Returns a None value. Nothing to do." % (self.ack_id_ref))
-        elif self.ack_table.ack(self.kwargs.ack_id):
-            self.logging.debug("Event acknowledged with <ack_id> '%s'." % (self.kwargs.ack_id))
+
+        if event.has("tmp.%s.ack_id" % (self.name)):
+            ack_id = event.get('tmp.%s.ack_id' % (self.name))
+            if self.ack_table.ack(ack_id):
+                self.logging.debug("Event acknowledged with <ack_id> '%s'." % (ack_id))
+                event.delete('tmp.%s.ack_id' % (self.name))
+            else:
+                self.logging.debug("Event with <ack_id> '%s' received but was not previously acknowledged." % (ack_id))
         else:
-            self.logging.debug("Event with <ack_id> '%s' received but was not previously acknowledged." % (self.kwargs.ack_id))
+            self.logging.warning("Received event without 'tmp.%s.ack_id' therefor it is dropped" % (self.name))
+
+    def generateID(self):
+
+        return ''.join(SystemRandom().choice(string.ascii_lowercase) for _ in range(4))
 
     def postHook(self):
 

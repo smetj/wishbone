@@ -4,7 +4,7 @@
 #
 #  roundrobin.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,12 +23,13 @@
 #
 #
 
-from wishbone import Actor
+from wishbone.actor import Actor
+from wishbone.module import FlowModule
 from itertools import cycle
 from random import randint
 
 
-class RoundRobin(Actor):
+class RoundRobin(FlowModule):
 
     '''**Round-robins incoming events to all connected queues.**
 
@@ -58,8 +59,8 @@ class RoundRobin(Actor):
 
         self.destination_queues = []
         for queue in self.pool.listQueues(names=True):
-            if queue not in ["failed", "success", "metrics", "logs"]:
-                self.destination_queues.append(self.pool.getQueue(queue))
+            if queue not in ["_failed", "_success", "_metrics", "_logs"]:
+                self.destination_queues.append(queue)
 
         if not self.kwargs.randomize:
             self.cycle = cycle(self.destination_queues)
@@ -75,5 +76,5 @@ class RoundRobin(Actor):
         return next(self.cycle)
 
     def __chooseRandomQueue(self):
-        index = randint(0, len(self.destination_queues)-1)
+        index = randint(0, len(self.destination_queues) - 1)
         return self.destination_queues[index]

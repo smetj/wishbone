@@ -3,7 +3,7 @@
 #
 #  __init__.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 import os
 from gevent import sleep
 from wishbone.error import ModuleNotReady
+from .structured_data_file import StructuredDataFile
 
 
 class ModuleConnectionMock(object):
@@ -35,7 +36,6 @@ class ModuleConnectionMock(object):
     to the upstream server has not been finished yet, we have at least a
     predictable error.
     '''
-
 
     def __init__(self, message="Not connected"):
 

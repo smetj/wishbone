@@ -1,7 +1,11 @@
 #!/usr/bin/env python
+#
 # -*- coding: utf-8 -*-
 #
 #  py2devtools.py
+#
+#  Copyright 2017 Jelle Smet <development@smetj.net>
+#
 #
 # The MIT License (MIT)
 

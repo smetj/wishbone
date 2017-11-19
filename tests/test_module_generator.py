@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_module_humanlogformat.py
+#  test_module_generator.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,24 +22,32 @@
 #
 #
 
-from wishbone.event import Event
-from wishbone.event import Log
-from wishbone.module.humanlogformat import HumanLogFormat
+
+from wishbone.module.generator import Generator
+
 from wishbone.actor import ActorConfig
 from wishbone.utils.test import getter
 
 
-def test_module_humanlogformat():
+def test_module_generator_basic():
 
-    actor_config = ActorConfig('humanlogformat', 100, 1, {}, "")
-    humanlogformat = HumanLogFormat(actor_config, colorize=False, ident='setup.py')
-    humanlogformat.pool.queue.inbox.disableFallThrough()
-    humanlogformat.pool.queue.outbox.disableFallThrough()
-    humanlogformat.start()
+    actor_config = ActorConfig('generator', 100, 1, {}, "")
+    test_event = Generator(actor_config, payload="test")
 
-    e = Event('test')
-    e.set(Log(1367682301.430527, 6, 3342, 'Router', 'Received SIGINT. Shutting down.'))
+    test_event.pool.queue.outbox.disableFallThrough()
+    test_event.start()
 
-    humanlogformat.pool.queue.inbox.put(e)
-    one = getter(humanlogformat.pool.queue.outbox)
-    assert one.get() == "2013-05-04T17:45:01 setup.py[3342]: informational Router: Received SIGINT. Shutting down."
+    event = getter(test_event.pool.queue.outbox)
+    assert event.get() == "test"
+
+
+def test_module_generator_dict():
+
+    actor_config = ActorConfig('generator', 100, 1, {}, "")
+    test_event = Generator(actor_config, payload={"one": 1})
+
+    test_event.pool.queue.outbox.disableFallThrough()
+    test_event.start()
+
+    event = getter(test_event.pool.queue.outbox)
+    assert event.get()["one"] == 1

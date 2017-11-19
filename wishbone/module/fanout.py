@@ -3,7 +3,7 @@
 #
 #  fanout.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,10 +22,11 @@
 #
 #
 
-from wishbone import Actor
+from wishbone.actor import Actor
+from wishbone.module import FlowModule
 
 
-class Fanout(Actor):
+class Fanout(FlowModule):
 
     '''**Forward each incoming message to all connected queues.**
 
@@ -53,10 +54,8 @@ class Fanout(Actor):
         self.destinations = []
         for queue in self.pool.listQueues(names=True, default=False):
             if queue != "inbox":
-                self.destinations.append(self.pool.getQueue(queue))
+                self.destinations.append(queue)
 
     def consume(self, event):
-
         for queue in self.destinations:
             self.submit(event.clone(), queue)
-

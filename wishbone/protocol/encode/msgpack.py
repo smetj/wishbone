@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_module_jsonencode.py
+#  msgpack.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,23 +22,27 @@
 #
 #
 
-from wishbone.event import Event
-from wishbone.module.jsonencode import JSONEncode
-from wishbone.actor import ActorConfig
-from wishbone.utils.test import getter
+from wishbone.protocol import Encode
+from msgpack import dumps
 
 
-def test_module_jsonencode():
+class MSGPack(Encode):
 
-    actor_config = ActorConfig('jsonencode', 100, 1, {}, "")
-    jsonencode = JSONEncode(actor_config)
+    '''**Encode data into msgpack format.**
 
-    jsonencode.pool.queue.inbox.disableFallThrough()
-    jsonencode.pool.queue.outbox.disableFallThrough()
-    jsonencode.start()
+    Convert a Python datastructure into msgpack format.
 
-    e = Event(["one", "two", "three"])
+    Parameters:
 
-    jsonencode.pool.queue.inbox.put(e)
-    one = getter(jsonencode.pool.queue.outbox)
-    assert one.get() == '["one", "two", "three"]'
+        n/a
+
+    '''
+
+    def __init__(self):
+        pass
+
+    def handleDict(self, data):
+        return dumps(data)
+
+    def handleList(self, data):
+        return dumps(data)
