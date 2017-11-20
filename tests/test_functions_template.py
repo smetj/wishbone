@@ -108,3 +108,9 @@ def test_wishbone_function_template_version():
 
     f = ComponentManager().getComponentByName("wishbone.function.template.version")()
     assert f.get() == '3.0.0'
+
+
+def test_wishbone_function_template_environment():
+
+    f = ComponentManager().getComponentByName("wishbone.function.template.environment")()
+    assert '/' in f.get("PATH")

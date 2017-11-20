@@ -158,6 +158,7 @@ setup(
         'wishbone.function.template': [
             'choice = wishbone.function.template.choice:Choice',
             'cycle = wishbone.function.template.cycle:Cycle',
+            'environment = wishbone.function.template.environment:Environment',
             'epoch = wishbone.function.template.epoch:Epoch',
             'pid = wishbone.function.template.pid:PID',
             'random_bool = wishbone.function.template.random_bool:RandomBool',

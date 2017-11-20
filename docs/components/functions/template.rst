@@ -22,6 +22,8 @@ Wishbone comes by default with following builtin template functions:
 +-----------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------+
 | :py:class:`wishbone.function.template.cycle <wishbone.function.template.cycle.Cycle>`                           | Cycles through the provided array returning the next element.|
 +-----------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------+
+| :py:class:`wishbone.function.template.environment <wishbone.function.template.environment.Environment>`         | Returns environment variables.                               |
++-----------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------+
 | :py:class:`wishbone.function.template.epoch <wishbone.function.template.epoch.Epoch>`                           | Returns epoch with sub second accuracy as a float.           |
 +-----------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------+
 | :py:class:`wishbone.function.template.pid <wishbone.function.template.pid.PID>`                                 | Returns the PID of the current process.                      |

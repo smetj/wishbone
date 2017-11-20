@@ -89,6 +89,7 @@ class ConfigFile(object):
         - Initializes the following template functions and makes them
           available to each initialized module:
             - strftime()
+            - env()
             - epoch()
             - version()
 
@@ -254,6 +255,7 @@ class ConfigFile(object):
 
         self.addTemplateFunction("strftime", "wishbone.function.template.strftime")
         self.addTemplateFunction("epoch", "wishbone.function.template.epoch")
+        self.addTemplateFunction("env", "wishbone.function.template.env")
         self.addTemplateFunction("version", "wishbone.function.template.version")
 
     def __addModule(self, name, module, arguments={}, description="", functions={}, protocol=None, event=False):
