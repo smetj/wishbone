@@ -255,7 +255,7 @@ class ConfigFile(object):
 
         self.addTemplateFunction("strftime", "wishbone.function.template.strftime")
         self.addTemplateFunction("epoch", "wishbone.function.template.epoch")
-        self.addTemplateFunction("env", "wishbone.function.template.env")
+        self.addTemplateFunction("env", "wishbone.function.template.environment")
         self.addTemplateFunction("version", "wishbone.function.template.version")
 
     def __addModule(self, name, module, arguments={}, description="", functions={}, protocol=None, event=False):
