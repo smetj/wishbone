@@ -14,3 +14,4 @@ Examples & Recipes
     module_reading_data_disk
     formatting_logs_and_metrics
     dead_mans_switch
+    pass_vars_docker
