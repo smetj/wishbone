@@ -7,6 +7,9 @@ Template Functions
 .. autoclass:: wishbone.function.template.cycle.Cycle
     :members:
 
+.. autoclass:: wishbone.function.template.environment.Environment
+    :members:
+
 .. autoclass:: wishbone.function.template.epoch.Epoch
     :members:
 
