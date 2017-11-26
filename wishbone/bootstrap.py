@@ -68,7 +68,7 @@ class BootStrap():
         stop.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
 
         list = subparsers.add_parser('list', description="Lists the available modules.")
-        list.add_argument('--namespace', type=str, dest='namespace', default="wishbone", help='The component namespace to query.')
+        list.add_argument('--namespace', type=str, dest='namespace', default="wishbone, wishbone_contrib, wishbone_external", help='The component namespace to query.')
 
         show = subparsers.add_parser('show', description="Shows information about a component.")
         show_group = show.add_mutually_exclusive_group(required=True)
@@ -219,7 +219,7 @@ class Dispatch():
         '''
 
         print((self.generateHeader()))
-        print((ComponentManager().getComponentTable()))
+        print((ComponentManager(namespace=[n.strip() for n in self.namespace.split(",")]).getComponentTable()))
 
     def show(self):
         '''Maps to the CLI command and shows the docstring of the Wishbone module.
