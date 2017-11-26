@@ -243,3 +243,31 @@ def test_extractBulkItemValues():
 
     for item in extractBulkItemValues(e, "data"):
         assert item in [{"one": 1}, {"two": 2}, {"three": 3}]
+
+
+def test_merge_dict():
+
+    e = Event({"one": 1})
+    e.merge({"two": 2})
+
+    assert e.dump()["data"] == {"one": 1, "two": 2}
+
+
+def test_merge_list():
+
+    e = Event(["one"])
+    e.merge(["two"])
+
+    assert e.dump()["data"] == ["one", "two"]
+
+
+def test_merge_fail():
+
+    e = Event("hi")
+
+    try:
+        e.merge(["two"])
+    except InvalidData:
+        assert True
+    else:
+        assert False

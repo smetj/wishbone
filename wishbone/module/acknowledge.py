@@ -124,7 +124,7 @@ class Acknowledge(FlowModule):
         if event.has("tmp.%s.ack_id" % (self.name)):
             self.logging.warning("Event arriving to <inbox> with tmp.%s.ack_id already set.  Perhaps that should have been the <acknowledge> queue instead." % (self.name))
         else:
-            event.set(ack_id, "tmp.%s.ack_id" % (self.name))
+            event.set({"ack_id": ack_id}, "tmp.%s" % (self.name))
 
             if self.ack_table.unack(ack_id):
                 self.submit(event, "outbox")

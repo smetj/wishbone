@@ -27,6 +27,7 @@ from wishbone.error import BulkFull, InvalidData, TTLExpired
 from uuid import uuid4
 from jinja2 import Template
 from copy import deepcopy
+from scalpl import Cut
 
 
 EVENT_RESERVED = ["timestamp", "data", "tmp", "errors", "uuid", "uuid_previous", "cloned", "bulk", "ttl", "tags"]
@@ -75,6 +76,9 @@ class Event(object):
     A class object containing the event data being passed from one Wishbone
     module to the other.
 
+    The keyformat used is the one handled by the ``Scalpl`` module
+    (https://pypi.python.org/pypi/scalpl/).
+
     Args:
 
         data (dict/list/string/int/float): The data to assign to the ``data`` field.
@@ -90,7 +94,7 @@ class Event(object):
 
     def __init__(self, data=None, ttl=254, bulk=False, bulk_size=100):
 
-        self.data = {
+        self.data = Cut({
             "cloned": False,
             "bulk": bulk,
             "data": None,
@@ -104,7 +108,8 @@ class Event(object):
 
             "uuid_previous": [
             ],
-        }
+        })
+
         if bulk:
             self.data["data"] = []
         else:
@@ -209,15 +214,7 @@ class Event(object):
         if s[0] in EVENT_RESERVED and len(s) == 1:
             raise Exception("Cannot delete root of reserved keyword '%s'." % (key))
 
-        if key is None:
-            self.data = None
-        else:
-            if '.' in key:
-                s = key.split('.')
-                key = '.'.join(s[:-1])
-                del(self.get(key)[s[-1]])
-            else:
-                del(self.data[key])
+        del(self.data[key])
 
     def dump(self):
         '''Dumps the content of the event.
@@ -229,7 +226,7 @@ class Event(object):
 
         d = deepcopy(self)
         d.data["timestamp"] = float(d.data["timestamp"])
-        return d.data
+        return d.data.data
 
     def get(self, key="data"):
         '''Returns the value of ``key``.
@@ -247,24 +244,10 @@ class Event(object):
             KeyError: The provided key does not exist.
         '''
 
-        def travel(path, d):
-
-            if len(path) == 1:
-                if isinstance(d, dict):
-                    return d[path[0]]
-                else:
-                    raise Exception()
-            else:
-                return travel(path[1:], d[path[0]])
-        if key is None or key is "" or key is ".":
-            return self.data
-        else:
-            try:
-                path = key.split('.')
-                data = travel(path, self.data)
-                return data
-            except Exception:
-                raise KeyError(key)
+        try:
+            return self.data[key]
+        except Exception as err:
+            raise KeyError(key)
 
     def has(self, key="data"):
         '''Returns a bool indicating the event has ``key``
@@ -283,7 +266,7 @@ class Event(object):
         '''
 
         try:
-            self.get(key)
+            self.data[key]
         except KeyError:
             return False
         else:
@@ -300,6 +283,29 @@ class Event(object):
         '''
 
         return self.data["bulk"]
+
+    def merge(self, value, key="data"):
+        '''
+        Merges value into ``key``.
+        Value types should be mergeable otherwise an error is returned.
+
+        Args:
+            value (dict,list): The value to merge
+            key (str): The key to merge into
+
+        Raises:
+            InvalidData: Types are not mergeable
+        '''
+
+        try:
+            if isinstance(value, list):
+                self.data[key] += value
+            elif isinstance(value, dict):
+                self.data[key].update(value)
+            else:
+                raise InvalidData("Source and destination are incompatible to merge")
+        except Exception:
+            raise InvalidData("Source and destination are incompatible to merge")
 
     def render(self, template):
         '''Returns a formatted string using the provided template and key
@@ -330,11 +336,8 @@ class Event(object):
             value (str, int, float, dict, list): The value to assign.
             key (str): The key to store the value
         '''
-        result = value
-        for name in reversed(key.split('.')):
-            result = {name: result}
 
-        self.__dictMerge(self.data, result)
+        self.data[key] = value
 
     def slurp(self, data):
         '''Expects ``data`` to be a dict representation of an ``Event`` and
@@ -360,7 +363,7 @@ class Event(object):
                                   an event
         '''
         try:
-            assert isinstance(data, dict), "event.slurp() expects a dict."
+            assert isinstance(data, (dict, Cut)), "event.slurp() expects a dict."
             for item in [
                 ("timestamp", float),
                 ("data", None),
@@ -379,32 +382,9 @@ class Event(object):
         except AssertionError as err:
             raise InvalidData("The incoming data could not be used to construct an event.  Reason: '%s'." % err)
         else:
-            self.data = data
+            self.data = Cut(data)
             self.data["timestamp"] = time.time()
 
         return(self)
 
     raw = dump
-
-    def __dictMerge(self, dct, merge_dct):
-        ''' Recursive dict merge. Inspired by :meth:````dict.update()````, instead of
-        updating only top-level keys, __dictMerge recurses down into dicts nested
-        to an arbitrary depth, updating keys. The ````merge_dct```` is merged into
-        ````dct````.
-
-        Stolen from https://gist.github.com/angstwad/bf22d1822c38a92ec0a9
-
-        Args:
-
-            dct(dict): The dictionary onto which the merge is executed
-            merge_dct(dict: dict merged into ``dct``
-
-        Returns:
-
-            dict: The merged version
-        '''
-        for k, v in list(merge_dct.items()):
-            if k in dct and isinstance(dct[k], dict) and isinstance(merge_dct[k], dict):
-                self.__dictMerge(dct[k], merge_dct[k])
-            else:
-                dct[k] = merge_dct[k]
