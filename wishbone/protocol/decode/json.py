@@ -98,7 +98,6 @@ class JSON(Decode):
             return []
 
     def handleString(self, data):
-
         try:
             yield loads(data)
         except Exception as err:
