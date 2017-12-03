@@ -243,11 +243,13 @@ class Event(object):
 
             KeyError: The provided key does not exist.
         '''
-
-        try:
-            return self.data[key]
-        except Exception as err:
-            raise KeyError(key)
+        if key in [None, "", "."]:
+            return self.data
+        else:
+            try:
+                return self.data[key]
+            except Exception as err:
+                raise KeyError(key)
 
     def has(self, key="data"):
         '''Returns a bool indicating the event has ``key``
