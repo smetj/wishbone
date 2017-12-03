@@ -165,6 +165,14 @@ def test_event_get():
     assert e.get("data.two.three") == 3
 
 
+def test_event_get_empty_key():
+
+    e = Event("hello")
+    assert e.get(None)["data"] == "hello"
+    assert e.get("")["data"] == "hello"
+    assert e.get(".")["data"] == "hello"
+
+
 def test_event_has():
 
     e = Event({"one": 1, "two": {"three": 3}})
