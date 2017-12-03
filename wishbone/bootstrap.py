@@ -58,7 +58,7 @@ class BootStrap():
         start.add_argument('--identification', type=str, dest='identification', default="wishbone", help='An identifier string for generated logs.')
         start.add_argument('--instances', type=int, dest='instances', default=1, help='The number of parallel Wishbone instances to bootstrap.')
         start.add_argument('--loglevel', type=int, dest='log_level', default=6, help='The maximum loglevel.')
-        start.add_argument('--fork', action="store_true", default=False, help="When defined forks Wishbone to background and INFO logs are written to STDOUT.")
+        start.add_argument('--fork', action="store_true", default=False, help="When defined forks Wishbone to background and INFO logs are written to syslog/journald.")
         start.add_argument('--nocolor', action="store_true", help='When defined does not print colored output to stdout.')
         start.add_argument('--pid', type=str, dest='pid', default='%s/wishbone.pid' % (os.getcwd()), help='The pidfile to use.')
         start.add_argument('--profile', action="store_true", help='When enabled profiles the process and dumps a Chrome developer tools profile file in the current directory.')
