@@ -28,9 +28,9 @@ from pkg_resources import get_distribution
 
 class Version(TemplateFunction):
     '''
-    Returns the version of the desired module.
+    Returns the version of the desired Python module.
 
-    A Wishbone template function wich returns the version of an installed
+    A Wishbone template function wich returns the version a the defined Python
     module.
 
     Args:

@@ -7,6 +7,15 @@ Template functions return data which can be used inside a template.
 Wishbone makes use of `Jinja2`_ for all its templates. Template functions are
 functions which can be executed inside templates in order to render data.
 
+.. note::
+    When bootstrapping a server the following template functions are **always** available:
+
+    - strftime (wishbone.function.template.strftime)
+    - epoch (wishbone.function.template.epoch)
+    - env (wishbone.function.template.environment)
+    - version (wishbone.function.template.)
+
+
 Characteristics:
 
 * Template functions are functions which are added to the ``Jinja2`` `list of global functions`_.
@@ -40,7 +49,8 @@ Wishbone comes by default with following builtin template functions:
 +-----------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------+
 | :py:class:`wishbone.function.template.strftime <wishbone.function.template.strftime.STRFTime>`                  | Returns a formatted version of an epoch timestamp.           |
 +-----------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------+
-
+| :py:class:`wishbone.function.template.version <wishbone.function.template.version.Version>`                     | Returns the version of the desired module.                   |
++-----------------------------------------------------------------------------------------------------------------+--------------------------------------------------------------+
 
 See following examples:
 

@@ -28,6 +28,7 @@ from uuid import uuid4
 from jinja2 import Template
 from copy import deepcopy
 from scalpl import Cut
+from easydict import EasyDict
 
 
 EVENT_RESERVED = ["timestamp", "data", "tmp", "errors", "uuid", "uuid_previous", "cloned", "bulk", "ttl", "tags"]
@@ -231,6 +232,8 @@ class Event(object):
     def get(self, key="data"):
         '''Returns the value of ``key``.
 
+        ``key`` must be in ``Scalpl`` format.
+
         Args:
 
             key (str): The name of the key to read.
@@ -253,6 +256,8 @@ class Event(object):
 
     def has(self, key="data"):
         '''Returns a bool indicating the event has ``key``
+
+        ``key`` must be in ``Scalpl`` format.
 
         Args:
 
@@ -330,8 +335,48 @@ class Event(object):
         except Exception as err:
             raise InvalidData("Failed to render template. Reason: %s" % (err))
 
+    def renderKwargs(self, template_kwargs):
+        '''
+        Renders all the templates found in ``template_kwargs`` and sets
+        self.kwarg, a version of the current module's kwargs relate to this
+        events' content
+
+        Args:
+
+            template_kwargs (dict): A dict of the modules kwargs optoinally
+                                    containing Template instances.
+        '''
+
+        def recurse(data):
+
+            if isinstance(data, Template):
+                try:
+                    return data.render(**self.dump())
+                except Exception as err:
+                    return "#error: %s#" % (err)
+            elif isinstance(data, dict):
+                result = {}
+                for key, value in data.items():
+                    result[key] = recurse(value)
+                return EasyDict(result)
+            elif isinstance(data, list):
+                result = []
+                for value in data:
+                    result.append(recurse(value))
+                return result
+            else:
+                return data
+
+        self.kwargs = EasyDict(
+            recurse(
+                template_kwargs
+            )
+        )
+
     def set(self, value, key="data"):
         '''Sets the value of ``key``.
+
+        ``key`` must be in ``Scalpl`` format.
 
         Args:
 

@@ -72,9 +72,9 @@ class Cron(InputModule):
         while self.loop():
             if self.cron.check_trigger(time.localtime(time.time())[:5]):
                 self.logging.info("Cron executed.")
-                self.renderKwargs()
                 event = Event()
-                for payload in self.decode(self.kwargs.payload):
-                    event.set(payload, self.kwargs.destination)
+                event.renderKwargs(self.kwargs_template)
+                for payload in self.decode(event.kwargs.payload):
+                    event.set(payload, event.kwargs.destination)
                     self.submit(event, "outbox")
             sleep(60)

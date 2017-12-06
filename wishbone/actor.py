@@ -25,7 +25,7 @@
 from wishbone.queue import QueuePool
 from wishbone.logging import Logging
 from wishbone.event import Event as Wishbone_Event
-from wishbone.error import ModuleInitFailure, InvalidModule, TTLExpired, InvalidData
+from wishbone.error import ModuleInitFailure, InvalidModule, TTLExpired
 from wishbone.moduletype import ModuleType
 from wishbone.actorconfig import ActorConfig
 from wishbone.function.template import TemplateFunction
@@ -47,139 +47,6 @@ from easydict import EasyDict
 
 
 Greenlets = namedtuple('Greenlets', "consumer generic log metric")
-
-
-class RenderKwargs(object):
-    '''
-    Keeps a rendered versions of kwargs templates relative to events consumed
-    from different queues.
-
-    Args:
-        data (dict): A dict representing the raw unprocessed kwargs.
-        functions (dict): A dict Jinja2 template functions.
-    '''
-
-    def __init__(self, data, functions={}):
-
-        self.env_template = jinja2.Environment(
-            undefined=jinja2.StrictUndefined,
-            trim_blocks=True,
-            loader=jinja2.FileSystemLoader('/')
-        )
-        self.env_template.globals.update(functions)
-        self.__original_kwargs = data
-        self.template_strings = {}
-        self.__template_kwargs = self.__initialize_templates(data, functions)
-        self.__rendered_kwargs = {}
-        self.render(None, {})
-        self.functions = functions
-
-    def get(self, key, queue_context=None):
-        '''
-        Returns the rendered kwarg value within the given queue_context.
-
-        Args:
-            key (str): The key to return. (can be dotted notation for nested dicts)
-            queue_context (str): The name of the queue
-
-        Returns:
-            The rendered version of the values stored under `key`.
-
-        '''
-
-        if queue_context not in self.__rendered_kwargs:
-            raise InvalidData("No kwargs have been rendered yet for queue '%s'." % (queue_context))
-        else:
-            result = self.__lookup(key, self.__rendered_kwargs[queue_context])
-            if result is None:
-                return None
-            else:
-                return result
-
-    def render(self, queue_context=None, event_content={}):
-        '''
-        Renders the kwargs values using the provided payload.
-
-        Args:
-            queue_context (str): The name of the queue to store the results
-            event_content (dict): The key values to feed to the templates.
-
-        Returns:
-            None
-
-        Todo:
-            * Opportunity to optimize here?
-        '''
-
-        def recurse(data):
-
-            if isinstance(data, jinja2.environment.Template):
-                try:
-                    return data.render(**event_content)
-                except Exception as err:
-                    return "#error: %s#" % (err)
-                    # return self.template_strings[data]
-            elif isinstance(data, dict):
-                result = {}
-                for key, value in data.items():
-                    result[key] = recurse(value)
-                return EasyDict(result)
-            elif isinstance(data, list):
-                result = []
-                for value in data:
-                    result.append(recurse(value))
-                return result
-            else:
-                return data
-
-        rendered_kwargs = EasyDict(
-            recurse(
-                self.__template_kwargs.copy()
-            )
-        )
-
-        self.__rendered_kwargs[queue_context] = rendered_kwargs
-        return rendered_kwargs
-
-    def __initialize_templates(self, kwargs, functions):
-
-        def recurse(data):
-
-            if isinstance(data, str):
-                try:
-                    if len(list(self.env_template.parse(data).find_all(jinja2.nodes.Name))) > 0:
-                        t = self.env_template.from_string(data)
-                        self.template_strings[t] = data
-                        return t
-                    else:
-                        return data
-                except Exception as err:
-                    return data
-
-            elif isinstance(data, dict):
-                for key, value in data.items():
-                    data[key] = recurse(value)
-                return data
-            elif isinstance(data, list):
-                for index, value in enumerate(data):
-                    data[index] = recurse(value)
-                return data
-            else:
-                return data
-
-        result = recurse(kwargs)
-        return result
-
-    def __lookup(self, key, dataset):
-
-        def recurse(skey, data):
-            value = data[skey[0]]
-            if len(skey) == 1:
-                return value
-            else:
-                return recurse(skey[1:], value)
-
-        return recurse(key.split('.'), dataset)
 
 
 class Actor(object):
@@ -225,9 +92,35 @@ class Actor(object):
 
         self.stopped = True
 
-        self.__renderKwargs = self.__setupRenderKwargs()
-        self.renderKwargs()
-        self.__setupValidation()
+
+        # Do some sanity checks
+        #######################
+        self.__sanityChecks()
+
+        # Setup the Jinja2 environment to render kwargs templates.
+        ##########################################################
+        self.env_template = jinja2.Environment(
+            undefined=jinja2.StrictUndefined,
+            trim_blocks=True,
+            loader=jinja2.FileSystemLoader('/')
+        )
+
+        # Add the template functions to the template globals
+        ####################################################
+        for key, value in self.config.template_functions.items():
+            self.env_template.globals.update({key: value.get})
+
+        # Store a copy of the raw/unmodified kwargs
+        ##########################################
+        self.kwargs_raw = self.__getRawKwargs()
+
+        # Store a copy of kwargs with all templates replaced by a template instance
+        ############################################################################
+        self.kwargs_template = self.__getTemplateKwargs(self.env_template, self.kwargs_raw)
+
+        # Store a copy of the rendered kwargs as an EasyDict instance
+        #############################################################
+        self.kwargs = self.__renderTemplateKwargs(self.kwargs_template)
 
     def generateEvent(self, data={}):
         '''
@@ -478,7 +371,7 @@ class Actor(object):
             event = self.pool.getQueue(queue).get()
 
             # Render kwargs relative to the event's content and make these accessible under event.kwargs
-            event = self.renderEventKwargs(event=event, queue=queue)
+            event.renderKwargs(self.kwargs_template)
 
             # Validate TTL
             try:
@@ -541,6 +434,57 @@ class Actor(object):
         else:
             return config.description
 
+    def __getRawKwargs(self):
+        '''
+        Get the class paramaters of the class basing this class.
+
+        Returns (dict): A dict of the the raw kwargs
+        '''
+        kwargs = {}
+        for key, value in list(inspect.getouterframes(inspect.currentframe())[2][0].f_locals.items()):
+            if key == "self" or isinstance(value, ActorConfig):
+                next
+            else:
+                kwargs[key] = value
+        return kwargs
+
+    def __getTemplateKwargs(self, template_env, kwargs):
+        '''
+        Recurses through ``kwargs`` and returns a version of it in which all
+        strings are replaced by jinja2 template instances.
+
+        Args:
+            template_env (Jinja2.Environment instance): The Jinja2 environment instance to
+                                                        derive templates from.
+            kwargs (dict): The dict of keyword/arguments.
+
+        '''
+
+        def recurse(data):
+
+            if isinstance(data, str):
+                try:
+                    if len(list(template_env.parse(data).find_all(jinja2.nodes.Name))) > 0:
+                        t = template_env.from_string(data)
+                        return t
+                    else:
+                        return data
+                except Exception as err:
+                    return data
+
+            elif isinstance(data, dict):
+                for key, value in data.items():
+                    data[key] = recurse(value)
+                return data
+            elif isinstance(data, list):
+                for index, value in enumerate(data):
+                    data[index] = recurse(value)
+                return data
+            else:
+                return data
+
+        return recurse(kwargs)
+
     def __reconstructEvent(self, data={}):
         '''
 
@@ -587,8 +531,39 @@ class Actor(object):
 
         self.logging.debug("Following template functions are available: %s" % ", ".join(
             self.config.template_functions.keys()
+        )
+        )
+
+    def __renderTemplateKwargs(self, kwargs):
+
+        def recurse(data):
+
+            if isinstance(data, jinja2.environment.Template):
+                try:
+                    return data.render()
+                except Exception as err:
+                    return "#error: %s#" % (err)
+                    # return self.template_strings[data]
+            elif isinstance(data, dict):
+                result = {}
+                for key, value in data.items():
+                    result[key] = recurse(value)
+                return EasyDict(result)
+            elif isinstance(data, list):
+                result = []
+                for value in data:
+                    result.append(recurse(value))
+                return result
+            else:
+                return data
+
+        rendered_kwargs = EasyDict(
+            recurse(
+                kwargs
             )
         )
+
+        return rendered_kwargs
 
     def __setProtocolMethod(self):
         '''
@@ -622,24 +597,6 @@ class Actor(object):
             else:
                 self.generateEvent = self.__generateNormalEvent
 
-    def __setupRenderKwargs(self):
-        '''
-        Initial rendering of all templates to self.kwargs
-        '''
-
-        kwargs = {}
-        for key, value in list(inspect.getouterframes(inspect.currentframe())[2][0].f_locals.items()):
-            if key == "self" or isinstance(value, ActorConfig):
-                next
-            else:
-                kwargs[key] = value
-
-        functions = {}
-        for n, f in self.config.template_functions.items():
-            functions[n] = f.get
-
-        return RenderKwargs(kwargs, functions)
-
     def __validateAppliedFunctions(self):
         '''
         A validation routine which checks whether functions have been applied
@@ -654,7 +611,7 @@ class Actor(object):
             if queue not in queues_w_registered_consumers:
                 raise ModuleInitFailure("Failed to initialize module '%s'. You have functions defined on queue '%s' which doesn't have a registered consumer." % (self.name, queue))
 
-    def __setupValidation(self):
+    def __sanityChecks(self):
         '''
         Does following validations:
 

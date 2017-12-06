@@ -65,7 +65,6 @@ class Generator(InputModule):
     def produce(self):
 
         while self.loop():
-            self.renderKwargs()
             for payload in self.decode(self.kwargs.payload):
                 event = Event()
                 event.set(payload, self.kwargs.destination)
