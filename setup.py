@@ -45,7 +45,8 @@ install_requires = [
     'msgpack-python',
     'easydict',
     'jinja2',
-    'pygments'
+    'pygments',
+    'scalpl'
 ]
 
 dependency_links = [
