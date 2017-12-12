@@ -92,11 +92,6 @@ class Actor(object):
 
         self.stopped = True
 
-
-        # Do some sanity checks
-        #######################
-        self.__sanityChecks()
-
         # Setup the Jinja2 environment to render kwargs templates.
         ##########################################################
         self.env_template = jinja2.Environment(
@@ -121,6 +116,10 @@ class Actor(object):
         # Store a copy of the rendered kwargs as an EasyDict instance
         #############################################################
         self.kwargs = self.__renderTemplateKwargs(self.kwargs_template)
+
+        # Do some sanity checks
+        #######################
+        self.__sanityChecks()
 
     def generateEvent(self, data={}):
         '''
