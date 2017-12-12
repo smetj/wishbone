@@ -23,7 +23,6 @@
 #
 
 from gevent import monkey; monkey.patch_sys(stdin=False, stdout=True, stderr=False)
-from wishbone.actor import Actor
 from wishbone.module import OutputModule
 from wishbone.event import extractBulkItemValues
 from os import getpid
@@ -116,19 +115,20 @@ class STDOUT(OutputModule):
     '''
 
     def __init__(self, actor_config, selection=None, payload=None, counter=False, prefix="", pid=False, colorize=False, foreground_color="WHITE", background_color="RESET", color_style="NORMAL"):
-        Actor.__init__(self, actor_config)
+        OutputModule.__init__(self, actor_config)
 
         self.__validateInput(foreground_color, background_color, color_style)
-        self.format = Format(
-            self.kwargs.selection,
-            self.kwargs.counter,
-            self.kwargs.pid
-        )
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
         self.setEncoder("wishbone.protocol.encode.dummy")
 
     def preHook(self):
+
+        self.format = Format(
+            self.kwargs.selection,
+            self.kwargs.counter,
+            self.kwargs.pid
+        )
 
         if self.kwargs.colorize:
             init(autoreset=True)
