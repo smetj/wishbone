@@ -89,6 +89,7 @@ class JSON(Decode):
             self.buffer.seek(0)
             try:
                 yield loads(self.buffer.getvalue().decode(self.charset))
+                self.__buffer_size = 0
             except Exception as err:
                 raise ProtocolError("ProtcolError: %s" % (err))
         else:
