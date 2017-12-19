@@ -65,10 +65,12 @@ class MSGPack(Decode):
             self.unpacker.feed(data)
             for value in self.unpacker:
                 if value:
+                    self.reset()
                     yield value
                 else:
                     return []
         except BufferFull:
+            self.reset()
             raise Exception("Buffer of %s bytes full." % (self.buffer_size))
 
     def handleReadlinesMethod(self, data):
@@ -76,3 +78,8 @@ class MSGPack(Decode):
         for item in data.readlines():
             for result in self.handler(item):
                 yield result
+
+    def reset(self):
+
+        self.__buffer_size = 0
+        self.buffer = BytesIO()
