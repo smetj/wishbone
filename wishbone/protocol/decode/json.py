@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  json.py
@@ -73,11 +73,13 @@ class JSON(Decode):
         else:
             data = self.__leftover + data.decode(self.charset)
             if len(data) > self.buffer_size:
-                raise Exception("Buffer exceeded")
+                self.reset()
+                raise ProtocolError("Buffer exceeded")
             while self.delimiter in data:
                 item, data = data.split(self.delimiter, 1)
                 if item != "":
                     try:
+                        self.reset()
                         yield loads(item)
                     except Exception as err:
                         raise ProtocolError("ProtcolError: %s" % (err))
@@ -89,19 +91,22 @@ class JSON(Decode):
             self.buffer.seek(0)
             try:
                 yield loads(self.buffer.getvalue().decode(self.charset))
-                self.__buffer_size = 0
+                self.reset()
             except Exception as err:
+                self.reset()
                 raise ProtocolError("ProtcolError: %s" % (err))
         else:
             self.__buffer_size += self.buffer.write(data)
             if self.__buffer_size > self.buffer_size:
-                raise Exception("Buffer exceeded.")
+                self.reset()
+                raise ProtocolError("Buffer exceeded.")
             return []
 
     def handleString(self, data):
         try:
             yield loads(data)
         except Exception as err:
+            self.reset()
             raise ProtocolError("ProtocolError: %s" % (err))
 
     def handleReadlinesMethod(self, data):
@@ -109,3 +114,9 @@ class JSON(Decode):
         for item in data.readlines() + [None]:
             for result in self.handler(item):
                 yield result
+        self.reset()
+
+    def reset(self):
+
+        self.__buffer_size = 0
+        self.buffer = BytesIO()
