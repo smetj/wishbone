@@ -1,6 +1,6 @@
-========
-Funtions
-========
+=========
+Functions
+=========
 
 Functions are small pieces of reusable code which can be applied to different
 parts of a Wishbone setup. They are initialized initialized in the
