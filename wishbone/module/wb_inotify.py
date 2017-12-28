@@ -113,7 +113,7 @@ class WBInotify(InputModule):
     '''
 
     def __init__(self, actor_config, initial_listing=True, glob_pattern="*", paths={"/tmp": ["IN_CREATE", "IN_CLOSE_WRITE"]}):
-        Actor.__init__(self, actor_config)
+        InputModule.__init__(self, actor_config)
 
         self.pool.createQueue("outbox")
         self.decode = Dummy().handler
@@ -198,15 +198,15 @@ class WBInotify(InputModule):
         '''
 
         file_exists = True
-        i = Inotify(block_duration_s=1000)
-        i.add_watch(bytes(path, 'UTF8'))
+        i = Inotify()
+        i.add_watch(path)
 
         while file_exists and self.loop():
-            for event in i.event_gen():
+            for event in i.event_gen(yield_nones=False):
                 if event is not None:
                     for inotify_type in event[1]:
                         if inotify_type in inotify_types or inotify_types == []:
-                            abs_path = os.path.abspath("%s/%s" % (event[2].decode("utf-8"), event[3].decode("utf-8")))
+                            abs_path = os.path.abspath("%s/%s" % (event[2], event[3]))
                             if fnmatch.fnmatch(abs_path, glob_pattern):
                                 yield abs_path.rstrip('/'), inotify_type
                         if inotify_type == "IN_DELETE_SELF":
