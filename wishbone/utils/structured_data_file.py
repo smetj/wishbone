@@ -32,7 +32,6 @@ from wishbone.error import InvalidData
 
 
 class StructuredDataFile():
-
     '''
     Loads and optionally validates structured data from disk.
 
@@ -44,22 +43,25 @@ class StructuredDataFile():
         schema (str): The JSONschema to validate the loaded data against.
         expect_json (bool): When True, the data structure can be JSON
         expect_yaml (bool): When True, the data structure can be YAML.
+        expect_kv (bool): When True, the data structure can be Key/Value.
         content (dict): The loaded configurations.  Absolute paths are dict keys.
     '''
 
-    def __init__(self, default=None, schema=None, expect_json=True, expect_yaml=True):
+    def __init__(self, default=None, schema=None, expect_json=True, expect_yaml=True, expect_kv=True):
         '''
         Args:
             default (obj): A default value to return when no file content has loaded yet.
             schema (str): The JSONschema to validate the loaded data against.
             expect_json (bool): When True, the data structure can be JSON
             expect_yaml (bool): When True, the data structure can be YAML.
+            expect_kv (bool): When True, the data structure can be Key/Value.
         '''
 
         self.default = default
         self.schema = schema
         self.expect_json = expect_json
         self.expect_yaml = expect_yaml
+        self.expect_kv = expect_kv
         self.content = {}
         self.lock = Semaphore()
 
@@ -138,6 +140,21 @@ class StructuredDataFile():
                     return yaml.load(f)
                 except Exception as err:
                     errors.append("YAML: %s" % str(err))
+                else:
+                    return
+
+            if self.expect_kv:
+                try:
+                    data = {}
+                    f.seek(0)
+                    for line in f.readlines():
+                        splitted = line.split(":")
+                        key = splitted[0]
+                        value = ":".join(splitted[1:]).rstrip().lstrip()
+                        data[key] = value
+                    return data
+                except Exception as err:
+                    errors.append("KV: %s" % str(err))
                 else:
                     return
 
