@@ -85,6 +85,14 @@ class StructuredDataFile():
             else:
                 return self.content
 
+    def dumpItems(self):
+        '''
+        Dumps the complete cached content file by file
+        '''
+
+        for filename, content in self.content.items():
+            yield content
+
     def get(self, path):
         '''Returns the cached content of the file.  If the file isn't loaded yet, it
         tries to do that.'''
