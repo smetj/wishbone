@@ -27,54 +27,51 @@ from wishbone.utils import StructuredDataFile
 from os import unlink
 
 
-class Cleanup(object):
+class TempFile(object):
 
-    def __init__(self, path):
+    def __init__(self, filename, content):
 
-        self.path = path
+        self.filename = filename
+        with open(filename, "w") as f:
+            f.write(content)
 
     def __enter__(self, *args, **kwargs):
-        pass
 
-    def __exit__(self, *args):
+        return self
 
-        try:
-            unlink(self.path)
-        except Exception:
-            pass
+    def __exit__(self, *args, **kwargs):
+
+        unlink(self.filename)
 
 
 def test_yaml_default():
 
-    with Cleanup("/tmp/test.yaml"):
+    with TempFile("/tmp/test.yaml", "one: 1\n"):
         s = StructuredDataFile(expect_json=False, expect_kv=False)
-
-        with open("/tmp/test.yaml", "w") as f:
-            f.write("one: 1\n")
-
         assert s.get("/tmp/test.yaml") == {"one": 1}
 
 
 def test_json_default():
 
-    with Cleanup("/tmp/test.json"):
+    with TempFile("/tmp/test.json", '{"one": 1}\n'):
         s = StructuredDataFile(expect_yaml=False, expect_kv=False)
-
-        with open("/tmp/test.json", "w") as f:
-            f.write('{"one": 1}\n')
-
         assert s.get("/tmp/test.json") == {"one": 1}
 
 
 def test_kv_default():
 
-    with Cleanup("/tmp/test.kv"):
+    with TempFile("/tmp/test.kv", "one: 1\n"):
         s = StructuredDataFile(expect_yaml=False, expect_json=False)
-
-        with open("/tmp/test.kv", "w") as f:
-            f.write("one: 1\n")
-
         assert s.get("/tmp/test.kv") == {"one": "1"}
 
 
+def test_dump_items():
+
+    with TempFile("/tmp/one.json", '{"one": 1}'), TempFile("/tmp/two.json", '{"two": 2}'):
+        s = StructuredDataFile()
+        s.load("/tmp/one.json")
+        s.load("/tmp/two.json")
+
+        for item in s.dumpItems():
+            assert "one" in item or "two" in item
 
