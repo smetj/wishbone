@@ -34,7 +34,7 @@ class TestEvent(Actor):
     The data field of the test event contains the string "test".
 
 
-    Parameters:
+    Parameters::
 
         - interval(float)(1)
            |  The interval in seconds between each generated event.
@@ -50,7 +50,7 @@ class TestEvent(Actor):
            |  A dictionary of key/value to add to the event.
 
 
-    Queues:
+    Queues::
 
         - outbox
            |  Contains the generated events.

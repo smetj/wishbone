@@ -79,14 +79,12 @@ class WBInotify(InputModule):
         - IN_UNMOUNT
 
 
-    Outgoing events have following format:
-
-    ::
+    Outgoing events have following format::
 
         {"path": "/tmp/test", "inotify_type": "IN_ACCESS"}
 
 
-    Parameters:
+    Parameters::
 
         - initial_listing(bool)(True)
 
@@ -105,7 +103,7 @@ class WBInotify(InputModule):
            |  inotify events going through.
 
 
-    Queues:
+    Queues::
 
         - outbox
            |  Outgoing notify events.

@@ -32,12 +32,11 @@ class Fanout(FlowModule):
 
     Forward each incoming message to all connected queues.
 
-    Parameters:
+    Parameters::
 
         n/a
 
-
-    Queues:
+    Queues::
 
         - inbox:
            |  Incoming messages

@@ -39,7 +39,7 @@ class Syslog(OutputModule):
 
     The first value corresponds to the syslog severity level.
 
-    Parameters:
+    Parameters::
 
         - level(int)(5)*
            |  The loglevel.
@@ -57,7 +57,7 @@ class Syslog(OutputModule):
            |  The string to submit.
            |  If defined takes precedence over `selection`.
 
-    Queues:
+    Queues::
 
         - inbox
            |  incoming events

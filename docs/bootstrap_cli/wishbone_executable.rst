@@ -2,6 +2,8 @@
 Wishbone executable
 ===================
 
+.. _wishbone_executable:
+
 The ``wishbone`` executable takes care of many aspects of setting up your service.
 It accepts following commands:
 
@@ -72,6 +74,8 @@ It accepts following commands:
         --pid PID   The pidfile to use.
 
 * **show**
+
+.. _wishbone_executable_show:
 
   .. code-block:: sh
 

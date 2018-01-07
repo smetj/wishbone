@@ -36,7 +36,7 @@ class Template(ProcessModule):
     be read from a file or directly from the bootstrap file.
 
 
-    Parameters:
+    Parameters::
 
         - filename(str)(None)*
            |  The absolute template filename to load.
@@ -52,7 +52,7 @@ class Template(ProcessModule):
            |  assign the rendered string to.
 
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events

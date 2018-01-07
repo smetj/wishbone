@@ -37,14 +37,14 @@ class RoundRobin(FlowModule):
     are then submitted in a roundrobin (or randomized) fashion to the
     connected queues.  The outbox queue is non existent.
 
-    Parameters:
+    Parameters::
 
         - randomize(bool)(False)
             |  Randomizes the queue selection instead of going round-robin
             |  over all queues.
 
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events

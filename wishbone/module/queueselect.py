@@ -65,7 +65,7 @@ class QueueSelect(ProcessModule):
     are processed all others are ignored.
 
 
-    Parameters:
+    Parameters::
 
         - templates(list)([])*
            |  A list consisting out of template dicts as explained above.
@@ -75,7 +75,7 @@ class QueueSelect(ProcessModule):
            | Can be verbose hence it's configurable.
 
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events

@@ -71,7 +71,7 @@ class STDOUT(OutputModule):
     You can optionally define the colors used.
 
 
-    Parameters:
+    Parameters::
 
         - selection(str)(None)
            |  The event key to submit.
@@ -108,7 +108,7 @@ class STDOUT(OutputModule):
            |  The coloring style to use
            |  Valid values: DIM, NORMAL, BRIGHT
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events.

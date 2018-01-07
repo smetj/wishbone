@@ -96,7 +96,7 @@ class Pack(ProcessModule):
       - Any event arrives in queue <flush>.
 
 
-    Parameters:
+    Parameters::
 
         - bucket_size(int)(100)
            |  The maximum amount of events per bucket.
@@ -109,7 +109,7 @@ class Pack(ProcessModule):
         - aggregation_key(str)("default")
            |  Groups events with key <aggregation_key> into the same buckets.
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events

@@ -1,6 +1,6 @@
-.. _using_a_template_function:
 Using a template function
 =========================
+.. _using_a_template_function:
 
 This example explains how to use a template function to feed module parameters
 a `dynamic` value.  In this example we initialize

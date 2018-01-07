@@ -35,7 +35,7 @@ class Generator(InputModule):
     The payload can be just about anything including template functions.
 
 
-    Parameters:
+    Parameters::
 
         - interval(float)(1)
            |  The interval in seconds between each generated event.
@@ -47,7 +47,7 @@ class Generator(InputModule):
         - destination(str)("data")
            |  The location write the payload to
 
-    Queues:
+    Queues::
 
         - outbox
            |  Contains the generated events.

@@ -1,12 +1,12 @@
-.. _flow:
 ====
 Flow
 ====
-
+.. _flow:
 
 .. note::
 
-    Flow modules conditionally alter the flow of events between modules.
+    Flow modules apply logic of some sort to decide which queue to submit the
+    event to without altering the event's payload.
 
 Flow modules select the outgoing queue to which incoming events are submitted
 based on certain conditions.  For example, Wishbone queues can only be

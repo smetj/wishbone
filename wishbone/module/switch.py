@@ -42,12 +42,12 @@ class Switch(FlowModule):
           <outgoing> stored under *data*.
 
 
-    Parameters:
+    Parameters::
 
         - outgoing(str)("outbox")*
             |  The name of the queue to submit incoming events to.
 
-    Queues:
+    Queues::
 
         - inbox
            |  incoming events

@@ -1,8 +1,9 @@
-.. _events:
+:orphan:
+
 ======
 Events
 ======
-
+.. _events:
 
     *wishbone.event.Event object instances are used to store and transport structured data
     between module queues.*
@@ -166,9 +167,9 @@ Cloning events keeps track of the previous UUIDs in order to track an event's or
     {'cloned': True, 'bulk': False, 'data': 'hello', 'errors': {}, 'tags': [], 'timestamp': 1505652318.7972248, 'tmp': {}, 'ttl': 254, 'uuid_previous': ['1b1e28a5-9ec7-484d-98db-4b645e69363a', '2caf2e0d-d2ec-4ced-ad82-c69859c450ed'], 'version': 1, 'uuid': '4b6525ef-e03a-4bd4-86ef-99f6c8cc4a03'}
 
 
-.. _bulk_events:
 Bulk Events
 -----------
+.. _bulk_events:
 
 .. note::
 
@@ -184,22 +185,22 @@ Example:
 
 .. code:: python
 
->>> from wishbone.event import Event
->>> from wishbone.event import extractBulkItems
->>>
->>> e = Event(bulk=True)
->>> e.appendBulk(Event({"one":1}))
->>> e.appendBulk(Event({"two":2}))
->>> e.appendBulk(Event({"three":3}))
->>> e.dump()
-{'cloned': False, 'bulk': True, 'data': [{'cloned': False, 'bulk': False, 'data': {'one': 1}, 'errors': {}, 'tags': [], 'timestamp': 1505674274.242459, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': '0469f2f6-2e1e-4f54-bc9d-01d926a31c5f'}, {'cloned': False, 'bulk': False, 'data': {'two': 2}, 'errors': {}, 'tags': [], 'timestamp': 1505674274.2428124, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': '9d193329-6ad6-468a-ab53-4989c36627a3'}, {'cloned': False, 'bulk': False, 'data': {'three': 3}, 'errors': {}, 'tags': [], 'timestamp': 1505674274.242997, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': 'a203ff10-4361-41c2-b5e5-bee7075ecf4d'}], 'errors': {}, 'tags': [], 'timestamp': 1505674274.2423306, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': '15887953-51ad-437f-af51-2bc9d99681a3'}
->>> for item in extractBulkItems(e):
-...     print(item.dump())
-...
-{'cloned': False, 'bulk': False, 'data': {'one': 1}, 'errors': {}, 'tags': [], 'timestamp': 1505674275.5071478, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': '0469f2f6-2e1e-4f54-bc9d-01d926a31c5f'}
-{'cloned': False, 'bulk': False, 'data': {'two': 2}, 'errors': {}, 'tags': [], 'timestamp': 1505674275.50755, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': '9d193329-6ad6-468a-ab53-4989c36627a3'}
-{'cloned': False, 'bulk': False, 'data': {'three': 3}, 'errors': {}, 'tags': [], 'timestamp': 1505674275.5078042, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': 'a203ff10-4361-41c2-b5e5-bee7075ecf4d'}
->>>
+  >>> from wishbone.event import Event
+  >>> from wishbone.event import extractBulkItems
+  >>>
+  >>> e = Event(bulk=True)
+  >>> e.appendBulk(Event({"one":1}))
+  >>> e.appendBulk(Event({"two":2}))
+  >>> e.appendBulk(Event({"three":3}))
+  >>> e.dump()
+  {'cloned': False, 'bulk': True, 'data': [{'cloned': False, 'bulk': False, 'data': {'one': 1}, 'errors': {}, 'tags': [], 'timestamp': 1505674274.242459, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': '0469f2f6-2e1e-4f54-bc9d-01d926a31c5f'}, {'cloned': False, 'bulk': False, 'data': {'two': 2}, 'errors': {}, 'tags': [], 'timestamp': 1505674274.2428124, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': '9d193329-6ad6-468a-ab53-4989c36627a3'}, {'cloned': False, 'bulk': False, 'data': {'three': 3}, 'errors': {}, 'tags': [], 'timestamp': 1505674274.242997, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': 'a203ff10-4361-41c2-b5e5-bee7075ecf4d'}], 'errors': {}, 'tags': [], 'timestamp': 1505674274.2423306, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': '15887953-51ad-437f-af51-2bc9d99681a3'}
+  >>> for item in extractBulkItems(e):
+  ...     print(item.dump())
+  ...
+  {'cloned': False, 'bulk': False, 'data': {'one': 1}, 'errors': {}, 'tags': [], 'timestamp': 1505674275.5071478, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': '0469f2f6-2e1e-4f54-bc9d-01d926a31c5f'}
+  {'cloned': False, 'bulk': False, 'data': {'two': 2}, 'errors': {}, 'tags': [], 'timestamp': 1505674275.50755, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': '9d193329-6ad6-468a-ab53-4989c36627a3'}
+  {'cloned': False, 'bulk': False, 'data': {'three': 3}, 'errors': {}, 'tags': [], 'timestamp': 1505674275.5078042, 'tmp': {}, 'ttl': 254, 'uuid_previous': [], 'version': 1, 'uuid': 'a203ff10-4361-41c2-b5e5-bee7075ecf4d'}
+  >>>
 
 
 .. _input modules: module%20types.html#input-modules

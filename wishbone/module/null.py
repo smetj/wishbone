@@ -33,11 +33,11 @@ class Null(OutputModule):
     Purges incoming events.
 
 
-        Parameters:
+    Parameters::
 
-          n/a
+      None
 
-    Queues:
+    Queues::
 
         - inbox
            |  incoming events

@@ -71,35 +71,31 @@ class Acknowledge(FlowModule):
     sending events to the ``acknowledge`` queue.
 
 
-    Module parameters:
+    Parameters::
 
-        :ack_id (data):
-             A unique value identifying the event.
+        - ack_id (data):
+            A unique value identifying the event.
 
-    Queues:
+    Queues::
 
-        :inbox:
-            Incoming events
+        - inbox
+            |  Incoming events
 
-        :outbox:
-            Outgoing events
+        - outbox
+            |  Outgoing events
 
-        :acknowledge:
-            Acknowledge events
+        - acknowledge
+            |  Acknowledge events
 
-        :dropped:
-            Where events go to when unacknowledged
-
-
-    Event variables:
-
-        :tmp.<name>.ack_id:
-            The location of the acknowledgement ID when coming in through the
-            inbox queue.
+        - dropped
+            |  Where events go to when unacknowledged
 
 
+    Event variables::
 
-
+        - tmp.<name>.ack_id
+            | The location of the acknowledgement ID when coming in through the
+            | inbox queue.
     '''
 
     def __init__(self, actor_config, ack_id=None):

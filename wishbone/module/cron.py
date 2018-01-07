@@ -40,7 +40,7 @@ class Cron(InputModule):
     Time is in crontab format.
 
 
-    Parameters:
+    Parameters::
 
         - cron(string)("*/10 * * * *")
             | The cron expression.
@@ -52,7 +52,7 @@ class Cron(InputModule):
             | The location to write <payload> to.
 
 
-    Queues:
+    Queues::
 
         - outbox
            |  Outgoing messges

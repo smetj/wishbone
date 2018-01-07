@@ -35,11 +35,11 @@ class Unpack(ProcessModule):
     Creates single events from all the events stored in a bulk event.
 
 
-    Parameters:
+    Parameters::
 
         None
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming messages

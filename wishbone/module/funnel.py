@@ -31,11 +31,11 @@ class Funnel(FlowModule):
 
     Funnel multiple incoming queues to one outgoing queue.
 
-    Parameters:
+    Parameters::
 
         n/a
 
-    Queues:
+    Queues::
 
         - outbox:
            |  Outgoing messages

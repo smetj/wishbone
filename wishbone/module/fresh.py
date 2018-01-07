@@ -40,7 +40,7 @@ class Fresh(FlowModule):
     stream recovers, a new event with <recovery_payload> is generated and
     submitted to the <timeout> queue.
 
-    Parameters:
+    Parameters::
 
         - timeout_payload(int/float/str/obj/list/...)("timeout")
            |  The data a timeout event contains.
@@ -56,7 +56,7 @@ class Fresh(FlowModule):
            |  The interval time to resend the <payload> event in case
            |  <timeout> has expired and
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events.

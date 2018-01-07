@@ -38,7 +38,7 @@ class FileOut(OutputModule):
     of the file.
 
 
-    Parameters:
+    Parameters::
 
         - selection(str)("data")
            |  The part of the event to submit externally.
@@ -50,8 +50,7 @@ class FileOut(OutputModule):
         - timestamp(bool)(False)
            |  If true prepends each line with a ISO8601 timestamp.
 
-
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming messages

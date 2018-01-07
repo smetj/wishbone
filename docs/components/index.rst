@@ -1,6 +1,7 @@
 ==========
 Components
 ==========
+.. _complete:
 
 A Wishbone service consists out of a combination of different components.
 Wishbone has 3 component types:

@@ -1,7 +1,7 @@
-.. _modules:
 =======
 Modules
 =======
+.. _modules:
 
 Modules are isolated pieces of code which do not directly invoke each others
 functionality.  They merely act upon the messages coming in to its queues and
@@ -11,6 +11,8 @@ Modules run as greenthreads.
 Wishbone comes with a set of builtin modules.  Besides these, there's a
 collection of :ref:`external modules <external modules>` available which are
 developed and released seperately from Wishbone itself.
+
+.. _module_types:
 
 Wishbone has following module types:
 
@@ -61,8 +63,3 @@ the characteristics to it:
 
     event = getter(test_event.pool.queue.outbox)
     assert event.get() == "test"
-
-
-.. autoclass:: wishbone.actorconfig.ActorConfig
-    :members:
-
