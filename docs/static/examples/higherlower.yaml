@@ -1,0 +1,42 @@
+---
+template_functions:
+  randomInt:
+    function: wishbone.function.template.random_integer
+    arguments:
+      minimum: 1
+      maximum: 100
+
+modules:
+  input:
+    module: wishbone.module.input.generator
+    arguments:
+      message : '{{randomInt()}}'
+      interval: 1
+
+  evaluate:
+    module: wishbone_contrib.module.flow.largerorsmaller
+    arguments:
+      min: 50
+      max: 100
+
+  outside:
+    module: wishbone.output.stdout
+    arguments:
+      prefix: "The value is outside the defined scope: "
+
+  inside:
+    module: wishbone.output.stdout
+    arguments:
+      prefix: "The value is inside the defined scope: "
+
+  error:
+    module: wishbone.output.stdout
+    arguments:
+      prefix: "The value is not an integer: "
+
+routingtable:
+  - input.outbox      -> evaluate.inbox
+  - evaluate.inside   -> inside.inbox
+  - evaluate.outside  -> outside.inbox
+  - evaluate.failed   -> error.inbox
+...

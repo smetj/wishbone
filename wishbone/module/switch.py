@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  passthrough.py
+#  switch.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,11 +22,12 @@
 #
 #
 
-from wishbone import Actor
+from wishbone.actor import Actor
+from wishbone.module import FlowModule
 from wishbone.error import ModuleInitFailure, ReservedName
 
 
-class Switch(Actor):
+class Switch(FlowModule):
 
     '''**Switch outgoing queues while forwarding events.**
 
@@ -35,18 +36,18 @@ class Switch(Actor):
 
     The value of <outgoing> can be dynamically set in 2 ways:
 
-        - Using a lookup value.
+        - Using a template function.
 
         - By sending an event to the <switch> queue with the value of
-          <outgoing> stored under *@data*.
+          <outgoing> stored under *data*.
 
 
-    Parameters:
+    Parameters::
 
         - outgoing(str)("outbox")*
             |  The name of the queue to submit incoming events to.
 
-    Queues:
+    Queues::
 
         - inbox
            |  incoming events
@@ -54,7 +55,7 @@ class Switch(Actor):
         - switch
            |  incoming events to alter outgoing queue.
 
-        - outbox
+        - outbox*
            |  outgoing events
 
         - <connected_queue_1>
@@ -81,23 +82,29 @@ class Switch(Actor):
         if self.kwargs.outgoing in self.forbidden:
             raise ModuleInitFailure("Module parameter <outgoing> cannot have value '%s'." % (self.kwargs.outgoing))
 
+        self.destination = self.kwargs.outgoing
+        self._destination = self.kwargs.outgoing
+
     def consume(self, event):
 
-        destination = self.kwargs.outgoing
-        if destination in self.forbidden:
-            raise ReservedName("Cannot forward incoming events to queue '%s'." % (destination))
+        if self.kwargs.outgoing != self._destination:
+            self._destination = self.kwargs.outgoing
+            self.destination = self.kwargs.outgoing
+
+        if self.destination in self.forbidden:
+            raise ReservedName("Cannot forward incoming events to queue '%s'." % (self.destination))
         else:
-            self.submit(event, self.pool.getQueue(destination))
+            self.submit(event, self.destination)
 
     def switch(self, event):
 
         prefix = "<switch> queue received event"
         try:
-            name = event.get("@data")
+            name = event.get("data")
             if self.pool.hasQueue(name):
-                self.kwargs.outgoing = name
+                self.destination = name
                 self.logging.info("%s. Outgoing messages forwarded to queue '%s'." % (prefix, name))
             else:
                 self.logging.error("%s but module has no queue named '%s'." % (prefix, name))
         except KeyError:
-            self.logging.error("%s but has no value key @data." % (prefix))
+            self.logging.error("%s but has no value key data." % (prefix))

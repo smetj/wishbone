@@ -3,7 +3,7 @@
 #
 #  funnel.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,20 +22,20 @@
 #
 #
 
-from wishbone import Actor
+from wishbone.module import FlowModule
 
 
-class Funnel(Actor):
+class Funnel(FlowModule):
 
-    '''**Funnel multiple incoming queues to 1 outgoing queue.**
+    '''**Funnel multiple incoming queues to one outgoing queue.**
 
-    Funnel multiple incoming queues to 1 outgoing queue.
+    Funnel multiple incoming queues to one outgoing queue.
 
-    Parameters:
+    Parameters::
 
         n/a
 
-    Queues:
+    Queues::
 
         - outbox:
            |  Outgoing messages
@@ -44,7 +44,7 @@ class Funnel(Actor):
 
     def __init__(self, actor_config):
 
-        Actor.__init__(self, actor_config)
+        FlowModule.__init__(self, actor_config)
         self.pool.createQueue("outbox")
 
     def preHook(self):
@@ -55,4 +55,4 @@ class Funnel(Actor):
 
     def consume(self, event):
 
-        self.submit(event, self.pool.queue.outbox)
+        self.submit(event, "outbox")

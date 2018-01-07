@@ -1,19 +1,28 @@
 Wishbone changelog
 ==================
 
-Version 2.3.3
+Version 3.0.0
 ~~~~~~~~~~~~~
+Features:
+- Only Python 3 support
+- Reorganized modules into protocol, function and module name space.
+- Many new internal modules added.
+- Removed ``debug`` command from wishbone executable
+- Moved to Jinja2 templating for all module parameter templating support.
+- Removed wishbone.encode and decode modules categories. Replaced by protocols.
+- Reworked encode/decode handling (protocol modules).
+- Removed confusing context property from module instances.
+- Removed Metric() and Log() type and replaced by simple dicts
+- Removed getting metrics from builtin webserver
+- Replaced wishbone.module.process.humanlogformat with template module
+- Removed @-prefix from default event fields
+- A ton of new features ... (see docs for details)
+
+Bugfixes:
 
 Misc:
-- Added clone() method to bulk events.
 
-
-Version 2.3.2
-~~~~~~~~~~~~~
-
-Misc:
-- wishbone.module.jsondecode: allow optional strict decoding.
-
+- Expanded testing
 
 Version 2.3.1
 ~~~~~~~~~~~~~

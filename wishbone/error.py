@@ -4,7 +4,7 @@
 #
 #  error.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -68,6 +68,10 @@ class NoSuchModule(Exception):
     pass
 
 
+class NoSuchComponent(Exception):
+    pass
+
+
 class MissingKey(Exception):
     pass
 
@@ -83,8 +87,38 @@ class BulkFull(Exception):
 class InvalidData(Exception):
     pass
 
+
+class InvalidComponent(Exception):
+    pass
+
+
 class InvalidModule(Exception):
     pass
 
+
 class ModuleNotReady(Exception):
+    pass
+
+
+class InvalidConfig(Exception):
+    pass
+
+
+class InvalidEventFormat(Exception):
+    pass
+
+
+class BufferExceeded(Exception):
+    pass
+
+
+class ProtocolError(Exception):
+    pass
+
+
+class ProtocolInitFailure(Exception):
+    pass
+
+
+class TTLExpired(Exception):
     pass

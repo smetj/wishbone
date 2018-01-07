@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-#
 # -*- coding: utf-8 -*-
 #
+#  queue.py
 #
-#
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,21 +28,25 @@ from wishbone.error import ReservedName, QueueMissing, QueueFull, QueueEmpty
 from time import time
 from gevent.queue import Empty, Full
 from gevent import sleep
-
-
-class Container():
-    pass
+from types import SimpleNamespace
 
 
 class QueuePool():
 
+    RESERVED_QUEUES = [
+        '_failed',
+        '_success',
+        '_logs',
+        '_metrics'
+    ]
+
     def __init__(self, size):
         self.__size = size
-        self.queue = Container()
-        self.queue.metrics = Queue(size)
-        self.queue.logs = Queue(size)
-        self.queue.success = Queue(size)
-        self.queue.failed = Queue(size)
+        self.queue = SimpleNamespace()
+        self.queue._metrics = Queue(size)
+        self.queue._logs = Queue(size)
+        self.queue._success = Queue(size)
+        self.queue._failed = Queue(size)
 
     def listQueues(self, names=False, default=True):
         '''returns the list of queue names from the queuepool.
@@ -52,7 +55,7 @@ class QueuePool():
         if default:
             blacklist = []
         else:
-            blacklist = ['failed', 'success', 'logs', 'metrics']
+            blacklist = self.RESERVED_QUEUES
 
         for m in list(self.queue.__dict__.keys()):
             if m not in blacklist:
@@ -64,8 +67,23 @@ class QueuePool():
     def createQueue(self, name):
         '''Creates a Queue.'''
 
-        if name in ["metrics", "logs", "success", "failed"] or name.startswith("_"):
-            raise ReservedName
+        if name in self.RESERVED_QUEUES or name.startswith("_"):
+            raise ReservedName("%s is an invalid queue name." % (name))
+
+        setattr(self.queue, name, Queue(self.__size))
+
+    def createSystemQueue(self, name):
+        '''
+        Creates a queue starting with _ which is forbidden by users as special
+        system queues are prefixed with '_'.
+
+        This method should normally never be used directly because of user
+        input.  It's the Wishbone framework itself which should make system
+        related queues.
+
+        Args:
+            name (str): The name of the queue (should start with _)
+        '''
 
         setattr(self.queue, name, Queue(self.__size))
 
@@ -84,7 +102,7 @@ class QueuePool():
         try:
             return getattr(self.queue, name)
         except:
-            raise QueueMissing("Module has no queue %s." %(name))
+            raise QueueMissing("Module has no queue %s." % (name))
 
     def join(self):
         '''Blocks until all queues in the pool are empty.'''
