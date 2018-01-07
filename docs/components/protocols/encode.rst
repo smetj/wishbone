@@ -1,7 +1,7 @@
-.. _encode:
 ======
 Encode
 ======
+.. _encode:
 
 Encode modules can only be used by :ref:`output <output>` modules.  They are
 reponsible for converting the Wishbone internal format into an appropriate outgoing data format.

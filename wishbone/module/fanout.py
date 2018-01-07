@@ -3,7 +3,7 @@
 #
 #  fanout.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -32,12 +32,11 @@ class Fanout(FlowModule):
 
     Forward each incoming message to all connected queues.
 
-    Parameters:
+    Parameters::
 
         n/a
 
-
-    Queues:
+    Queues::
 
         - inbox:
            |  Incoming messages

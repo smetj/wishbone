@@ -1,6 +1,9 @@
+:orphan:
+
 ==========
 Components
 ==========
+
 
 .. autoclass:: wishbone.queue.Queue
     :members:

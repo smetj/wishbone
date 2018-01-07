@@ -4,7 +4,7 @@
 #
 #  queueselect.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ class QueueSelect(ProcessModule):
     are processed all others are ignored.
 
 
-    Parameters:
+    Parameters::
 
         - templates(list)([])*
            |  A list consisting out of template dicts as explained above.
@@ -75,7 +75,7 @@ class QueueSelect(ProcessModule):
            | Can be verbose hence it's configurable.
 
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events

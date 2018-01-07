@@ -32,14 +32,14 @@ class TTL(Actor):
     When a message has traveled through this module more than <ttl> times it
     will be submitted to the <ttl_exceeded> queue.
 
-        Parameters:
+    Parameters::
 
         - ttl(int)(1)
            |  The maximum number of times an event is allowed
            |  to travel through.
 
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events.

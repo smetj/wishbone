@@ -32,13 +32,14 @@ import os
 if version_info[0] == 2:
     from io import open
 
+
 class DictGenerator(Actor):
 
     '''**Generates random dictionaries.**
 
     This module allows you to generate an stream of dictionaries.
 
-    Parameters:
+    Parameters::
 
         - keys(list)([])
            |  If provided, documents are created using the provided
@@ -63,7 +64,7 @@ class DictGenerator(Actor):
         - interval(int)(1)
            |  The time in seconds to sleep between each message.
 
-    Queues:
+    Queues::
 
         - outbox
            |  Outgoing messges

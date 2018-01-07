@@ -3,7 +3,7 @@
 #
 #  stdout.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ class STDOUT(OutputModule):
     You can optionally define the colors used.
 
 
-    Parameters:
+    Parameters::
 
         - selection(str)(None)
            |  The event key to submit.
@@ -108,7 +108,7 @@ class STDOUT(OutputModule):
            |  The coloring style to use
            |  Valid values: DIM, NORMAL, BRIGHT
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events.

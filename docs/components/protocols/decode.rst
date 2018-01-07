@@ -1,7 +1,7 @@
-.. _decode:
 ======
 Decode
 ======
+.. _decode:
 
 Decode modules can only be used by :ref:`input <input>` modules.  They are
 reponsible for converting the incoming data format into a format Wisbone can

@@ -13,46 +13,6 @@
 # serve to show the default.
 
 import sys
-import os
-
-class Mock(object):
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        return Mock()
-
-    def __iter__(self):
-        yield None
-
-    @classmethod
-    def __getattr__(cls, name):
-        if name in ("__file__", "__path__"):
-            return "/dev/null"
-        elif name[0] == name[0].upper():
-            mockType = type(name, (), {})
-            mockType.__module__ = __name__
-            return mockType
-        else:
-            return Mock()
-
-
-# MOCK_MODULES = ["gevent", "gevent.lock", "gevent.pool", "gevent.fileobject", "gevent.server",
-#                 "gevent.hub", "gevent.wsgi", "gevent.queue", "gevent.event", "gevent.select", "requests",
-#                 "argparse", "greenlet", "jsonschema", "prettytable",
-#                 "python-daemon", "pyyaml", "event", "gevent.event", "lock", "gevent.lock",
-#                 "gevent.pool", "wishbone.tools", "gevent.fileobject", "gevent.server",
-#                 "amqp", "amqp.connection", "gevent.hub", "gevent.wsgi", "gevent.queue",
-#                 "flask", "ReadRulesDisk", "gevent_inotifyx", "amqp.exceptions", "Event",
-#                 "uplook", "UpLook", "msgpack", "zmq", "zmq.green", "grequests", "gevent.os", "make_nonblocking",
-#                 "uplook.errors", "pyjq", "arrow", "cffi", "colorama", "cronex", "functools32", "jsonschema",
-#                 "lockfile", "prettytable", "python-daemon", "python-dateutil", "PyYAML", "readline"]
-
-MOCK_MODULES = [
-]
-
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

@@ -4,7 +4,7 @@
 #
 #  roundrobin.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -37,14 +37,14 @@ class RoundRobin(FlowModule):
     are then submitted in a roundrobin (or randomized) fashion to the
     connected queues.  The outbox queue is non existent.
 
-    Parameters:
+    Parameters::
 
         - randomize(bool)(False)
             |  Randomizes the queue selection instead of going round-robin
             |  over all queues.
 
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events

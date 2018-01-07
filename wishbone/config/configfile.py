@@ -3,7 +3,7 @@
 #
 #  configfile.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -56,7 +56,6 @@ LOG_COLOR_TEMPLATE = '''
 
 
 class ConfigFile(object):
-
     '''
     Generates a wishbone.router configuration object used to initialize a
     wishbone router object.
@@ -66,32 +65,33 @@ class ConfigFile(object):
 
     It does following automatic configurations:
 
-        - Initializes a ``wishbone.module.flow.funnel`` module called ``_logs``
-          which is connected to the ``_logs`` queue of all modules except if
-          this module has already been connected in the bootstrap file.
+    - Initializes a ``wishbone.module.flow.funnel`` module called ``_logs``
+      which is connected to the ``_logs`` queue of all modules except if
+      this module has already been connected in the bootstrap file.
 
-        - Initializes a ``wishbone.module.flow.funnel`` module called ``_metrics``
-          which is connected to the ``_metrics`` queue of all modules except if
-          this module has already been connected in the bootstrap file.  The
-          ``_metrics`` modules is by default not connected to any other
-          modules.  The effect of this is that all metrics are dropped unless
-          the user connects a module for furhter processing the metrics.
+    - Initializes a ``wishbone.module.flow.funnel`` module called ``_metrics``
+      which is connected to the ``_metrics`` queue of all modules except if
+      this module has already been connected in the bootstrap file.  The
+      ``_metrics`` modules is by default not connected to any other
+      modules.  The effect of this is that all metrics are dropped unless
+      the user connects a module for furhter processing the metrics.
 
-        - Adds a ``wishbone.module.flow.queueselect`` module called
-          ``_logs_filter`` responsible for dropping logs which log level do
-          not correspond to the define ``--log-level``
+    - Adds a ``wishbone.module.flow.queueselect`` module called
+      ``_logs_filter`` responsible for dropping logs which log level do
+      not correspond to the define ``--log-level``
 
-        - Adds either a ``wishbone.module.output.stdout`` called
-          ``_logs_stdout`` module or ``wishbone.module.output.syslog`` module
-          called ``_logs_syslog`` and connects this instance to
-          ``_logs.outbox``.
+    - Adds either a ``wishbone.module.output.stdout`` called
+      ``_logs_stdout`` module or ``wishbone.module.output.syslog`` module
+      called ``_logs_syslog`` and connects this instance to
+      ``_logs.outbox``.
 
-        - Initializes the following template functions and makes them
-          available to each initialized module:
-            - strftime()
-            - env()
-            - epoch()
-            - version()
+    - Initializes the following template functions and makes them
+      available to each initialized module::
+
+        - strftime()
+        - env()
+        - epoch()
+        - version()
 
     Args:
         filename (str): The filename of the configuration to load.

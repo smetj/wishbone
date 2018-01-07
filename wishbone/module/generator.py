@@ -3,7 +3,7 @@
 #
 #  generator.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ class Generator(InputModule):
     The payload can be just about anything including template functions.
 
 
-    Parameters:
+    Parameters::
 
         - interval(float)(1)
            |  The interval in seconds between each generated event.
@@ -47,7 +47,7 @@ class Generator(InputModule):
         - destination(str)("data")
            |  The location write the payload to
 
-    Queues:
+    Queues::
 
         - outbox
            |  Contains the generated events.

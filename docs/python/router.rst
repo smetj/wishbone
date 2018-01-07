@@ -1,6 +1,9 @@
+:orphan:
+
 ======
 Router
 ======
+
 
     *A router is responsible for initializing and holding all event modules,
     connecting their queues and organize the event flow between them.*

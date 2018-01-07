@@ -20,8 +20,8 @@ The most prominent Python parts invovled in writing a Wishbone server are:
     A convenience function to easily load components by entry point.
 
 
-Consider the following "hello world" example:
-
+Consider the following "hello world" example which demonstrates how to setup a
+Wishbone instance directly from Python:
 
 .. code-block:: python
 

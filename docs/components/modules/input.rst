@@ -1,7 +1,7 @@
-.. _input:
 =====
 Input
 =====
+.. _input:
 
 .. note::
 

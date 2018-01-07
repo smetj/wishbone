@@ -3,7 +3,7 @@
 #
 #  actor.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -368,6 +368,8 @@ class Actor(object):
         while self.loop():
 
             event = self.pool.getQueue(queue).get()
+            if not event.has("tmp.%s" % (self.name)):
+                event.set({}, "tmp.%s" % (self.name))
 
             # Render kwargs relative to the event's content and make these accessible under event.kwargs
             event.renderKwargs(self.kwargs_template)
