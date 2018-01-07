@@ -3,7 +3,7 @@
 #
 #  setup.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -27,22 +27,26 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '2.3.3'
+VERSION = '3.0.0'
 
 install_requires = [
-    'arrow==0.7.0',
-    'attrdict==2.0.0',
-    'colorama==0.3.7',
-    'cronex==0.1.0',
-    'gevent==1.1.2',
-    'gipc==0.6.0',
-    'jsonschema==2.5.1',
-    'prettytable==0.7.2',
+    'arrow',
+    'colorama',
+    'cronex',
+    'gevent',
+    'gipc',
+    'inotify>=0.2.9',
+    'jsonschema',
+    'prettytable',
     'python-daemon-3K',
-    'PyYAML==3.11',
     'requests',
-    'setproctitle==1.1.10',
-    'uplook==1.1.0',
+    'pyyaml',
+    'jsonschema',
+    'msgpack-python',
+    'easydict',
+    'jinja2',
+    'pygments',
+    'scalpl'
 ]
 
 dependency_links = [
@@ -59,13 +63,17 @@ class PyTest(TestCommand):
 
     def finalize_options(self):
         TestCommand.finalize_options(self)
-        self.test_args = ["tests/"]
+        self.test_args = [
+            "-v",
+            "tests/"
+        ]
         self.test_suite = True
 
     def run_tests(self):
         import pytest
         errcode = pytest.main(self.test_args)
         sys.exit(errcode)
+
 
 setup(
     name=PROJECT,
@@ -83,8 +91,7 @@ setup(
     classifiers=['Development Status :: 5 - Production/Stable',
                  'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
                  'Programming Language :: Python',
-                 'Programming Language :: Python :: 2.7',
-                 'Programming Language :: Python :: 3.5',
+                 'Programming Language :: Python :: 3',
                  'Programming Language :: Python :: Implementation :: PyPy',
                  'Intended Audience :: Developers',
                  'Intended Audience :: System Administrators',
@@ -104,47 +111,63 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': ['wishbone = wishbone.bootstrap:main'],
-        'wishbone.flow': [
+        'wishbone.protocol.decode': [
+            'dummy = wishbone.protocol.decode.dummy:Dummy',
+            'plain = wishbone.protocol.decode.plain:Plain',
+            'json = wishbone.protocol.decode.json:JSON',
+            'msgpack = wishbone.protocol.decode.msgpack:MSGPack',
+        ],
+        'wishbone.protocol.encode': [
+            'dummy = wishbone.protocol.encode.dummy:Dummy',
+            'json = wishbone.protocol.encode.json:JSON',
+            'msgpack = wishbone.protocol.encode.msgpack:MSGPack',
+        ],
+        'wishbone.module.flow': [
             'acknowledge = wishbone.module.acknowledge:Acknowledge',
-            'deserialize = wishbone.module.deserialize:Deserialize',
+            'count = wishbone.module.count:Count',
             'fanout = wishbone.module.fanout:Fanout',
             'funnel = wishbone.module.funnel:Funnel',
             'fresh = wishbone.module.fresh:Fresh',
+            'queueselect = wishbone.module.queueselect:QueueSelect',
             'roundrobin = wishbone.module.roundrobin:RoundRobin',
-            'switch = wishbone.module.switch:Switch',
-            'tippingbucket = wishbone.module.tippingbucket:TippingBucket',
-            'ttl = wishbone.module.ttl:TTL'
+            'switch = wishbone.module.switch:Switch'
+
         ],
-        'wishbone.encode': [
-            'humanlogformat = wishbone.module.humanlogformat:HumanLogFormat',
-            'json = wishbone.module.jsonencode:JSONEncode'
+        'wishbone.module.process': [
+            'modify = wishbone.module.modify:Modify',
+            'pack = wishbone.module.pack:Pack',
+            'template = wishbone.module.template:Template',
+            'unpack = wishbone.module.unpack:Unpack',
         ],
-        'wishbone.decode': [
-            'json = wishbone.module.jsondecode:JSONDecode'
-        ],
-        'wishbone.function': [
-            'modify = wishbone.module.modify:Modify'
-        ],
-        'wishbone.input': [
+        'wishbone.module.input': [
             'cron =  wishbone.module.cron:Cron',
-            'dictgenerator = wishbone.module.dictgenerator:DictGenerator',
-            'testevent = wishbone.module.testevent:TestEvent'
+            'inotify = wishbone.module.wb_inotify:WBInotify',
+            'generator = wishbone.module.generator:Generator',
         ],
-        'wishbone.output': [
+        'wishbone.module.output': [
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
             'syslog = wishbone.module.wbsyslog:Syslog'
         ],
-        'wishbone.lookup': [
-            'choice = wishbone.lookup.choice:Choice',
-            'cycle = wishbone.lookup.cycle:Cycle',
-            'etcd = wishbone.lookup.etcd:ETCD',
-            'event = wishbone.lookup.event:EventLookup',
-            'pid = wishbone.lookup.pid:PID',
-            'random_bool = wishbone.lookup.random_bool:RandomBool',
-            'random_integer = wishbone.lookup.random_integer:RandomInteger',
-            'random_word = wishbone.lookup.random_word:RandomWord',
-            'random_uuid = wishbone.lookup.random_uuid:RandomUUID'
+        'wishbone.function.module': [
+            'set = wishbone.function.module.set:Set',
+            'append = wishbone.function.module.append:Append',
+            'uppercase = wishbone.function.module.uppercase:Uppercase',
+            'lowercase = wishbone.function.module.lowercase:Lowercase',
+        ],
+        'wishbone.function.template': [
+            'choice = wishbone.function.template.choice:Choice',
+            'cycle = wishbone.function.template.cycle:Cycle',
+            'environment = wishbone.function.template.environment:Environment',
+            'epoch = wishbone.function.template.epoch:Epoch',
+            'pid = wishbone.function.template.pid:PID',
+            'random_bool = wishbone.function.template.random_bool:RandomBool',
+            'random_integer = wishbone.function.template.random_integer:RandomInteger',
+            'random_uuid = wishbone.function.template.random_uuid:RandomUUID',
+            'random_word = wishbone.function.template.random_word:RandomWord',
+            'regex = wishbone.function.template.regex:Regex',
+            'strftime = wishbone.function.template.strftime:STRFTime',
+            'version = wishbone.function.template.version:Version'
         ]
     }
 )

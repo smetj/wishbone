@@ -3,7 +3,7 @@
 #
 #  graphcontent.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ GRAPHCONTENT = """
     <title>Network | Custom Groups</title>
 
   <style type="text/css">
-    #mynetwork {
+    # mynetwork {
       width: 100px;
       height: 100px;
       border: 0px solid lightgray;
@@ -93,43 +93,44 @@ class VisJSData():
 
     def addModule(self, instance_name, module_name, description):
 
-        if ".input." in module_name or ".output." in module_name:
-            shape = "square"
-            color = {
-                "border": 'red',
-                "background": '#D2E5FF',
-                "highlight": {
-                    "border": '#2B7CE9',
-                    "background": '#D2E5FF'
-                },
-                "hover": {
-                    "border": '#2B7CE9',
-                    "background": '#D2E5FF'
-                }
+        if ".input." in module_name:
+            icon = {
+                "face": "FontAwesome",
+                "code": '\uf090',
+                "size": 75,
+                "color": "red"
+            }
+
+        elif ".output." in module_name:
+            icon = {
+                "face": "FontAwesome",
+                "code": '\uf08b',
+                "size": 75,
+                "color": "green"
+            }
+
+        elif ".flow." in module_name:
+            icon = {
+                "face": "FontAwesome",
+                "code": '\uf074',
+                "size": 75,
+                "color": "black"
             }
         else:
-            shape = "dot"
-            color = {
-                "border": '#2B7CE9',
-                "background": '#D2E5FF',
-                "highlight": {
-                    "border": '#2B7CE9',
-                    "background": '#D2E5FF'
-                },
-                "hover": {
-                    "border": '#2B7CE9',
-                    "background": '#D2E5FF'
-                }
+            icon = {
+                "face": "FontAwesome",
+                "code": '\uf085',
+                "size": 75,
+                "color": "black"
             }
 
         if instance_name not in list(self.nodes.keys()):
             self.nodes[instance_name] = {"id": self.id,
                                          "label": instance_name,
-                                         "shape": shape,
+                                         "shape": "icon",
+                                         "icon": icon,
                                          "size": 20,
-                                         "color": color,
                                          "title": "Module: %s</br>Description: %s" % (module_name, description),
-                                         "shadow": True,
                                          "font.size": 20
                                          }
             self.id += 1
@@ -139,10 +140,15 @@ class VisJSData():
         if "%s.%s" % (module, name) not in list(self.nodes.keys()):
             self.nodes["%s.%s" % (module, name)] = {"id": self.id,
                                                     "label": name,
-                                                    "shape": "dot",
+                                                    "shape": "icon",
+                                                    "icon": {
+                                                        "face": "FontAwesome",
+                                                        "code": '\uf0c9',
+                                                        "size": 20,
+                                                        "color": "orange"
+                                                    },
                                                     "size": 5,
                                                     "title": "Queue: %s.%s" % (module, name),
-                                                    "shadow": True,
                                                     "font.size": 20
                                                     }
             self.edges.append({"from": self.nodes[module]["id"],

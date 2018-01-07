@@ -3,7 +3,7 @@
 #
 #  event.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,361 +22,416 @@
 #
 #
 
-import arrow
 import time
-from wishbone.error import BulkFull, InvalidData
-
-EVENT_RESERVED = ["@timestamp", "@version", "@data", "@tmp", "@errors"]
-
-
-class Bulk(object):
-
-    def __init__(self, max_size=None, delimiter="\n"):
-        self.__events = []
-        self.max_size = max_size
-        self.delimiter = delimiter
-        self.error = None
-
-    def append(self, event):
-        '''
-        Appends an event to the bulk object.
-        '''
-
-        if isinstance(event, Event):
-            if self.max_size is None or len(self.__events) < self.max_size:
-                self.__events.append(event)
-            else:
-                    raise BulkFull("Max number of events (%s) is reached." % (self.max_size))
-        else:
-            raise InvalidData()
-
-    def clone(self):
-        '''
-        Returns a cloned version of the Bulk event using deepcopy.
-        '''
-
-        e = Bulk()
-        e.__events = self.deepish_copy(self.__events)
-        return e
-
-    def dump(self):
-        '''
-        Returns an iterator returning all contained events
-        '''
-
-        for event in self.__events:
-            yield event
-
-    def dumpFieldAsList(self, field="@data"):
-        '''
-        Returns a list containing a specific field of each stored event.
-        Events with a missing field are skipped.
-        '''
-
-        result = []
-        for event in self.dump():
-            try:
-                result.append(event.get(field))
-            except KeyError:
-                pass
-        return result
-
-    def dumpFieldAsString(self, field="@data"):
-        '''
-        Returns a string joining <field> of each event with <self.delimiter>.
-        Events with a missing field are skipped.
-        '''
-
-        result = []
-        for event in self.dump():
-            try:
-                result.append(event.get(field))
-            except KeyError:
-                pass
-
-        return self.delimiter.join(result)
-
-    def size(self):
-        '''
-        Returns the number of elements stored in the bulk.
-        '''
-
-        return len(self.__events)
-
-    def deepish_copy(self, org):
-        '''
-        much, much faster than deepcopy, for a dict of the simple python types.
-
-        Blatantly ripped off from https://writeonly.wordpress.com/2009/05/07
-        /deepcopy-is-a-pig-for-simple-data/
-        '''
-
-        if isinstance(org, dict):
-            out = dict().fromkeys(org)
-            for k, v in list(org.items()):
-                try:
-                    out[k] = v.copy()   # dicts, sets
-                except AttributeError:
-                    try:
-                        out[k] = v[:]   # lists, tuples, strings, unicode
-                    except TypeError:
-                        out[k] = v      # ints
-
-            return out
-        else:
-            return org
+from wishbone.error import BulkFull, InvalidData, TTLExpired
+from uuid import uuid4
+from jinja2 import Template
+from copy import deepcopy
+from scalpl import Cut
+from easydict import EasyDict
 
 
-class Log(object):
+EVENT_RESERVED = ["timestamp", "data", "tmp", "errors", "uuid", "uuid_previous", "cloned", "bulk", "ttl", "tags"]
 
-    '''
-    A Wishbone log object
+
+def extractBulkItemValues(event, selection):
+    '''Yields a field from all events in the bulk event.
+
+    Args:
+
+        event (wishbone.event.Event): The wishbone event in bulk mode.
+        selection (str): The field to extract form each event in the bulk.
+
+
+    Yields:
+
+        str/int/float/dict/list: The value of the event
     '''
 
-    def __init__(self, time, level, pid, module, message):
-
-        self.time = time
-        self.level = level
-        self.pid = pid
-        self.module = module
-        self.message = message
-
-    def __str__(self):
-
-        return "Log(%s)" % (self.__dict__)
-
-    def __repr__(self):
-
-        return "Log(%s)" % (self.__dict__)
+    if event.isBulk():
+        for e in event.data["data"]:
+            yield Event().slurp(e).get(selection)
 
 
-class Metric(object):
+def extractBulkItems(event):
+    '''Yields all the events from a bulk event.
 
-    '''
-    A Wishbone metric object
+    Args:
+
+        event (wishbone.event.Event): The wishbone event in bulk mode.
+
+    Yields:
+
+        `wishbone.event.Event`: The value of the event
     '''
 
-    def __init__(self, time, type, source, name, value, unit, tags):
-
-        self.time = time
-        self.type = type
-        self.source = source
-        self.name = name
-        self.value = value
-        self.unit = unit
-        self.tags = tags
-
-    def __str__(self):
-
-        return "Metric(%s)" % (self.__dict__)
-
-    def __repr__(self):
-
-        return "Metric(%s)" % (self.__dict__)
-
-    def dump(self):
-
-        return self.__dict__
+    if event.isBulk():
+        for e in event.data["data"]:
+            yield Event().slurp(e)
 
 
 class Event(object):
 
-    '''
-    **The Wishbone event object representation.**
+    '''The Wishbone event object.
 
     A class object containing the event data being passed from one Wishbone
     module to the other.
+
+    The keyformat used is the one handled by the ``Scalpl`` module
+    (https://pypi.python.org/pypi/scalpl/).
+
+    Args:
+
+        data (dict/list/string/int/float): The data to assign to the ``data`` field.
+        ttl (int): The TTL value for the event.
+        bulk (bool): Initialize the event as a bulk event
+        bulk_size (int): The number of events the bulk can hold.
+
+    Attributes:
+
+        data (dict): A dict containing the event data structure.
+        bulk_size (int): The max allowed bulk size.
     '''
 
-    def __init__(self, data=None):
+    def __init__(self, data=None, ttl=254, bulk=False, bulk_size=100):
 
-        self.data = {
-            "@timestamp": time.time(),
-            "@version": 1,
-            "@data": data,
-            "@tmp": {
+        self.data = Cut({
+            "cloned": False,
+            "bulk": bulk,
+            "data": None,
+            "errors": {
             },
-            "@errors": {
-            }
-        }
+            "tags": [],
+            "timestamp": time.time(),
+            "tmp": {
+            },
+            "ttl": ttl,
+
+            "uuid_previous": [
+            ],
+        })
+
+        if bulk:
+            self.data["data"] = []
+        else:
+            self.set(data)
+        self.data["uuid"] = str(uuid4())
+        self.bulk_size = bulk_size
+
+    def appendBulk(self, event):
+        '''Appends an event to this bulk event.
+
+        Args:
+
+            event(wishbone.event.Event): The event to add to the bulk instance
+
+        Raises:
+
+            InvalidData: Either the event is not of type Bulk or ``event`` is
+                         not an wishbone.event.Event instance.
+        '''
+
+        if self.data["bulk"]:
+            if isinstance(event, Event):
+                if len(self.data["data"]) == self.bulk_size:
+                    raise BulkFull("The bulk event already contains '%s' events." % (self.bulk_size))
+
+                self.data["data"].append(event.dump())
+            else:
+                raise InvalidData("'event' should be of type wishbone.event.Event.")
+        else:
+            raise InvalidData("This instance is not initialized as a bulk event.")
 
     def clone(self):
-        '''
-        Returns a cloned version of the event using deepcopy.
-        '''
+        '''Returns a cloned version of the event.
 
-        c = self.deepish_copy(self.data)
-        e = Event()
-        e.data = c
+        Returns:
+
+            class: A ````wishbone.event.Event```` instance
+
+
+        '''
+        e = deepcopy(self)
+
+        if "uuid_previous" in e.data:
+            e.data["uuid_previous"].append(
+                e.data["uuid"]
+            )
+        else:
+            e.data["uuid_previous"] = [
+                e.data["uuid"]
+            ]
+        e.data["uuid"] = str(uuid4())
+        e.data["timestamp"] = time.time()
+        e.data["cloned"] = True
+
         return e
 
     def copy(self, source, destination):
-        '''
-        Copies the source key to the destination key.
+        '''Copies the source key to the destination key.
 
-        :param str source: The name of the source key.
-        :param str destination: The name of the destination key.
+        Args:
+
+            source (str): The name of the source key.
+            destination (str): The name of the destination key.
         '''
 
-        self.set(self.deepish_copy(self.get(source)), destination)
+        self.set(
+            deepcopy(
+                self.get(
+                    source
+                )
+            ),
+            destination
+        )
+
+    def decrementTTL(self):
+        '''Decrements the TTL value.
+
+        Raises:
+
+            TTLExpired: When TTL has reached 0.
+        '''
+
+        self.data["ttl"] -= 1
+
+        if self.data["ttl"] <= 0:
+            raise TTLExpired("Event TTL expired in transit.")
 
     def delete(self, key=None):
-        '''
-        Deletes a key.
+        '''Deletes a key.
 
-        :param str key: The name of the key to delete
+        Args:
+
+            key (str): The key to delete
+
+        Raises:
+
+            Exception: Deleting the root of a reserved keyword such as ``data`` or ``tags``.
+            KeyError: When a non-existing key is referred to.
         '''
 
         s = key.split('.')
         if s[0] in EVENT_RESERVED and len(s) == 1:
             raise Exception("Cannot delete root of reserved keyword '%s'." % (key))
 
-        if key is None:
-            self.data = None
-        else:
-            if '.' in key:
-                s = key.split('.')
-                key = '.'.join(s[:-1])
-                del(self.get(key)[s[-1]])
-            else:
-                del(self.data[key])
+        del(self.data[key])
 
-    def format(self, template, key="@data"):
-        '''
-        Returns a formatted string using the provided template and key
+    def dump(self):
+        '''Dumps the content of the event.
 
-        :param str template: The template to apply
-        :param str key: The name of key providing the values for the template
-        :return: The completed template
-        :rtype: str
+        Returns:
+
+            dict: The content of the event.
         '''
 
-        try:
-            return template.format(**self.get(key))
-        except Exception:
-            return template
+        d = deepcopy(self)
+        d.data["timestamp"] = float(d.data["timestamp"])
+        return d.data.data
 
-    def get(self, key="@data"):
+    def get(self, key="data"):
+        '''Returns the value of ``key``.
+
+        ``key`` must be in ``Scalpl`` format.
+
+        Args:
+
+            key (str): The name of the key to read.
+
+        Returns:
+
+            str/int/float/dict/list: The value of the key
+
+        Raises:
+
+            KeyError: The provided key does not exist.
         '''
-        Returns the value of <key>.
-
-        :param str key: The name of the key to read.
-        :return: The value of <key>
-        '''
-
-        def travel(path, d):
-
-            if len(path) == 1:
-                if isinstance(d, dict):
-                    return d[path[0]]
-                else:
-                    raise Exception()
-            else:
-                return travel(path[1:], d[path[0]])
-        if key is None or key is "" or key is ".":
+        if key in [None, "", "."]:
             return self.data
         else:
             try:
-                path = key.split('.')
-                return travel(path, self.data)
-            except:
+                return self.data[key]
+            except Exception as err:
                 raise KeyError(key)
 
-    def has(self, key="@data"):
-        '''
-        Returns a boot indicating the event has <key>
+    def has(self, key="data"):
+        '''Returns a bool indicating the event has ``key``
 
-        :param str key: The name of the key to check
-        :return: Bool
+        ``key`` must be in ``Scalpl`` format.
+
+        Args:
+
+            key (str): The name of the key to check
+
+        Returns:
+
+            bool: True if the key is there otherwise false
+
+        Raises:
+
+            KeyError: The provided key does not exist
         '''
 
         try:
-            self.get(key)
+            self.data[key]
         except KeyError:
             return False
         else:
             return True
 
-    def set(self, value, key="@data"):
-        '''
-        Sets the value of <key>.
+    def isBulk(self):
+        '''Tells whether event is ``bulk`` or not.
 
-        :param value: The value to set.
-        :param str key: The name of the key to assign <value> to.
-        '''
 
-        if key.startswith('@') and key.split('.')[0] not in EVENT_RESERVED:
-            raise Exception("Keys starting with @ are reserved.")
-        result = value
-        for name in reversed(key.split('.')):
-            result = {name: result}
+        Returns:
 
-        self.dict_merge(self.data, result)
-        # self.data.update(result)
+            bool: True if the event is bulk
 
-    def dump(self, complete=False, convert_timestamp=True):
-        '''
-        Dumps the content of the event.
-
-        :param bool complete: Determines whether to include @tmp and @errors.
-        :param bool convert_timestamp: When True converts <Arrow> object to iso8601 string.
-        :return: The content of the event.
-        :rtype: dict
         '''
 
-        d = {}
-        for key, value in list(self.data.items()):
-            if key == "@tmp" and not complete:
-                continue
-            if key == "@errors" and not complete:
-                continue
-            elif isinstance(value, arrow.arrow.Arrow) and convert_timestamp:
-                d[key] = str(value)
+        return self.data["bulk"]
+
+    def merge(self, value, key="data"):
+        '''
+        Merges value into ``key``.
+        Value types should be mergeable otherwise an error is returned.
+
+        Args:
+            value (dict,list): The value to merge
+            key (str): The key to merge into
+
+        Raises:
+            InvalidData: Types are not mergeable
+        '''
+
+        try:
+            if isinstance(value, list):
+                self.data[key] += value
+            elif isinstance(value, dict):
+                self.data[key].update(value)
             else:
-                d[key] = value
+                raise InvalidData("Source and destination are incompatible to merge")
+        except Exception:
+            raise InvalidData("Source and destination are incompatible to merge")
 
-        return d
+    def render(self, template):
+        '''Returns a formatted string using the provided template and key
+
+        Args:
+
+            template (str): A string representing the Jinja2 template.
+
+        Returns:
+
+            str: The rendered string
+
+        Raises:
+
+            InvalidData: An invalid jinja2 template has been provided
+        '''
+
+        try:
+            return Template(template).render(self.dump())
+        except Exception as err:
+            raise InvalidData("Failed to render template. Reason: %s" % (err))
+
+    def renderKwargs(self, template_kwargs):
+        '''
+        Renders all the templates found in ``template_kwargs`` and sets
+        self.kwarg, a version of the current module's kwargs relate to this
+        events' content
+
+        Args:
+
+            template_kwargs (dict): A dict of the modules kwargs optoinally
+                                    containing Template instances.
+        '''
+
+        def recurse(data):
+
+            if isinstance(data, Template):
+                try:
+                    return data.render(**self.dump())
+                except Exception as err:
+                    return "#error: %s#" % (err)
+            elif isinstance(data, dict):
+                result = {}
+                for key, value in data.items():
+                    result[key] = recurse(value)
+                return EasyDict(result)
+            elif isinstance(data, list):
+                result = []
+                for value in data:
+                    result.append(recurse(value))
+                return result
+            else:
+                return data
+
+        self.kwargs = EasyDict(
+            recurse(
+                template_kwargs
+            )
+        )
+
+    def set(self, value, key="data"):
+        '''Sets the value of ``key``.
+
+        ``key`` must be in ``Scalpl`` format.
+
+        Args:
+
+            value (str, int, float, dict, list): The value to assign.
+            key (str): The key to store the value
+        '''
+
+        self.data[key] = value
+
+    def slurp(self, data):
+        '''Expects ``data`` to be a dict representation of an ``Event`` and
+        alligns this event to it.
+
+        The timestamp field will be reset to the time this method has been
+        called.
+
+
+        Args:
+
+            data (dict): The dict object containing the complete event.
+
+
+        Returns:
+
+            wishbone.event.Event: A Wishbone event instance.
+
+
+        Raises:
+
+            InvalidData:  ``data`` does not contain valid fields to build
+                                  an event
+        '''
+        try:
+            assert isinstance(data, (dict, Cut)), "event.slurp() expects a dict."
+            for item in [
+                ("timestamp", float),
+                ("data", None),
+                ("tmp", dict),
+                ("errors", dict),
+                ("uuid", str),
+                ("uuid_previous", list),
+                ("cloned", bool),
+                ("bulk", bool),
+                ("ttl", int),
+                ("tags", list)
+            ]:
+                assert item[0] in data, "%s is missing" % (item[0])
+                if item[1] is not None:
+                    assert isinstance(data[item[0]], item[1]), "%s type '%s' is not valid." % (item[0], item[1])
+        except AssertionError as err:
+            raise InvalidData("The incoming data could not be used to construct an event.  Reason: '%s'." % err)
+        else:
+            self.data = Cut(data)
+            self.data["timestamp"] = time.time()
+
+        return(self)
 
     raw = dump
-
-    def dict_merge(self, dct, merge_dct):
-
-        """ Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
-        updating only top-level keys, dict_merge recurses down into dicts nested
-        to an arbitrary depth, updating keys. The ``merge_dct`` is merged into
-        ``dct``.
-
-        Stolen from https://gist.github.com/angstwad/bf22d1822c38a92ec0a9
-
-        :param dct: dict onto which the merge is executed
-        :param merge_dct: dct merged into dct
-        :return: None
-        """
-        for k, v in list(merge_dct.items()):
-            if k in dct and isinstance(dct[k], dict) and isinstance(merge_dct[k], dict):
-                self.dict_merge(dct[k], merge_dct[k])
-            else:
-                dct[k] = merge_dct[k]
-
-    def deepish_copy(self, org):
-        '''
-        much, much faster than deepcopy, for a dict of the simple python types.
-
-        Blatantly ripped off from https://writeonly.wordpress.com/2009/05/07
-        /deepcopy-is-a-pig-for-simple-data/
-        '''
-
-        if isinstance(org, dict):
-            out = dict().fromkeys(org)
-            for k, v in list(org.items()):
-                try:
-                    out[k] = v.copy()   # dicts, sets
-                except AttributeError:
-                    try:
-                        out[k] = v[:]   # lists, tuples, strings, unicode
-                    except TypeError:
-                        out[k] = v      # ints
-
-            return out
-        else:
-            return org

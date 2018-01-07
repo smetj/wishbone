@@ -3,7 +3,7 @@
 #
 #  test_module_acknowledge.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -26,8 +26,6 @@ from wishbone.event import Event
 from wishbone.module.acknowledge import Acknowledge
 from wishbone.actor import ActorConfig
 from wishbone.utils.test import getter
-from uplook import UpLook
-from wishbone.lookup import EventLookup
 
 
 def test_module_acknowledge_default():
@@ -35,7 +33,7 @@ def test_module_acknowledge_default():
     # Standard situation.  Event passes through as it's
     # the first time is is acknowledged.
 
-    actor_config = ActorConfig('acknowledge', 100, 1, {}, "")
+    actor_config = ActorConfig('acknowledge', 100, 1, {}, "", disable_exception_handling=True)
     acknowledge = Acknowledge(actor_config)
     acknowledge.pool.queue.inbox.disableFallThrough()
     acknowledge.pool.queue.outbox.disableFallThrough()
@@ -55,8 +53,8 @@ def test_module_acknowledge_dropped():
     # An  event tries to pass through with an unacknowledged ack_id and
     # therefor should be dropped.
 
-    actor_config = ActorConfig('acknowledge', 100, 1, {}, "")
-    acknowledge = Acknowledge(actor_config)
+    actor_config = ActorConfig('acknowledge', 100, 1, {}, "", disable_exception_handling=True)
+    acknowledge = Acknowledge(actor_config, ack_id="{{data}}")
     acknowledge.pool.queue.inbox.disableFallThrough()
     acknowledge.pool.queue.outbox.disableFallThrough()
     acknowledge.pool.queue.acknowledge.disableFallThrough()
@@ -70,13 +68,14 @@ def test_module_acknowledge_dropped():
     assert getter(acknowledge.pool.queue.dropped).get() == "one"
     acknowledge.stop()
 
+
 def test_module_acknowledge_acknowledge():
 
     # An unacknowledged ack_id gets acknowledged and therefor lets then next
     # event with the same ack_id through.
 
-    actor_config = ActorConfig('acknowledge', 100, 1, {}, "")
-    acknowledge = Acknowledge(actor_config)
+    actor_config = ActorConfig('acknowledge', 100, 1, {}, "", disable_exception_handling=True)
+    acknowledge = Acknowledge(actor_config, ack_id="{{data}}")
     acknowledge.pool.queue.inbox.disableFallThrough()
     acknowledge.pool.queue.outbox.disableFallThrough()
     acknowledge.pool.queue.acknowledge.disableFallThrough()
@@ -92,4 +91,3 @@ def test_module_acknowledge_acknowledge():
     acknowledge.pool.queue.inbox.put(event_one)
     assert getter(acknowledge.pool.queue.outbox).get() == "one"
     acknowledge.stop()
-

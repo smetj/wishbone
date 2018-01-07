@@ -3,7 +3,7 @@
 #
 #  fileout.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -23,13 +23,13 @@
 #
 
 
-from wishbone import Actor
-from wishbone.event import Bulk
+from wishbone.actor import Actor
+from wishbone.module import OutputModule
 from gevent.os import make_nonblocking
 import arrow
 
 
-class FileOut(Actor):
+class FileOut(OutputModule):
 
     '''**Writes events to a file**
 
@@ -38,9 +38,9 @@ class FileOut(Actor):
     of the file.
 
 
-    Parameters:
+    Parameters::
 
-        - selection(str)("@data")
+        - selection(str)("data")
            |  The part of the event to submit externally.
            |  Use an empty string to refer to the complete event.
 
@@ -50,15 +50,14 @@ class FileOut(Actor):
         - timestamp(bool)(False)
            |  If true prepends each line with a ISO8601 timestamp.
 
-
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming messages
 
     '''
 
-    def __init__(self, actor_config, selection='@data', location="./wishbone.out", timestamp=False):
+    def __init__(self, actor_config, selection='data', location="./wishbone.out", timestamp=False):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -76,7 +75,7 @@ class FileOut(Actor):
 
     def consume(self, event):
 
-        if isinstance(event, Bulk):
+        if event.isBulk():
             data = event.dumpFieldAsString(self.kwargs.selection)
         else:
             data = str(event.get(self.kwargs.selection))

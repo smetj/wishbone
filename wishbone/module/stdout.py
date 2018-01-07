@@ -3,7 +3,7 @@
 #
 #  stdout.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -21,12 +21,13 @@
 #  MA 02110-1301, USA.
 #
 #
+
 from gevent import monkey; monkey.patch_sys(stdin=False, stdout=True, stderr=False)
-from wishbone import Actor
+from wishbone.module import OutputModule
+from wishbone.event import extractBulkItemValues
 from os import getpid
 from colorama import init, Fore, Back, Style
 import sys
-from wishbone.event import Bulk
 
 
 class Format():
@@ -46,12 +47,6 @@ class Format():
     def do(self, data):
         return self.pid(self.counter(data))
 
-    # def __returnComplete(self, event):
-    #     return event.raw(complete=True)
-
-    # def __returnIncomplete(self, event):
-    #     return event.get('@data')
-
     def __returnCounter(self, data):
         self.countervalue += 1
         return "%s - %s" % (self.countervalue, data)
@@ -66,9 +61,9 @@ class Format():
         return "PID-%s: %s" % (self.pid_value, data)
 
 
-class STDOUT(Actor):
+class STDOUT(OutputModule):
 
-    '''**Prints incoming events to STDOUT.**
+    '''**Prints event data to STDOUT.**
 
     Prints incoming events to STDOUT. When <complete> is True,
     the complete event including headers is printed to STDOUT.
@@ -76,11 +71,15 @@ class STDOUT(Actor):
     You can optionally define the colors used.
 
 
-    Parameters:
+    Parameters::
 
-        - selection(str)("@data")
-           |  The part of the event to submit externally.
-           |  Use an empty string to refer to the complete event.
+        - selection(str)(None)
+           |  The event key to submit.
+           |  If ``None`` the complete event is selected.
+
+        - payload(str)(None)
+           |  The string to submit.
+           |  If defined takes precedence over `selection`.
 
         - counter(bool)(False)
            |  Puts an incremental number for each event in front
@@ -91,6 +90,11 @@ class STDOUT(Actor):
 
         - pid(bool)(False)
            |  Includes the pid of the process producing the output.
+
+        - colorize(bool)(False)
+           |  When True all STDOUT output is wrapped in between ANSI color
+           |  escape sequences defined by `foreground_color`, `background_color`,
+           |  `color_style`.
 
         - foreground_color(str)("WHITE")
            |  The foreground color.
@@ -104,34 +108,56 @@ class STDOUT(Actor):
            |  The coloring style to use
            |  Valid values: DIM, NORMAL, BRIGHT
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events.
     '''
 
-    def __init__(self, actor_config, selection="@data", counter=False, prefix="", pid=False, foreground_color="WHITE", background_color="RESET", color_style="NORMAL"):
-        Actor.__init__(self, actor_config)
+    def __init__(self, actor_config, selection=None, payload=None, counter=False, prefix="", pid=False, colorize=False, foreground_color="WHITE", background_color="RESET", color_style="NORMAL"):
+        OutputModule.__init__(self, actor_config)
 
         self.__validateInput(foreground_color, background_color, color_style)
-        self.format = Format(self.kwargs.selection, self.kwargs.counter, self.kwargs.pid)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
+        self.setEncoder("wishbone.protocol.encode.dummy")
 
-        init(autoreset=True)
+    def preHook(self):
+
+        self.format = Format(
+            self.kwargs.selection,
+            self.kwargs.counter,
+            self.kwargs.pid
+        )
+
+        if self.kwargs.colorize:
+            init(autoreset=True)
+            self.getString = self.__stringColor
+        else:
+            self.getString = self.__stringNoColor
 
     def consume(self, event):
-        if isinstance(event, Bulk):
-            data = event.dumpFieldAsList(self.kwargs.selection)
-            data = "\n".join(data)
-        else:
-            data = event.get(self.kwargs.selection)
 
-        output = "%s%s%s%s%s\n" % (
-            getattr(Fore, self.kwargs.foreground_color),
-            getattr(Back, self.kwargs.background_color),
-            getattr(Style, self.kwargs.color_style),
-            self.kwargs.prefix,
+        if event.kwargs.payload is None:
+            if event.isBulk():
+                data = "\n".join([str(item) for item in extractBulkItemValues(event, self.kwargs.selection)])
+            else:
+                data = event.get(
+                    event.kwargs.selection
+                )
+        else:
+            data = event.kwargs.payload
+
+        if self.config.io_event:
+            data = self.encode(event.dump())
+        else:
+            data = self.encode(data)
+
+        output = self.getString(
+            getattr(Fore, event.kwargs.foreground_color),
+            getattr(Back, event.kwargs.background_color),
+            getattr(Style, event.kwargs.color_style),
+            event.kwargs.prefix,
             self.format.do(data)
         )
         sys.stdout.write(output)
@@ -145,3 +171,19 @@ class STDOUT(Actor):
             raise Exception("Background value is not correct.")
         if s not in ["DIM", "NORMAL", "BRIGHT"]:
             raise Exception("Style value is not correct.")
+
+    def __stringColor(self, f, b, s, p, d):
+        return "%s%s%s%s%s\n" % (
+            f,
+            b,
+            s,
+            p,
+            self.format.do(d)
+        )
+
+    def __stringNoColor(self, f, b, s, p, d):
+
+        return "%s%s\n" % (
+            p,
+            self.format.do(d)
+        )

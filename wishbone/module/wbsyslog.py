@@ -3,7 +3,7 @@
 #
 #  wbsyslog.py
 #
-#  Copyright 2016 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,17 +22,16 @@
 #
 #
 
-from wishbone import Actor
-from wishbone.event import Log
-from wishbone.event import Bulk
+from wishbone.module import OutputModule
+from wishbone.event import extractBulkItemValues
 import syslog
 import sys
 import os
 
 
-class Syslog(Actor):
+class Syslog(OutputModule):
 
-    '''**Writes log events to syslog.**
+    '''**Submits event data to syslog.**
 
     Logevents have following format:
 
@@ -40,27 +39,32 @@ class Syslog(Actor):
 
     The first value corresponds to the syslog severity level.
 
-    Parameters:
-
-        - selection(str)("@data")
-           |  The part of the event to submit externally.
-           |  Use an empty string to refer to the complete event.
+    Parameters::
 
         - level(int)(5)*
            |  The loglevel.
+           |  (Can be a dynamic value)
 
         - ident(str)(<script_name>)*
            |  The syslog id string.
            |  If not provided the script name is used.
+           |  (Can be a dynamic value)
 
-    Queues:
+        - selection(str)("data")
+           |  The event key to submit.
+
+        - payload(str)(None)
+           |  The string to submit.
+           |  If defined takes precedence over `selection`.
+
+    Queues::
 
         - inbox
            |  incoming events
     '''
 
-    def __init__(self, actor_config, selection="@data", level=5, ident=os.path.basename(sys.argv[0])):
-        Actor.__init__(self, actor_config)
+    def __init__(self, actor_config, level=5, ident=os.path.basename(sys.argv[0]), selection="data", payload=None):
+        OutputModule.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
@@ -71,20 +75,22 @@ class Syslog(Actor):
 
     def consume(self, event):
 
-        if isinstance(event, Bulk):
-            for e in event.dump():
-                data = e.get(self.kwargs.selection)
-                self.__writeLog(data)
+        if event.kwargs.payload is None:
+            if event.isBulk():
+                data = "\n".join([str(item) for item in extractBulkItemValues(event, event.kwargs.selection)])
+            else:
+                data = event.get(
+                    event.kwargs.selection
+                )
         else:
-            data = event.get(self.kwargs.selection)
-            self.__writeLog(data)
+            data = event.kwargs.payload
 
-    def __writeLog(self, data):
+        data = self.encode(data)
 
-        if isinstance(data, Log):
-            syslog.syslog(data.level, "%s: %s" % (data.module, data.message))
-        else:
-            syslog.syslog(self.kwargs.level, "%s: %s" % (self.kwargs.ident, str(data)))
+        syslog.syslog(
+            event.kwargs.level,
+            data
+        )
 
     def postHook(self):
         syslog.closelog()
