@@ -124,7 +124,6 @@ class VisJSData():
                 "color": "black"
             }
 
-
         if instance_name not in list(self.nodes.keys()):
             self.nodes[instance_name] = {"id": self.id,
                                          "label": instance_name,

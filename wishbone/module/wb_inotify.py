@@ -22,7 +22,6 @@
 #
 #
 
-from wishbone.actor import Actor
 from wishbone.module import InputModule
 from wishbone.protocol.decode.dummy import Dummy
 
