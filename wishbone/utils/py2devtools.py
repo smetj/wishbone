@@ -4,7 +4,7 @@
 #
 #  py2devtools.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #
 # The MIT License (MIT)
