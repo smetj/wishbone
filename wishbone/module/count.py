@@ -3,7 +3,7 @@
 #
 #  count.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ class Count(FlowModule):
 
     Conditions have following format:
 
-    Example 1:
+    Example 1::
 
         {
         "data": {
@@ -56,7 +56,7 @@ class Count(FlowModule):
     dropped.
 
 
-    Example 2:
+    Example 2::
 
         {
         "tmp.address": {
@@ -76,7 +76,7 @@ class Count(FlowModule):
 
     Events which do not have the requested key can pass through.
 
-    Parameters:
+    Parameters::
 
         - conditions(dict)({})
            |  The conditions which should be met.
@@ -86,7 +86,7 @@ class Count(FlowModule):
            |  A value of 0 disables the expiration.
 
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events

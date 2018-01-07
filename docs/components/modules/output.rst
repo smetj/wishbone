@@ -1,8 +1,7 @@
-.. _output:
 ======
 Output
 ======
-
+.. _output:
 
 .. note::
 

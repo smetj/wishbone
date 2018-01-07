@@ -3,7 +3,7 @@
 #
 #  fresh.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ class Fresh(FlowModule):
     stream recovers, a new event with <recovery_payload> is generated and
     submitted to the <timeout> queue.
 
-    Parameters:
+    Parameters::
 
         - timeout_payload(int/float/str/obj/list/...)("timeout")
            |  The data a timeout event contains.
@@ -56,7 +56,7 @@ class Fresh(FlowModule):
            |  The interval time to resend the <payload> event in case
            |  <timeout> has expired and
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events.

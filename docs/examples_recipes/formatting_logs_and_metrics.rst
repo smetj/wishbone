@@ -118,7 +118,7 @@ You could do that using following bootstrap file:
 
 Starting the Wishbone instance in foreground would give following result:
 
-.. code-block:: txt
+.. code-block:: sh
 
     $ wishbone start --config hello_world_logs.yaml
     Instance started in foreground with pid 11126

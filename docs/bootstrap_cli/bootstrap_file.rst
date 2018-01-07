@@ -7,7 +7,7 @@ A boostrap file is written in YAML syntax and it should adhere `this schema`_.
 It consists out of 5 sections:
 
 
-1. **`protocols`** section:
+1. **protocols** section:
 
   .. _bootstrap_protocols:
 
@@ -32,7 +32,7 @@ It consists out of 5 sections:
   * ``arguments`` is optional.
 
 
-2. **`module_functions`** section:
+2. **module_functions** section:
 
   .. _bootstrap_module_functions:
 
@@ -55,7 +55,7 @@ It consists out of 5 sections:
   * ``arguments is optional``
 
 
-3. **`template_functions`** section:
+3. **template_functions** section:
 
   .. _bootstrap_template_functions:
 
@@ -82,7 +82,7 @@ It consists out of 5 sections:
   * ``arguments is optional``
 
 
-4. **`modules`** section:
+4. **modules** section:
 
    .. _bootstrap_modules:
 
@@ -113,7 +113,7 @@ It consists out of 5 sections:
 
 
 
-5. **`routingtable`** section:
+5. **routingtable** section:
 
    .. _bootstrap_routingtable:
 

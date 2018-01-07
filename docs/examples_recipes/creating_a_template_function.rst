@@ -1,8 +1,7 @@
-.. _creating_a_template_function:
 Creating a template function
-===========================
+============================
 .. _writing_a_template_function:
-
+.. _creating_a_template_function:
 
 Creating your own template function is easy.
 
@@ -13,6 +12,7 @@ system's uptime in seconds.
 * Your class must have a ``get()`` method which actually returns the desired data.
 * Write a terse docstring as this will be used when issuing ``wishbone show --docs wishbone_external.function.template.uptime``.
 * Install your template function along a similar entrypoint in ``setup.py``:
+
 .. code-block:: python
 
   entry_points={

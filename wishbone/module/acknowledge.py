@@ -3,7 +3,7 @@
 #
 #  acknowledge.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -71,35 +71,31 @@ class Acknowledge(FlowModule):
     sending events to the ``acknowledge`` queue.
 
 
-    Module parameters:
+    Parameters::
 
-        :ack_id (data):
-             A unique value identifying the event.
+        - ack_id (data):
+            A unique value identifying the event.
 
-    Queues:
+    Queues::
 
-        :inbox:
-            Incoming events
+        - inbox
+            |  Incoming events
 
-        :outbox:
-            Outgoing events
+        - outbox
+            |  Outgoing events
 
-        :acknowledge:
-            Acknowledge events
+        - acknowledge
+            |  Acknowledge events
 
-        :dropped:
-            Where events go to when unacknowledged
-
-
-    Event variables:
-
-        :tmp.<name>.ack_id:
-            The location of the acknowledgement ID when coming in through the
-            inbox queue.
+        - dropped
+            |  Where events go to when unacknowledged
 
 
+    Event variables::
 
-
+        - tmp.<name>.ack_id
+            | The location of the acknowledgement ID when coming in through the
+            | inbox queue.
     '''
 
     def __init__(self, actor_config, ack_id=None):
@@ -119,13 +115,12 @@ class Acknowledge(FlowModule):
         if self.kwargs.ack_id is None:
             ack_id = self.generateID()
         else:
-            ack_id = event.render(self.kwargs.ack_id)
+            ack_id = event.kwargs.ack_id
 
         if event.has("tmp.%s.ack_id" % (self.name)):
             self.logging.warning("Event arriving to <inbox> with tmp.%s.ack_id already set.  Perhaps that should have been the <acknowledge> queue instead." % (self.name))
         else:
             event.set({"ack_id": ack_id}, "tmp.%s" % (self.name))
-
             if self.ack_table.unack(ack_id):
                 self.submit(event, "outbox")
             else:

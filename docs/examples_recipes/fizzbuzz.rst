@@ -28,60 +28,62 @@ Bootstrap file
 
 .. code-block:: yaml
 
-    ---
-    protocols:
-      json_decode:
-        protocol: wishbone.protocol.decode.json
-      json_encode:
-        protocol: wishbone.protocol.encode.json
+  ---
+  protocols:
+    json_decode:
+      protocol: wishbone.protocol.decode.json
+    json_encode:
+      protocol: wishbone.protocol.encode.json
 
-    modules:
-      input:
-        module: wishbone.module.input.httpserver
-        protocol: json_decode
-        arguments:
-          response:
-            - colors: >
-                Hi '{{tmp.input.user_agent}}' on '{{tmp.input.remote_addr}}'. Your id is '{{uuid}}'. Thank you for choosing Wishbone ;)'
+  modules:
+    input:
+      module: wishbone_contrib.module.input.httpserver
+      protocol: json_decode
+      arguments:
+        resource:
+          colors:
+            users: []
+            tokens: []
+            response: Hi '{{tmp.input.env.http_user_agent}}' on '{{tmp.input.env.remote_addr}}'. Your id is '{{uuid}}'. Thank you for choosing Wishbone ;)'
 
-      categorize:
-        module: wishbone.module.flow.queueselect
-        arguments:
-          templates:
-            - name: primary
-              queue: >
-                {{ 'primary' if data.color in ("red", "green", "blue") else 'not_primary' }}
-              payload:
-                greeting: Hello
-                message: '{{data.color}} is an awesome choice'
+    categorize:
+      module: wishbone.module.flow.queueselect
+      arguments:
+        templates:
+          - name: primary
+            queue: >
+              {{ 'primary' if data.color in ("red", "green", "blue") else 'not_primary' }}
+            payload:
+              greeting: Hello
+              message: '{{data.color}} is an awesome choice'
 
-      funnel:
-        module: wishbone.module.flow.funnel
+    funnel:
+      module: wishbone.module.flow.funnel
 
-      requestbin:
-        protocol: json_encode
-        module: wishbone.module.output.http
-        arguments:
-          method: PUT
-          url: 'https://requestb.in/{{data.requestbin_id}}'
-          selection: tmp.categorize.payload
+    requestbin:
+      protocol: json_encode
+      module: wishbone.module.output.http
+      arguments:
+        method: PUT
+        url: 'https://requestb.in/{{data.requestbin_id}}'
+        selection: tmp.categorize.payload
 
-      stdout:
-        module: wishbone.module.output.stdout
-        protocol: json_encode
-        arguments:
-          selection: .
+    stdout:
+      module: wishbone.module.output.stdout
+      protocol: json_encode
+      arguments:
+        selection: .
 
-    routingtable:
-      - input.colors           -> categorize.inbox
+  routingtable:
+    - input.colors           -> categorize.inbox
 
-      - categorize.primary     -> requestbin.inbox
-      - categorize.not_primary -> funnel.not_primary
+    - categorize.primary     -> requestbin.inbox
+    - categorize.not_primary -> funnel.not_primary
 
-      - requestbin.success     -> funnel.requestbin
+    - requestbin.success     -> funnel.requestbin
 
-      - funnel.outbox          -> stdout.inbox
-    ...
+    - funnel.outbox          -> stdout.inbox
+  ...
 
 
 Client

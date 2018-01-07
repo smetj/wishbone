@@ -4,7 +4,7 @@
 #
 #  template.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ class Template(ProcessModule):
     be read from a file or directly from the bootstrap file.
 
 
-    Parameters:
+    Parameters::
 
         - filename(str)(None)*
            |  The absolute template filename to load.
@@ -52,7 +52,7 @@ class Template(ProcessModule):
            |  assign the rendered string to.
 
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events

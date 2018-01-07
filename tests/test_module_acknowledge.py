@@ -54,7 +54,7 @@ def test_module_acknowledge_dropped():
     # therefor should be dropped.
 
     actor_config = ActorConfig('acknowledge', 100, 1, {}, "", disable_exception_handling=True)
-    acknowledge = Acknowledge(actor_config, ack_id="{data}")
+    acknowledge = Acknowledge(actor_config, ack_id="{{data}}")
     acknowledge.pool.queue.inbox.disableFallThrough()
     acknowledge.pool.queue.outbox.disableFallThrough()
     acknowledge.pool.queue.acknowledge.disableFallThrough()
@@ -75,7 +75,7 @@ def test_module_acknowledge_acknowledge():
     # event with the same ack_id through.
 
     actor_config = ActorConfig('acknowledge', 100, 1, {}, "", disable_exception_handling=True)
-    acknowledge = Acknowledge(actor_config, ack_id="{data}")
+    acknowledge = Acknowledge(actor_config, ack_id="{{data}}")
     acknowledge.pool.queue.inbox.disableFallThrough()
     acknowledge.pool.queue.outbox.disableFallThrough()
     acknowledge.pool.queue.acknowledge.disableFallThrough()

@@ -3,7 +3,7 @@
 #
 #  pack.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ class Pack(ProcessModule):
       - Any event arrives in queue <flush>.
 
 
-    Parameters:
+    Parameters::
 
         - bucket_size(int)(100)
            |  The maximum amount of events per bucket.
@@ -109,7 +109,7 @@ class Pack(ProcessModule):
         - aggregation_key(str)("default")
            |  Groups events with key <aggregation_key> into the same buckets.
 
-    Queues:
+    Queues::
 
         - inbox
            |  Incoming events

@@ -3,7 +3,7 @@
 #
 #  wb_inotify.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@
 #
 #
 
-from wishbone.actor import Actor
 from wishbone.module import InputModule
 from wishbone.protocol.decode.dummy import Dummy
 
@@ -79,14 +78,12 @@ class WBInotify(InputModule):
         - IN_UNMOUNT
 
 
-    Outgoing events have following format:
-
-    ::
+    Outgoing events have following format::
 
         {"path": "/tmp/test", "inotify_type": "IN_ACCESS"}
 
 
-    Parameters:
+    Parameters::
 
         - initial_listing(bool)(True)
 
@@ -105,7 +102,7 @@ class WBInotify(InputModule):
            |  inotify events going through.
 
 
-    Queues:
+    Queues::
 
         - outbox
            |  Outgoing notify events.

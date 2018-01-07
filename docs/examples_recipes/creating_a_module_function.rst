@@ -1,8 +1,7 @@
-.. _creating_a_module_function:
 ==========================
 Creating a module function
 ==========================
-
+.. _creating_a_module_function:
 
 Creating a module function is just a matter of creating a simple class.
 
@@ -15,6 +14,7 @@ Some key points of a module function:
 * Your class must have a ``do()`` method which accepts the event and returns it modified.
 * Write a terse docstring as this will be used when issuing ``wishbone show --docs wishbone_external.function.module.grandtotal``.
 * Install your template function along a similar entrypoint in ``setup.py``:
+
 .. code-block:: python
 
   entry_points={
