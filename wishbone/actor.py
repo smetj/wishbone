@@ -368,7 +368,8 @@ class Actor(object):
         while self.loop():
 
             event = self.pool.getQueue(queue).get()
-            event.set({}, "tmp.%s" % (self.name))
+            if not event.has("tmp.%s" % (self.name)):
+                event.set({}, "tmp.%s" % (self.name))
 
             # Render kwargs relative to the event's content and make these accessible under event.kwargs
             event.renderKwargs(self.kwargs_template)
