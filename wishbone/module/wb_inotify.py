@@ -41,11 +41,12 @@ from inotify import constants
 from gevent import sleep
 import os
 import fnmatch
+from inotify.calls import InotifyError
 
 
 class WBInotify(InputModule):
-
-    '''**Monitors one or more paths for inotify events.**
+    '''
+    **Monitors one or more paths for inotify events.**
 
     Monitors one or more paths for the defined inotify events.
 
@@ -126,7 +127,8 @@ class WBInotify(InputModule):
             self.sendToBackground(self.monitor, path, inotify_types, self.kwargs.glob_pattern)
 
     def monitor(self, path, inotify_types, glob_pattern):
-        '''Monitors ``path`` for ``inotify_types`` on files and dirs matching ``glob_pattern``
+        '''
+        Monitors ``path`` for ``inotify_types`` on files and dirs matching ``glob_pattern``
 
         :param str path: The path to monitor
         :param list inotify_types: A list of inotify types to monitor
@@ -160,7 +162,6 @@ class WBInotify(InputModule):
                 sleep(5)
 
     def __getAllFiles(self, path, glob_pattern):
-
         """
         Returns all files it can find in ``path``.  If ``path`` is a directory
         it returns all files found in the directory (not recursive)
@@ -180,9 +181,7 @@ class WBInotify(InputModule):
                 yield f
 
     def __setupInotifyMonitor(self, path, inotify_types, glob_pattern):
-
         '''
-
         Initializes an inotify monitor process on ``path`` and yields the
         defined ``inotify_types`` generated on the paths matching the
         ``glob_pattern``.
@@ -191,15 +190,13 @@ class WBInotify(InputModule):
         :param list inotify_types: A list of inotify types to monitor
         :param str glob_pattern: Paths need to match in order to be returned.
         :return: generator
-
         '''
 
-        file_exists = True
         i = Inotify()
         i.add_watch(path)
 
-        while file_exists and self.loop():
-            for event in i.event_gen(yield_nones=False):
+        while self.loop():
+            for event in i.event_gen():
                 if event is not None:
                     for inotify_type in event[1]:
                         if inotify_type in inotify_types or inotify_types == []:
@@ -207,7 +204,9 @@ class WBInotify(InputModule):
                             if fnmatch.fnmatch(abs_path, glob_pattern):
                                 yield abs_path.rstrip('/'), inotify_type
                         if inotify_type == "IN_DELETE_SELF":
-                            file_exists = False
-                            break
+                            try:
+                                i.remove_watch(path)
+                            except InotifyError:
+                                return
                 else:
                     sleep(1)
