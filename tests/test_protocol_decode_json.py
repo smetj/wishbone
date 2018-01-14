@@ -41,8 +41,12 @@ class ReadlinesMock():
 def test_protocol_decode_json_basic():
 
     m = JSON()
-    for item in m.handler(b'{"one": 1}'):
-        assert item == {"one": 1}
+    result = ""
+    for chunk in [b'{"one": 1}', None]:
+        for item in m.handler(chunk):
+            result = item
+
+    assert result == {"one": 1}
 
 
 def test_protocol_decode_json_unicode():
