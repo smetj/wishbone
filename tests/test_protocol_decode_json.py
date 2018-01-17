@@ -42,7 +42,7 @@ def test_protocol_decode_json_basic():
 
     m = JSON()
     result = ""
-    for chunk in [b'{"one": 1}', None]:
+    for chunk in [b'{"one": 1}', b""]:
         for item in m.handler(chunk):
             result = item
 
