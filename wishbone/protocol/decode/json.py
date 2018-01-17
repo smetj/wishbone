@@ -103,15 +103,18 @@ class JSON(Decode):
             return []
 
     def handleString(self, data):
-        try:
-            yield loads(data)
-        except Exception as err:
-            self.reset()
-            raise ProtocolError("ProtocolError: %s" % (err))
+        if len(data) == 0:
+            raise StopIteration
+        else:
+            try:
+                yield loads(data)
+            except Exception as err:
+                self.reset()
+                raise ProtocolError("ProtocolError: %s" % (err))
 
     def handleReadlinesMethod(self, data):
 
-        for item in data.readlines() + [None]:
+        for item in data.readlines() + [""]:
             for result in self.handler(item):
                 yield result
         self.reset()
