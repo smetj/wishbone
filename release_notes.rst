@@ -1,13 +1,6 @@
 Wishbone changelog
 ==================
 
-Version 3.0.1
-~~~~~~~~~~~~~
-
-Bugfixes:
-
-  wishbone.module.input.inotify: Fix file delete & replace
-
 Version 3.0.0
 ~~~~~~~~~~~~~
 Features:
