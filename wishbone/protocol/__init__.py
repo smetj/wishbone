@@ -30,17 +30,17 @@ class Decode(object):
     def handler(self, data):
 
         try:
-            if isinstance(data, bytes) or data is None:
+            if isinstance(data, bytes):
                 return self.handleBytes(data)
-            elif isinstance(data, str) or data is None:
+            elif isinstance(data, str):
                 return self.handleString(data)
-            elif isinstance(data, int) or data is None:
+            elif isinstance(data, int):
                 return self.handleInt(data)
-            elif isinstance(data, float) or data is None:
+            elif isinstance(data, float):
                 return self.handleFloat(data)
-            elif isinstance(data, dict) or data is None:
+            elif isinstance(data, dict):
                 return self.handleDict(data)
-            elif isinstance(data, list) or data is None:
+            elif isinstance(data, list):
                 return self.handleList(data)
             elif hasattr(data, "readlines") and callable(data.readlines):
                 return self.handleReadlinesMethod(data)
