@@ -16,7 +16,7 @@ If you need a `1-to-many` or a `many-to-1` queue connection then you can use
 the :py:class:`wishbone.module.fanout.Fanout` or
 :py:class:`wishbone.module.funnel.Funnel` respectively.
 
-Some of the characteristics of `output` modules are:
+Some of the characteristics of `flow` modules are:
 
 * They do not alter the content of events flowing through except optionally
   setting some contextual data.

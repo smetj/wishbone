@@ -22,11 +22,25 @@
 #
 
 from wishbone.protocol import Decode
-from io import BytesIO
+from io import BytesIO, StringIO
 
 
 class EndOfStream(Exception):
     pass
+
+
+class BytesBuffer(object):
+
+    leftover = ""
+    buffer = BytesIO()
+    size = 0
+
+
+class StringBuffer(object):
+
+    leftover = ""
+    buffer = StringIO()
+    size = 0
 
 
 class Plain(Decode):
@@ -52,43 +66,74 @@ class Plain(Decode):
         self.charset = charset
         self.delimiter = delimiter
         self.buffer_size = buffer_size
-        self.__leftover = ""
-        self.buffer = BytesIO()
-        self.__buffer_size = 0
+
+        self.bytes_buffer = BytesBuffer()
+        self.string_buffer = StringBuffer()
 
         if delimiter is None:
-            self.handleBytes = self.__plainNoDelimiter
+            self.handleBytes = self.__plainNoDelimiterBytes
+            self.handleString = self.__plainNoDelimiterString
         else:
-            self.handleBytes = self.__plainDelimiter
+            self.handleBytes = self.__plainDelimiterBytes
+            self.handleString = self.__plainDelimiterString
 
-    def __plainDelimiter(self, data):
+    def __plainDelimiterBytes(self, data):
 
-        if data is None or data == b'':
-            yield self.__leftover.rstrip()
-            self.__leftover = ""
+        if len(data) == 0:
+            yield self.bytes_buffer.leftover.rstrip()
+            self.bytes_buffer.leftover = ""
         else:
-            data = self.__leftover + data.decode(self.charset)
+            data = self.bytes_buffer.leftover + data.decode(self.charset)
             if len(data) > self.buffer_size:
                 raise Exception("Buffer exceeded")
             while self.delimiter in data:
                 item, data = data.split(self.delimiter, 1)
                 yield item
-            self.__leftover = data
+            self.bytes_buffer.leftover = data
 
-    def __plainNoDelimiter(self, data):
+    def __plainNoDelimiterBytes(self, data):
 
-        if data is None or data == b'':
-            self.buffer.seek(0)
-            yield self.buffer.getvalue().decode(self.charset).rstrip(self.delimiter)
+        if len(data) == 0:
+            self.bytes_buffer.buffer.seek(0)
+            yield self.bytes_buffer.buffer.getvalue().decode(self.charset).rstrip(self.delimiter)
         else:
-            self.__buffer_size += self.buffer.write(data)
-            if self.__buffer_size > self.buffer_size:
+            self.bytes_buffer.size += self.bytes_buffer.buffer.write(data)
+            if self.bytes_buffer.size > self.buffer_size:
+                raise Exception("Buffer exceeded.")
+            return []
+
+    def __plainDelimiterString(self, data):
+
+        if len(data) == 0:
+            if self.string_buffer.leftover.rstrip() == "":
+                raise StopIteration
+            else:
+                yield self.string_buffer.leftover.rstrip()
+                self.string_buffer.leftover = ""
+
+        else:
+            data = self.string_buffer.leftover + data
+            if len(data) > self.buffer_size:
+                raise Exception("Buffer exceeded")
+            while self.delimiter in data:
+                item, data = data.split(self.delimiter, 1)
+                yield item
+            self.string_buffer.leftover = data
+
+    def __plainNoDelimiterString(self, data):
+
+        if len(data) == 0:
+            self.string_buffer.buffer.seek(0)
+            yield self.string_buffer.buffer.getvalue().rstrip(self.delimiter)
+        else:
+            self.string_buffer.size += self.string_buffer.buffer.write(data)
+            if self.string_buffer.size > self.buffer_size:
                 raise Exception("Buffer exceeded.")
             return []
 
     def handleReadlinesMethod(self, data):
 
-        for item in data.readlines() + [None]:
+        for item in data.readlines() + [""]:
             for result in self.handler(item):
                 if result != "":
                     yield result

@@ -27,9 +27,38 @@ from wishbone.protocol.decode.plain import Plain
 import itertools
 
 
-def test_protocol_decode_plain_basic():
+def test_protocol_decode_plain_basic_delimiter_binary():
 
     a = itertools.cycle(["a", "b", "c"])
     p = Plain()
     for payload in p.handler(b"a\nb\nc\n"):
         assert payload == next(a)
+
+
+def test_protocol_decode_plain_basic_nodelimiter_binary():
+
+    p = Plain(delimiter=None)
+    result = ""
+    for chunk in [b"abc", b""]:
+        for payload in p.handler(chunk):
+            result = payload
+    assert result == "abc"
+
+
+def test_protocol_decode_plain_basic_delimiter_string():
+
+    a = itertools.cycle(["a", "b", "c"])
+    p = Plain()
+    for chunk in ["a\nb\nc\n", ""]:
+        for payload in p.handler(chunk):
+            assert payload == next(a)
+
+
+def test_protocol_decode_plain_basic_nodelimiter_string():
+
+    p = Plain(delimiter=None)
+    result = ""
+    for chunk in ["abc", ""]:
+        for payload in p.handler(chunk):
+            result = payload
+    assert result == "abc"
