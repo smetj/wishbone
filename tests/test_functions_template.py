@@ -107,7 +107,7 @@ def test_wishbone_function_template_regexFalse():
 def test_wishbone_function_template_version():
 
     f = ComponentManager().getComponentByName("wishbone.function.template.version")()
-    assert f.get() == '3.0.0'
+    assert f.get() == '3.0.1'
 
 
 def test_wishbone_function_template_environment():
