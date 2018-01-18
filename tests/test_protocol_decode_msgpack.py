@@ -24,6 +24,7 @@
 
 
 from wishbone.protocol.decode.msgpack import MSGPack
+from wishbone.error import ProtocolError
 
 
 class ReadlineMock():
@@ -43,6 +44,27 @@ def test_protocol_decode_msgpack_basic():
     m = MSGPack()
     for item in m.handler(b'\x93\x01\x02\x03'):
         assert item == [1, 2, 3]
+
+
+def test_protocol_decode_msgpack_basic_chunk():
+
+    m = MSGPack()
+    for chunk in [b'\x93\x01\x02\x03', None]:
+        for item in m.handler(chunk):
+            assert item == [1, 2, 3]
+
+
+def test_protocol_decode_msgpack_basic_chunk_size():
+
+    try:
+        m = MSGPack(buffer_size=2)
+        for chunk in [b'\x93\x01\x02\x03', None]:
+            for item in m.handler(chunk):
+                assert item == [1, 2, 3]
+    except ProtocolError:
+        assert True
+    else:
+        assert False
 
 
 def test_protocol_decode_msgpack_unicode():

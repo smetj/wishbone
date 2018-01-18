@@ -28,7 +28,7 @@ from wishbone.event import extractBulkItemValues
 from os import getpid
 from colorama import init, Fore, Back, Style
 import sys
-
+import re
 
 class Format():
 
@@ -122,6 +122,8 @@ class STDOUT(OutputModule):
         self.registerConsumer(self.consume, "inbox")
         self.setEncoder("wishbone.protocol.encode.dummy")
 
+        self.ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+
     def preHook(self):
 
         self.format = Format(
@@ -182,6 +184,8 @@ class STDOUT(OutputModule):
         )
 
     def __stringNoColor(self, f, b, s, p, d):
+
+        d = self.ansi_escape.sub('', str(d))
 
         return "%s%s\n" % (
             p,

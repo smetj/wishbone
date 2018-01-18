@@ -23,103 +23,75 @@
 #
 
 
-from wishbone.protocol import Decode
 from wishbone.error import ProtocolError
-from io import BytesIO
+from wishbone.protocol import Decode
 from json import loads
-
-
-class EndOfStream(Exception):
-    pass
+from io import StringIO
 
 
 class JSON(Decode):
 
-    '''**Decode JSON data into a Python data structure.**
-
-    Convert a JSON bytestring into a Python data structure using the defined
-    charset.
-
-    Parameters:
-
-        - charset(string)("utf-8")
-           |  The charset to use to decode the bytestring data.
-
-        - delimiter(string)("\\n")
-           |  The delimiter between multiple events
-
-        - buffer_size(int)(4096)
-           |  The max amount of bytes allowed to read for 1 event
-    '''
-
-    def __init__(self, charset="utf-8", delimiter=None, buffer_size=4096):
+    def __init__(self, charset='utf-8', delimiter=None, buffer_size=4096):
 
         self.charset = charset
-        self.delimiter = delimiter
+        if isinstance(delimiter, bytes):
+            self.delimiter = delimiter.decode(charset, 'strict')
+        else:
+            self.delimiter = delimiter
         self.buffer_size = buffer_size
-        self.__leftover = ""
-        self.buffer = BytesIO()
-        self.__buffer_size = 0
+        self.buffer = StringIO()
 
-        if delimiter is None:
-            self.handleBytes = self.__plainNoDelimiter
-        else:
-            self.handleBytes = self.__plainDelimiter
+    def handleBytes(self, data):
 
-    def __plainDelimiter(self, data):
+        for item in self.handler(data.decode(self.charset, "strict")):
+            yield self.handler(item)
 
-        if data is None or data == b'':
-            return []
-        else:
-            data = self.__leftover + data.decode(self.charset)
-            if len(data) > self.buffer_size:
-                self.reset()
-                raise ProtocolError("Buffer exceeded")
-            while self.delimiter in data:
-                item, data = data.split(self.delimiter, 1)
-                if item != "":
-                    try:
-                        self.reset()
-                        yield loads(item)
-                    except Exception as err:
-                        raise ProtocolError("ProtcolError: %s" % (err))
-            self.__leftover = data
+    def handleDict(self, data):
 
-    def __plainNoDelimiter(self, data):
+        return data
 
-        if data is None or data == b'':
-            self.buffer.seek(0)
-            try:
-                yield loads(self.buffer.getvalue().decode(self.charset))
-                self.reset()
-            except Exception as err:
-                self.reset()
-                raise ProtocolError("ProtcolError: %s" % (err))
-        else:
-            self.__buffer_size += self.buffer.write(data)
-            if self.__buffer_size > self.buffer_size:
-                self.reset()
-                raise ProtocolError("Buffer exceeded.")
-            return []
+    def handleGenerator(self, data):
+
+        for chunk in data:
+            for item in self.handler(chunk):
+                yield item
+
+    def handleReadLinesMethod(self, data):
+
+        for chunk in data.readlines():
+            for item in self.handler(chunk):
+                yield item
 
     def handleString(self, data):
-        if len(data) == 0:
-            raise StopIteration
+
+        self.buffer.write(data)
+        self.buffer.seek(0)
+
+        if self.delimiter is not None and self.delimiter in self.buffer.getvalue():
+            for item in self.buffer.getvalue().split(self.delimiter):
+                if item == "":
+                    next
+                else:
+                    try:
+                        yield loads(item)
+                    except Exception as err:
+                        raise ProtocolError(err)
+            self.buffer.truncate(0)
+        else:
+            self.buffer.seek(0, 2)
+
+    def flush(self):
+
+        if len(self.buffer.getvalue()) == 0:
+            return
+            yield
         else:
             try:
-                yield loads(data)
+                yield loads(
+                    self.buffer.getvalue()
+                )
             except Exception as err:
-                self.reset()
-                raise ProtocolError("ProtocolError: %s" % (err))
-
-    def handleReadlinesMethod(self, data):
-
-        for item in data.readlines() + [""]:
-            for result in self.handler(item):
-                yield result
-        self.reset()
-
-    def reset(self):
-
-        self.__buffer_size = 0
-        self.buffer = BytesIO()
+                raise ProtocolError(err)
+            else:
+                self.buffer.seek(0)
+                self.buffer.truncate()

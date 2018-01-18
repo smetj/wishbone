@@ -65,9 +65,10 @@ class Generator(InputModule):
     def produce(self):
 
         while self.loop():
-            for payload in self.decode(self.kwargs.payload):
-                event = Event()
-                event.set(payload, self.kwargs.destination)
-                self.submit(event, "outbox")
-                sleep(self.kwargs.interval)
+            for chunk in [self.kwargs.payload, None]:
+                for payload in self.decode(chunk):
+                    event = Event()
+                    event.set(payload, self.kwargs.destination)
+                    self.submit(event, "outbox")
+            sleep(self.kwargs.interval)
         self.logging.info("Stopped producing events.")
