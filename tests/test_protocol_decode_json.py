@@ -24,6 +24,8 @@
 
 
 from wishbone.protocol.decode.json import JSON
+from wishbone.error import ProtocolError
+import itertools
 
 
 class ReadlinesMock():
@@ -37,16 +39,30 @@ class ReadlinesMock():
 
         return self.data
 
+    def read(self):
+
+        return b"".join(self.data)
+
 
 def test_protocol_decode_json_basic():
 
     m = JSON()
     result = ""
-    for chunk in [b'{"one": 1}', b""]:
+    for chunk in [b'{"one": 1}', None]:
         for item in m.handler(chunk):
             result = item
 
     assert result == {"one": 1}
+
+
+def test_protocol_decode_json_basic_delimiter():
+
+    a = itertools.cycle([{'one': 1}, {'two': 2}])
+    m = JSON(delimiter="\n")
+    for chunk in ['{"one": 1}\n{"two": 2}', None]:
+        for item in m.handler(chunk):
+            result = next(a)
+            assert item == result
 
 
 def test_protocol_decode_json_unicode():
@@ -63,3 +79,16 @@ def test_protocol_decode_json_readlines():
     reader = ReadlinesMock()
     for item in j.handler(reader):
         assert item == {"one": 1}
+
+
+def test_protocol_decode_json_overflow():
+
+    m = JSON(buffer_size=5)
+    try:
+        for chunk in [b'{"one": 1}', None]:
+            for item in m.handler(chunk):
+                item
+    except ProtocolError:
+        assert True
+    else:
+        assert False

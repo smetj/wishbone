@@ -22,118 +22,67 @@
 #
 
 from wishbone.protocol import Decode
-from io import BytesIO, StringIO
-
-
-class EndOfStream(Exception):
-    pass
-
-
-class BytesBuffer(object):
-
-    leftover = ""
-    buffer = BytesIO()
-    size = 0
-
-
-class StringBuffer(object):
-
-    leftover = ""
-    buffer = StringIO()
-    size = 0
+from io import StringIO
 
 
 class Plain(Decode):
 
-    '''**Decode plaintext using the defined charset.**
-
-    Converts text bytestring into unicode using the defined charset.
-
-    Parameters:
-
-        - charset(string)("utf-8")
-           |  The charset to use to decode the bytestring data.
-
-        - delimiter(string)("\\n")
-           |  The delimiter between multiple events
-
-        - buffer_size(int)(4096)
-           |  The max amount of bytes allowed to read for 1 event
-    '''
-
-    def __init__(self, charset="utf-8", delimiter="\n", buffer_size=4096):
+    def __init__(self, charset='utf-8', delimiter=None, buffer_size=4096, strip_newline=False):
 
         self.charset = charset
-        self.delimiter = delimiter
+        if isinstance(delimiter, bytes):
+            self.delimiter = delimiter.decode(charset, 'strict')
+        else:
+            self.delimiter = delimiter
         self.buffer_size = buffer_size
+        self.strip_newline = strip_newline
+        self.buffer = StringIO()
 
-        self.bytes_buffer = BytesBuffer()
-        self.string_buffer = StringBuffer()
+    def handleBytes(self, data):
 
-        if delimiter is None:
-            self.handleBytes = self.__plainNoDelimiterBytes
-            self.handleString = self.__plainNoDelimiterString
-        else:
-            self.handleBytes = self.__plainDelimiterBytes
-            self.handleString = self.__plainDelimiterString
+        for chunk in self.handler(data.decode(self.charset, "strict")):
+            yield chunk
+            # for item in self.handler(chunk):
+            #     print("y"*10)
+            #     yield item
 
-    def __plainDelimiterBytes(self, data):
+    def handleDict(self, data):
 
-        if len(data) == 0:
-            yield self.bytes_buffer.leftover.rstrip()
-            self.bytes_buffer.leftover = ""
-        else:
-            data = self.bytes_buffer.leftover + data.decode(self.charset)
-            if len(data) > self.buffer_size:
-                raise Exception("Buffer exceeded")
-            while self.delimiter in data:
-                item, data = data.split(self.delimiter, 1)
+        return data
+
+    def handleReadLinesMethod(self, data):
+
+        for chunk in data.readlines():
+            for item in self.handler(chunk):
                 yield item
-            self.bytes_buffer.leftover = data
 
-    def __plainNoDelimiterBytes(self, data):
+    def handleString(self, data):
 
-        if len(data) == 0:
-            self.bytes_buffer.buffer.seek(0)
-            yield self.bytes_buffer.buffer.getvalue().decode(self.charset).rstrip(self.delimiter)
+        self.buffer.write(data)
+        self.buffer.seek(0)
+
+        if self.delimiter is not None and self.delimiter in self.buffer.getvalue():
+            for item in self.buffer.getvalue().split(self.delimiter):
+                if item == "":
+                    next
+                else:
+                    if self.strip_newline:
+                        yield item.rstrip()
+                    else:
+                        yield item
+            self.buffer.truncate(0)
         else:
-            self.bytes_buffer.size += self.bytes_buffer.buffer.write(data)
-            if self.bytes_buffer.size > self.buffer_size:
-                raise Exception("Buffer exceeded.")
-            return []
+            self.buffer.seek(0, 2)
 
-    def __plainDelimiterString(self, data):
+    def flush(self):
 
-        if len(data) == 0:
-            if self.string_buffer.leftover.rstrip() == "":
-                raise StopIteration
+        if len(self.buffer.getvalue()) == 0:
+            return
+            yield
+        else:
+            if self.strip_newline:
+                yield self.buffer.getvalue().rstrip()
             else:
-                yield self.string_buffer.leftover.rstrip()
-                self.string_buffer.leftover = ""
-
-        else:
-            data = self.string_buffer.leftover + data
-            if len(data) > self.buffer_size:
-                raise Exception("Buffer exceeded")
-            while self.delimiter in data:
-                item, data = data.split(self.delimiter, 1)
-                yield item
-            self.string_buffer.leftover = data
-
-    def __plainNoDelimiterString(self, data):
-
-        if len(data) == 0:
-            self.string_buffer.buffer.seek(0)
-            yield self.string_buffer.buffer.getvalue().rstrip(self.delimiter)
-        else:
-            self.string_buffer.size += self.string_buffer.buffer.write(data)
-            if self.string_buffer.size > self.buffer_size:
-                raise Exception("Buffer exceeded.")
-            return []
-
-    def handleReadlinesMethod(self, data):
-
-        for item in data.readlines() + [""]:
-            for result in self.handler(item):
-                if result != "":
-                    yield result
+                yield self.buffer.getvalue()
+            self.buffer.seek(0)
+            self.buffer.truncate(0)
