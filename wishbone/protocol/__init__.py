@@ -23,6 +23,7 @@
 #
 
 from wishbone.error import ProtocolError
+import types
 
 
 class Decode(object):
@@ -44,6 +45,8 @@ class Decode(object):
                 return self.handleList(data)
             elif hasattr(data, "readlines") and callable(data.readlines):
                 return self.handleReadlinesMethod(data)
+            elif isinstance(data, types.GeneratorType):
+                return self.handleGenerator(data)
             else:
                 raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
         except Exception as err:
