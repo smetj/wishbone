@@ -26,7 +26,7 @@
 from wishbone.protocol import Decode
 from wishbone.error import ProtocolError
 from io import BytesIO
-from json import loads
+from json import load, loads
 
 
 class EndOfStream(Exception):
@@ -68,7 +68,7 @@ class JSON(Decode):
 
     def __plainDelimiter(self, data):
 
-        if data is None or data == b'':
+        if data == b'':
             return []
         else:
             data = self.__leftover + data.decode(self.charset)
@@ -87,7 +87,7 @@ class JSON(Decode):
 
     def __plainNoDelimiter(self, data):
 
-        if data is None or data == b'':
+        if data == b'':
             self.buffer.seek(0)
             try:
                 yield loads(self.buffer.getvalue().decode(self.charset))
@@ -102,7 +102,13 @@ class JSON(Decode):
                 raise ProtocolError("Buffer exceeded.")
             return []
 
+    def handleGenerator(self, data):
+
+        for chunk in data:
+            yield chunk
+
     def handleString(self, data):
+
         if len(data) == 0:
             raise StopIteration
         else:
@@ -114,10 +120,14 @@ class JSON(Decode):
 
     def handleReadlinesMethod(self, data):
 
-        for item in data.readlines() + [""]:
-            for result in self.handler(item):
-                yield result
-        self.reset()
+        if self.delimiter is not None:
+            for chunk in data.readlines():
+                yield loads(chunk)
+        else:
+            try:
+                yield load(data)
+            except Exception as err:
+                raise ProtocolError("ProtocolError: %s" % (err))
 
     def reset(self):
 
