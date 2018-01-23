@@ -37,6 +37,10 @@ class ReadlinesMock():
 
         return self.data
 
+    def read(self):
+
+        return b"".join(self.data)
+
 
 def test_protocol_decode_json_basic():
 
