@@ -24,12 +24,80 @@
 
 from wishbone.error import ProtocolError
 import types
+from scalpl import Cut
 
 
 class Decode(object):
 
+    handle_buffer_size = False
+
+    def flush(self):
+
+        raise Exception("This decoder has no flush() method implemented.")
+
     def handler(self, data):
 
+        if not self.handle_buffer_size and self.buffer.seek(0, 2) >= self.buffer_size:
+            raise ProtocolError("Buffer full")
+        try:
+            if data is None:
+                return self.flush()
+            elif isinstance(data, bytes):
+                return self.handleBytes(data)
+            elif isinstance(data, str):
+                return self.handleString(data)
+            elif isinstance(data, int):
+                return self.handleInt(data)
+            elif isinstance(data, float):
+                return self.handleFloat(data)
+            elif isinstance(data, dict):
+                return self.handleDict(data)
+            elif isinstance(data, Cut):
+                return self.handleDict(
+                    dict(data)
+                )
+            elif isinstance(data, list):
+                return self.handleList(data)
+            elif isinstance(data, types.GeneratorType):
+                return self.handleGenerator(data)
+            elif hasattr(data, "readlines") and callable(data.readlines):
+                return self.handleReadLinesMethod(data)
+            else:
+                raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
+        except Exception as err:
+            raise ProtocolError(err)
+
+    def handleBytes(self, data):
+        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
+
+    def handleDict(self, data):
+        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
+
+    def handleFloat(self, data):
+        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
+
+    def handleGenerator(self, data):
+        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
+
+    def handleInt(self, data):
+        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
+
+    def handleList(self, data):
+        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
+
+    def handleReadLinesMethod(self, data):
+        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
+
+    def handleString(self, data):
+        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
+
+    def handleUnicode(self, data):
+        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
+
+
+class Encode(object):
+
+    def handler(self, data):
         try:
             if isinstance(data, bytes):
                 return self.handleBytes(data)
@@ -43,57 +111,8 @@ class Decode(object):
                 return self.handleDict(data)
             elif isinstance(data, list):
                 return self.handleList(data)
-            elif hasattr(data, "readlines") and callable(data.readlines):
-                return self.handleReadlinesMethod(data)
-            elif isinstance(data, types.GeneratorType):
-                return self.handleGenerator(data)
-            else:
-                raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
-        except Exception as err:
-            raise ProtocolError(err)
-
-    def handleBytes(self, data):
-        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
-
-    def handleString(self, data):
-        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
-
-    def handleInt(self, data):
-        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
-
-    def handleFloat(self, data):
-        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
-
-    def handleUnicode(self, data):
-        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
-
-    def handleDict(self, data):
-        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
-
-    def handleList(self, data):
-        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
-
-    def handleReadLinesMethod(self, data):
-        raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
-
-
-class Encode(object):
-
-    def handler(self, data):
-
-        try:
-            if isinstance(data, bytes) or data is None:
-                return self.handleBytes(data)
-            elif isinstance(data, str) or data is None:
-                return self.handleString(data)
-            elif isinstance(data, int) or data is None:
-                return self.handleInt(data)
-            elif isinstance(data, float) or data is None:
-                return self.handleFloat(data)
-            elif isinstance(data, dict) or data is None:
-                return self.handleDict(data)
-            elif isinstance(data, list) or data is None:
-                return self.handleList(data)
+            elif isinstance(data, Cut):
+                return self.handleCut(data)
             else:
                 raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
         except Exception as err:
