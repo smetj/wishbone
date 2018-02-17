@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  dummy.py
+#  test_protocol_decode_dummy.py
 #
-#  Copyright 2018 Jelle Smet <development@smetj.net>
+#  Copyright 2017 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,35 +22,13 @@
 #
 #
 
-from wishbone.protocol import Decode
+
+from wishbone.protocol.decode.dummy import Dummy
 
 
-class Dummy(Decode):
+def test_protocol_decode_dummy_basic():
 
-    '''**A dummy decoder.**
-
-    A dummy decoder which yields unmodified data back.
-
-
-    Parameters:
-
-        n/a
-    '''
-
-    def __init__(self, *args, **kwargs):
-        self.handle_buffer_size = True
-
-    def handleBytes(self, data):
-        yield data
-
-    handleString = handleBytes
-    handleInt = handleBytes
-    handleFloat = handleBytes
-    handleDict = handleBytes
-    handleList = handleBytes
-    handleGenerator = handleBytes
-    handleReadLinesMethod = handleBytes
-
-    def flush(self):
-        return
-        yield
+    p = Dummy()
+    for chunk in ["one", None]:
+        for payload in p.handler(chunk):
+            print (payload)

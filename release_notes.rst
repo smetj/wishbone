@@ -1,6 +1,14 @@
 Wishbone changelog
 ==================
 
+Version 3.0.2
+~~~~~~~~~~~~~
+
+Bugfixes:
+- Rework protocol decode handling
+- Make sure monkey.patch_all() happens in ``actor.Actor.py``
+
+
 Version 3.0.1
 ~~~~~~~~~~~~~
 

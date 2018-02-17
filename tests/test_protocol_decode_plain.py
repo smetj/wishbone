@@ -23,42 +23,80 @@
 #
 
 
+import os
 from wishbone.protocol.decode.plain import Plain
 import itertools
+from wishbone.error import ProtocolError
 
 
-def test_protocol_decode_plain_basic_delimiter_binary():
+def test_protocol_decode_plain_basic_string():
 
-    a = itertools.cycle(["a", "b", "c"])
     p = Plain()
-    for payload in p.handler(b"a\nb\nc\n"):
-        assert payload == next(a)
-
-
-def test_protocol_decode_plain_basic_nodelimiter_binary():
-
-    p = Plain(delimiter=None)
-    result = ""
-    for chunk in [b"abc", b""]:
+    for chunk in ["a\nb\nc\n", None]:
         for payload in p.handler(chunk):
-            result = payload
-    assert result == "abc"
+            assert payload == "a\nb\nc\n"
 
 
-def test_protocol_decode_plain_basic_delimiter_string():
+def test_protocol_decode_plain_basic_binary():
+
+    p = Plain()
+    for chunk in [b"a\nb\nc\n\xc3\xa9", None]:
+        for payload in p.handler(chunk):
+            assert payload == "a\nb\nc\né"
+
+
+def test_protocol_decode_plain_delimiter_string():
 
     a = itertools.cycle(["a", "b", "c"])
-    p = Plain()
-    for chunk in ["a\nb\nc\n", ""]:
+
+    p = Plain(delimiter="\n")
+    for chunk in ["a\nb\nc\n", None]:
         for payload in p.handler(chunk):
             assert payload == next(a)
 
 
-def test_protocol_decode_plain_basic_nodelimiter_string():
+def test_protocol_decode_plain_delimiter_binary():
 
-    p = Plain(delimiter=None)
-    result = ""
-    for chunk in ["abc", ""]:
+    a = itertools.cycle(["a", "b", "c", "é"])
+
+    p = Plain(delimiter="\n")
+    for chunk in [b"a\nb\nc\n\xc3\xa9", None]:
         for payload in p.handler(chunk):
-            result = payload
-    assert result == "abc"
+            assert payload == next(a)
+
+
+def test_protocol_decode_plain_readlines():
+
+    result = itertools.cycle(["one", "two", "three", "four", "five"])
+
+    try:
+        os.unlink("./protocol_decode_test")
+    except Exception as err:
+        del(err)
+
+    with open("./protocol_decode_test", "w") as w:
+        w.write("one\ttwo\tthree\n")
+        w.write("four\tfive")
+
+    with open("./protocol_decode_test", "r") as r:
+        p = Plain(delimiter="\t", strip_newline=True)
+        for payload in p.handler(r):
+            assert payload == next(result)
+
+    try:
+        os.unlink("./protocol_decode_test")
+    except Exception as err:
+        del(err)
+
+
+def test_protocol_decode_plain_basic_overflow():
+
+    p = Plain(buffer_size=4)
+    try:
+        for chunk in ["a", "b", "c", "d", "e", None]:
+            for payload in p.handler(chunk):
+                payload
+    except ProtocolError:
+        assert True
+    else:
+        assert False

@@ -22,6 +22,7 @@
 #
 #
 
+from gevent.monkey import patch_all; patch_all()
 from wishbone.queue import QueuePool
 from wishbone.logging import Logging
 from wishbone.event import Event as Wishbone_Event

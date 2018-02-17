@@ -22,6 +22,7 @@
 #
 #
 
+from gevent import monkey; monkey.patch_all()
 import gipc
 import argparse
 import os

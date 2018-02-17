@@ -24,13 +24,9 @@
 
 
 from wishbone.protocol import Decode
-from io import BytesIO
 from msgpack import Unpacker
 from msgpack.exceptions import BufferFull
-
-
-class EndOfStream(Exception):
-    pass
+from wishbone.error import ProtocolError
 
 
 class MSGPack(Decode):
@@ -54,10 +50,8 @@ class MSGPack(Decode):
 
         self.charset = charset
         self.buffer_size = buffer_size
-        self.__leftover = ""
-        self.buffer = BytesIO()
-        self.__buffer_size = 0
         self.unpacker = Unpacker(encoding=self.charset, max_buffer_size=buffer_size)
+        self.handle_buffer_size = True
 
     def handleBytes(self, data):
 
@@ -65,21 +59,25 @@ class MSGPack(Decode):
             self.unpacker.feed(data)
             for value in self.unpacker:
                 if value:
-                    self.reset()
                     yield value
                 else:
-                    return []
+                    return
+                    yield
         except BufferFull:
-            self.reset()
-            raise Exception("Buffer of %s bytes full." % (self.buffer_size))
+            raise ProtocolError("Buffer of %s bytes full." % (self.buffer_size))
 
-    def handleReadlinesMethod(self, data):
+    def handleReadLinesMethod(self, data):
 
         for item in data.readlines():
             for result in self.handler(item):
                 yield result
 
-    def reset(self):
+    def flush(self):
+        result = next(self.unpacker)
+        if result is None:
+            return
+            yield
+        else:
+            yield result
 
-        self.__buffer_size = 0
-        self.buffer = BytesIO()
+        self.unpacker = Unpacker(encoding=self.charset, max_buffer_size=self.buffer_size)

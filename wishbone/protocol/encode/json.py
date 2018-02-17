@@ -53,4 +53,7 @@ class JSON(Encode):
     def handleDict(self, data):
         return dumps(data, sort_keys=self.sort_keys, ensure_ascii=self.ensure_ascii, indent=self.indent)
 
+    def handleCut(self, data):
+        return self.handleDict(dict(data))
+
     handleList = handleDict
