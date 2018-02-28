@@ -24,3 +24,8 @@ or directly from Github
 .. code-block:: sh
 
     $ pip install git+https://github.com/smetj/wishbone-input-httpserver@development#egg=wishbone-input-httpserver
+
+
+An overview of Wishbone 3 compatible modules can be found here:
+
+    - https://github.com/wishbone-modules
