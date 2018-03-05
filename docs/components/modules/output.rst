@@ -8,19 +8,22 @@ Output
     Output modules submit data to external services.
 
 
-Some of the characteristics of `output` modules are:
+ `Output` module properties:
 
 * They have a :ref:`protocol encoder method <encode>` mapped to
   :func:`wishbone.module.OutputModule.encode` in order to convert the desired
   :py:class:`wishbone.event.Event` payload into the desired format prior to
   submitting it to the external service.
 
-* They should **always** provide a ``selection`` and ``payload`` module parameter.
+* Should **always** provide a ``selection`` and ``payload`` module parameter.
   If ``payload`` is not ``None``, then it takes precendence over ``selection``. ``Selection``
   defines the event key to submit whilst template comes up with
   a string to submit.  ``payload`` usually makes no sense with bulk events.
 
-* Output modules should understand how to deal with :ref:`bulk events <bulk_events>`.
+* Should understand how to deal with :ref:`bulk events <bulk_events>`.
+
+* Should use :func:`wishbone.module.OutputModule.getDataToSubmit` to retrieve
+  the actual data to submit to the external service.
 
 The builtin Wishbone Output modules:
 

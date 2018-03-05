@@ -23,7 +23,6 @@
 #
 
 from wishbone.module import OutputModule
-from wishbone.event import extractBulkItemValues
 import syslog
 import sys
 import os
@@ -41,6 +40,16 @@ class Syslog(OutputModule):
 
     Parameters::
 
+        - selection(str)("data")
+           |  The event key to submit.
+
+        - payload(str)(None)
+           |  The string to submit.
+           |  If defined takes precedence over `selection`.
+
+        - native_event(bool)(False)
+           |  If True, outgoing events are native events.
+
         - level(int)(5)*
            |  The loglevel.
            |  (Can be a dynamic value)
@@ -50,20 +59,15 @@ class Syslog(OutputModule):
            |  If not provided the script name is used.
            |  (Can be a dynamic value)
 
-        - selection(str)("data")
-           |  The event key to submit.
-
-        - payload(str)(None)
-           |  The string to submit.
-           |  If defined takes precedence over `selection`.
-
     Queues::
 
         - inbox
            |  incoming events
     '''
 
-    def __init__(self, actor_config, level=5, ident=os.path.basename(sys.argv[0]), selection="data", payload=None):
+    def __init__(self, actor_config,
+                 selection="data", payload=None, native_event=False,
+                 level=5, ident=os.path.basename(sys.argv[0])):
         OutputModule.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -75,17 +79,11 @@ class Syslog(OutputModule):
 
     def consume(self, event):
 
-        if event.kwargs.payload is None:
-            if event.isBulk():
-                data = "\n".join([str(item) for item in extractBulkItemValues(event, event.kwargs.selection)])
-            else:
-                data = event.get(
-                    event.kwargs.selection
-                )
-        else:
-            data = event.kwargs.payload
-
-        data = self.encode(data)
+        data = self.encode(
+            self.getDataToSubmit(
+                event
+            )
+        )
 
         syslog.syslog(
             event.kwargs.level,

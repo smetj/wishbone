@@ -279,3 +279,11 @@ def test_merge_fail():
         assert True
     else:
         assert False
+
+
+def test_render_field():
+
+    e = Event({"value": "Hello", "template": "{{data.value}} how are you doing?"})
+    assert e.get("data.template") == "{{data.value}} how are you doing?"
+    e.renderField("data.template")
+    assert e.get("data.template") == "Hello how are you doing?"

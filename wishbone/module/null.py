@@ -35,7 +35,15 @@ class Null(OutputModule):
 
     Parameters::
 
-      None
+        - selection(str)("data")
+           |  The event key to submit.
+
+        - payload(str)(None)
+           |  The string to submit.
+           |  If defined takes precedence over `selection`.
+
+        - native_event(bool)(False)
+           |  If True, outgoing events are native events.
 
     Queues::
 
@@ -43,7 +51,9 @@ class Null(OutputModule):
            |  incoming events
     '''
 
-    def __init__(self, actor_config, *args, selection=None, payload=None, **kwargs):
+    def __init__(self, actor_config,
+                 selection=None, payload=None, native_event=False,
+                 *args, **kwargs):
 
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")

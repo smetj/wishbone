@@ -27,11 +27,9 @@ from wishbone.queue import QueuePool
 from wishbone.logging import Logging
 from wishbone.event import Event as Wishbone_Event
 from wishbone.error import ModuleInitFailure, InvalidModule, TTLExpired
-from wishbone.moduletype import ModuleType
 from wishbone.actorconfig import ActorConfig
 from wishbone.function.template import TemplateFunction
 from wishbone.function.module import ModuleFunction
-from wishbone.protocol import Encode, Decode
 
 from collections import namedtuple
 from gevent import spawn, kill
@@ -43,6 +41,7 @@ from sys import exc_info
 import traceback
 import inspect
 import jinja2
+from copy import deepcopy
 
 from easydict import EasyDict
 
@@ -122,22 +121,38 @@ class Actor(object):
         #######################
         self.__sanityChecks()
 
-    def generateEvent(self, data={}):
+        # Validate and setup module
+        # Methods are come from based class
+        ###################################
+        self._moduleInitValidation()
+        self._moduleInitSetup()
+
+    def generateEvent(self, data={}, destination=None):
         '''
         Generates a new event.
 
-        This function gets overwritten by either
-        ``self.__generateNormalEvent`` or ``self.__reconstructEvent``.
+        This function can get overridden by
+        ``wishbone.module.InputModule._generateNativeEvent``.
+
+        The provided ``data`` will be traversed in search of valid templates
+        which then will be rendered.
 
         Args:
             data (``data``): The payload to add to the event.
+            destination (None): The destination key to write the data to
 
         Returns:
             wishbone.event.Event: An event containing ``data`` as a payload.
 
         '''
-
-        raise ModuleInitFailure("Function should get overwritten by either self.__generateNormalEvent or self.__reconstructEvent.")
+        if destination in [None, "data"]:
+            event = Wishbone_Event(data)
+            event.renderField(destination, self.env_template)
+        else:
+            event = Wishbone_Event()
+            event.set(data, destination)
+            event.renderField(destination, self.env_template)
+        return event
 
     def loop(self):
         '''The global lock for this module.
@@ -224,7 +239,6 @@ class Actor(object):
             None
         '''
 
-        self.__setProtocolMethod()
         self.__postHook()
         if hasattr(self, "preHook"):
             self.logging.debug("preHook() found, executing")
@@ -407,19 +421,6 @@ class Actor(object):
                 # Unset the current event uuid to the logger object
                 self.logging.setCurrentEventID(None)
 
-    def __generateNormalEvent(self, data={}):
-        '''
-        Gets mapped to self.generateEvent for `flow`, `process` and `output` type modules.
-
-        Args:
-            data (``data``): The payload to add to the event.
-
-        Returns:
-            wishbone.event.Event: An event containing ``data`` as a payload.
-        '''
-
-        return Wishbone_Event(data)
-
     def __getDescription(self, config):
         '''
         Gets the module description.
@@ -485,24 +486,7 @@ class Actor(object):
             else:
                 return data
 
-        return recurse(kwargs)
-
-    def __reconstructEvent(self, data={}):
-        '''
-
-        Gets mapps to self.generateEvent for `input` type modules and if
-        ``Actor.config.protocol_event`` is ``True``.
-
-        Args:
-            data (dict): The dict representation of ``wishbone.event.Event``.
-
-        Returns:
-            wishbone.event.Event: ``Event`` instance of ``data``
-        '''
-
-        e = Wishbone_Event()
-        e.slurp(data)
-        return e
+        return recurse(deepcopy(kwargs))
 
     def __metricProducer(self):
         '''
@@ -567,38 +551,6 @@ class Actor(object):
 
         return rendered_kwargs
 
-    def __setProtocolMethod(self):
-        '''
-        Sets a ``self.encode`` for `output` modules or ``self.decode`` for
-        `input` modules.
-        '''
-
-        if self.MODULE_TYPE == ModuleType.INPUT:
-            if not hasattr(self, "decode") and self.config.protocol is None:
-                self.logging.debug("This 'Input' module has no decoder method set. Setting dummy decoder.")
-                self.setDecoder("wishbone.protocol.decode.dummy")
-            if self.config.protocol is not None:
-                self.logging.debug("This 'Input' module has '%s' decoder configured." % (self.config.protocol))
-                self.decode = self.config.protocol.handler
-
-            if self.config.io_event is True:
-                self.generateEvent = self.__reconstructEvent
-            else:
-                self.generateEvent = self.__generateNormalEvent
-
-        if self.MODULE_TYPE == ModuleType.OUTPUT:
-            if not hasattr(self, "encode") and self.config.protocol is None:
-                self.logging.debug("This 'Output' module has no encoder method set. Setting dummy decoder.")
-                self.setEncoder("wishbone.protocol.encode.dummy")
-            if self.config.protocol is not None:
-                self.logging.debug("This 'Output' module has '%s' encoder configured." % (self.config.protocol))
-                self.encode = self.config.protocol.handler
-
-            if self.config.io_event is True:
-                self.generateEvent = self.__reconstructEvent
-            else:
-                self.generateEvent = self.__generateNormalEvent
-
     def __validateAppliedFunctions(self):
         '''
         A validation routine which checks whether functions have been applied
@@ -619,9 +571,6 @@ class Actor(object):
 
             - Validate if all template functions base ``TemplateFunction``
             - Validate if all module functions base ``ModuleFunction``
-            - Validate if ``ModuleType.OUTPUT`` has ``payload`` and ``selection`` parameter.
-            - Validate if ``ModuleType.INPUT`` whether protocol bases ``Protocol.Decode``
-            - Validate if ``ModuleType.OUTPUT`` whether protocol bases ``Protocol.Encode``
             - Validate if the module has attribute "MODULE_TYPE" indicating it's not an pre 3.0 module.
 
         Args:
@@ -646,20 +595,6 @@ class Actor(object):
             for function in functions:
                 if not isinstance(function, ModuleFunction):
                     raise ModuleInitFailure("Module function '%s' does not base ModuleFunction." % (name))
-
-        if self.MODULE_TYPE == ModuleType.OUTPUT:
-            if "payload" not in self.kwargs.keys():
-                raise ModuleInitFailure("An 'output' module should always have a 'payload' parameter. This is a programming error.")
-            if "selection" not in self.kwargs.keys():
-                raise ModuleInitFailure("An 'output' module should always have a 'selection' parameter. This is a programming error.")
-
-        if self.MODULE_TYPE == ModuleType.INPUT:
-            if self.config.protocol is not None and not isinstance(self.config.protocol, Decode):
-                raise ModuleInitFailure("An 'input' module should have a decode protocol set. Found %s" % (type(self.config.protocol)))
-
-        if self.MODULE_TYPE == ModuleType.OUTPUT:
-            if self.config.protocol is not None and not isinstance(self.config.protocol, Encode):
-                raise ModuleInitFailure("An 'output' module should have a encode protocol set. Found %s" % (type(self.config.protocol)))
 
         if not hasattr(self, "MODULE_TYPE"):
             raise InvalidModule("Module instance '%s' seems to be of an incompatible old type." % (self.name))
