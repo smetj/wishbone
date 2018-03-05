@@ -23,6 +23,7 @@
 #
 
 from wishbone.componentmanager import ComponentManager
+from pkg_resources import get_distribution
 import time
 import os
 import re
@@ -107,7 +108,7 @@ def test_wishbone_function_template_regexFalse():
 def test_wishbone_function_template_version():
 
     f = ComponentManager().getComponentByName("wishbone.function.template.version")()
-    assert f.get() == '3.0.2'
+    assert f.get() == get_distribution("wishbone").version
 
 
 def test_wishbone_function_template_environment():
