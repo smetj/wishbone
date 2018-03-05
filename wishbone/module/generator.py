@@ -23,7 +23,6 @@
 #
 
 from wishbone.module import InputModule
-from wishbone.protocol.decode.dummy import Dummy
 from gevent import sleep
 
 
@@ -59,7 +58,6 @@ class Generator(InputModule):
                  interval=1, payload="test", destination="data"):
         InputModule.__init__(self, actor_config)
         self.pool.createQueue("outbox")
-        self.decode = Dummy().handler
 
     def preHook(self):
 

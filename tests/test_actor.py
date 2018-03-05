@@ -25,6 +25,7 @@
 from wishbone.actorconfig import ActorConfig
 from wishbone.module import InputModule, OutputModule
 from wishbone.error import ModuleInitFailure
+from wishbone.protocol.decode.plain import Plain
 
 
 class DummyModule(InputModule):
@@ -46,7 +47,15 @@ def test_module():
     actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
     d = DummyModule(actor_config)
     d.start()
-    assert d.decode.__self__.__class__.__name__ == "DummyModule"
+    assert d.decode.__self__.__class__.__name__ == "Dummy"
+
+
+def test_module_override_protocol():
+
+    actor_config = ActorConfig('DummyTest', 100, 1, {}, "", protocol=Plain())
+    d = DummyModule(actor_config)
+    d.start()
+    assert d.decode.__self__.__class__.__name__ == "Plain"
 
 
 def test_init_inputmodule_good():

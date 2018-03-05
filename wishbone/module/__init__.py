@@ -30,6 +30,8 @@ from wishbone.error import ModuleInitFailure
 from wishbone.event import extractBulkItemValues
 from wishbone.protocol import Encode, Decode
 from wishbone.event import Event as Wishbone_Event
+from wishbone.protocol.decode.dummy import Dummy as DummyDecoder
+from wishbone.protocol.encode.dummy import Dummy as DummyEncoder
 
 
 class InputModule(Actor):
@@ -48,21 +50,7 @@ class InputModule(Actor):
         '''
         self.decode = ComponentManager().getComponentByName(name)(*args, **kwargs).handler
 
-    def decode(self, data):
-        '''
-        Decodes data into the desired format.
-
-        This method gets replaced by a
-        ::py:func:`wishbone.protocol.Decode.handler` method.
-
-        Args:
-            data (anything?): The data to decode.
-
-        Returns:
-            The decoded data
-        '''
-
-        raise ModuleInitFailure("No decoder set.")
+    decode = DummyDecoder().handler
 
     def _generateNativeEvent(self, data={}, destination=None):
         '''
@@ -126,21 +114,7 @@ class OutputModule(Actor):
 
         self.encode = ComponentManager().getComponentByName(name)(*args, **kwargs).handler
 
-    def encode(self, data):
-        '''
-        Encodes data into the desired format.
-
-        This method gets replaced by a
-        ::py:func:`wishbone.protocol.Encode.handler` method.
-
-        Args:
-            data (anything?): The data to encode.
-
-        Returns:
-            The encoded data
-        '''
-
-        raise ModuleInitFailure("No encoder set.")
+    encode = DummyEncoder().handler
 
     def getDataToSubmit(self, event):
         '''
