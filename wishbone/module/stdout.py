@@ -24,7 +24,6 @@
 
 from gevent import monkey; monkey.patch_sys(stdin=False, stdout=True, stderr=False)
 from wishbone.module import OutputModule
-from wishbone.event import extractBulkItemValues
 from os import getpid
 from colorama import init, Fore, Back, Style
 import sys
@@ -127,7 +126,6 @@ class STDOUT(OutputModule):
         self.__validateInput(foreground_color, background_color, color_style)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
-        self.setEncoder("wishbone.protocol.encode.dummy")
 
         self.ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
 

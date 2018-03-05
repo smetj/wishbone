@@ -1,4 +1,4 @@
-    #!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  cron.py
@@ -24,9 +24,7 @@
 
 from gevent import monkey; monkey.patch_all()
 from wishbone.actor import Actor
-from wishbone.event import Event
 from wishbone.module import InputModule
-from wishbone.protocol.decode.dummy import Dummy
 from cronex import CronExpression
 from gevent import sleep
 import time
@@ -67,7 +65,6 @@ class Cron(InputModule):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
         self.cron = CronExpression("%s wishbone" % self.kwargs.cron)
-        self.decode = Dummy().handler
 
     def preHook(self):
         self.sendToBackground(self.timer)

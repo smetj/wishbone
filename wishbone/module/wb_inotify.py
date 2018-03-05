@@ -23,7 +23,6 @@
 #
 
 from wishbone.module import InputModule
-from wishbone.protocol.decode.dummy import Dummy
 
 # I know no other working way to actually monkey patch select
 # when inotify is imported.
@@ -120,7 +119,6 @@ class WBInotify(InputModule):
         InputModule.__init__(self, actor_config)
 
         self.pool.createQueue("outbox")
-        self.decode = Dummy().handler
 
     def preHook(self):
 
