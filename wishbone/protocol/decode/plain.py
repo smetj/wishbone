@@ -42,9 +42,6 @@ class Plain(Decode):
 
         for chunk in self.handler(data.decode(self.charset, "strict")):
             yield chunk
-            # for item in self.handler(chunk):
-            #     print("y"*10)
-            #     yield item
 
     def handleDict(self, data):
 

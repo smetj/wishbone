@@ -8,7 +8,7 @@ Input
     Input modules either take events from the outside world or generate events.
 
 
-Some of the characteristics of `input` modules are:
+`Input` module properties:
 
 * They have a :ref:`protocol decoder method <decode>` mapped to
   :func:`wishbone.module.InputModule.decode` in order to convert the incoming
@@ -20,6 +20,12 @@ Some of the characteristics of `input` modules are:
 
 * Contextual data about the incoming event can/should be stored under
   ``tmp.<module name>``.
+
+* Should always have an ``destination`` and ``native_event`` parameter.
+
+* Should use :func:`wishbone.actor.Actor.generateEvent` to generate the event
+  in which to store the incoming data.  It takes care of how the event is created
+  in relation to the obligatory ``destination`` and ``native_event`` parameters.
 
 
 The builtin Wishbone Input modules:
