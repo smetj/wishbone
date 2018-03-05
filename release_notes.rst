@@ -1,11 +1,6 @@
-Version 3.0.3
+Version 3.0.4
 =============
 
-Features
----------
-
-- Added Event.renderField() method.
-- ``Actor.generateEvent()`` is now 'native_event' aware.
-- ``Actor.generateEvent()`` can render templates.
-- ``Input`` modules have 2 additional mandatory parameters ``native_event`` & ``destination``.
-- ``Output`` modules have 1 additional mandatory parameter ``native_event``.
+No changes compared to 3.0.3.
+Bumping version because of deleting version 3.0.3 from Pypi which does not
+alllow versions to be reused.
