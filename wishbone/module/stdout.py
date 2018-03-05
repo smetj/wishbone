@@ -30,6 +30,7 @@ from colorama import init, Fore, Back, Style
 import sys
 import re
 
+
 class Format():
 
     def __init__(self, selection, counter, pid):
@@ -81,6 +82,9 @@ class STDOUT(OutputModule):
            |  The string to submit.
            |  If defined takes precedence over `selection`.
 
+        - native_event(bool)(False)
+           |  If True, outgoing events are native events.
+
         - counter(bool)(False)
            |  Puts an incremental number for each event in front
            |  of each event.
@@ -114,7 +118,10 @@ class STDOUT(OutputModule):
            |  Incoming events.
     '''
 
-    def __init__(self, actor_config, selection=None, payload=None, counter=False, prefix="", pid=False, colorize=False, foreground_color="WHITE", background_color="RESET", color_style="NORMAL"):
+    def __init__(self, actor_config,
+                 selection=None, payload=None, native_event=False,
+                 counter=False, prefix="", pid=False, colorize=False,
+                 foreground_color="WHITE", background_color="RESET", color_style="NORMAL"):
         OutputModule.__init__(self, actor_config)
 
         self.__validateInput(foreground_color, background_color, color_style)
@@ -140,20 +147,11 @@ class STDOUT(OutputModule):
 
     def consume(self, event):
 
-        if event.kwargs.payload is None:
-            if event.isBulk():
-                data = "\n".join([str(item) for item in extractBulkItemValues(event, self.kwargs.selection)])
-            else:
-                data = event.get(
-                    event.kwargs.selection
-                )
-        else:
-            data = event.kwargs.payload
-
-        if self.config.io_event:
-            data = self.encode(event.dump())
-        else:
-            data = self.encode(data)
+        data = self.encode(
+            self.getDataToSubmit(
+                event
+            )
+        )
 
         output = self.getString(
             getattr(Fore, event.kwargs.foreground_color),

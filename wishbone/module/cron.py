@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  cron.py
@@ -42,6 +42,9 @@ class Cron(InputModule):
 
     Parameters::
 
+        - native_event(bool)(False)
+           |  Whether to expect incoming events to be native Wishbone events
+
         - cron(string)("*/10 * * * *")
             | The cron expression.
 
@@ -58,7 +61,8 @@ class Cron(InputModule):
            |  Outgoing messges
     '''
 
-    def __init__(self, actor_config, cron="*/10 * * * *", payload="wishbone", destination="data"):
+    def __init__(self, actor_config, native_event=False,
+                 cron="*/10 * * * *", payload="wishbone", destination="data"):
 
         Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
@@ -72,9 +76,15 @@ class Cron(InputModule):
         while self.loop():
             if self.cron.check_trigger(time.localtime(time.time())[:5]):
                 self.logging.info("Cron executed.")
-                event = Event()
-                event.renderKwargs(self.kwargs_template)
-                for payload in self.decode(event.kwargs.payload):
-                    event.set(payload, event.kwargs.destination)
-                    self.submit(event, "outbox")
+            for chunk in [self.kwargs_raw["payload"], None]:
+                for payload in self.decode(chunk):
+                    event = self.generateEvent(
+                        payload,
+                        self.kwargs.destination
+                    )
+                    self.submit(
+                        event,
+                        "outbox"
+                    )
+
             sleep(60)

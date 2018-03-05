@@ -25,17 +25,19 @@
 from wishbone.module import InputModule
 from wishbone.protocol.decode.dummy import Dummy
 from gevent import sleep
-from wishbone.event import Event
 
 
 class Generator(InputModule):
-
-    '''**Generates an event at the chosen interval.**
+    '''
+    Generates an event at the chosen interval.
 
     The payload can be just about anything including template functions.
 
 
     Parameters::
+
+        - native_event(bool)(False)
+           |  Whether to expect incoming events to be native Wishbone events
 
         - interval(float)(1)
            |  The interval in seconds between each generated event.
@@ -53,7 +55,8 @@ class Generator(InputModule):
            |  Contains the generated events.
     '''
 
-    def __init__(self, actor_config, interval=1, payload="test", destination="data"):
+    def __init__(self, actor_config, native_event=False,
+                 interval=1, payload="test", destination="data"):
         InputModule.__init__(self, actor_config)
         self.pool.createQueue("outbox")
         self.decode = Dummy().handler
@@ -65,10 +68,12 @@ class Generator(InputModule):
     def produce(self):
 
         while self.loop():
-            for chunk in [self.kwargs.payload, None]:
+            for chunk in [self.kwargs_raw["payload"], None]:
                 for payload in self.decode(chunk):
-                    event = Event()
-                    event.set(payload, self.kwargs.destination)
+                    event = self.generateEvent(
+                        payload,
+                        self.kwargs.destination
+                    )
                     self.submit(event, "outbox")
             sleep(self.kwargs.interval)
         self.logging.info("Stopped producing events.")

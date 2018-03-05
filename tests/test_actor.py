@@ -23,12 +23,13 @@
 #
 
 from wishbone.actorconfig import ActorConfig
-from wishbone.module import InputModule
+from wishbone.module import InputModule, OutputModule
+from wishbone.error import ModuleInitFailure
 
 
 class DummyModule(InputModule):
 
-    def __init__(self, actor_config):
+    def __init__(self, actor_config, native_event=False, destination="data"):
         InputModule.__init__(self, actor_config)
         self.pool.createQueue("outbox")
         self.sendToBackground(self.producer)
@@ -46,3 +47,84 @@ def test_module():
     d = DummyModule(actor_config)
     d.start()
     assert d.decode.__self__.__class__.__name__ == "DummyModule"
+
+
+def test_init_inputmodule_good():
+
+    class InputModuleTestGood(InputModule):
+
+        def __init__(self, actor_config, native_event=False, destination="data"):
+            InputModule.__init__(self, actor_config)
+
+    actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
+
+    try:
+        InputModuleTestGood(actor_config)
+    except ModuleInitFailure:
+        assert False
+    else:
+        assert True
+
+
+def test_init_inputmodule_bad():
+
+    class InputModuleTestBad_1(InputModule):
+
+        def __init__(self, actor_config, destination=None):
+            InputModule.__init__(self, actor_config)
+
+    class InputModuleTestBad_2(InputModule):
+
+        def __init__(self, actor_config, native_event=None):
+            InputModule.__init__(self, actor_config)
+
+    actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
+
+    for i in range(1, 3):
+        try:
+            locals()["InputModuleTestBad_%s" % (i)](actor_config)
+        except ModuleInitFailure:
+            assert True
+        else:
+            assert False
+
+
+def test_init_outputmodule_good():
+
+    class OutputModuleTestGood(OutputModule):
+        def __init__(self, actor_config, selection=None, payload=None, native_event=None):
+            InputModule.__init__(self, actor_config)
+
+    actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
+
+    try:
+        OutputModuleTestGood(actor_config)
+    except ModuleInitFailure:
+        assert False
+    else:
+        assert True
+
+
+def test_init_outputmodule_bad():
+
+    class OutputModuleTestBad_1(OutputModule):
+        def __init__(self, actor_config, payload=None, native_event=None):
+            InputModule.__init__(self, actor_config)
+
+    class OutputModuleTestBad_2(OutputModule):
+        def __init__(self, actor_config, selection=None, native_event=None):
+            InputModule.__init__(self, actor_config)
+
+    class OutputModuleTestBad_3(OutputModule):
+        def __init__(self, actor_config, selection=None, payload=None):
+            InputModule.__init__(self, actor_config)
+
+    actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
+
+    for i in range(1, 4):
+        try:
+            locals()["OutputModuleTestBad_%s" % (i)](actor_config)
+        except ModuleInitFailure:
+            assert True
+        else:
+            assert False

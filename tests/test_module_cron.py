@@ -30,7 +30,7 @@ from wishbone.utils.test import getter
 def test_module_cron_default():
 
     actor_config = ActorConfig('cron', 100, 1, {}, "")
-    cron = Cron(actor_config, '*/1 * * * *')
+    cron = Cron(actor_config, cron='*/1 * * * *')
     cron.pool.queue.outbox.disableFallThrough()
     cron.start()
 

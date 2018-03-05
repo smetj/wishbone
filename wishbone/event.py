@@ -218,7 +218,9 @@ class Event(object):
         del(self.data[key])
 
     def dump(self):
-        '''Dumps the content of the event.
+        '''
+        Dumps the complete event.
+        This complete event is also called a ``native event``
 
         Returns:
 
@@ -314,12 +316,14 @@ class Event(object):
         except Exception:
             raise InvalidData("Source and destination are incompatible to merge")
 
-    def render(self, template):
+    def render(self, template, env_template=None):
         '''Returns a formatted string using the provided template and key
 
         Args:
 
             template (str): A string representing the Jinja2 template.
+            env_template (``jinja2.Environment``): Used to render template strings from.
+                If not set, then template rendering happens without environment.
 
         Returns:
 
@@ -331,7 +335,36 @@ class Event(object):
         '''
 
         try:
-            return Template(template).render(self.dump())
+            if env_template is None:
+                return Template(template).render(self.dump())
+            else:
+                return env_template.from_string(template).render(self.dump())
+        except Exception as err:
+            raise InvalidData("Failed to render template. Reason: %s" % (err))
+
+    def renderField(self, field_name, env_template=None):
+        '''
+        Expects ``field_name`` to contain a template, renders it and replaces
+        its content with the result. If the field ``field_name`` contains
+        anything else than a string then it's silently ignored.
+
+        Args:
+
+            field_name (str): A string defining the field to handle.
+
+        Returns:
+
+            None
+
+        Raises:
+
+            InvalidData: An invalid jinja2 template has been provided
+        '''
+
+        try:
+            raw_value = self.get(field_name)
+            rendered_value = self.__renderDataStructure(raw_value, env_template)
+            self.set(rendered_value, field_name)
         except Exception as err:
             raise InvalidData("Failed to render template. Reason: %s" % (err))
 
@@ -387,8 +420,9 @@ class Event(object):
         self.data[key] = value
 
     def slurp(self, data):
-        '''Expects ``data`` to be a dict representation of an ``Event`` and
-        alligns this event to it.
+        '''
+        Create an event object from a ``native event`` dict exported by
+        ``dump()``
 
         The timestamp field will be reset to the time this method has been
         called.
@@ -435,3 +469,30 @@ class Event(object):
         return(self)
 
     raw = dump
+
+    def __renderDataStructure(self, datastructure, env_template):
+
+        def recurse(data):
+
+            if isinstance(data, str):
+                try:
+                    if env_template is None:
+                        return Template(data).render(**self.dump())
+                    else:
+                        return env_template.from_string(data).render(**self.dump())
+                except Exception as err:
+                    return "#error: %s#" % (err)
+            elif isinstance(data, dict):
+                result = {}
+                for key, value in data.items():
+                    result[key] = recurse(value)
+                return EasyDict(result)
+            elif isinstance(data, list):
+                result = []
+                for value in data:
+                    result.append(recurse(value))
+                return result
+            else:
+                return data
+
+        return recurse(datastructure)
