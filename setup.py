@@ -147,7 +147,8 @@ setup(
         'wishbone.module.output': [
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
-            'syslog = wishbone.module.wbsyslog:Syslog'
+            'syslog = wishbone.module.wbsyslog:Syslog',
+            'throughput = wishbone.module.throughput:Throughput'
         ],
         'wishbone.function.module': [
             'set = wishbone.function.module.set:Set',
