@@ -44,6 +44,7 @@ import jinja2
 from copy import deepcopy
 
 from easydict import EasyDict
+from pkg_resources import get_distribution
 
 
 Greenlets = namedtuple('Greenlets', "consumer generic log metric")
@@ -126,6 +127,8 @@ class Actor(object):
         ###################################
         self._moduleInitValidation()
         self._moduleInitSetup()
+
+        self.version = get_distribution(self.__module__.split('.')[0]).version
 
     def generateEvent(self, data={}, destination=None):
         '''
@@ -252,6 +255,9 @@ class Actor(object):
             )
         )
         self.stopped = False
+
+        if not self.name.startswith("_"):
+            self.logging.debug("Started version %s" % (self.version))
 
     def sendToBackground(self, function, *args, **kwargs):
         '''
