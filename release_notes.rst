@@ -4,3 +4,5 @@ Version 3.0.5
 
 Features:
     - Added wishbone.module.output.throughput
+    - Some minor speed improvements prevening useless template rendering where
+      string can't be a template.
