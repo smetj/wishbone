@@ -22,12 +22,13 @@
 #
 #
 
-from gevent import monkey; monkey.patch_sys(stdin=False, stdout=True, stderr=False)
+from gevent import monkey; monkey.patch_all()
 from wishbone.module import OutputModule
 from os import getpid
 from colorama import init, Fore, Back, Style
 import sys
 import re
+from gevent.fileobject import FileObjectThread
 
 
 class Format():
@@ -63,7 +64,8 @@ class Format():
 
 class STDOUT(OutputModule):
 
-    '''**Prints event data to STDOUT.**
+    '''
+    Prints event data to STDOUT.
 
     Prints incoming events to STDOUT. When <complete> is True,
     the complete event including headers is printed to STDOUT.
@@ -73,43 +75,47 @@ class STDOUT(OutputModule):
 
     Parameters::
 
-        - selection(str)(None)
-           |  The event key to submit.
-           |  If ``None`` the complete event is selected.
-
-        - payload(str)(None)
-           |  The string to submit.
-           |  If defined takes precedence over `selection`.
-
-        - native_event(bool)(False)
-           |  If True, outgoing events are native events.
-
-        - counter(bool)(False)
-           |  Puts an incremental number for each event in front
-           |  of each event.
-
-        - prefix(str)("")*
-           |  Puts the prefix in front of each printed event.
-
-        - pid(bool)(False)
-           |  Includes the pid of the process producing the output.
+        - background_color(str)("RESET")
+           |  The background color.
+           |  Valid values: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET
 
         - colorize(bool)(False)
            |  When True all STDOUT output is wrapped in between ANSI color
            |  escape sequences defined by `foreground_color`, `background_color`,
            |  `color_style`.
 
+        - color_style(str)("NORMAL")
+           |  The coloring style to use
+           |  Valid values: DIM, NORMAL, BRIGHT
+
+        - counter(bool)(False)
+           |  Puts an incremental number for each event in front
+           |  of each event.
+
         - foreground_color(str)("WHITE")
            |  The foreground color.
            |  Valid values: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE
 
-        - background_color(str)("RESET")
-           |  The background color.
-           |  Valid values: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET
+        - native_events(bool)(False)
+           |  If True, outgoing events are native events.
 
-        - color_style(str)("NORMAL")
-           |  The coloring style to use
-           |  Valid values: DIM, NORMAL, BRIGHT
+        - parallel_streams(int)(1)
+           |  The number of outgoing parallel data streams.
+
+        - payload(str)(None)
+           |  The string to submit.
+           |  If defined takes precedence over `selection`.
+
+        - pid(bool)(False)
+           |  Includes the pid of the process producing the output.
+
+        - prefix(str)("")*
+           |  Puts the prefix in front of each printed event.
+
+        - selection(str)(None)
+           |  The event key to submit.
+           |  If ``None`` the complete event is selected.
+
 
     Queues::
 
@@ -118,7 +124,7 @@ class STDOUT(OutputModule):
     '''
 
     def __init__(self, actor_config,
-                 selection=None, payload=None, native_event=False,
+                 selection=None, payload=None, native_events=False, parallel_streams=1,
                  counter=False, prefix="", pid=False, colorize=False,
                  foreground_color="WHITE", background_color="RESET", color_style="NORMAL"):
         OutputModule.__init__(self, actor_config)
@@ -143,6 +149,8 @@ class STDOUT(OutputModule):
         else:
             self.getString = self.__stringNoColor
 
+        self.f = FileObjectThread(sys.stdout)
+
     def consume(self, event):
 
         data = self.encode(
@@ -158,8 +166,11 @@ class STDOUT(OutputModule):
             event.kwargs.prefix,
             self.format.do(data)
         )
-        sys.stdout.write(output)
-        sys.stdout.flush()
+        self.f.write(output)
+
+    def postHook(self):
+
+        self.f.close()
 
     def __validateInput(self, f, b, s):
 

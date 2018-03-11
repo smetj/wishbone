@@ -15,15 +15,26 @@ Output
   :py:class:`wishbone.event.Event` payload into the desired format prior to
   submitting it to the external service.
 
-* Should **always** provide a ``selection`` and ``payload`` module parameter.
-  If ``payload`` is not ``None``, then it takes precendence over ``selection``. ``Selection``
-  defines the event key to submit whilst template comes up with
-  a string to submit.  ``payload`` usually makes no sense with bulk events.
-
-* Should understand how to deal with :ref:`bulk events <bulk_events>`.
+* Should **always** provide a ``selection``, ``payload``, ``native_events``
+  and ``parallel_streams`` module parameter. If ``payload`` is not ``None``,
+  then it takes precendence over ``selection``. ``Selection`` defines the
+  event key to submit whilst template comes up with a string to
+  submit.``payload`` usually makes no sense with bulk events.
 
 * Should use :func:`wishbone.module.OutputModule.getDataToSubmit` to retrieve
-  the actual data to submit to the external service.
+  the actual data to submit to the external service.This automatically takes
+  care of :ref:`bulk events <bulk_events>`.
+
+* Through inheriting :py:class:`wishbone.module.OutputModule` `Output` modules
+  override :func:`wishbone.actor.Actor._consumer` with their own version which
+  executes the registered ``function`` in parallel greenthreads by using a
+  threadpool. The module's ``parallel_streams`` parameter defines the size of
+  the pool and therefor the number of parallel greenthreads submitting the
+  event data externally.It depends on the nature of your output protocol
+  whether this makes sense.Normally you shouldn't really bother with this as
+  long a Gevent's monkey patching works on the code you're using to speak to
+  the remote service.
+
 
 The builtin Wishbone Output modules:
 
@@ -47,7 +58,3 @@ The builtin Wishbone Output modules:
     :members:
     :show-inheritance:
     :inherited-members:
-
-
-
-

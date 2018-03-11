@@ -41,8 +41,11 @@ class Throughput(OutputModule):
            |  The string to submit.
            |  If defined takes precedence over `selection`.
 
-        - native_event(bool)(False)
+        - native_events(bool)(False)
            |  If True, outgoing events are native events.
+
+        - parallel_streams(int)(1)
+           |  The number of outgoing parallel data streams.
 
     Queues::
 
@@ -51,7 +54,7 @@ class Throughput(OutputModule):
     '''
 
     def __init__(self, actor_config,
-                 selection=None, payload=None, native_event=False,
+                 selection=None, payload=None, native_events=False, parallel_streams=1,
                  *args, **kwargs):
 
         Actor.__init__(self, actor_config)

@@ -30,7 +30,7 @@ from wishbone.protocol.decode.plain import Plain
 
 class DummyModule(InputModule):
 
-    def __init__(self, actor_config, native_event=False, destination="data"):
+    def __init__(self, actor_config, native_events=False, destination="data"):
         InputModule.__init__(self, actor_config)
         self.pool.createQueue("outbox")
         self.sendToBackground(self.producer)
@@ -62,7 +62,7 @@ def test_init_inputmodule_good():
 
     class InputModuleTestGood(InputModule):
 
-        def __init__(self, actor_config, native_event=False, destination="data"):
+        def __init__(self, actor_config, native_events=False, destination="data"):
             InputModule.__init__(self, actor_config)
 
     actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
@@ -84,7 +84,7 @@ def test_init_inputmodule_bad():
 
     class InputModuleTestBad_2(InputModule):
 
-        def __init__(self, actor_config, native_event=None):
+        def __init__(self, actor_config, native_events=None):
             InputModule.__init__(self, actor_config)
 
     actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
@@ -101,7 +101,7 @@ def test_init_inputmodule_bad():
 def test_init_outputmodule_good():
 
     class OutputModuleTestGood(OutputModule):
-        def __init__(self, actor_config, selection=None, payload=None, native_event=None):
+        def __init__(self, actor_config, selection=None, payload=None, native_events=None, parallel_streams=1):
             InputModule.__init__(self, actor_config)
 
     actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
@@ -117,20 +117,24 @@ def test_init_outputmodule_good():
 def test_init_outputmodule_bad():
 
     class OutputModuleTestBad_1(OutputModule):
-        def __init__(self, actor_config, payload=None, native_event=None):
+        def __init__(self, actor_config, payload=None, native_events=None, parallel_streams=1):
             InputModule.__init__(self, actor_config)
 
     class OutputModuleTestBad_2(OutputModule):
-        def __init__(self, actor_config, selection=None, native_event=None):
+        def __init__(self, actor_config, selection=None, native_events=None, parallel_streams=1):
             InputModule.__init__(self, actor_config)
 
     class OutputModuleTestBad_3(OutputModule):
-        def __init__(self, actor_config, selection=None, payload=None):
+        def __init__(self, actor_config, selection=None, payload=None, parallel_streams=1):
+            InputModule.__init__(self, actor_config)
+
+    class OutputModuleTestBad_4(OutputModule):
+        def __init__(self, actor_config, selection=None, payload=None, native_events=None):
             InputModule.__init__(self, actor_config)
 
     actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
 
-    for i in range(1, 4):
+    for i in range(1, 5):
         try:
             locals()["OutputModuleTestBad_%s" % (i)](actor_config)
         except ModuleInitFailure:

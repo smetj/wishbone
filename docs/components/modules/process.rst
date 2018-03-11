@@ -7,6 +7,9 @@ Process
 
     Process modules process and therefor modify events in one way or another.
 
+Process modules usually aren't very cooperative in the Gevent sense of doing
+things since they aren't supposed to do any IO.
+
 The builtin Wishbone Output modules:
 
 +----------------------------------------------------------------------------------+------------------------------------------+
