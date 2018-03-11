@@ -40,24 +40,27 @@ class Syslog(OutputModule):
 
     Parameters::
 
-        - selection(str)("data")
-           |  The event key to submit.
-
-        - payload(str)(None)
-           |  The string to submit.
-           |  If defined takes precedence over `selection`.
-
-        - native_event(bool)(False)
-           |  If True, outgoing events are native events.
+        - ident(str)(<script_name>)*
+           |  The syslog id string.
+           |  If not provided the script name is used.
+           |  (Can be a dynamic value)
 
         - level(int)(5)*
            |  The loglevel.
            |  (Can be a dynamic value)
 
-        - ident(str)(<script_name>)*
-           |  The syslog id string.
-           |  If not provided the script name is used.
-           |  (Can be a dynamic value)
+        - native_events(bool)(False)
+           |  If True, outgoing events are native events.
+
+        - payload(str)(None)
+           |  The string to submit.
+           |  If defined takes precedence over `selection`.
+
+        - parallel_streams(int)(1)
+           |  The number of outgoing parallel data streams.
+
+        - selection(str)("data")
+           |  The event key to submit.
 
     Queues::
 
@@ -66,7 +69,7 @@ class Syslog(OutputModule):
     '''
 
     def __init__(self, actor_config,
-                 selection="data", payload=None, native_event=False,
+                 selection="data", payload=None, native_events=False, parallel_streams=1,
                  level=5, ident=os.path.basename(sys.argv[0])):
         OutputModule.__init__(self, actor_config)
 

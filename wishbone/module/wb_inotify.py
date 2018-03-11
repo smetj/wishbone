@@ -87,7 +87,7 @@ class WBInotify(InputModule):
         - destination(str)(data)
            |  In which field to store the inotify event data.
 
-        - native_event(bool)(False)
+        - native_events(bool)(False)
            |  Whether to expect incoming events to be native Wishbone events.
 
         - initial_listing(bool)(True)
@@ -114,7 +114,7 @@ class WBInotify(InputModule):
 
     '''
 
-    def __init__(self, actor_config, native_event=False, destination="data",
+    def __init__(self, actor_config, native_events=False, destination="data",
                  initial_listing=True, glob_pattern="*", paths={"/tmp": ["IN_CREATE", "IN_CLOSE_WRITE"]}):
         InputModule.__init__(self, actor_config)
 

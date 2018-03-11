@@ -32,6 +32,11 @@ from wishbone.protocol import Encode, Decode
 from wishbone.event import Event as Wishbone_Event
 from wishbone.protocol.decode.dummy import Dummy as DummyDecoder
 from wishbone.protocol.encode.dummy import Dummy as DummyEncoder
+from wishbone.error import TTLExpired
+from copy import deepcopy
+from sys import exc_info
+import traceback
+from gevent.pool import Pool
 
 
 class InputModule(Actor):
@@ -82,7 +87,7 @@ class InputModule(Actor):
             self.logging.debug("This 'Input' module has '%s' decoder configured." % (self.config.protocol))
             self.decode = self.config.protocol.handler
 
-        if self.kwargs.native_event:
+        if self.kwargs.native_events:
             self.generateEvent = self._generateNativeEvent
 
     def _moduleInitValidation(self):
@@ -102,7 +107,7 @@ class InputModule(Actor):
         if self.config.protocol is not None and not isinstance(self.config.protocol, Decode):
             raise ModuleInitFailure("An 'input' module should have a decode protocol set. Found %s" % (type(self.config.protocol)))
 
-        for param in ["native_event", "destination"]:
+        for param in ["native_events", "destination"]:
             if param not in self.kwargs.keys():
                 raise ModuleInitFailure("An 'Input' module should always have a '%s' parameter. This is a programming error." % (param))
 
@@ -119,7 +124,7 @@ class OutputModule(Actor):
     def getDataToSubmit(self, event):
         '''
         Derives the data to submit from ``event`` taking into account
-        ``native_event``, ``payload`` and ``selection`` module parameters.
+        ``native_events``, ``payload`` and ``selection`` module parameters.
 
         Args:
             event (```wishbone.event.Event```): The event to extract data from.
@@ -129,7 +134,7 @@ class OutputModule(Actor):
             dict/str/...: The data to submit.
         '''
 
-        if self.kwargs.native_event:
+        if self.kwargs.native_events:
             return event.getNative()
         elif event.kwargs.payload is None:
             if event.isBulk():
@@ -140,6 +145,73 @@ class OutputModule(Actor):
                 )
         else:
             return event.kwargs.payload
+
+    def _consumer(self, function, queue):
+        '''
+
+        Greenthread which applies <function> to each element from <queue>.
+        However, this version overrides ``Actor._consumer`` as it executes
+        parallel coroutine versions of ``functions`` spawned on a
+        ``gevent.pool.Pool`` instance.  The number of parallel instances is
+        defined by the ``parallel_streams`` value.
+
+        Args:
+            function (``function``): The function which has been registered to consume ``queue``.
+
+            queue (str): The name of the queue from which events have to be
+                         consumed and processed by ``function``.
+
+        Returns:
+            None
+        '''
+
+        self.parallel_pool = Pool(self.kwargs.parallel_streams)
+        self._run.wait()
+        self.logging.debug("Function '%s' has been registered to consume queue '%s'" % (function.__name__, queue))
+
+        def execFunction(function, event):
+            try:
+                function(deepcopy(event))
+            except Exception as err:
+                if self.config.disable_exception_handling:
+                    raise
+                exc_type, exc_value, exc_traceback = exc_info()
+                info = (traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value))
+
+                event.set(info, "errors.%s" % (self.name))
+
+                self.logging.error("%s" % (err))
+                self.submit(event, "_failed")
+            else:
+                self.submit(event, "_success")
+            finally:
+                # Unset the current event uuid to the logger object
+                self.logging.setCurrentEventID(None)
+
+        while self.loop():
+
+            event = self.pool.getQueue(queue).get()
+            if not event.has("tmp.%s" % (self.name)):
+                event.set({}, "tmp.%s" % (self.name))
+
+            # Render kwargs relative to the event's content and make these accessible under event.kwargs
+            event.renderKwargs(self.kwargs_template)
+
+            # Validate TTL
+            try:
+                event.decrementTTL()
+            except TTLExpired as err:
+                self.logging.warning("Event with UUID %s dropped. Reason: %s" % (event.get("uuid"), err))
+                continue
+
+            # Set the current event uuid to the logger object
+            self.logging.setCurrentEventID(event.get("uuid"))
+
+            # Apply all the defined queue functions to the event
+            event = self._applyFunctions(queue, event)
+
+            # Apply consumer function
+            self.parallel_pool.spawn(execFunction, function, event)
 
     def _moduleInitSetup(self):
         '''
@@ -170,7 +242,7 @@ class OutputModule(Actor):
         if self.config.protocol is not None and not isinstance(self.config.protocol, Encode):
             raise ModuleInitFailure("An 'output' module should have a encode protocol set. Found %s" % (type(self.config.protocol)))
 
-        for param in ["payload", "selection", "native_event"]:
+        for param in ["payload", "selection", "native_events", "parallel_streams"]:
             if param not in self.kwargs.keys():
                 raise ModuleInitFailure("An 'output' module should always have a '%s' parameter. This is a programming error." % (param))
 

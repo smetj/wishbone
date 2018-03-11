@@ -118,6 +118,7 @@ setup(
             'msgpack = wishbone.protocol.decode.msgpack:MSGPack',
         ],
         'wishbone.protocol.encode': [
+            'binary = wishbone.protocol.encode.binary:Binary',
             'dummy = wishbone.protocol.encode.dummy:Dummy',
             'json = wishbone.protocol.encode.json:JSON',
             'msgpack = wishbone.protocol.encode.msgpack:MSGPack',

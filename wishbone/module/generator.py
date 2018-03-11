@@ -35,7 +35,7 @@ class Generator(InputModule):
 
     Parameters::
 
-        - native_event(bool)(False)
+        - native_events(bool)(False)
            |  Whether to expect incoming events to be native Wishbone events
 
         - interval(float)(1)
@@ -54,7 +54,7 @@ class Generator(InputModule):
            |  Contains the generated events.
     '''
 
-    def __init__(self, actor_config, native_event=False,
+    def __init__(self, actor_config, native_events=False,
                  interval=1, payload="test", destination="data"):
         InputModule.__init__(self, actor_config)
         self.pool.createQueue("outbox")

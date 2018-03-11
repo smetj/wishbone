@@ -88,8 +88,8 @@ class Actor(object):
         self.greenlets = Greenlets([], [], [], [])
         self.greenlets.metric.append(spawn(self.__metricProducer))
 
-        self.__run = Event()
-        self.__run.clear()
+        self._run = Event()
+        self._run.clear()
 
         self.stopped = True
 
@@ -128,7 +128,8 @@ class Actor(object):
         self._moduleInitValidation()
         self._moduleInitSetup()
 
-        self.version = get_distribution(self.__module__.split('.')[0]).version
+
+        self.version = self.__getVersion()
 
     def generateEvent(self, data={}, destination=None):
         '''
@@ -200,7 +201,7 @@ class Actor(object):
             None
         '''
 
-        self.greenlets.consumer.append(spawn(self.__consumer, function, queue))
+        self.greenlets.consumer.append(spawn(self._consumer, function, queue))
 
     def renderEventKwargs(self, event, queue=None):
         '''
@@ -247,7 +248,7 @@ class Actor(object):
             self.logging.debug("preHook() found, executing")
             self.preHook()
         self.__validateAppliedFunctions()
-        self.__run.set()
+        self._run.set()
         self.logging.debug(
             "Started with max queue size of %s events and metrics interval of %s seconds." % (
                 self.config.size,
@@ -347,7 +348,7 @@ class Actor(object):
                 self.logging.warning("Queue '%s' is full and stalls the event pipeline. You should probably look into this." % (queue))
                 sleep(0.1)
 
-    def __applyFunctions(self, queue, event):
+    def _applyFunctions(self, queue, event):
         '''
         Executes and applies all registered module functions against the event.
 
@@ -369,7 +370,7 @@ class Actor(object):
                     self.logging.error("Function '%s' is skipped as it is causing an error. Reason: '%s'" % (f, err))
         return event
 
-    def __consumer(self, function, queue):
+    def _consumer(self, function, queue):
         '''
         Greenthread which applies <function> to each element from <queue>
 
@@ -383,7 +384,7 @@ class Actor(object):
             None
         '''
 
-        self.__run.wait()
+        self._run.wait()
         self.logging.debug("Function '%s' has been registered to consume queue '%s'" % (function.__name__, queue))
 
         while self.loop():
@@ -406,7 +407,7 @@ class Actor(object):
             self.logging.setCurrentEventID(event.get("uuid"))
 
             # Apply all the defined queue functions to the event
-            event = self.__applyFunctions(queue, event)
+            event = self._applyFunctions(queue, event)
 
             # Apply consumer function
             try:
@@ -494,12 +495,19 @@ class Actor(object):
 
         return recurse(deepcopy(kwargs))
 
+    def __getVersion(self):
+
+        try:
+            return get_distribution(self.__module__.split('.')[0]).version
+        except Exception as err:
+            return "unknown"
+
     def __metricProducer(self):
         '''
         A greenthread collecting the queue metrics at the defined interval.
         '''
 
-        self.__run.wait()
+        self._run.wait()
         hostname = socket.gethostname()
         while self.loop():
             for queue in self.pool.listQueues(names=True):

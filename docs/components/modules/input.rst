@@ -21,11 +21,11 @@ Input
 * Contextual data about the incoming event can/should be stored under
   ``tmp.<module name>``.
 
-* Should always have an ``destination`` and ``native_event`` parameter.
+* Should always have an ``destination`` and ``native_events`` parameter.
 
 * Should use :func:`wishbone.actor.Actor.generateEvent` to generate the event
   in which to store the incoming data.  It takes care of how the event is created
-  in relation to the obligatory ``destination`` and ``native_event`` parameters.
+  in relation to the obligatory ``destination`` and ``native_events`` parameters.
 
 
 The builtin Wishbone Input modules:
