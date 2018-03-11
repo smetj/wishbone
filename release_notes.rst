@@ -8,3 +8,4 @@ Features:
       string can't be a template.
     - Added debug log showing the module version
     - Fixed docstrings of protocol decode modules
+    - Added wishbone.protocol.encode.binary
