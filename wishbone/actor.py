@@ -128,7 +128,6 @@ class Actor(object):
         self._moduleInitValidation()
         self._moduleInitSetup()
 
-
         self.version = self.__getVersion()
 
     def generateEvent(self, data={}, destination=None):
