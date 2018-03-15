@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  wbsyslog.py
+#  throughput.py
 #
 #  Copyright 2018 Jelle Smet <development@smetj.net>
 #
@@ -22,45 +22,30 @@
 #
 #
 
+from wishbone.actor import Actor
 from wishbone.module import OutputModule
-import syslog
-import sys
-import os
+from gevent import sleep
 
 
-class Syslog(OutputModule):
+class Throughput(OutputModule):
+    '''
+    Prints the number of messages passing through on STDOUT.
 
-    '''**Submits event data to syslog.**
-
-    Logevents have following format:
-
-    (6, 1367682301.430527, 'Router', 'Received SIGINT. Shutting down.')
-
-    The first value corresponds to the syslog severity level.
 
     Parameters::
 
-        - ident(str)(<script_name>)*
-           |  The syslog id string.
-           |  If not provided the script name is used.
-           |  (Can be a dynamic value)
-
-        - level(int)(5)*
-           |  The loglevel.
-           |  (Can be a dynamic value)
-
-        - native_events(bool)(False)
-           |  If True, outgoing events are native events.
+        - selection(str)("data")
+           |  The event key to submit.
 
         - payload(str)(None)
            |  The string to submit.
            |  If defined takes precedence over `selection`.
 
+        - native_events(bool)(False)
+           |  If True, outgoing events are native events.
+
         - parallel_streams(int)(1)
            |  The number of outgoing parallel data streams.
-
-        - selection(str)("data")
-           |  The event key to submit.
 
     Queues::
 
@@ -69,29 +54,24 @@ class Syslog(OutputModule):
     '''
 
     def __init__(self, actor_config,
-                 selection="data", payload=None, native_events=False, parallel_streams=1,
-                 level=5, ident=os.path.basename(sys.argv[0])):
-        OutputModule.__init__(self, actor_config)
+                 selection=None, payload=None, native_events=False, parallel_streams=1,
+                 *args, **kwargs):
 
+        Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
-
-    def preHook(self):
-
-        syslog.openlog("%s[%s]" % (self.kwargs.ident, os.getpid()))
+        self.sendToBackground(self.calculateSpeed)
+        self.counter = 0
 
     def consume(self, event):
 
-        data = self.encode(
-            self.getDataToSubmit(
-                event
-            )
-        )
+        self.counter += 1
 
-        syslog.syslog(
-            event.kwargs.level,
-            data
-        )
+    def calculateSpeed(self):
 
-    def postHook(self):
-        syslog.closelog()
+        self.last = 0
+
+        while self.loop():
+            print("Events per second passing through: %s" % (self.counter - self.last))
+            self.last = self.counter
+            sleep(1)

@@ -40,7 +40,7 @@ class Cron(InputModule):
 
     Parameters::
 
-        - native_event(bool)(False)
+        - native_events(bool)(False)
            |  Whether to expect incoming events to be native Wishbone events
 
         - cron(string)("*/10 * * * *")
@@ -59,7 +59,7 @@ class Cron(InputModule):
            |  Outgoing messges
     '''
 
-    def __init__(self, actor_config, native_event=False,
+    def __init__(self, actor_config, native_events=False,
                  cron="*/10 * * * *", payload="wishbone", destination="data"):
 
         Actor.__init__(self, actor_config)

@@ -336,9 +336,9 @@ class Event(object):
 
         try:
             if env_template is None:
-                return Template(template).render(self.dump())
+                return Template(template).render(**self.data)
             else:
-                return env_template.from_string(template).render(self.dump())
+                return env_template.from_string(template).render(**self.data)
         except Exception as err:
             raise InvalidData("Failed to render template. Reason: %s" % (err))
 
@@ -475,13 +475,16 @@ class Event(object):
         def recurse(data):
 
             if isinstance(data, str):
-                try:
-                    if env_template is None:
-                        return Template(data).render(**self.dump())
-                    else:
-                        return env_template.from_string(data).render(**self.dump())
-                except Exception as err:
-                    return "#error: %s#" % (err)
+                if '{{' in data and '}}'in data:
+                    try:
+                        if env_template is None:
+                            return Template(data).render(**self.dump())
+                        else:
+                            return env_template.from_string(data).render(**self.dump())
+                    except Exception as err:
+                        return "#error: %s#" % (err)
+                else:
+                    return data
             elif isinstance(data, dict):
                 result = {}
                 for key, value in data.items():

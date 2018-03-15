@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '3.0.4'
+VERSION = '3.1.0'
 
 install_requires = [
     'arrow',
@@ -118,6 +118,7 @@ setup(
             'msgpack = wishbone.protocol.decode.msgpack:MSGPack',
         ],
         'wishbone.protocol.encode': [
+            'binary = wishbone.protocol.encode.binary:Binary',
             'dummy = wishbone.protocol.encode.dummy:Dummy',
             'json = wishbone.protocol.encode.json:JSON',
             'msgpack = wishbone.protocol.encode.msgpack:MSGPack',
@@ -147,7 +148,8 @@ setup(
         'wishbone.module.output': [
             'null = wishbone.module.null:Null',
             'stdout = wishbone.module.stdout:STDOUT',
-            'syslog = wishbone.module.wbsyslog:Syslog'
+            'syslog = wishbone.module.wbsyslog:Syslog',
+            'throughput = wishbone.module.throughput:Throughput'
         ],
         'wishbone.function.module': [
             'set = wishbone.function.module.set:Set',

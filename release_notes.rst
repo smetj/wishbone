@@ -1,6 +1,17 @@
-Version 3.0.4
+Version 3.1.0
 =============
 
-No changes compared to 3.0.3.
-Bumping version because of deleting version 3.0.3 from Pypi which does not
-alllow versions to be reused.
+
+Features:
+    - Added wishbone.module.output.throughput
+    - Some minor speed improvements prevening useless template rendering where
+      string can't be a template.
+    - Added debug log showing the module version
+    - Fixed docstrings of protocol decode modules
+    - Added wishbone.protocol.encode.binary
+    - Added parallel streams support for output modules
+
+Changes:
+
+    - Changed ``native_event`` parameter to ``native_events``
+    - Added new feature ``parallel_streams`` for output modules

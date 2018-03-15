@@ -31,6 +31,23 @@ from io import StringIO
 
 class JSON(Decode):
 
+    '''
+    Decode a JSON string into a Python object.
+
+    Parameters:
+
+        - charset(str)('utf-8)
+            |  The charset to use when decoding.
+
+        - delimiter(str)(None)
+            |  The dilimiter to use in a stream of Python docs.
+            |  None expects the complete payload to be 1 json document.
+
+        - buffer_size(int)(4096)
+            |  The maximum number of bytes allowed to buffer.
+
+    '''
+
     def __init__(self, charset='utf-8', delimiter=None, buffer_size=4096):
 
         self.charset = charset
