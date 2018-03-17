@@ -36,6 +36,15 @@ Output
   the remote service.
 
 
+.. WARNING::
+
+    Be aware that if ``parallel_streams`` is larger than 1, the equal amount
+    of events will be processed concurrently by the function registered with
+    :func:`wishbone.actor.Actor.registerConsumer` to consume the queue. Within
+    that function do **NOT** change shared (module) variables but only use
+    local (to the function) ones.
+
+
 The builtin Wishbone Output modules:
 
 +-----------------------------------------------------------------------------+-----------------------------------+
