@@ -35,18 +35,18 @@ class Generator(InputModule):
 
     Parameters::
 
-        - native_events(bool)(False)
-           |  Whether to expect incoming events to be native Wishbone events
+        - destination(str)("data")
+           |  The location write the payload to
 
         - interval(float)(1)
            |  The interval in seconds between each generated event.
            |  A value of 0 means as fast as possible.
 
+        - native_events(bool)(False)
+           |  Whether to expect incoming events to be native Wishbone events
+
         - payload(str/dict/int/float)("test")
            |  The content of the test message.
-
-        - destination(str)("data")
-           |  The location write the payload to
 
     Queues::
 
