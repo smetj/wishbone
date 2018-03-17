@@ -168,9 +168,9 @@ class STDOUT(OutputModule):
         )
         self.f.write(output)
 
-    def postHook(self):
+    # def postHook(self):
 
-        self.f.close()
+    #     self.f.close()
 
     def __validateInput(self, f, b, s):
 
