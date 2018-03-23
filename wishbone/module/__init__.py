@@ -43,7 +43,9 @@ class InputModule(Actor):
     MODULE_TYPE = ModuleType.INPUT
 
     def setDecoder(self, name, *args, **kwargs):
-        '''Sets a decoder.
+        '''
+        Sets the decoder with name <name> unless there's already a decoder
+        defined via ``actorconfig.ActorConfig``.
 
         Args:
             name (str): The name of the decoder to initialize
@@ -51,9 +53,16 @@ class InputModule(Actor):
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            None
+            Bool: True if the decoder is set, False when a decoder was already
+                  set via ``actorconfig.ActorConfig``
         '''
-        self.decode = ComponentManager().getComponentByName(name)(*args, **kwargs).handler
+        if self.decode is None:
+            self.decode = ComponentManager().getComponentByName(name)(*args, **kwargs).handler
+            self.logging.debug("Decoder '%s' has been set.")
+            return True
+        else:
+            self.logging.debug("Decoder '%s' has not been set. The user already defined one." % (name))
+            return False
 
     decode = DummyDecoder().handler
 
@@ -116,8 +125,27 @@ class OutputModule(Actor):
     MODULE_TYPE = ModuleType.OUTPUT
 
     def setEncoder(self, name, *args, **kwargs):
+        '''
+        Sets the encoder with name <name> unless there's already an encoder
+        defined via ``actorconfig.ActorConfig``.
 
-        self.encode = ComponentManager().getComponentByName(name)(*args, **kwargs).handler
+        Args:
+            name (str): The name of the encoder to initialize
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Bool: True if the encoder is set, False when an encoder was already
+                  set via ``actorconfig.ActorConfig``
+        '''
+
+        if self.encode is None:
+            self.encode = ComponentManager().getComponentByName(name)(*args, **kwargs).handler
+            self.logging.debug("Encoder '%s' has been set.")
+            return True
+        else:
+            self.logging.debug("Encoder '%s' has not been set. The user already defined one." % (name))
+            return False
 
     encode = DummyEncoder().handler
 
