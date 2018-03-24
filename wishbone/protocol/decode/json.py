@@ -27,6 +27,7 @@ from wishbone.error import ProtocolError
 from wishbone.protocol import Decode
 from json import loads
 from io import StringIO
+import os
 
 
 class JSON(Decode):
@@ -57,6 +58,14 @@ class JSON(Decode):
             self.delimiter = delimiter
         self.buffer_size = buffer_size
         self.buffer = StringIO()
+
+    def getBufferSize(self):
+
+        cur_pos = self.buffer.tell()
+        self.buffer.seek(0, os.SEEK_END)
+        size = self.buffer.tell()
+        self.buffer.seek(cur_pos)
+        return size
 
     def handleBytes(self, data):
 
@@ -110,5 +119,9 @@ class JSON(Decode):
             except Exception as err:
                 raise ProtocolError(err)
             else:
-                self.buffer.seek(0)
-                self.buffer.truncate()
+                self.resetBuffer()
+
+    def resetBuffer(self):
+
+        self.buffer = StringIO()
+

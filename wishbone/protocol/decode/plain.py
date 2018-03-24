@@ -23,6 +23,7 @@
 
 from wishbone.protocol import Decode
 from io import StringIO
+import os
 
 
 class Plain(Decode):
@@ -57,6 +58,14 @@ class Plain(Decode):
         self.strip_newline = strip_newline
         self.buffer = StringIO()
 
+    def getBufferSize(self):
+
+        cur_pos = self.buffer.tell()
+        self.buffer.seek(0, os.SEEK_END)
+        size = self.buffer.tell()
+        self.buffer.seek(cur_pos)
+        return size
+
     def handleBytes(self, data):
 
         for chunk in self.handler(data.decode(self.charset, "strict")):
@@ -86,13 +95,13 @@ class Plain(Decode):
                         yield item.rstrip()
                     else:
                         yield item
-            self.buffer.truncate(0)
+            self.resetBuffer()
         else:
-            self.buffer.seek(0, 2)
+            self.buffer.seek(self.getBufferSize())
 
     def flush(self):
 
-        if len(self.buffer.getvalue()) == 0:
+        if self.getBufferSize() == 0:
             return
             yield
         else:
@@ -100,5 +109,8 @@ class Plain(Decode):
                 yield self.buffer.getvalue().rstrip()
             else:
                 yield self.buffer.getvalue()
-            self.buffer.seek(0)
-            self.buffer.truncate(0)
+            self.resetBuffer()
+
+    def resetBuffer(self):
+
+        self.buffer = StringIO()
