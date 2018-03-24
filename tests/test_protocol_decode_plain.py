@@ -73,7 +73,6 @@ def test_protocol_decode_plain_readlines():
         os.unlink("./protocol_decode_test")
     except Exception as err:
         del(err)
-
     with open("./protocol_decode_test", "w") as w:
         w.write("one\ttwo\tthree\n")
         w.write("four\tfive")
@@ -81,8 +80,8 @@ def test_protocol_decode_plain_readlines():
     with open("./protocol_decode_test", "r") as r:
         p = Plain(delimiter="\t", strip_newline=True)
         for payload in p.handler(r):
-            assert payload == next(result)
-
+            check = next(result)
+            assert payload == check
     try:
         os.unlink("./protocol_decode_test")
     except Exception as err:
