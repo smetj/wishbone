@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = 'wishbone'
-VERSION = '3.1.0'
+VERSION = '3.1.1'
 
 install_requires = [
     'arrow',

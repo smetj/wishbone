@@ -64,6 +64,7 @@ class MSGPack(Decode):
                     return
                     yield
         except BufferFull:
+            self.unpacker = Unpacker(encoding=self.charset, max_buffer_size=self.buffer_size)
             raise ProtocolError("Buffer of %s bytes full." % (self.buffer_size))
 
     def handleReadLinesMethod(self, data):

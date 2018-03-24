@@ -30,14 +30,19 @@ from scalpl import Cut
 class Decode(object):
 
     handle_buffer_size = False
+    current_size = 0
 
     def flush(self):
 
         raise Exception("This decoder has no flush() method implemented.")
 
+    def getBufferSize(self):
+
+        return 0
+
     def handler(self, data):
 
-        if not self.handle_buffer_size and self.buffer.seek(0, 2) >= self.buffer_size:
+        if not self.handle_buffer_size and self.getBufferSize() >= self.buffer_size:
             raise ProtocolError("Buffer full")
         try:
             if data is None:
@@ -94,6 +99,9 @@ class Decode(object):
     def handleUnicode(self, data):
         raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
 
+    def resetBuffer(self):
+
+        raise Exception("Decoder has no resetBuffer() method.")
 
 class Encode(object):
 

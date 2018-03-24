@@ -1,17 +1,16 @@
-Version 3.1.0
+Version 3.1.1
 =============
 
+Bugfixes:
+
+    - remove closing of stdout filehandle as it might lead to stacktraces when
+      its still required. Leave it as is.
+
+    - Fixed wishbone.protocol.decoder problems when exceeding allowed buffer.
 
 Features:
-    - Added wishbone.module.output.throughput
-    - Some minor speed improvements prevening useless template rendering where
-      string can't be a template.
-    - Added debug log showing the module version
-    - Fixed docstrings of protocol decode modules
-    - Added wishbone.protocol.encode.binary
-    - Added parallel streams support for output modules
 
-Changes:
+    - Changed behaviour of Actor.setEncoder and Actor.setDecoder so they don't
+      override the referred encoder/decoder when one is already setup through
+      ActorConfig.
 
-    - Changed ``native_event`` parameter to ``native_events``
-    - Added new feature ``parallel_streams`` for output modules

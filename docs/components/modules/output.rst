@@ -8,7 +8,9 @@ Output
     Output modules submit data to external services.
 
 
- `Output` module properties:
+
+**Output module properties**:
+
 
 * They have a :ref:`protocol encoder method <encode>` mapped to
   :func:`wishbone.module.OutputModule.encode` in order to convert the desired
@@ -34,6 +36,20 @@ Output
   whether this makes sense.Normally you shouldn't really bother with this as
   long a Gevent's monkey patching works on the code you're using to speak to
   the remote service.
+
+* If you're setting a default encoder function make sure you use
+  :func:`wishbone.module.OutputModule.setEncoder` as this method will prevent
+  overwrite any user defined encoder set via
+  :py:class:`wishbone.actorconfig.ActorConfig`.
+
+
+.. WARNING::
+
+    Be aware that if ``parallel_streams`` is larger than 1, the equal amount
+    of events will be processed concurrently by the function registered with
+    :func:`wishbone.actor.Actor.registerConsumer` to consume the queue. Within
+    that function do **NOT** change shared (module) variables but only use
+    local (to the function) ones.
 
 
 The builtin Wishbone Output modules:
