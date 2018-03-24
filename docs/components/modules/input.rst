@@ -8,7 +8,8 @@ Input
     Input modules either take events from the outside world or generate events.
 
 
-`Input` module properties:
+**Input module properties**:
+
 
 * They have a :ref:`protocol decoder method <decode>` mapped to
   :func:`wishbone.module.InputModule.decode` in order to convert the incoming
@@ -26,6 +27,11 @@ Input
 * Should use :func:`wishbone.actor.Actor.generateEvent` to generate the event
   in which to store the incoming data.  It takes care of how the event is created
   in relation to the obligatory ``destination`` and ``native_events`` parameters.
+
+* If you're setting a default decoder function make sure you use
+  :func:`wishbone.module.InputModule.setDecoder` as this method will prevent
+  overwrite any user defined decoder set via
+  :py:class:`wishbone.actorconfig.ActorConfig`.
 
 
 The builtin Wishbone Input modules:
