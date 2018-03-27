@@ -41,6 +41,17 @@ from gevent.pool import Pool
 
 class InputModule(Actor):
     MODULE_TYPE = ModuleType.INPUT
+    actorconfig_defined_decoder = False
+
+    def getDecoder(self):
+        '''
+        Returns a new instance of the ``handler()`` method of the decoder set
+        by ``self.setDecoder()``. Each concurrent incoming data stream should
+        use its own instance of the decoder otherwise they end up overwriting
+        each other's content.
+        '''
+
+        raise Exception("This function should be overwritten by setDecoder().")
 
     def setDecoder(self, name, *args, **kwargs):
         '''
@@ -48,23 +59,19 @@ class InputModule(Actor):
         defined via ``actorconfig.ActorConfig``.
 
         Args:
-            name (str): The name of the decoder to initialize
+            name (str): The entrypoint name of the decoder to initialize
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
-
-        Returns:
-            Bool: True if the decoder is set, False when a decoder was already
-                  set via ``actorconfig.ActorConfig``
         '''
-        if self.decode is None:
-            self.decode = ComponentManager().getComponentByName(name)(*args, **kwargs).handler
-            self.logging.debug("Decoder '%s' has been set.")
-            return True
-        else:
-            self.logging.debug("Decoder '%s' has not been set. The user already defined one." % (name))
-            return False
 
-    decode = DummyDecoder().handler
+        if not self.actorconfig_defined_decoder:
+            class_ = ComponentManager().getComponentByName(name)
+
+            def getDecoder():
+                return class_(*args, **kwargs).handler
+
+            self.getDecoder = getDecoder
+            self.decode = self.getDecoder()
 
     def _generateNativeEvent(self, data={}, destination=None):
         '''
@@ -89,12 +96,13 @@ class InputModule(Actor):
         Does module type specific setup.
         '''
 
-        if not hasattr(self, "decode") and self.config.protocol is None:
-            self.logging.debug("This 'Input' module has no decoder method set. Setting dummy decoder.")
-            self.setDecoder("wishbone.protocol.decode.dummy")
+        self.setDecoder("wishbone.protocol.decode.dummy")
+
         if self.config.protocol is not None:
+            self.actorconfig_defined_decoder = True
             self.logging.debug("This 'Input' module has '%s' decoder configured." % (self.config.protocol))
-            self.decode = self.config.protocol.handler
+            self.getDecoder = self.config.protocol
+            self.decode = self.config.protocol()
 
         if self.kwargs.native_events:
             self.generateEvent = self._generateNativeEvent
@@ -112,9 +120,6 @@ class InputModule(Actor):
         Raises:
             ModuleInitFailure: Raised when one of the components isn't correct.
         '''
-
-        if self.config.protocol is not None and not isinstance(self.config.protocol, Decode):
-            raise ModuleInitFailure("An 'input' module should have a decode protocol set. Found %s" % (type(self.config.protocol)))
 
         for param in ["native_events", "destination"]:
             if param not in self.kwargs.keys():

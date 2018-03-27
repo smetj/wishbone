@@ -233,7 +233,7 @@ class Default(object):
 
         protocols = {}
         for name, instance in list(self.config.protocols.items()):
-            protocols[name] = self.component_manager.getComponentByName(instance.protocol)(**instance.arguments)
+            protocols[name] = {"class": self.component_manager.getComponentByName(instance.protocol), "arguments": instance.arguments}
 
         template_functions = {}
         for name, instance in list(self.config.template_functions.items()):
@@ -256,7 +256,13 @@ class Default(object):
             elif instance.protocol not in protocols:
                 raise ModuleInitFailure("Protocol %s referenced but not available." % (instance.protocol))
             else:
-                protocol = protocols[instance.protocol]
+                class_ = protocols[instance.protocol]["class"]
+                args = protocols[instance.protocol]["arguments"]
+
+                def getProtocol():
+                    return class_(**args).handler
+
+                protocol = getProtocol
 
             actor_config = ActorConfig(
                 name=name,

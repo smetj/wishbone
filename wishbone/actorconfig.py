@@ -38,7 +38,8 @@ class ActorConfig(object):
         template_functions (dict): A dictionary of template functions.
         description (str): A short free form discription of the actor instance.
         module_functions (dict): A dict of queue names containing an array of module_functions
-        protocol (``wishbone.protocol.Encode``, ``wishbone.protocol.Encode``): A protocol decode or encode instance.
+        protocol (``func``, ``wishbone.protocol.Encode``): A function returning a ``decoder.handler()``
+                                                           method or a protocol encode instance.
         io_event (bool): When ``True`` Input and Output modules know to expect or emit serialzed wishbone events.
         identification (str): A name assigned to the Wishbone instance, useful for the module to know such as logging.
         disable_exception_handling (bool): If True, exception handling is disabled. Usefull for testing
@@ -56,7 +57,8 @@ class ActorConfig(object):
             template_functions (dict): A dictionary of template functions.
             description (str): A short free form discription of the actor instance.
             module_functions (dict): A dict of queue names containing an array of module_functions.
-            protocol (``wishbone.protocol.Encode``, ``wishbone.protocol.Encode``): A protocol decode or encode instance.
+            protocol (``func``, ``wishbone.protocol.Encode``): A function returning a ``decoder.handler()``
+                                                               method or a protocol encode instance.
             io_event (bool): When ``True`` Input and Output modules know to expect or emit serialzed wishbone events.
             identification (str): A name assigned to the Wishbone instance, useful for the module to know such as logging.
             disable_exception_handling (bool): If True, exception handling is disabled. Usefull for testing

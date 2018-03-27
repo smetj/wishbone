@@ -103,6 +103,7 @@ class Decode(object):
 
         raise Exception("Decoder has no resetBuffer() method.")
 
+
 class Encode(object):
 
     def handler(self, data):
