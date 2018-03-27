@@ -38,6 +38,9 @@ class Dummy(Decode):
     '''
 
     def __init__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+
         self.handle_buffer_size = True
 
     def handleBytes(self, data):

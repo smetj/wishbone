@@ -52,9 +52,10 @@ def test_module():
 
 def test_module_override_protocol():
 
-    actor_config = ActorConfig('DummyTest', 100, 1, {}, "", protocol=Plain())
+    actor_config = ActorConfig('DummyTest', 100, 1, {}, "", protocol=lambda: Plain().handler)
     d = DummyModule(actor_config)
     d.start()
+
     assert d.decode.__self__.__class__.__name__ == "Plain"
 
 
