@@ -1,27 +1,26 @@
 language: python
 python:
-  - "3.6"
+- '3.6'
 install:
-  - python setup.py install
-
+- python setup.py install
 script:
-  - python setup.py test
-
+- python setup.py test
 after_success:
-  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-  - export REPO=smetj/wishbone
-  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
-  - docker build -f Dockerfile -t $REPO:$TRAVIS_COMMIT --build-arg branch=$TRAVIS_BRANCH .
-  - docker tag $REPO:$TRAVIS_COMMIT $REPO:$TAG
-  - docker push $REPO:$TAG
-  - docker push $REPO:$TRAVIS_COMMIT
-
+- docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+- export REPO=smetj/wishbone
+- export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH
+  ; fi`
+- docker build -f Dockerfile -t $REPO:$TRAVIS_COMMIT --build-arg branch=$TRAVIS_BRANCH
+  .
+- docker tag $REPO:$TRAVIS_COMMIT $REPO:$TAG
+- docker push $REPO:$TAG
+- docker push $REPO:$TRAVIS_COMMIT
 notifications:
   webhooks:
     urls:
-      - https://$WEBHOOK_USER:$WEBHOOK_PASSWORD@events.smetj.net/travis
-    on_success: always # default: always
-    on_failure: always # default: always
-    on_start: change   # default: never
-    on_cancel: always # default: always
-    on_error: always # default: always
+    - secure: gO8Uahwa9Rnk5E0YI8gWhbTZp9j1/SDEI8ydDKgwi/7PkrM1D3ldd2zYL5mDMRo8Dx3nv5PA7excGBhtjBtNemdbtoXiZYVnSPuGOBBNOvELpF0Zr8+o3a2s8pEB3Qyr9voZHPEMIrNBJpb9CKoFejRUwdyPtV1hhoKAc1Dw6Kckd1EFb2XcIWIeE6k+vxOUXoYcfC3jvtECmiEqZpjM5ChKZvsyEVYyZ4kpPsqHlV2O0Th0ab0TdUsYQXC6r/JN8YaLxT/WaXqiNCkqO+LmolBOrZ4O0qZbkhi0x04V6nBYmal6KYdpREhv8R8tqHCeBDMjRTrxeYik37j/zBagsVOkQ++S4ciBH/2stAxBHMRFaG6zAt5dakJksnEsoqHp2tuTN72eUPfBovYYMmLNZEuElK3YTIDeiI+EnlScXb5zR1NgsFzas5w5uUCkvvgAcFf1Y+2xDZyR0neiMlfhY3xUUGgRhtTxz8Eb+kV709VVNd+cndoROhKRZKtpOljf6jpH+rzS7OaReQtlEudv71NgtpEKt6CM5OW4bci9IxPdmZwq8YwiWdAnd/2jhPbwnHQtAJ2GFwUy4rcIAMQhCelsc7qgPruXrBlZ/GUnbxb2yQQDaTfr9133jJ4XwIietuNV8MqogCgpW/1B2DbJ8qvsSrfWGotKXmV7RD14gR4=
+    on_success: always
+    on_failure: always
+    on_start: change
+    on_cancel: always
+    on_error: always
