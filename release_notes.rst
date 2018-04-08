@@ -1,6 +1,6 @@
-Version 3.1.3
+Version 3.1.4
 =============
 
 Bugfixes:
 
-    - Fixed bug where setting protocol encoder failed.
+    - Fix bug where setting encoder replace decoder.
