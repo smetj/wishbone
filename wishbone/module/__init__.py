@@ -256,7 +256,7 @@ class OutputModule(Actor):
             self.setEncoder("wishbone.protocol.encode.dummy")
         if self.config.protocol is not None:
             self.logging.debug("This 'Output' module has '%s' encoder configured." % (self.config.protocol))
-            self.encode = self.config.protocol.handler
+            self.encode = self.config.protocol()
 
     def _moduleInitValidation(self):
         '''
@@ -271,9 +271,6 @@ class OutputModule(Actor):
         Raises:
             ModuleInitFailure: Raised when one of the components isn't correct.
         '''
-
-        if self.config.protocol is not None and not isinstance(self.config.protocol, Encode):
-            raise ModuleInitFailure("An 'output' module should have a encode protocol set. Found %s" % (type(self.config.protocol)))
 
         for param in ["payload", "selection", "native_events", "parallel_streams"]:
             if param not in self.kwargs.keys():
