@@ -17,8 +17,8 @@ services.
 
 The framework can be used to implement a wide area of solutions such as
 `mashup enablers`_, `ETL servers`_, `stream processing servers`_, `webhook
-services`_ , `ChatOps services`_, bots and all kinds of event driven
-automation.
+services`_ , `ChatOps services`_, bots, `Cloud-based integrations`_
+and all kinds of event driven automation.
 
 .. image:: pics/separator_2.png
     :align: center
@@ -67,3 +67,4 @@ Wishbone will probably be useful to you when tackling the:
 .. _CEP: https://en.wikipedia.org/wiki/Complex_event_processing
 .. _ChatOps services: https://www.google.com/search?newwindow=1&q=chatops
 .. _webhook services: https://en.wikipedia.org/wiki/Webhook
+.. _Cloud-based integrations: https://en.wikipedia.org/wiki/Cloud-based_integration
