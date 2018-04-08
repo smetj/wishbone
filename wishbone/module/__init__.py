@@ -28,11 +28,10 @@ from wishbone.moduletype import ModuleType
 from wishbone.componentmanager import ComponentManager
 from wishbone.error import ModuleInitFailure
 from wishbone.event import extractBulkItemValues
-from wishbone.protocol import Encode, Decode
 from wishbone.event import Event as Wishbone_Event
-from wishbone.protocol.decode.dummy import Dummy as DummyDecoder
 from wishbone.protocol.encode.dummy import Dummy as DummyEncoder
 from wishbone.error import TTLExpired
+from wishbone.utils import GetProtocolHandler
 from copy import deepcopy
 from sys import exc_info
 import traceback
@@ -66,11 +65,7 @@ class InputModule(Actor):
 
         if not self.actorconfig_defined_decoder:
             class_ = ComponentManager().getComponentByName(name)
-
-            def getDecoder():
-                return class_(*args, **kwargs).handler
-
-            self.getDecoder = getDecoder
+            self.getDecoder = GetProtocolHandler(class_, kwargs).getProtocol
             self.decode = self.getDecoder()
 
     def _generateNativeEvent(self, data={}, destination=None):

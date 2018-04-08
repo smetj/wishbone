@@ -31,6 +31,7 @@ from gevent import pywsgi
 from .graphcontent import GRAPHCONTENT
 from .graphcontent import VisJSData
 from types import SimpleNamespace
+from wishbone.utils import GetProtocolHandler
 
 
 class ModulePool():
@@ -256,13 +257,7 @@ class Default(object):
             elif instance.protocol not in protocols:
                 raise ModuleInitFailure("Protocol %s referenced but not available." % (instance.protocol))
             else:
-                class_ = protocols[instance.protocol]["class"]
-                args = protocols[instance.protocol]["arguments"]
-
-                def getProtocol():
-                    return class_(**args).handler
-
-                protocol = getProtocol
+                protocol = GetProtocolHandler(protocols[instance.protocol]["class"], protocols[instance.protocol]["arguments"]).getProtocol
 
             actor_config = ActorConfig(
                 name=name,

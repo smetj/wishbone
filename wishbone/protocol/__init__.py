@@ -123,7 +123,7 @@ class Encode(object):
             elif isinstance(data, Cut):
                 return self.handleCut(data)
             else:
-                raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
+                raise ProtocolError("%s is not supported by this Encoder." % (type(data)))
         except Exception as err:
             raise ProtocolError(err)
 

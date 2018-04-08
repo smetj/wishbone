@@ -25,6 +25,7 @@
 import os
 from gevent import sleep
 from wishbone.error import ModuleNotReady
+from copy import deepcopy
 from .structured_data_file import StructuredDataFile
 
 
@@ -140,3 +141,15 @@ class PIDFile():
 
         if os.path.isfile(self.location):
             os.remove(self.location)
+
+
+class GetProtocolHandler(object):
+
+    def __init__(self, class_instance, arguments):
+
+        self.class_instance = deepcopy(class_instance)
+        self.arguments = deepcopy(arguments)
+
+    def getProtocol(self):
+
+        return self.class_instance(**self.arguments).handler

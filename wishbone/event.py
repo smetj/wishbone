@@ -256,6 +256,8 @@ class Event(object):
             except Exception as err:
                 raise KeyError(key)
 
+    getNative = dump
+
     def has(self, key="data"):
         '''Returns a bool indicating the event has ``key``
 
