@@ -137,7 +137,7 @@ class Count(FlowModule):
                     break
         else:
             self.submit(event, "outbox")
-            self.logging.debug("Event with id '%s' has not a single key defined in the conditions therefor it is passed to outbox." % (event.get('uuid'), key))
+            self.logging.debug("Event with id '%s' has not a single key defined in the conditions therefor it is passed to outbox." % (event.get('uuid')))
 
     def __countDown(self, seconds, key):
 
