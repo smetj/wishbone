@@ -24,6 +24,7 @@
 
 from wishbone.module.wb_inotify import WBInotify
 from wishbone.actor import ActorConfig
+from wishbone.queue import QueuePool
 from wishbone.utils.test import getter
 from uuid import uuid4
 import os
@@ -34,7 +35,7 @@ def test_module_inotify_default():
 
     # Standard situation.  Monitors the changes to a file.
 
-    actor_config = ActorConfig('inotify', 100, 1, {}, "")
+    actor_config = ActorConfig('inotify', QueuePool())
 
     filename = "/tmp/%s" % str(uuid4())
     open(filename, 'a').close()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_utils.py
+#  wishbonequeue.py
 #
 #  Copyright 2018 Jelle Smet <development@smetj.net>
 #
@@ -22,18 +22,36 @@
 #
 #
 
-from wishbone.error import QueueEmpty
+
+from abc import ABC, abstractmethod
 
 
-def getter(queue):
-    return queue.get()
-    counter = 0
-    while True:
-        counter += 1
-        if counter >= 5:
-            raise Exception("No event from queue")
-        else:
-            try:
-                return queue.get(timeout=1)
-            except QueueEmpty:
-                continue
+class WishboneQueue(ABC):
+
+    @abstractmethod
+    def clean(self):
+        pass
+
+    @abstractmethod
+    def disableFallThrough(self):
+        pass
+
+    @abstractmethod
+    def dump(self):
+        pass
+
+    @abstractmethod
+    def empty(self):
+        pass
+
+    @abstractmethod
+    def enableFallThrough(self):
+        pass
+
+    @abstractmethod
+    def get(self):
+        pass
+
+    @abstractmethod
+    def size(self):
+        pass

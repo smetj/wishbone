@@ -25,12 +25,13 @@
 from wishbone.event import Event
 from wishbone.module.funnel import Funnel
 from wishbone.actor import ActorConfig
+from wishbone.queue import QueuePool
 from wishbone.utils.test import getter
 
 
 def test_module_funnel():
 
-    actor_config = ActorConfig('funnel', 100, 1, {}, "")
+    actor_config = ActorConfig('funnel', QueuePool())
     funnel = Funnel(actor_config)
     funnel.pool.queue.outbox.disableFallThrough()
 

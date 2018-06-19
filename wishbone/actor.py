@@ -23,13 +23,14 @@
 #
 
 from gevent.monkey import patch_all; patch_all()
-from wishbone.queue import QueuePool
+from wishbone.queue import QueuePoolWrapper
 from wishbone.logging import Logging
 from wishbone.event import Event as Wishbone_Event
-from wishbone.error import ModuleInitFailure, InvalidModule, TTLExpired
+from wishbone.error import ModuleInitFailure, InvalidModule, TTLExpired, QueueEmpty, QueuePoolError
 from wishbone.actorconfig import ActorConfig
 from wishbone.function.template import TemplateFunction
 from wishbone.function.module import ModuleFunction
+from wishbone.queue import MemoryQueue
 
 from collections import namedtuple
 from gevent import spawn, kill
@@ -75,23 +76,33 @@ class Actor(object):
         self.config = config
         self.name = config.name
         self.description = self.__getDescription(config)
+        self.__loop = True
+        self.greenlets = Greenlets([], [], [], [])
+        self._run = Event()
+        self._run.clear()
+        self.stopped = True
 
-        self.pool = QueuePool(config.size)
+        # Setup the metrics collector thread
+        ####################################
+        self.greenlets.metric.append(spawn(self.__metricProducer))
 
+        # Setup queue pool component and create the default queues
+        ##########################################################
+        self.pool = QueuePoolWrapper(self.name, config.queue_pool)
+        for queue in ["_logs", "_metrics", "_success", "_failed"]:
+            try:
+                self.pool.createSystemQueue(queue, MemoryQueue())
+            except QueuePoolError:
+                # The queue already exists, that's fine.
+                pass
+
+        # Setup the logging component
+        #############################
         self.logging = Logging(
             name=config.name,
             q=self.pool.queue._logs,
             identification=self.config.identification
         )
-
-        self.__loop = True
-        self.greenlets = Greenlets([], [], [], [])
-        self.greenlets.metric.append(spawn(self.__metricProducer))
-
-        self._run = Event()
-        self._run.clear()
-
-        self.stopped = True
 
         # Setup the Jinja2 environment to render kwargs templates.
         ##########################################################
@@ -248,16 +259,9 @@ class Actor(object):
             self.preHook()
         self.__validateAppliedFunctions()
         self._run.set()
-        self.logging.debug(
-            "Started with max queue size of %s events and metrics interval of %s seconds." % (
-                self.config.size,
-                self.config.frequency
-            )
-        )
         self.stopped = False
 
-        if not self.name.startswith("_"):
-            self.logging.debug("Started version %s" % (self.version))
+        self.logging.debug("Started version %s" % (self.version))
 
     def sendToBackground(self, function, *args, **kwargs):
         '''
@@ -335,17 +339,17 @@ class Actor(object):
         Returns:
             None
         '''
-
-        while self.loop():
-            try:
-                getattr(self.pool.queue, queue).put(event)
-                break
-            except AttributeError:
-                self.logging.error("No such queue %s. Event with uuid %s dropped." % (queue, event.get('uuid')))
-                break
-            except QueueFull:
-                self.logging.warning("Queue '%s' is full and stalls the event pipeline. You should probably look into this." % (queue))
-                sleep(0.1)
+        try:
+            q = self.pool.getQueue(queue)
+        except QueuePoolError:
+            self.logging.error("No such queue %s. Event with uuid %s dropped." % (queue, event.get('uuid')))
+        else:
+            while self.loop():
+                try:
+                    q.put(event, timeout=1)
+                    break
+                except QueueFull:
+                    self.logging.warning("Queue '%s' is full and stalls the event pipeline. You should probably look into this." % (queue))
 
     def _applyFunctions(self, queue, event):
         '''
@@ -385,10 +389,14 @@ class Actor(object):
 
         self._run.wait()
         self.logging.debug("Function '%s' has been registered to consume queue '%s'" % (function.__name__, queue))
-
+        queue_instance = self.pool.getQueue(queue)
         while self.loop():
 
-            event = self.pool.getQueue(queue).get()
+            try:
+                event = queue_instance.get(timeout=1)
+            except QueueEmpty:
+                continue
+
             if not event.has("tmp.%s" % (self.name)):
                 event.set({}, "tmp.%s" % (self.name))
 
@@ -400,6 +408,7 @@ class Actor(object):
                 event.decrementTTL()
             except TTLExpired as err:
                 self.logging.warning("Event with UUID %s dropped. Reason: %s" % (event.get("uuid"), err))
+                del(event)
                 continue
 
             # Set the current event uuid to the logger object

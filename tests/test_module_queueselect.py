@@ -25,12 +25,13 @@
 from wishbone.event import Event
 from wishbone.module.queueselect import QueueSelect
 from wishbone.actor import ActorConfig
+from wishbone.queue import QueuePool
 from wishbone.utils.test import getter
 
 
 def test_module_queueselect_default():
 
-    actor_config = ActorConfig('queueselect', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('queueselect', QueuePool(), disable_exception_handling=True)
 
     template = {
         "name": "name of the rule",
@@ -68,7 +69,7 @@ def test_module_queueselect_default():
 
 def test_module_queueselect_multiple_queues():
 
-    actor_config = ActorConfig('queueselect', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('queueselect', QueuePool(), disable_exception_handling=True)
 
     template = {
         "name": "name of the rule",
@@ -107,7 +108,7 @@ def test_module_queueselect_multiple_queues():
 
 def test_module_queueselect_nomatch():
 
-    actor_config = ActorConfig('queueselect', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('queueselect', QueuePool(), disable_exception_handling=True)
 
     template = {
         "name": "name of the rule",
@@ -139,7 +140,7 @@ def test_module_queueselect_nomatch():
 
 def test_module_queueselect_regex():
 
-    actor_config = ActorConfig('queueselect', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('queueselect', QueuePool(), disable_exception_handling=True)
 
     template = {
         "name": "name of the rule",
@@ -171,7 +172,7 @@ def test_module_queueselect_regex():
 
 def test_module_queueselect_novalidqueue():
 
-    actor_config = ActorConfig('queueselect', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('queueselect', QueuePool(), disable_exception_handling=True)
 
     templates = [
         {

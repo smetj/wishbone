@@ -26,13 +26,14 @@
 from wishbone.module.unpack import Unpack
 
 from wishbone.actor import ActorConfig
+from wishbone.queue import QueuePool
 from wishbone.utils.test import getter
 from wishbone.event import Event
 
 
 def test_module_unpack():
 
-    actor_config = ActorConfig('unpack', 100, 1, {}, "")
+    actor_config = ActorConfig('unpack', QueuePool())
     unpack = Unpack(actor_config)
 
     unpack.pool.queue.inbox.disableFallThrough()

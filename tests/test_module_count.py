@@ -26,6 +26,7 @@ from wishbone.event import Event
 from wishbone.module.count import Count
 from wishbone.actor import ActorConfig
 from wishbone.utils.test import getter
+from wishbone.queue import QueuePool
 from gevent import sleep
 
 
@@ -42,7 +43,7 @@ def test_module_count_default_pass():
         }
     }
 
-    actor_config = ActorConfig('funnel', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('funnel', QueuePool(), disable_exception_handling=True)
     count = Count(actor_config, conditions)
     count.pool.queue.inbox.disableFallThrough()
     count.pool.queue.outbox.disableFallThrough()
@@ -76,7 +77,7 @@ def test_module_count_timeout_pass():
         }
     }
 
-    actor_config = ActorConfig('funnel', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('funnel', QueuePool(), disable_exception_handling=True)
     count = Count(actor_config, conditions)
     count.pool.queue.inbox.disableFallThrough()
     count.pool.queue.outbox.disableFallThrough()
@@ -110,7 +111,7 @@ def test_module_count_default_dropped():
         }
     }
 
-    actor_config = ActorConfig('funnel', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('funnel', QueuePool(), disable_exception_handling=True)
     count = Count(actor_config, conditions)
     count.pool.queue.inbox.disableFallThrough()
     count.pool.queue.outbox.disableFallThrough()
@@ -142,7 +143,7 @@ def test_module_count_timeout_drop():
         }
     }
 
-    actor_config = ActorConfig('funnel', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('funnel', QueuePool(), disable_exception_handling=True)
     count = Count(actor_config, conditions)
     count.pool.queue.inbox.disableFallThrough()
     count.pool.queue.outbox.disableFallThrough()

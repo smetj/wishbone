@@ -2,7 +2,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-#  error.py
+#  __init__.py
 #
 #  Copyright 2018 Jelle Smet <development@smetj.net>
 #
@@ -121,4 +121,7 @@ class ProtocolInitFailure(Exception):
 
 
 class TTLExpired(Exception):
+    pass
+
+class QueuePoolError(Exception):
     pass

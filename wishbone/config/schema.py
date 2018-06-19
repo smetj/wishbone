@@ -111,7 +111,10 @@ SCHEMA = {
             }
         },
         "routingtable": {
-            "type": "array"
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
         }
     },
     "required": ["modules", "routingtable"],

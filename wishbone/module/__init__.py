@@ -26,7 +26,7 @@
 from wishbone.actor import Actor
 from wishbone.moduletype import ModuleType
 from wishbone.componentmanager import ComponentManager
-from wishbone.error import ModuleInitFailure
+from wishbone.error import ModuleInitFailure, QueueEmpty
 from wishbone.event import extractBulkItemValues
 from wishbone.event import Event as Wishbone_Event
 from wishbone.protocol.encode.dummy import Dummy as DummyEncoder
@@ -218,7 +218,10 @@ class OutputModule(Actor):
 
         while self.loop():
 
-            event = self.pool.getQueue(queue).get()
+            try:
+                event = self.pool.getQueue(queue).get(timeout=1)
+            except QueueEmpty:
+                continue
             if not event.has("tmp.%s" % (self.name)):
                 event.set({}, "tmp.%s" % (self.name))
 

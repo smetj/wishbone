@@ -26,6 +26,7 @@ from wishbone.event import Event
 from wishbone.module.acknowledge import Acknowledge
 from wishbone.actor import ActorConfig
 from wishbone.utils.test import getter
+from wishbone.queue import QueuePool
 
 
 def test_module_acknowledge_default():
@@ -33,7 +34,7 @@ def test_module_acknowledge_default():
     # Standard situation.  Event passes through as it's
     # the first time is is acknowledged.
 
-    actor_config = ActorConfig('acknowledge', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('acknowledge', QueuePool(), disable_exception_handling=True)
     acknowledge = Acknowledge(actor_config)
     acknowledge.pool.queue.inbox.disableFallThrough()
     acknowledge.pool.queue.outbox.disableFallThrough()
@@ -53,7 +54,7 @@ def test_module_acknowledge_dropped():
     # An  event tries to pass through with an unacknowledged ack_id and
     # therefor should be dropped.
 
-    actor_config = ActorConfig('acknowledge', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('acknowledge', QueuePool(), disable_exception_handling=True)
     acknowledge = Acknowledge(actor_config, ack_id="{{data}}")
     acknowledge.pool.queue.inbox.disableFallThrough()
     acknowledge.pool.queue.outbox.disableFallThrough()
@@ -74,7 +75,7 @@ def test_module_acknowledge_acknowledge():
     # An unacknowledged ack_id gets acknowledged and therefor lets then next
     # event with the same ack_id through.
 
-    actor_config = ActorConfig('acknowledge', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('acknowledge', QueuePool(), disable_exception_handling=True)
     acknowledge = Acknowledge(actor_config, ack_id="{{data}}")
     acknowledge.pool.queue.inbox.disableFallThrough()
     acknowledge.pool.queue.outbox.disableFallThrough()

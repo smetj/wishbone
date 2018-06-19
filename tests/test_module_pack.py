@@ -25,6 +25,7 @@
 from wishbone.event import Event
 from wishbone.module.pack import Pack
 from wishbone.actor import ActorConfig
+from wishbone.queue import QueuePool
 from wishbone.utils.test import getter
 from gevent import sleep
 
@@ -33,7 +34,7 @@ def test_module_pack_size():
 
     # Wraps  10 events into a bulk event.
 
-    actor_config = ActorConfig('pack', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('pack', QueuePool(), disable_exception_handling=True)
     bucket = Pack(actor_config, bucket_size=10)
     bucket.pool.queue.inbox.disableFallThrough()
     bucket.pool.queue.outbox.disableFallThrough()
@@ -52,7 +53,7 @@ def test_module_pack_time():
 
     # Bucket spills in 1 second
 
-    actor_config = ActorConfig('pack', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('pack', QueuePool(), disable_exception_handling=True)
     bucket = Pack(actor_config, bucket_age=1)
     bucket.pool.queue.inbox.disableFallThrough()
     bucket.pool.queue.outbox.disableFallThrough()
