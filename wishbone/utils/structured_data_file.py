@@ -31,8 +31,8 @@ from jsonschema import validate
 from wishbone.error import InvalidData
 
 
-class StructuredDataFile():
-    '''
+class StructuredDataFile:
+    """
     Loads and optionally validates structured data from disk.
 
     The module loads data from disk and optionally validates the data against
@@ -45,17 +45,24 @@ class StructuredDataFile():
         expect_yaml (bool): When True, the data structure can be YAML.
         expect_kv (bool): When True, the data structure can be Key/Value.
         content (dict): The loaded configurations.  Absolute paths are dict keys.
-    '''
+    """
 
-    def __init__(self, default=None, schema=None, expect_json=True, expect_yaml=True, expect_kv=True):
-        '''
+    def __init__(
+        self,
+        default=None,
+        schema=None,
+        expect_json=True,
+        expect_yaml=True,
+        expect_kv=True,
+    ):
+        """
         Args:
             default (obj): A default value to return when no file content has loaded yet.
             schema (str): The JSONschema to validate the loaded data against.
             expect_json (bool): When True, the data structure can be JSON
             expect_yaml (bool): When True, the data structure can be YAML.
             expect_kv (bool): When True, the data structure can be Key/Value.
-        '''
+        """
 
         self.default = default
         self.schema = schema
@@ -66,18 +73,18 @@ class StructuredDataFile():
         self.lock = Semaphore()
 
     def delete(self, path):
-        '''Deletes the file content from the object'''
+        """Deletes the file content from the object"""
 
         abs_path = os.path.abspath(path)
 
         with self.lock:
             if abs_path in self.content.keys():
-                del(self.content[abs_path])
+                del (self.content[abs_path])
 
     def dump(self):
-        '''Dumps the complete cached content of all files
+        """Dumps the complete cached content of all files
         If multiple files are cached then a list is returned.
-        '''
+        """
 
         with self.lock:
             if self.content is {}:
@@ -86,16 +93,16 @@ class StructuredDataFile():
                 return self.content
 
     def dumpItems(self):
-        '''
+        """
         Dumps the complete cached content file by file
-        '''
+        """
 
         for filename, content in self.content.items():
             yield content
 
     def get(self, path):
-        '''Returns the cached content of the file.  If the file isn't loaded yet, it
-        tries to do that.'''
+        """Returns the cached content of the file.  If the file isn't loaded yet, it
+        tries to do that."""
 
         abs_path = os.path.abspath(path)
 
@@ -105,7 +112,7 @@ class StructuredDataFile():
             return self.content[abs_path]
 
     def load(self, path):
-        '''Loads the file into the module and validates the content when required.'''
+        """Loads the file into the module and validates the content when required."""
 
         abs_path = os.path.abspath(path)
         with self.lock:
@@ -122,9 +129,13 @@ class StructuredDataFile():
                     except Exception as err:
                         raise InvalidData(err.message)
             else:
-                raise Exception("'%s' does not appear to be a regular file." % (abs_path))
+                raise Exception(
+                    "'%s' does not appear to be a regular file." % (abs_path)
+                )
         else:
-            raise Exception("File '%s' does not exist or is not accessible." % (abs_path))
+            raise Exception(
+                "File '%s' does not exist or is not accessible." % (abs_path)
+            )
 
         return content
 
@@ -167,4 +178,6 @@ class StructuredDataFile():
                     return
 
             if len(errors) > 0:
-                raise Exception("Could not load file '%s'.  Reason: '%s'" % (path, ",".join(errors)))
+                raise Exception(
+                    "Could not load file '%s'.  Reason: '%s'" % (path, ",".join(errors))
+                )

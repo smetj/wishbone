@@ -31,7 +31,7 @@ from wishbone.utils.test import getter
 
 def test_module_switch_default():
 
-    actor_config = ActorConfig('switch', QueuePool())
+    actor_config = ActorConfig("switch", QueuePool())
 
     switch = Switch(actor_config, outgoing="one")
     switch.pool.queue.inbox.disableFallThrough()
@@ -53,7 +53,7 @@ def test_module_switch_default():
 
 def test_module_switch_event():
 
-    actor_config = ActorConfig('switch', QueuePool(), disable_exception_handling=True)
+    actor_config = ActorConfig("switch", QueuePool(), disable_exception_handling=True)
 
     switch = Switch(actor_config, outgoing="one")
     switch.pool.queue.inbox.disableFallThrough()

@@ -72,7 +72,7 @@ def test_protocol_decode_plain_readlines():
     try:
         os.unlink("./protocol_decode_test")
     except Exception as err:
-        del(err)
+        del (err)
     with open("./protocol_decode_test", "w") as w:
         w.write("one\ttwo\tthree\n")
         w.write("four\tfive")
@@ -85,7 +85,7 @@ def test_protocol_decode_plain_readlines():
     try:
         os.unlink("./protocol_decode_test")
     except Exception as err:
-        del(err)
+        del (err)
 
 
 def test_protocol_decode_plain_basic_overflow():

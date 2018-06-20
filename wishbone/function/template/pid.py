@@ -27,20 +27,20 @@ from os import getpid
 
 
 class PID(TemplateFunction):
-    '''
+    """
     Returns the PID of the current process.
 
     A Wishbone template function which returns the PID of the current process.
 
     Args:
         None
-    '''
+    """
 
     def __init__(self):
         self.pid = getpid()
 
     def get(self):
-        '''
+        """
         The function mapped to the template function.
 
         Args:
@@ -48,6 +48,6 @@ class PID(TemplateFunction):
 
         Returns:
             int: The current PID.
-        '''
+        """
 
         return self.pid

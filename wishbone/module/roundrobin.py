@@ -31,7 +31,7 @@ from random import randint
 
 class RoundRobin(FlowModule):
 
-    '''**Round-robins incoming events to all connected queues.**
+    """**Round-robins incoming events to all connected queues.**
 
     Create a "1 to n" relationship between queues.  Events arriving in inbox
     are then submitted in a roundrobin (or randomized) fashion to the
@@ -48,7 +48,7 @@ class RoundRobin(FlowModule):
 
         - inbox
            |  Incoming events
-    '''
+    """
 
     def __init__(self, actor_config, randomize=False):
         Actor.__init__(self, actor_config)

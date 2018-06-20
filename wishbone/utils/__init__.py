@@ -31,12 +31,12 @@ from .structured_data_file import StructuredDataFile
 
 class ModuleConnectionMock(object):
 
-    '''
+    """
     A class which can be initially assigned to a variable which is going to
     hold a future connection related object/method. If the actual connection
     to the upstream server has not been finished yet, we have at least a
     predictable error.
-    '''
+    """
 
     def __init__(self, message="Not connected"):
 
@@ -47,17 +47,17 @@ class ModuleConnectionMock(object):
         raise ModuleNotReady(self.message)
 
 
-class PIDFile():
+class PIDFile:
 
-    '''
+    """
     Handles all PIDfile interactions.
-    '''
+    """
 
     def __init__(self, location):
         self.location = location
 
     def alive(self):
-        '''Returns True if at least 1 PID in pidfile is alive.'''
+        """Returns True if at least 1 PID in pidfile is alive."""
 
         for pid in self.__readPIDFile():
             if self.__isAlive(pid):
@@ -65,7 +65,7 @@ class PIDFile():
         return False
 
     def create(self, pids=[]):
-        '''Creates the pidfile containing the provided list of pids.'''
+        """Creates the pidfile containing the provided list of pids."""
 
         if self.exists():
             if self.valid():
@@ -76,22 +76,22 @@ class PIDFile():
         self.__writePIDFile(pids)
 
     def cleanup(self):
-        '''Deleted PID file if possible.'''
+        """Deleted PID file if possible."""
         if self.exists():
             self.__deletePIDFile()
 
     def exists(self):
-        '''Returns True if file exists.'''
+        """Returns True if file exists."""
 
         return os.path.isfile(self.location)
 
     def read(self):
-        '''Returns the content of the pidfile'''
+        """Returns the content of the pidfile"""
 
         return self.__readPIDFile()
 
     def sendSigint(self, pid):
-        '''Sends sigint to PID.'''
+        """Sends sigint to PID."""
 
         try:
             os.kill(int(pid), 2)
@@ -102,7 +102,7 @@ class PIDFile():
             sleep(1)
 
     def valid(self):
-        '''Returns True at least one PID within pidfile is still alive.'''
+        """Returns True at least one PID within pidfile is still alive."""
 
         try:
             for pid in self.__readPIDFile():
@@ -113,7 +113,7 @@ class PIDFile():
             return False
 
     def __isAlive(self, pid):
-        '''Verifies whether pid is still alive.'''
+        """Verifies whether pid is still alive."""
 
         try:
             os.kill(int(pid), 0)
@@ -122,29 +122,28 @@ class PIDFile():
             False
 
     def __writePIDFile(self, pids=[]):
-        '''Writes a list pids to the file.'''
+        """Writes a list pids to the file."""
 
-        with open(self.location, 'w') as pidfile:
+        with open(self.location, "w") as pidfile:
             for pid in pids:
                 pidfile.write("%s\n" % (pid))
 
     def __readPIDFile(self):
-        '''Returns a list of pids values the file contains.'''
+        """Returns a list of pids values the file contains."""
 
-        with open(self.location, 'r') as pidfile:
+        with open(self.location, "r") as pidfile:
             pids = pidfile.readlines()
 
         return [int(x) for x in pids]
 
     def __deletePIDFile(self):
-        '''Unconditionally deletes the pidfile.'''
+        """Unconditionally deletes the pidfile."""
 
         if os.path.isfile(self.location):
             os.remove(self.location)
 
 
 class GetProtocolHandler(object):
-
     def __init__(self, class_instance, arguments):
 
         self.class_instance = deepcopy(class_instance)

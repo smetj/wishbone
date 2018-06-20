@@ -30,7 +30,7 @@ import io
 
 class RandomWord(TemplateFunction):
 
-    '''
+    """
     Returns a random word.
 
     A Wishbone template function which returns a randomly selected word from a
@@ -41,7 +41,7 @@ class RandomWord(TemplateFunction):
         filename (str): When None, a built-in word list is used otherwise the
                         referenced file is loaded.
         encoding (str): The encoding used to read the file.
-    '''
+    """
 
     def __init__(self, filename=None, encoding="latin-1"):
 
@@ -57,7 +57,7 @@ class RandomWord(TemplateFunction):
             return f.readlines()
 
     def get(self):
-        '''
+        """
         The function mapped to the template function.
 
         Args:
@@ -65,6 +65,6 @@ class RandomWord(TemplateFunction):
 
         Returns:
             str: A random word
-        '''
+        """
 
         return choice(self.wordlist).rstrip()

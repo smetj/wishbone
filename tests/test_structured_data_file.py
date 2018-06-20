@@ -28,7 +28,6 @@ from os import unlink
 
 
 class TempFile(object):
-
     def __init__(self, filename, content):
 
         self.filename = filename
@@ -67,11 +66,12 @@ def test_kv_default():
 
 def test_dump_items():
 
-    with TempFile("/tmp/one.json", '{"one": 1}'), TempFile("/tmp/two.json", '{"two": 2}'):
+    with TempFile("/tmp/one.json", '{"one": 1}'), TempFile(
+        "/tmp/two.json", '{"two": 2}'
+    ):
         s = StructuredDataFile()
         s.load("/tmp/one.json")
         s.load("/tmp/two.json")
 
         for item in s.dumpItems():
             assert "one" in item or "two" in item
-

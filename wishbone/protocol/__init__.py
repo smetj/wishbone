@@ -58,9 +58,7 @@ class Decode(object):
             elif isinstance(data, dict):
                 return self.handleDict(data)
             elif isinstance(data, Cut):
-                return self.handleDict(
-                    dict(data)
-                )
+                return self.handleDict(dict(data))
             elif isinstance(data, list):
                 return self.handleList(data)
             elif isinstance(data, types.GeneratorType):
@@ -68,7 +66,9 @@ class Decode(object):
             elif hasattr(data, "readlines") and callable(data.readlines):
                 return self.handleReadLinesMethod(data)
             else:
-                raise ProtocolError("%s is not supported by this Decoder." % (type(data)))
+                raise ProtocolError(
+                    "%s is not supported by this Decoder." % (type(data))
+                )
         except Exception as err:
             raise ProtocolError(err)
 
@@ -105,7 +105,6 @@ class Decode(object):
 
 
 class Encode(object):
-
     def handler(self, data):
         try:
             if isinstance(data, bytes):
@@ -123,7 +122,9 @@ class Encode(object):
             elif isinstance(data, Cut):
                 return self.handleCut(data)
             else:
-                raise ProtocolError("%s is not supported by this Encoder." % (type(data)))
+                raise ProtocolError(
+                    "%s is not supported by this Encoder." % (type(data))
+                )
         except Exception as err:
             raise ProtocolError(err)
 

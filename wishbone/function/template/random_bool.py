@@ -27,17 +27,17 @@ from random import getrandbits
 
 
 class RandomBool(TemplateFunction):
-    '''
+    """
     Randomly returns True or False.
 
     A Wishbone template function which returns a random bool.
 
     Args:
         None
-    '''
+    """
 
     def get(self):
-        '''
+        """
         The function mapped to the template function.
 
         Args:
@@ -45,6 +45,6 @@ class RandomBool(TemplateFunction):
 
         Returns:
             int: A random number.
-        '''
+        """
 
         return bool(getrandbits(1))

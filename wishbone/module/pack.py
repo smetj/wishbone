@@ -30,7 +30,6 @@ from gevent import sleep
 
 
 class Bucket(object):
-
     def __init__(self, key, size, age, logging, queue, looplock):
 
         self.key = key
@@ -45,16 +44,13 @@ class Bucket(object):
         self.logging.info("Created new bucket with aggregation key '%s'." % (self.key))
 
     def createEmptyBucket(self):
-        self.bucket = Event(
-            bulk=True,
-            bulk_size=self.size
-        )
+        self.bucket = Event(bulk=True, bulk_size=self.size)
         self.resetTimer()
 
     def flushBucketTimer(self):
-        '''
+        """
         Flushes the buffer when <bucket_age> has expired.
-        '''
+        """
 
         while self.loop():
             sleep(1)
@@ -67,24 +63,26 @@ class Bucket(object):
                     self.resetTimer()
 
     def flush(self):
-        '''
+        """
         Flushes the buffer.
-        '''
-        self.logging.debug("Flushed bucket '%s' of size '%s'" % (self.key, len(self.bucket.data)))
+        """
+        self.logging.debug(
+            "Flushed bucket '%s' of size '%s'" % (self.key, len(self.bucket.data))
+        )
         self.queue.put(self.bucket)
         self.createEmptyBucket()
 
     def resetTimer(self):
-        '''
+        """
         Resets the buffer expiry countdown to its configured value.
-        '''
+        """
 
         self._timer = self.age
 
 
 class Pack(ProcessModule):
 
-    '''**Packs multiple events into a bulk event.**
+    """**Packs multiple events into a bulk event.**
 
     Aggregates multiple events into a bulk event usually prior to submitting
     to an output module.
@@ -121,9 +119,11 @@ class Pack(ProcessModule):
            |  Flushes the buffer on incoming events despite the bulk being
            |  full (bucket_size) or expired (bucket_age).
 
-    '''
+    """
 
-    def __init__(self, actor_config, bucket_size=100, bucket_age=10, aggregation_key="default"):
+    def __init__(
+        self, actor_config, bucket_size=100, bucket_age=10, aggregation_key="default"
+    ):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -139,7 +139,9 @@ class Pack(ProcessModule):
         try:
             self.getBucket(self.kwargs.aggregation_key).bucket.appendBulk(event)
         except BulkFull:
-            self.logging.debug("Bucket full after %s events." % (self.kwargs.bucket_size))
+            self.logging.debug(
+                "Bucket full after %s events." % (self.kwargs.bucket_size)
+            )
             self.getBucket(self.kwargs.aggregation_key).flush()
             self.getBucket(self.kwargs.aggregation_key).bucket.appendBulk(event)
 
@@ -154,16 +156,19 @@ class Pack(ProcessModule):
                 self.kwargs.bucket_age,
                 self.logging,
                 self.pool.queue.outbox,
-                self.loop)
+                self.loop,
+            )
             self.sendToBackground(self.buckets[key].flushBucketTimer)
             return self.buckets[key]
 
     def flushIncomingMessage(self, event):
-        '''
+        """
         Called on each incoming messages of <flush> queue.
         Flushes the buffer.
-        '''
+        """
 
-        self.logging.debug("Recieved message in <flush> queue.  Flushing all bulk buffers.")
+        self.logging.debug(
+            "Recieved message in <flush> queue.  Flushing all bulk buffers."
+        )
         for index, bucket in self.buckets:
             bucket.flush()

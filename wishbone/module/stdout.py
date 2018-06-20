@@ -22,7 +22,9 @@
 #
 #
 
-from gevent import monkey; monkey.patch_all()
+from gevent import monkey
+
+monkey.patch_all()
 from wishbone.module import OutputModule
 from os import getpid
 from colorama import init, Fore, Back, Style
@@ -31,8 +33,7 @@ import re
 from gevent.fileobject import FileObjectThread
 
 
-class Format():
-
+class Format:
     def __init__(self, selection, counter, pid):
         self.selection = selection
         if counter:
@@ -64,7 +65,7 @@ class Format():
 
 class STDOUT(OutputModule):
 
-    '''
+    """
     Prints event data to STDOUT.
 
     Prints incoming events to STDOUT. When <complete> is True,
@@ -121,26 +122,35 @@ class STDOUT(OutputModule):
 
         - inbox
            |  Incoming events.
-    '''
+    """
 
-    def __init__(self, actor_config,
-                 selection=None, payload=None, native_events=False, parallel_streams=1,
-                 counter=False, prefix="", pid=False, colorize=False,
-                 foreground_color="WHITE", background_color="RESET", color_style="NORMAL"):
+    def __init__(
+        self,
+        actor_config,
+        selection=None,
+        payload=None,
+        native_events=False,
+        parallel_streams=1,
+        counter=False,
+        prefix="",
+        pid=False,
+        colorize=False,
+        foreground_color="WHITE",
+        background_color="RESET",
+        color_style="NORMAL",
+    ):
         OutputModule.__init__(self, actor_config)
 
         self.__validateInput(foreground_color, background_color, color_style)
         self.pool.createQueue("inbox")
         self.registerConsumer(self.consume, "inbox")
 
-        self.ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+        self.ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
 
     def preHook(self):
 
         self.format = Format(
-            self.kwargs.selection,
-            self.kwargs.counter,
-            self.kwargs.pid
+            self.kwargs.selection, self.kwargs.counter, self.kwargs.pid
         )
 
         if self.kwargs.colorize:
@@ -153,18 +163,14 @@ class STDOUT(OutputModule):
 
     def consume(self, event):
 
-        data = self.encode(
-            self.getDataToSubmit(
-                event
-            )
-        )
+        data = self.encode(self.getDataToSubmit(event))
 
         output = self.getString(
             getattr(Fore, event.kwargs.foreground_color),
             getattr(Back, event.kwargs.background_color),
             getattr(Style, event.kwargs.color_style),
             event.kwargs.prefix,
-            self.format.do(data)
+            self.format.do(data),
         )
         self.f.write(output)
 
@@ -174,27 +180,37 @@ class STDOUT(OutputModule):
 
     def __validateInput(self, f, b, s):
 
-        if f not in ["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE"]:
+        if f not in [
+            "BLACK",
+            "RED",
+            "GREEN",
+            "YELLOW",
+            "BLUE",
+            "MAGENTA",
+            "CYAN",
+            "WHITE",
+        ]:
             raise Exception("Foreground value is not correct.")
-        if b not in ["BLACK", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "WHITE", "RESET"]:
+        if b not in [
+            "BLACK",
+            "RED",
+            "GREEN",
+            "YELLOW",
+            "BLUE",
+            "MAGENTA",
+            "CYAN",
+            "WHITE",
+            "RESET",
+        ]:
             raise Exception("Background value is not correct.")
         if s not in ["DIM", "NORMAL", "BRIGHT"]:
             raise Exception("Style value is not correct.")
 
     def __stringColor(self, f, b, s, p, d):
-        return "%s%s%s%s%s\n" % (
-            f,
-            b,
-            s,
-            p,
-            self.format.do(d)
-        )
+        return "%s%s%s%s%s\n" % (f, b, s, p, self.format.do(d))
 
     def __stringNoColor(self, f, b, s, p, d):
 
-        d = self.ansi_escape.sub('', str(d))
+        d = self.ansi_escape.sub("", str(d))
 
-        return "%s%s\n" % (
-            p,
-            self.format.do(d)
-        )
+        return "%s%s\n" % (p, self.format.do(d))

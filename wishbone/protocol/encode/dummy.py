@@ -27,14 +27,14 @@ from wishbone.protocol import Encode
 
 class Dummy(Encode):
 
-    '''**A dummy encoder.**
+    """**A dummy encoder.**
 
     Does not encode anything.
 
     Parameters:
 
         n/a
-    '''
+    """
 
     def __init__(self, *args, **kwargs):
         pass

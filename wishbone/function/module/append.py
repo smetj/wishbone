@@ -26,7 +26,7 @@ from wishbone.function.module import ModuleFunction
 
 
 class Append(ModuleFunction):
-    '''
+    """
     Adds a value to an existing list.
 
     A Wishbone module function which add a value to an existing list.
@@ -34,15 +34,15 @@ class Append(ModuleFunction):
     Args:
         data (str/int/float/list/dict): The data to add
         destination (str): The field to add data to.
-    '''
+    """
 
-    def __init__(self, data, destination='tags'):
+    def __init__(self, data, destination="tags"):
 
         self.data = data
         self.destination = destination
 
     def do(self, event):
-        '''
+        """
         The function mapped to the module function.
 
         Args:
@@ -50,7 +50,7 @@ class Append(ModuleFunction):
 
         Returns:
             wishbone.event.Event: The modified event.
-        '''
+        """
 
         if isinstance(self.data, (int, float, str)):
             lst = event.get(self.destination)

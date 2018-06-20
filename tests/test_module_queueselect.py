@@ -31,21 +31,17 @@ from wishbone.utils.test import getter
 
 def test_module_queueselect_default():
 
-    actor_config = ActorConfig('queueselect', QueuePool(), disable_exception_handling=True)
+    actor_config = ActorConfig(
+        "queueselect", QueuePool(), disable_exception_handling=True
+    )
 
     template = {
         "name": "name of the rule",
         "queue": "{{ 'queue_1' if data.one == 1 else 'queue_2' }}",
         "payload": {
-            "queue_1": {
-                "detail_1": "some value",
-                "detail_2": "some other value",
-            },
-            "queue_2": {
-                "detail_1": "some value",
-                "detail_2": "some other value",
-            }
-        }
+            "queue_1": {"detail_1": "some value", "detail_2": "some other value"},
+            "queue_2": {"detail_1": "some value", "detail_2": "some other value"},
+        },
     }
 
     queueselect = QueueSelect(actor_config, templates=[template])
@@ -69,21 +65,17 @@ def test_module_queueselect_default():
 
 def test_module_queueselect_multiple_queues():
 
-    actor_config = ActorConfig('queueselect', QueuePool(), disable_exception_handling=True)
+    actor_config = ActorConfig(
+        "queueselect", QueuePool(), disable_exception_handling=True
+    )
 
     template = {
         "name": "name of the rule",
         "queue": "{{ 'queue_1,queue_2' if data.one == 1 else 'queue_2' }}",
         "payload": {
-            "queue_1": {
-                "detail_1": "some value",
-                "detail_2": "some other value",
-            },
-            "queue_2": {
-                "detail_1": "some value",
-                "detail_2": "some other value",
-            }
-        }
+            "queue_1": {"detail_1": "some value", "detail_2": "some other value"},
+            "queue_2": {"detail_1": "some value", "detail_2": "some other value"},
+        },
     }
 
     queueselect = QueueSelect(actor_config, templates=[template])
@@ -108,21 +100,17 @@ def test_module_queueselect_multiple_queues():
 
 def test_module_queueselect_nomatch():
 
-    actor_config = ActorConfig('queueselect', QueuePool(), disable_exception_handling=True)
+    actor_config = ActorConfig(
+        "queueselect", QueuePool(), disable_exception_handling=True
+    )
 
     template = {
         "name": "name of the rule",
         "queue": "{{ 'queue_1,queue_2' if data.one == 1 else 'queue_2' }}",
         "payload": {
-            "queue_1": {
-                "detail_1": "some value",
-                "detail_2": "some other value",
-            },
-            "queue_2": {
-                "detail_1": "some value",
-                "detail_2": "some other value",
-            }
-        }
+            "queue_1": {"detail_1": "some value", "detail_2": "some other value"},
+            "queue_2": {"detail_1": "some value", "detail_2": "some other value"},
+        },
     }
 
     queueselect = QueueSelect(actor_config, templates=[template])
@@ -140,21 +128,17 @@ def test_module_queueselect_nomatch():
 
 def test_module_queueselect_regex():
 
-    actor_config = ActorConfig('queueselect', QueuePool(), disable_exception_handling=True)
+    actor_config = ActorConfig(
+        "queueselect", QueuePool(), disable_exception_handling=True
+    )
 
     template = {
         "name": "name of the rule",
         "queue": "{{ 'queue_1' if regex('\d', data.one) else 'queue_2' }}",
         "payload": {
-            "queue_1": {
-                "detail_1": "some value",
-                "detail_2": "some other value",
-            },
-            "queue_2": {
-                "detail_1": "some value",
-                "detail_2": "some other value",
-            }
-        }
+            "queue_1": {"detail_1": "some value", "detail_2": "some other value"},
+            "queue_2": {"detail_1": "some value", "detail_2": "some other value"},
+        },
     }
 
     queueselect = QueueSelect(actor_config, templates=[template])
@@ -172,7 +156,9 @@ def test_module_queueselect_regex():
 
 def test_module_queueselect_novalidqueue():
 
-    actor_config = ActorConfig('queueselect', QueuePool(), disable_exception_handling=True)
+    actor_config = ActorConfig(
+        "queueselect", QueuePool(), disable_exception_handling=True
+    )
 
     templates = [
         {
@@ -182,7 +168,7 @@ def test_module_queueselect_novalidqueue():
         {
             "name": "rule_2",
             "queue": "{{ 'no_such_queue_1' if data.one == 1 else 'no_such_queue_2' }}",
-        }
+        },
     ]
 
     queueselect = QueueSelect(actor_config, templates=templates)

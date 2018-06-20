@@ -35,10 +35,10 @@ def test_module_inotify_default():
 
     # Standard situation.  Monitors the changes to a file.
 
-    actor_config = ActorConfig('inotify', QueuePool())
+    actor_config = ActorConfig("inotify", QueuePool())
 
     filename = "/tmp/%s" % str(uuid4())
-    open(filename, 'a').close()
+    open(filename, "a").close()
 
     inotify = WBInotify(actor_config, initial_listing=True, paths={filename: []})
     inotify.pool.queue.outbox.disableFallThrough()

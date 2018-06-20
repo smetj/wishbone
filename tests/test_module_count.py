@@ -35,15 +35,10 @@ def test_module_count_default_pass():
     # Standard situation.  Event passes through after it appeared 10 times.
 
     conditions = {
-        "data": {
-            "value": "one",
-            "occurrence": 10,
-            "window": 60,
-            "action": "pass"
-        }
+        "data": {"value": "one", "occurrence": 10, "window": 60, "action": "pass"}
     }
 
-    actor_config = ActorConfig('funnel', QueuePool(), disable_exception_handling=True)
+    actor_config = ActorConfig("funnel", QueuePool(), disable_exception_handling=True)
     count = Count(actor_config, conditions)
     count.pool.queue.inbox.disableFallThrough()
     count.pool.queue.outbox.disableFallThrough()
@@ -51,15 +46,11 @@ def test_module_count_default_pass():
     count.start()
 
     for _ in range(0, 9):
-        count.pool.queue.inbox.put(
-            Event("one")
-        )
+        count.pool.queue.inbox.put(Event("one"))
         result = getter(count.pool.queue.dropped).get()
         assert result == "one"
 
-    count.pool.queue.inbox.put(
-        Event("one")
-    )
+    count.pool.queue.inbox.put(Event("one"))
     assert getter(count.pool.queue.outbox).get() == "one"
     count.stop()
 
@@ -69,15 +60,10 @@ def test_module_count_timeout_pass():
     # Standard situation.  Event passes through after it appeared 10 times.
 
     conditions = {
-        "data": {
-            "value": "one",
-            "occurrence": 3,
-            "window": 2,
-            "action": "pass"
-        }
+        "data": {"value": "one", "occurrence": 3, "window": 2, "action": "pass"}
     }
 
-    actor_config = ActorConfig('funnel', QueuePool(), disable_exception_handling=True)
+    actor_config = ActorConfig("funnel", QueuePool(), disable_exception_handling=True)
     count = Count(actor_config, conditions)
     count.pool.queue.inbox.disableFallThrough()
     count.pool.queue.outbox.disableFallThrough()
@@ -103,15 +89,10 @@ def test_module_count_default_dropped():
     # Standard situation.  Events get dropped after it appeared 10 times.
 
     conditions = {
-        "data": {
-            "value": "one",
-            "occurrence": 10,
-            "window": 60,
-            "action": "drop"
-        }
+        "data": {"value": "one", "occurrence": 10, "window": 60, "action": "drop"}
     }
 
-    actor_config = ActorConfig('funnel', QueuePool(), disable_exception_handling=True)
+    actor_config = ActorConfig("funnel", QueuePool(), disable_exception_handling=True)
     count = Count(actor_config, conditions)
     count.pool.queue.inbox.disableFallThrough()
     count.pool.queue.outbox.disableFallThrough()
@@ -119,15 +100,11 @@ def test_module_count_default_dropped():
     count.start()
 
     for _ in range(0, 9):
-        count.pool.queue.inbox.put(
-            Event("one")
-        )
+        count.pool.queue.inbox.put(Event("one"))
         result = getter(count.pool.queue.outbox).get()
         assert result == "one"
 
-    count.pool.queue.inbox.put(
-        Event("one")
-    )
+    count.pool.queue.inbox.put(Event("one"))
     assert getter(count.pool.queue.dropped).get() == "one"
     count.stop()
 
@@ -135,15 +112,10 @@ def test_module_count_default_dropped():
 def test_module_count_timeout_drop():
 
     conditions = {
-        "data": {
-            "value": "one",
-            "occurrence": 3,
-            "window": 2,
-            "action": "drop"
-        }
+        "data": {"value": "one", "occurrence": 3, "window": 2, "action": "drop"}
     }
 
-    actor_config = ActorConfig('funnel', QueuePool(), disable_exception_handling=True)
+    actor_config = ActorConfig("funnel", QueuePool(), disable_exception_handling=True)
     count = Count(actor_config, conditions)
     count.pool.queue.inbox.disableFallThrough()
     count.pool.queue.outbox.disableFallThrough()

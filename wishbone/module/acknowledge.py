@@ -29,7 +29,6 @@ import string
 
 
 class AckList(object):
-
     def __init__(self):
 
         self.ack_table = []
@@ -56,7 +55,7 @@ class AckList(object):
 
 class Acknowledge(FlowModule):
 
-    '''**Forwards or drops events by acknowleding values.**
+    """**Forwards or drops events by acknowleding values.**
 
     This module stores the value of field ``ack_id`` from each incoming event.
     Subsequent events with the same ``ack_id`` field value will be dropped
@@ -96,7 +95,7 @@ class Acknowledge(FlowModule):
         - tmp.<name>.ack_id
             | The location of the acknowledgement ID when coming in through the
             | inbox queue.
-    '''
+    """
 
     def __init__(self, actor_config, ack_id=None):
         FlowModule.__init__(self, actor_config)
@@ -118,31 +117,46 @@ class Acknowledge(FlowModule):
             ack_id = event.kwargs.ack_id
 
         if event.has("tmp.%s.ack_id" % (self.name)):
-            self.logging.warning("Event arriving to <inbox> with tmp.%s.ack_id already set.  Perhaps that should have been the <acknowledge> queue instead." % (self.name))
+            self.logging.warning(
+                "Event arriving to <inbox> with tmp.%s.ack_id already set.  Perhaps that should have been the <acknowledge> queue instead."
+                % (self.name)
+            )
         else:
             event.set({"ack_id": ack_id}, "tmp.%s" % (self.name))
             if self.ack_table.unack(ack_id):
                 self.submit(event, "outbox")
             else:
-                self.logging.debug("Event with still unacknowledged <ack_id> '%s' send to <dropped> queue." % (ack_id))
+                self.logging.debug(
+                    "Event with still unacknowledged <ack_id> '%s' send to <dropped> queue."
+                    % (ack_id)
+                )
                 self.submit(event, "dropped")
 
     def acknowledge(self, event):
 
         if event.has("tmp.%s.ack_id" % (self.name)):
-            ack_id = event.get('tmp.%s.ack_id' % (self.name))
+            ack_id = event.get("tmp.%s.ack_id" % (self.name))
             if self.ack_table.ack(ack_id):
                 self.logging.debug("Event acknowledged with <ack_id> '%s'." % (ack_id))
-                event.delete('tmp.%s.ack_id' % (self.name))
+                event.delete("tmp.%s.ack_id" % (self.name))
             else:
-                self.logging.debug("Event with <ack_id> '%s' received but was not previously acknowledged." % (ack_id))
+                self.logging.debug(
+                    "Event with <ack_id> '%s' received but was not previously acknowledged."
+                    % (ack_id)
+                )
         else:
-            self.logging.warning("Received event without 'tmp.%s.ack_id' therefor it is dropped" % (self.name))
+            self.logging.warning(
+                "Received event without 'tmp.%s.ack_id' therefor it is dropped"
+                % (self.name)
+            )
 
     def generateID(self):
 
-        return ''.join(SystemRandom().choice(string.ascii_lowercase) for _ in range(4))
+        return "".join(SystemRandom().choice(string.ascii_lowercase) for _ in range(4))
 
     def postHook(self):
 
-        self.logging.debug("The ack table has %s events unacknowledged." % (len(self.ack_table.ack_table)))
+        self.logging.debug(
+            "The ack table has %s events unacknowledged."
+            % (len(self.ack_table.ack_table))
+        )

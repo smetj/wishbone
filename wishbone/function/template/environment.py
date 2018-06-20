@@ -27,17 +27,17 @@ from os import environ
 
 
 class Environment(TemplateFunction):
-    '''
+    """
     Returns environment variables
 
     A Wishbone template function wich return environment variables.
 
     Args:
         None
-    '''
+    """
 
     def get(self, variable):
-        '''
+        """
         The function mapped to the template function.
 
         Args:
@@ -45,6 +45,6 @@ class Environment(TemplateFunction):
 
         Returns:
             str: The environment value
-        '''
+        """
 
         return environ[variable]

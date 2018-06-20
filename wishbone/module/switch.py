@@ -29,7 +29,7 @@ from wishbone.error import ModuleInitFailure, ReservedName
 
 class Switch(FlowModule):
 
-    '''**Switch outgoing queues while forwarding events.**
+    """**Switch outgoing queues while forwarding events.**
 
     Forwards events to the desired outgoing queue based on the value of
     <outgoing>.
@@ -63,7 +63,7 @@ class Switch(FlowModule):
 
         - <connected_queue_n>
            |  outgoing events
-    '''
+    """
 
     def __init__(self, actor_config, outgoing="outbox"):
 
@@ -80,7 +80,10 @@ class Switch(FlowModule):
     def preHook(self):
 
         if self.kwargs.outgoing in self.forbidden:
-            raise ModuleInitFailure("Module parameter <outgoing> cannot have value '%s'." % (self.kwargs.outgoing))
+            raise ModuleInitFailure(
+                "Module parameter <outgoing> cannot have value '%s'."
+                % (self.kwargs.outgoing)
+            )
 
         self.destination = self.kwargs.outgoing
         self._destination = self.kwargs.outgoing
@@ -92,7 +95,9 @@ class Switch(FlowModule):
             self.destination = self.kwargs.outgoing
 
         if self.destination in self.forbidden:
-            raise ReservedName("Cannot forward incoming events to queue '%s'." % (self.destination))
+            raise ReservedName(
+                "Cannot forward incoming events to queue '%s'." % (self.destination)
+            )
         else:
             self.submit(event, self.destination)
 
@@ -103,8 +108,12 @@ class Switch(FlowModule):
             name = event.get("data")
             if self.pool.hasQueue(name):
                 self.destination = name
-                self.logging.info("%s. Outgoing messages forwarded to queue '%s'." % (prefix, name))
+                self.logging.info(
+                    "%s. Outgoing messages forwarded to queue '%s'." % (prefix, name)
+                )
             else:
-                self.logging.error("%s but module has no queue named '%s'." % (prefix, name))
+                self.logging.error(
+                    "%s but module has no queue named '%s'." % (prefix, name)
+                )
         except KeyError:
             self.logging.error("%s but has no value key data." % (prefix))

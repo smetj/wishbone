@@ -28,7 +28,7 @@ from uuid import uuid4
 
 class RandomUUID(TemplateFunction):
 
-    '''
+    """
     Returns a UUID value.
 
     A Wishbone template function which returns a UUID.
@@ -36,10 +36,10 @@ class RandomUUID(TemplateFunction):
     Args:
         None
 
-    '''
+    """
 
     def get(self):
-        '''
+        """
         The function mapped to the template function.
 
         Args:
@@ -47,6 +47,6 @@ class RandomUUID(TemplateFunction):
 
         Returns:
             str: A UUID
-        '''
+        """
 
         return str(uuid4())

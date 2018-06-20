@@ -30,7 +30,7 @@ from wishbone.error import InvalidData
 
 class Unpack(ProcessModule):
 
-    '''**Unpacks bulk events into single events.**
+    """**Unpacks bulk events into single events.**
 
     Creates single events from all the events stored in a bulk event.
 
@@ -49,7 +49,7 @@ class Unpack(ProcessModule):
 
         - dropped
            |  Dropped messages
-    '''
+    """
 
     def __init__(self, actor_config):
 
@@ -66,8 +66,13 @@ class Unpack(ProcessModule):
                 try:
                     self.submit(Event().slurp(e), "outbox")
                 except InvalidData:
-                    self.logging.debug("Bulk event with id '%s' contained an invalid event. Invalid event skipped." % (event.get('uuid')))
-            self.logging.debug("Expanded Bulk event into %s events." % (len(event.data)))
+                    self.logging.debug(
+                        "Bulk event with id '%s' contained an invalid event. Invalid event skipped."
+                        % (event.get("uuid"))
+                    )
+            self.logging.debug(
+                "Expanded Bulk event into %s events." % (len(event.data))
+            )
         else:
             self.logging.debug("Event with id '%s' is not a bulk event. Dropped.")
             self.submit(event, "dropped")

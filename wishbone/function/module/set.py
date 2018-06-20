@@ -27,7 +27,7 @@ from wishbone.function.module import ModuleFunction
 
 
 class Set(ModuleFunction):
-    '''
+    """
     Sets a field to the desired value.
 
     A Wishbone module function which sets data to the desired field.  Data can be a template.
@@ -35,15 +35,15 @@ class Set(ModuleFunction):
     Args:
         data (str): The value (or template) to apply.
         destination (str): The destination field
-    '''
+    """
 
-    def __init__(self, data, destination='data'):
+    def __init__(self, data, destination="data"):
 
         self.data = data
         self.destination = destination
 
     def do(self, event):
-        '''
+        """
         The function mapped to the module function.
 
         Args:
@@ -51,7 +51,7 @@ class Set(ModuleFunction):
 
         Returns:
             wishbone.event.Event: The modified event.
-        '''
+        """
 
         if isinstance(self.data, str):
             data = event.render(self.data)

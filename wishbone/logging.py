@@ -30,10 +30,10 @@ from time import time
 from os import getpid
 
 
-class MockLogger():
-    '''
+class MockLogger:
+    """
     A wrapper around Logging which mimics logger.Logger
-    '''
+    """
 
     def __init__(self, name, q, level=5):
 
@@ -51,12 +51,12 @@ class MockLogger():
             self.l.Logging.__log(self.level, line.rstrip())
 
 
-class Logging():
+class Logging:
 
-    '''
+    """
     Generates Wishbone formatted log messages following the Syslog priority
     definition.
-    '''
+    """
 
     LEVELS = {
         0: "emergency",
@@ -66,7 +66,7 @@ class Logging():
         4: "warning",
         5: "notice",
         6: "informational",
-        7: "debug"
+        7: "debug",
     }
 
     def __init__(self, name, q, identification=None):
@@ -78,16 +78,18 @@ class Logging():
 
     def __log(self, level, message):
 
-        event = Event({
-            "time": time(),
-            "identification": self.identification,
-            "event_id": self.__event_id,
-            "level": level,
-            "txt_level": self.LEVELS[level],
-            "pid": getpid(),
-            "module": self.name,
-            "message": message
-        })
+        event = Event(
+            {
+                "time": time(),
+                "identification": self.identification,
+                "event_id": self.__event_id,
+                "level": level,
+                "txt_level": self.LEVELS[level],
+                "pid": getpid(),
+                "module": self.name,
+                "message": message,
+            }
+        )
         while True:
             try:
                 self.logs.put(event, timeout=1)
@@ -106,6 +108,7 @@ class Logging():
         """Generates a log message with priority critical(2).
         """
         self.__log(2, message)
+
     crit = critical
 
     def debug(self, message, *args, **kwargs):
@@ -117,6 +120,7 @@ class Logging():
         """Generates a log message with priority emergency(0).
         """
         self.__log(0, message)
+
     emerg = emergency
     exception = emergency
 
@@ -124,12 +128,14 @@ class Logging():
         """Generates a log message with priority error(3).
         """
         self.__log(3, message, *args, **kwargs)
+
     err = error
 
     def informational(self, message, *args, **kwargs):
         """Generates a log message with priority informational(6).
         """
         self.__log(6, message)
+
     info = informational
 
     def notice(self, message, *args, **kwargs):
@@ -145,4 +151,5 @@ class Logging():
         """Generates a log message with priority warning(4).
         """
         self.__log(4, message, *args, **kwargs)
+
     warn = warning

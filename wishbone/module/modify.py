@@ -28,25 +28,26 @@ from copy import deepcopy
 import re
 import arrow
 
-VALID_EXPRESSIONS = ["add_item",
-                     "copy",
-                     "del_item",
-                     "delete",
-                     "extract",
-                     "join",
-                     "lowercase",
-                     "merge",
-                     "replace",
-                     "set",
-                     "template",
-                     "uppercase",
-                     "time",
-                     ]
+VALID_EXPRESSIONS = [
+    "add_item",
+    "copy",
+    "del_item",
+    "delete",
+    "extract",
+    "join",
+    "lowercase",
+    "merge",
+    "replace",
+    "set",
+    "template",
+    "uppercase",
+    "time",
+]
 
 
 class Modify(ProcessModule):
 
-    '''**Modify and manipulate datastructures.**
+    """**Modify and manipulate datastructures.**
 
     This module modifies the data of an event using a **sequential** list of
     expressions.
@@ -193,7 +194,7 @@ class Modify(ProcessModule):
 
         - outbox:
            |  Outgoing modified messages
-    '''
+    """
 
     def __init__(self, actor_config, expressions=[]):
         Actor.__init__(self, actor_config)
@@ -208,7 +209,10 @@ class Modify(ProcessModule):
                 command, args = self.__extractExpr(expression)
                 event = getattr(self, "command_%s" % (command))(event, *args)
             except Exception as err:
-                self.logging.error("Failed to process expression '%s'. Reason: %s Skipped." % (expression, err))
+                self.logging.error(
+                    "Failed to process expression '%s'. Reason: %s Skipped."
+                    % (expression, err)
+                )
 
         self.submit(event, "outbox")
 

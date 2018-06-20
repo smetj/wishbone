@@ -28,7 +28,7 @@ import os
 
 class Plain(Decode):
 
-    '''
+    """
     Decode string data into a Python object.
 
     Parameters:
@@ -45,13 +45,15 @@ class Plain(Decode):
 
         - strip_newline(bool)(False)
             |  If ``True`` strips newline from each line.
-    '''
+    """
 
-    def __init__(self, charset='utf-8', delimiter=None, buffer_size=4096, strip_newline=False):
+    def __init__(
+        self, charset="utf-8", delimiter=None, buffer_size=4096, strip_newline=False
+    ):
 
         self.charset = charset
         if isinstance(delimiter, bytes):
-            self.delimiter = delimiter.decode(charset, 'strict')
+            self.delimiter = delimiter.decode(charset, "strict")
         else:
             self.delimiter = delimiter
         self.buffer_size = buffer_size

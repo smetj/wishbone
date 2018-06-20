@@ -66,10 +66,11 @@ def test_connect_already_connected():
     qp.connect("one.outbox", "two.inbox")
 
     for expression in [
-            ("one.outbox", "two.inbox"),
-            ("two.inbox", "one.outbox"),
-            ("two.inbox", "two.outbox"),
-            ("one.outbox", "two.outbox")]:
+        ("one.outbox", "two.inbox"),
+        ("two.inbox", "one.outbox"),
+        ("two.inbox", "two.outbox"),
+        ("one.outbox", "two.outbox"),
+    ]:
 
         try:
             qp.connect(*expression)

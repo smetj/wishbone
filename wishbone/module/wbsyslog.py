@@ -30,7 +30,7 @@ import os
 
 class Syslog(OutputModule):
 
-    '''**Submits event data to syslog.**
+    """**Submits event data to syslog.**
 
     Logevents have following format:
 
@@ -66,11 +66,18 @@ class Syslog(OutputModule):
 
         - inbox
            |  incoming events
-    '''
+    """
 
-    def __init__(self, actor_config,
-                 selection="data", payload=None, native_events=False, parallel_streams=1,
-                 level=5, ident=os.path.basename(sys.argv[0])):
+    def __init__(
+        self,
+        actor_config,
+        selection="data",
+        payload=None,
+        native_events=False,
+        parallel_streams=1,
+        level=5,
+        ident=os.path.basename(sys.argv[0]),
+    ):
         OutputModule.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -82,16 +89,9 @@ class Syslog(OutputModule):
 
     def consume(self, event):
 
-        data = self.encode(
-            self.getDataToSubmit(
-                event
-            )
-        )
+        data = self.encode(self.getDataToSubmit(event))
 
-        syslog.syslog(
-            event.kwargs.level,
-            data
-        )
+        syslog.syslog(event.kwargs.level, data)
 
     def postHook(self):
         syslog.closelog()

@@ -252,7 +252,7 @@ class Default(object):
                 identification=self.identification,
                 protocol=protocol,
                 io_event=instance.event,
-                disable_exception_handling=False
+                disable_exception_handling=False,
             )
 
             self.registerModule(instance.module, actor_config, instance.arguments)

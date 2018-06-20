@@ -29,10 +29,10 @@ from wishbone.protocol.encode.msgpack import MSGPack
 def test_protocol_encode_json_dict():
 
     m = MSGPack()
-    assert m.handler({"one": 1}) == b'\x81\xa3one\x01'
+    assert m.handler({"one": 1}) == b"\x81\xa3one\x01"
 
 
 def test_protocol_encode_json_list():
 
     m = MSGPack()
-    assert m.handler(["one", "two"]) == b'\x92\xa3one\xa3two'
+    assert m.handler(["one", "two"]) == b"\x92\xa3one\xa3two"
