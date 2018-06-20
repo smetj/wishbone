@@ -107,7 +107,7 @@ class QueueSelect(ProcessModule):
         self.pool.createQueue("nomatch")
 
         self.registerConsumer(self.consume, "inbox")
-        self.registerConsumer(self.handleFileTemplate, "file")
+        # self.registerConsumer(self.handleFileTemplate, "file")
 
         self.template_loader = StructuredDataFile(
             expect_json=False,
@@ -159,7 +159,7 @@ class QueueSelect(ProcessModule):
                 e.set(queue_payload, "tmp.%s" % (self.name))
 
                 # Submit a clone of the event to the required queue
-                self.submit(e, queue_name)
+                self.submit(event, queue_name)
 
             else:
                 if self.kwargs.log_matching:

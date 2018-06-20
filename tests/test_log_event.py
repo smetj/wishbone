@@ -25,11 +25,12 @@
 from wishbone.module.generator import Generator
 from wishbone.actor import ActorConfig
 from wishbone.utils.test import getter
+from wishbone.queue import QueuePool
 
 
 def test_module_logs():
 
-    actor_config = ActorConfig('generator', 100, 1, {}, "")
+    actor_config = ActorConfig('generator', QueuePool())
 
     # {"time": time(), "level": level, "pid": getpid(), "module": self.name, "message": message}
     test_event = Generator(actor_config)

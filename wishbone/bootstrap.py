@@ -63,7 +63,6 @@ class BootStrap():
         start.add_argument('--nocolor', action="store_true", help='When defined does not print colored output to stdout.')
         start.add_argument('--pid', type=str, dest='pid', default='%s/wishbone.pid' % (os.getcwd()), help='The pidfile to use.')
         start.add_argument('--profile', action="store_true", help='When enabled profiles the process and dumps a Chrome developer tools profile file in the current directory.')
-        start.add_argument('--queue-size', type=int, dest='queue_size', default=100, help='The queue size to use.')
 
         stop = subparsers.add_parser('stop', description="Tries to gracefully stop the Wishbone instance.")
         stop.add_argument('--pid', type=str, dest='pid', default='wishbone.pid', help='The pidfile to use.')
@@ -92,7 +91,6 @@ class Dispatch():
         self.config = kwargs.get("config", None)
         self.instances = kwargs.get("instances", None)
         self.pid = kwargs.get("pid", None)
-        self.queue_size = kwargs.get("queue_size", None)
         self.frequency = kwargs.get("frequency", None)
         self.identification = kwargs.get("identification", None)
         self.graph = kwargs.get("graph", None)
@@ -142,7 +140,6 @@ class Dispatch():
         def startRouter():
             router = Default(
                 config,
-                size=self.queue_size,
                 frequency=self.frequency,
                 identification=self.identification,
                 graph=self.graph,
@@ -150,9 +147,7 @@ class Dispatch():
             )
 
             router.start()
-
             e.wait()
-
             router.stop()
         e = Event()
         signal(2, e.set)

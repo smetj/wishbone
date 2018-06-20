@@ -25,13 +25,14 @@
 from wishbone.event import Event
 from wishbone.module.fresh import Fresh
 from wishbone.actor import ActorConfig
+from wishbone.queue import QueuePool
 from wishbone.utils.test import getter
 from gevent import sleep
 
 
 def test_module_fresh_default():
 
-    actor_config = ActorConfig('fresh', 100, 1, {}, "")
+    actor_config = ActorConfig('fresh', QueuePool())
     fresh = Fresh(actor_config)
     fresh.pool.queue.inbox.disableFallThrough()
     fresh.pool.queue.outbox.disableFallThrough()
@@ -50,7 +51,7 @@ def test_module_fresh_default():
 
 def test_module_fresh_timeout():
 
-    actor_config = ActorConfig('fresh', 100, 1, {}, "")
+    actor_config = ActorConfig('fresh', QueuePool())
     fresh = Fresh(actor_config, timeout=1)
     fresh.pool.queue.inbox.disableFallThrough()
     fresh.pool.queue.outbox.disableFallThrough()
@@ -66,7 +67,7 @@ def test_module_fresh_timeout():
 
 def test_module_fresh_recovery():
 
-    actor_config = ActorConfig('fresh', 100, 1, {}, "")
+    actor_config = ActorConfig('fresh', QueuePool())
     fresh = Fresh(actor_config, timeout=1)
     fresh.pool.queue.inbox.disableFallThrough()
     fresh.pool.queue.outbox.disableFallThrough()
@@ -86,7 +87,7 @@ def test_module_fresh_recovery():
 
 def test_module_fresh_repeat():
 
-    actor_config = ActorConfig('fresh', 100, 1, {}, "")
+    actor_config = ActorConfig('fresh', QueuePool())
     fresh = Fresh(actor_config, timeout=1, repeat_interval=1)
     fresh.pool.queue.inbox.disableFallThrough()
     fresh.pool.queue.outbox.disableFallThrough()

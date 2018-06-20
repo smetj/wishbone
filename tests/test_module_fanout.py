@@ -22,15 +22,16 @@
 #
 #
 
+from wishbone.actor import ActorConfig
 from wishbone.event import Event
 from wishbone.module.fanout import Fanout
-from wishbone.actor import ActorConfig
+from wishbone.queue import QueuePool
 from wishbone.utils.test import getter
 
 
 def test_module_fanout():
 
-    actor_config = ActorConfig('fanout', 100, 1, {}, "", disable_exception_handling=True)
+    actor_config = ActorConfig('fanout', QueuePool(), disable_exception_handling=True)
     fanout = Fanout(actor_config)
     fanout.pool.queue.inbox.disableFallThrough()
 

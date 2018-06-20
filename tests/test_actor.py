@@ -26,9 +26,15 @@ from wishbone.actorconfig import ActorConfig
 from wishbone.module import InputModule, OutputModule
 from wishbone.error import ModuleInitFailure
 from wishbone.protocol.decode.plain import Plain
+from wishbone.queue import QueuePool
 
 
 class DummyModule(InputModule):
+    """
+    ** DummyModule **
+
+    one two three
+    """
 
     def __init__(self, actor_config, native_events=False, destination="data"):
         InputModule.__init__(self, actor_config)
@@ -44,7 +50,7 @@ class DummyModule(InputModule):
 
 def test_module():
 
-    actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
+    actor_config = ActorConfig('DummyTest', QueuePool())
     d = DummyModule(actor_config)
     d.start()
     assert d.decode.__self__.__class__.__name__ == "Dummy"
@@ -52,7 +58,7 @@ def test_module():
 
 def test_module_override_protocol():
 
-    actor_config = ActorConfig('DummyTest', 100, 1, {}, "", protocol=lambda: Plain().handler)
+    actor_config = ActorConfig('DummyTest', QueuePool(), protocol=lambda: Plain().handler)
     d = DummyModule(actor_config)
     d.start()
 
@@ -62,11 +68,16 @@ def test_module_override_protocol():
 def test_init_inputmodule_good():
 
     class InputModuleTestGood(InputModule):
+        """
+        ** DummyModule **
+
+        one two three
+        """
 
         def __init__(self, actor_config, native_events=False, destination="data"):
             InputModule.__init__(self, actor_config)
 
-    actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
+    actor_config = ActorConfig('DummyTest', QueuePool())
 
     try:
         InputModuleTestGood(actor_config)
@@ -79,16 +90,26 @@ def test_init_inputmodule_good():
 def test_init_inputmodule_bad():
 
     class InputModuleTestBad_1(InputModule):
+        """
+        ** DummyModule **
+
+        one two three
+        """
 
         def __init__(self, actor_config, destination=None):
             InputModule.__init__(self, actor_config)
 
     class InputModuleTestBad_2(InputModule):
+        """
+            ** DummyModule **
+
+            one two three
+        """
 
         def __init__(self, actor_config, native_events=None):
             InputModule.__init__(self, actor_config)
 
-    actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
+    actor_config = ActorConfig('DummyTest', QueuePool())
 
     for i in range(1, 3):
         try:
@@ -102,10 +123,16 @@ def test_init_inputmodule_bad():
 def test_init_outputmodule_good():
 
     class OutputModuleTestGood(OutputModule):
+        """
+        ** DummyModule **
+
+        one two three
+        """
+
         def __init__(self, actor_config, selection=None, payload=None, native_events=None, parallel_streams=1):
             InputModule.__init__(self, actor_config)
 
-    actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
+    actor_config = ActorConfig('DummyTest', QueuePool())
 
     try:
         OutputModuleTestGood(actor_config)
@@ -118,22 +145,46 @@ def test_init_outputmodule_good():
 def test_init_outputmodule_bad():
 
     class OutputModuleTestBad_1(OutputModule):
+        """
+        ** DummyModule **
+
+        one two three
+        """
+
         def __init__(self, actor_config, payload=None, native_events=None, parallel_streams=1):
             InputModule.__init__(self, actor_config)
 
     class OutputModuleTestBad_2(OutputModule):
+        """
+        ** DummyModule **
+
+        one two three
+        """
+
         def __init__(self, actor_config, selection=None, native_events=None, parallel_streams=1):
             InputModule.__init__(self, actor_config)
 
     class OutputModuleTestBad_3(OutputModule):
+        """
+        ** DummyModule **
+
+        one two three
+        """
+
         def __init__(self, actor_config, selection=None, payload=None, parallel_streams=1):
             InputModule.__init__(self, actor_config)
 
     class OutputModuleTestBad_4(OutputModule):
+        """
+        ** DummyModule **
+
+        one two three
+        """
+
         def __init__(self, actor_config, selection=None, payload=None, native_events=None):
             InputModule.__init__(self, actor_config)
 
-    actor_config = ActorConfig('DummyTest', 100, 1, {}, "")
+    actor_config = ActorConfig('DummyTest', QueuePool())
 
     for i in range(1, 5):
         try:

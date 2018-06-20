@@ -88,14 +88,14 @@ class Logging():
             "module": self.name,
             "message": message
         })
-
-        try:
-            self.logs.put(event)
-        except QueueFull:
-            if not self.__queue_full_message:
-                print("Log queue full for module '%s'. Dropping messages" % (self.name))
+        while True:
+            try:
+                self.logs.put(event, timeout=1)
+                break
+            except QueueFull:
+                continue
             else:
-                self.__queue_full_message = True
+                print("Log queue full for module '%s'. Dropping messages" % (self.name))
 
     def alert(self, message, *args, **kwargs):
         """Generates a log message with priority alert(1).

@@ -27,8 +27,10 @@ from wishbone.protocol.decode.dummy import Dummy
 
 
 def test_protocol_decode_dummy_basic():
-
+    result = []
     p = Dummy()
     for chunk in ["one", None]:
         for payload in p.handler(chunk):
-            print (payload)
+            result.append(payload)
+
+    assert result == ["one"]

@@ -24,12 +24,13 @@
 
 from wishbone.module.cron import Cron
 from wishbone.actor import ActorConfig
+from wishbone.queue import QueuePool
 from wishbone.utils.test import getter
 
 
 def test_module_cron_default():
 
-    actor_config = ActorConfig('cron', 100, 1, {}, "")
+    actor_config = ActorConfig('cron', QueuePool())
     cron = Cron(actor_config, cron='*/1 * * * *')
     cron.pool.queue.outbox.disableFallThrough()
     cron.start()

@@ -25,11 +25,12 @@
 from wishbone.event import Event
 from wishbone.module.modify import Modify
 from wishbone.actor import ActorConfig
+from wishbone.queue import QueuePool
 from wishbone.utils.test import getter
 
 
 def get_actor(expression):
-    actor_config = ActorConfig('modify', 100, 1, {}, "")
+    actor_config = ActorConfig('modify', QueuePool())
     modify = Modify(actor_config, expressions=[expression])
 
     modify.pool.queue.inbox.disableFallThrough()

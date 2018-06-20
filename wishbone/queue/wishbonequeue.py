@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  test_wishbone.py
+#  wishbonequeue.py
 #
-#  Copyright 2017 Jelle Smet <development@smetj.net>
+#  Copyright 2018 Jelle Smet <development@smetj.net>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -22,29 +22,36 @@
 #
 #
 
-from wishbone.queue import QueuePool
-from wishbone.queue import Queue
+
+from abc import ABC, abstractmethod
 
 
-def test_listQueues():
-    q = QueuePool(1)
-    q.createQueue("hello")
-    assert sorted(list(q.listQueues(names=True))) == sorted(['hello', '_failed', '_success', '_logs', '_metrics'])
+class WishboneQueue(ABC):
 
+    @abstractmethod
+    def clean(self):
+        pass
 
-def test_createQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.queue.test)
+    @abstractmethod
+    def disableFallThrough(self):
+        pass
 
+    @abstractmethod
+    def dump(self):
+        pass
 
-def test_hasQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert (q.hasQueue("test"))
+    @abstractmethod
+    def empty(self):
+        pass
 
+    @abstractmethod
+    def enableFallThrough(self):
+        pass
 
-def test_getQueue():
-    q = QueuePool(1)
-    q.createQueue("test")
-    assert isinstance(q.getQueue("test"), Queue)
+    @abstractmethod
+    def get(self):
+        pass
+
+    @abstractmethod
+    def size(self):
+        pass

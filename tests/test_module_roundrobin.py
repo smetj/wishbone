@@ -25,12 +25,13 @@
 from wishbone.event import Event
 from wishbone.module.roundrobin import RoundRobin
 from wishbone.actor import ActorConfig
+from wishbone.queue import QueuePool
 from wishbone.utils.test import getter
 
 
 def test_module_roundrobin():
 
-    actor_config = ActorConfig('roundrobin', 100, 1, {}, "")
+    actor_config = ActorConfig('roundrobin', QueuePool())
     roundrobin = RoundRobin(actor_config)
 
     roundrobin.pool.queue.inbox.disableFallThrough()
