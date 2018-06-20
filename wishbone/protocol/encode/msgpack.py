@@ -28,7 +28,7 @@ from msgpack import dumps
 
 class MSGPack(Encode):
 
-    '''**Encode data into msgpack format.**
+    """**Encode data into msgpack format.**
 
     Convert a Python datastructure into msgpack format.
 
@@ -36,7 +36,7 @@ class MSGPack(Encode):
 
         n/a
 
-    '''
+    """
 
     def __init__(self):
         pass

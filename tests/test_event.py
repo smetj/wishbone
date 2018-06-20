@@ -144,7 +144,10 @@ def test_event_dump():
 def test_event_render():
 
     e = Event({"one": 1, "two": 2})
-    assert e.render("{{data.one}} is a number and so is {{data.two}}") == "1 is a number and so is 2"
+    assert (
+        e.render("{{data.one}} is a number and so is {{data.two}}")
+        == "1 is a number and so is 2"
+    )
 
 
 def test_event_render_error():
@@ -193,13 +196,13 @@ def test_event_slurp():
     b = Event()
     b.slurp(a.dump())
 
-    assert a.get('uuid') == b.get('uuid')
+    assert a.get("uuid") == b.get("uuid")
 
 
 def test_event_slurp_bad():
 
     a = Event()
-    del(a.data["uuid"])
+    del (a.data["uuid"])
     b = Event()
 
     try:
@@ -224,7 +227,7 @@ def test_event_get_error():
 def test_event_uuid():
 
     e = Event()
-    assert e.get('uuid')
+    assert e.get("uuid")
 
 
 def test_extractBulkItems():

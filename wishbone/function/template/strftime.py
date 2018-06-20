@@ -27,7 +27,7 @@ import arrow
 
 
 class STRFTime(TemplateFunction):
-    '''
+    """
     Returns a formatted version of an epoch timestamp.
 
     A Wishbone template function to return a formatted version of an epoch
@@ -35,10 +35,10 @@ class STRFTime(TemplateFunction):
 
     Args:
         None
-    '''
+    """
 
     def get(self, epoch, template):
-        '''
+        """
         The function mapped to the template function.
 
         Args:
@@ -47,6 +47,6 @@ class STRFTime(TemplateFunction):
 
         Returns:
             str: A timestamp
-        '''
+        """
 
         return arrow.get(epoch).format(template)

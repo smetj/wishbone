@@ -36,7 +36,12 @@ def test_templating_string():
 
     f = ComponentManager().getComponentByName("wishbone.function.template.pid")
     f_instance = f()
-    actor_config = ActorConfig('generator', QueuePool(), template_functions={"pid": f_instance}, disable_exception_handling=True)
+    actor_config = ActorConfig(
+        "generator",
+        QueuePool(),
+        template_functions={"pid": f_instance},
+        disable_exception_handling=True,
+    )
     test_event = Generator(actor_config, payload="{{pid()}}")
 
     test_event.pool.queue.outbox.disableFallThrough()
@@ -50,7 +55,12 @@ def test_templating_list():
 
     f = ComponentManager().getComponentByName("wishbone.function.template.pid")
     f_instance = f()
-    actor_config = ActorConfig('generator', QueuePool(), template_functions={"pid": f_instance}, disable_exception_handling=True)
+    actor_config = ActorConfig(
+        "generator",
+        QueuePool(),
+        template_functions={"pid": f_instance},
+        disable_exception_handling=True,
+    )
     test_event = Generator(actor_config, payload=["{{pid()}}"])
 
     test_event.pool.queue.outbox.disableFallThrough()
@@ -64,7 +74,12 @@ def test_templating_dict():
 
     f = ComponentManager().getComponentByName("wishbone.function.template.pid")
     f_instance = f()
-    actor_config = ActorConfig('generator', QueuePool(), template_functions={"pid": f_instance}, disable_exception_handling=True)
+    actor_config = ActorConfig(
+        "generator",
+        QueuePool(),
+        template_functions={"pid": f_instance},
+        disable_exception_handling=True,
+    )
     test_event = Generator(actor_config, payload={"one": "{{pid()}}"})
 
     test_event.pool.queue.outbox.disableFallThrough()
@@ -78,7 +93,12 @@ def test_templating_dict_in_list():
 
     f = ComponentManager().getComponentByName("wishbone.function.template.pid")
     f_instance = f()
-    actor_config = ActorConfig('generator', QueuePool(), template_functions={"pid": f_instance}, disable_exception_handling=True)
+    actor_config = ActorConfig(
+        "generator",
+        QueuePool(),
+        template_functions={"pid": f_instance},
+        disable_exception_handling=True,
+    )
     test_event = Generator(actor_config, payload=[{"one": "{{pid()}}"}])
 
     test_event.pool.queue.outbox.disableFallThrough()

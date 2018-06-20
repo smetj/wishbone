@@ -29,7 +29,6 @@ from gevent import sleep
 
 
 class Bucket(object):
-
     def __init__(self, key, size, age, logging, queue, looplock):
 
         self.key = key
@@ -49,9 +48,9 @@ class Bucket(object):
 
     def flushBucketTimer(self):
 
-        '''
+        """
         Flushes the buffer when <bucket_age> has expired.
-        '''
+        """
 
         while self.loop():
             sleep(1)
@@ -64,24 +63,26 @@ class Bucket(object):
                     self.resetTimer()
 
     def flush(self):
-        '''
+        """
         Flushes the buffer.
-        '''
-        self.logging.debug("Flushed bucket '%s' of size '%s'" % (self.key, self.bucket.size()))
+        """
+        self.logging.debug(
+            "Flushed bucket '%s' of size '%s'" % (self.key, self.bucket.size())
+        )
         self.queue.put(self.bucket)
         self.createEmptyBucket()
 
     def resetTimer(self):
-        '''
+        """
         Resets the buffer expiry countdown to its configured value.
-        '''
+        """
 
         self._timer = self.age
 
 
 class TippingBucket(Actor):
 
-    '''**Aggregates multiple events into bulk.**
+    """**Aggregates multiple events into bulk.**
 
     Aggregates multiple incoming events into bulk usually prior to submitting
     to an output module.
@@ -118,9 +119,11 @@ class TippingBucket(Actor):
            |  Flushes the buffer on incoming events despite the bulk being
            |  full (bucket_size) or expired (bucket_age).
 
-    '''
+    """
 
-    def __init__(self, actor_config, bucket_size=100, bucket_age=10, aggregation_key="default"):
+    def __init__(
+        self, actor_config, bucket_size=100, bucket_age=10, aggregation_key="default"
+    ):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -136,7 +139,9 @@ class TippingBucket(Actor):
         try:
             self.getBucket(self.kwargs.aggregation_key).bucket.append(event)
         except BulkFull:
-            self.logging.debug("Bucket full after %s events." % (self.kwargs.bucket_size))
+            self.logging.debug(
+                "Bucket full after %s events." % (self.kwargs.bucket_size)
+            )
             self.getBucket(self.kwargs.aggregation_key).flush()
             self.getBucket(self.kwargs.aggregation_key).bucket.append(event)
 
@@ -151,16 +156,19 @@ class TippingBucket(Actor):
                 self.kwargs.bucket_age,
                 self.logging,
                 self.pool.queue.outbox,
-                self.loop)
+                self.loop,
+            )
             self.sendToBackground(self.buckets[key].flushBucketTimer)
             return self.buckets[key]
 
     def flushIncomingMessage(self, event):
-        '''
+        """
         Called on each incoming messages of <flush> queue.
         Flushes the buffer.
-        '''
+        """
 
-        self.logging.debug("Recieved message in <flush> queue.  Flushing all bulk buffers.")
+        self.logging.debug(
+            "Recieved message in <flush> queue.  Flushing all bulk buffers."
+        )
         for index, bucket in self.buckets:
             bucket.flush()

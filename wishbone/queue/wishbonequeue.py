@@ -27,7 +27,6 @@ from abc import ABC, abstractmethod
 
 
 class WishboneQueue(ABC):
-
     @abstractmethod
     def clean(self):
         pass

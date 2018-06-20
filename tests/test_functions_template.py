@@ -62,47 +62,61 @@ def test_wishbone_function_template_pid():
 
 def test_wishbone_function_template_random_bool():
 
-    f = ComponentManager().getComponentByName("wishbone.function.template.random_bool")()
+    f = ComponentManager().getComponentByName(
+        "wishbone.function.template.random_bool"
+    )()
     assert f.get() in [True, False]
 
 
 def test_wishbone_function_template_random_integer():
 
-    f = ComponentManager().getComponentByName("wishbone.function.template.random_integer")(10, 15)
+    f = ComponentManager().getComponentByName(
+        "wishbone.function.template.random_integer"
+    )(10, 15)
     value = f.get()
     assert value >= 10 and value <= 15
 
 
 def test_wishbone_function_template_random_uuid():
 
-    f = ComponentManager().getComponentByName("wishbone.function.template.random_uuid")()
+    f = ComponentManager().getComponentByName(
+        "wishbone.function.template.random_uuid"
+    )()
     value = f.get()
-    assert re.compile('[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}', re.I).match(value) is not None
+    assert (
+        re.compile(
+            "[a-f0-9]{8}-?[a-f0-9]{4}-?4[a-f0-9]{3}-?[89ab][a-f0-9]{3}-?[a-f0-9]{12}",
+            re.I,
+        ).match(value)
+        is not None
+    )
 
 
 def test_wishbone_function_template_random_word():
 
-    f = ComponentManager().getComponentByName("wishbone.function.template.random_word")()
+    f = ComponentManager().getComponentByName(
+        "wishbone.function.template.random_word"
+    )()
     value = f.get()
-    assert re.compile('\w*').match(value) is not None
+    assert re.compile("\w*").match(value) is not None
 
 
 def test_wishbone_function_template_strftime():
 
     f = ComponentManager().getComponentByName("wishbone.function.template.strftime")()
-    assert f.get(0, 'YYYY-MM-DD HH:mm:ss ZZ') == '1970-01-01 00:00:00 +00:00'
+    assert f.get(0, "YYYY-MM-DD HH:mm:ss ZZ") == "1970-01-01 00:00:00 +00:00"
 
 
 def test_wishbone_function_template_regexTrue():
 
     f = ComponentManager().getComponentByName("wishbone.function.template.regex")()
-    assert f.get('.*', "hello")
+    assert f.get(".*", "hello")
 
 
 def test_wishbone_function_template_regexFalse():
 
     f = ComponentManager().getComponentByName("wishbone.function.template.regex")()
-    assert not f.get('.*$.', "hello")
+    assert not f.get(".*$.", "hello")
 
 
 def test_wishbone_function_template_version():
@@ -113,5 +127,7 @@ def test_wishbone_function_template_version():
 
 def test_wishbone_function_template_environment():
 
-    f = ComponentManager().getComponentByName("wishbone.function.template.environment")()
-    assert '/' in f.get("PATH")
+    f = ComponentManager().getComponentByName(
+        "wishbone.function.template.environment"
+    )()
+    assert "/" in f.get("PATH")

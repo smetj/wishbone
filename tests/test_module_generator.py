@@ -32,7 +32,7 @@ from wishbone.utils.test import getter
 
 def test_module_generator_basic():
 
-    actor_config = ActorConfig('generator', QueuePool())
+    actor_config = ActorConfig("generator", QueuePool())
     test_event = Generator(actor_config, payload="test")
 
     test_event.pool.queue.outbox.disableFallThrough()
@@ -44,7 +44,7 @@ def test_module_generator_basic():
 
 def test_module_generator_dict():
 
-    actor_config = ActorConfig('generator', QueuePool())
+    actor_config = ActorConfig("generator", QueuePool())
     test_event = Generator(actor_config, payload={"one": 1})
 
     test_event.pool.queue.outbox.disableFallThrough()

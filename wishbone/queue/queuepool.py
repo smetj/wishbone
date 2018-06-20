@@ -95,9 +95,15 @@ class Shovel(object):
     def __repr__(self):
 
         if self.lock:
-            return "Running Shovel(%s -> %s)" % (self.source_name, self.destination_name)
+            return "Running Shovel(%s -> %s)" % (
+                self.source_name,
+                self.destination_name,
+            )
         else:
-            return "Stopped Shovel(%s -> %s)" % (self.source_name, self.destination_name)
+            return "Stopped Shovel(%s -> %s)" % (
+                self.source_name,
+                self.destination_name,
+            )
 
 
 class QueuePool(object):
@@ -413,9 +419,7 @@ class QueuePoolWrapper(object):
         if instance is None:
             instance = MemoryQueue()
 
-        self._queue_pool.registerQueue(
-            "%s.%s" % (self._module_name, name), instance
-        )
+        self._queue_pool.registerQueue("%s.%s" % (self._module_name, name), instance)
         setattr(
             self.queue,
             name,
@@ -424,9 +428,7 @@ class QueuePoolWrapper(object):
 
     def createSystemQueue(self, name, instance=None):
 
-        self._queue_pool.registerQueue(
-            "%s.%s" % (self._module_name, name), instance
-        )
+        self._queue_pool.registerQueue("%s.%s" % (self._module_name, name), instance)
 
         if instance is None:
             instance = MemoryQueue()

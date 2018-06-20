@@ -30,7 +30,7 @@ from wishbone.error import InvalidData
 
 class QueueSelect(ProcessModule):
 
-    '''**Submits message to the queue defined by a rendered template.**
+    """**Submits message to the queue defined by a rendered template.**
 
     Renders a list of templates against the event.  Events are submitted to
     the queue a rendered template returns.
@@ -89,14 +89,9 @@ class QueueSelect(ProcessModule):
         - file
            |  Read rules from YAML file or delete them.
 
-    '''
+    """
 
-    INOTIFY_TYPES = [
-        "IN_CREATE",
-        "IN_CLOSE_WRITE",
-        "IN_DELETE",
-        "WISHBONE_INIT"
-    ]
+    INOTIFY_TYPES = ["IN_CREATE", "IN_CLOSE_WRITE", "IN_DELETE", "WISHBONE_INIT"]
 
     def __init__(self, actor_config, templates=[], log_matching=False):
         ProcessModule.__init__(self, actor_config)
@@ -109,10 +104,7 @@ class QueueSelect(ProcessModule):
         self.registerConsumer(self.consume, "inbox")
         # self.registerConsumer(self.handleFileTemplate, "file")
 
-        self.template_loader = StructuredDataFile(
-            expect_json=False,
-            expect_yaml=True
-        )
+        self.template_loader = StructuredDataFile(expect_json=False, expect_yaml=True)
 
     def consume(self, event):
 
@@ -121,7 +113,8 @@ class QueueSelect(ProcessModule):
                 template_name=template.name,
                 queue_list=template.queue,
                 payload=template.get("payload", {}),
-                event=event)
+                event=event,
+            )
 
         for file_name, file_content in self.template_loader.dump().items():
             try:
@@ -133,27 +126,30 @@ class QueueSelect(ProcessModule):
                     template_name=file_name,
                     queue_list=queue_name,
                     payload=file_content["payload"].get(queue_name, {}),
-                    event=event)
+                    event=event,
+                )
 
     def handleQueueSelect(self, template_name, queue_list, payload, event):
-        '''Handles submitting <event> into queue <queue_name>.'''
+        """Handles submitting <event> into queue <queue_name>."""
 
-        for queue_name in [queue.strip() for queue in queue_list.split(',')]:
+        for queue_name in [queue.strip() for queue in queue_list.split(",")]:
 
             if self.pool.hasQueue(queue_name):
 
                 if self.kwargs.log_matching:
-                    self.logging.debug("Template '{template_name}' selected queue '{queue_name}' to route event '{event_id}' to.".format(
-                        template_name=template_name,
-                        queue_name=queue_name,
-                        event_id=event.get('uuid')
-                    ))
+                    self.logging.debug(
+                        "Template '{template_name}' selected queue '{queue_name}' to route event '{event_id}' to.".format(
+                            template_name=template_name,
+                            queue_name=queue_name,
+                            event_id=event.get("uuid"),
+                        )
+                    )
 
                 # Construct and set the payload
                 queue_payload = {
-                    "original_event_id": event.get('uuid'),
+                    "original_event_id": event.get("uuid"),
                     "queue": queue_name,
-                    "payload": payload
+                    "payload": payload,
                 }
                 e = event.clone()
                 e.set(queue_payload, "tmp.%s" % (self.name))
@@ -163,15 +159,17 @@ class QueueSelect(ProcessModule):
 
             else:
                 if self.kwargs.log_matching:
-                    self.logging.debug("Template '{template_name}' selected non-existing queue '{queue_name}' to route event '{event_id}' to.".format(
-                        template_name=template_name,
-                        queue_name=queue_name,
-                        event_id=event.get('uuid')
-                    ))
+                    self.logging.debug(
+                        "Template '{template_name}' selected non-existing queue '{queue_name}' to route event '{event_id}' to.".format(
+                            template_name=template_name,
+                            queue_name=queue_name,
+                            event_id=event.get("uuid"),
+                        )
+                    )
                 self.submit(event, "nomatch")
 
     def handleFileTemplate(self, event):
-        '''Loads or deletes the template file defined in data.path.'''
+        """Loads or deletes the template file defined in data.path."""
 
         inotify_type = event.get("data.inotify_type")
         path = event.get("data.path")
@@ -179,11 +177,15 @@ class QueueSelect(ProcessModule):
         if inotify_type in self.INOTIFY_TYPES:
             if inotify_type == "IN_DELETE":
                 self.template_loader.delete(path)
-                self.logging.debug("Removed template file '{path}' from cache.".format(path=path))
+                self.logging.debug(
+                    "Removed template file '{path}' from cache.".format(path=path)
+                )
             else:
                 self.template_loader.load(path)
                 self.logging.debug("Loaded template file '{path}'".format(path=path))
         else:
-            self.logging.warning("No support for inotify type '{inotify_type}'. Dropped.".format(
-                inotify_type=inotify_type
-            ))
+            self.logging.warning(
+                "No support for inotify type '{inotify_type}'. Dropped.".format(
+                    inotify_type=inotify_type
+                )
+            )

@@ -29,7 +29,7 @@ from gevent import sleep
 
 class TestEvent(Actor):
 
-    '''**Generates a test event at the chosen interval.**
+    """**Generates a test event at the chosen interval.**
 
     The data field of the test event contains the string "test".
 
@@ -54,9 +54,16 @@ class TestEvent(Actor):
 
         - outbox
            |  Contains the generated events.
-    '''
+    """
 
-    def __init__(self, actor_config, interval=1, message="test", numbered=False, additional_values={}):
+    def __init__(
+        self,
+        actor_config,
+        interval=1,
+        message="test",
+        numbered=False,
+        additional_values={},
+    ):
         Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
 

@@ -22,7 +22,9 @@
 #
 #
 
-from gevent import monkey; monkey.patch_all()
+from gevent import monkey
+
+monkey.patch_all()
 from wishbone.actor import Actor
 from wishbone.module import InputModule
 from cronex import CronExpression
@@ -32,7 +34,7 @@ import time
 
 class Cron(InputModule):
 
-    '''**Generates an event at the defined time**
+    """**Generates an event at the defined time**
 
     Generates an event with the defined payload at the chosen time.
     Time is in crontab format.
@@ -57,10 +59,16 @@ class Cron(InputModule):
 
         - outbox
            |  Outgoing messges
-    '''
+    """
 
-    def __init__(self, actor_config, native_events=False,
-                 cron="*/10 * * * *", payload="wishbone", destination="data"):
+    def __init__(
+        self,
+        actor_config,
+        native_events=False,
+        cron="*/10 * * * *",
+        payload="wishbone",
+        destination="data",
+    ):
 
         Actor.__init__(self, actor_config)
         self.pool.createQueue("outbox")
@@ -75,13 +83,7 @@ class Cron(InputModule):
                 self.logging.info("Cron executed.")
             for chunk in [self.kwargs_raw["payload"], None]:
                 for payload in self.decode(chunk):
-                    event = self.generateEvent(
-                        payload,
-                        self.kwargs.destination
-                    )
-                    self.submit(
-                        event,
-                        "outbox"
-                    )
+                    event = self.generateEvent(payload, self.kwargs.destination)
+                    self.submit(event, "outbox")
 
             sleep(60)

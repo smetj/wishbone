@@ -30,7 +30,7 @@ from wishbone.utils.test import getter
 
 
 def get_actor(expression):
-    actor_config = ActorConfig('modify', QueuePool())
+    actor_config = ActorConfig("modify", QueuePool())
     modify = Modify(actor_config, expressions=[expression])
 
     modify.pool.queue.inbox.disableFallThrough()
@@ -46,7 +46,7 @@ def test_module_add_item():
     e = Event(["one", "two", "three"])
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert "fubar" in one.get('data')
+    assert "fubar" in one.get("data")
 
 
 def test_module_copy():
@@ -55,7 +55,7 @@ def test_module_copy():
     e = Event({"greeting": "hi"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert "hi" == one.get('tmp.copy')["greeting"]
+    assert "hi" == one.get("tmp.copy")["greeting"]
     assert id(one.get("data")) != id(one.get("tmp.copy"))
 
 
@@ -65,7 +65,7 @@ def test_module_copy_default():
     e = Event({"greeting": "hi"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert "default" == one.get('tmp.copy')
+    assert "default" == one.get("tmp.copy")
 
 
 def test_module_del_item():
@@ -74,7 +74,7 @@ def test_module_del_item():
     e = Event(["one", "two", "three", "fubar"])
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert "fubar" not in one.get('data')
+    assert "fubar" not in one.get("data")
 
 
 def test_module_delete():
@@ -83,16 +83,18 @@ def test_module_delete():
     e = Event({"one": 1, "two": 2})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert "two" not in one.get('data').keys()
+    assert "two" not in one.get("data").keys()
 
 
 def test_module_extract():
 
-    a = get_actor({"extract": ["destination", "(?P<one>.*?)\ (?P<two>.*)\ (?P<three>.*)", "data"]})
+    a = get_actor(
+        {"extract": ["destination", "(?P<one>.*?)\ (?P<two>.*)\ (?P<three>.*)", "data"]}
+    )
     e = Event("een twee drie")
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert one.get('destination.one') == "een"
+    assert one.get("destination.one") == "een"
 
 
 def test_module_lowercase():
@@ -101,16 +103,16 @@ def test_module_lowercase():
     e = Event({"lower": "HELLO"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert one.get('data.lower') == "hello"
+    assert one.get("data.lower") == "hello"
 
 
 def test_module_modify_set():
 
     a = get_actor({"set": ["hi", "blah"]})
-    e = Event('hello')
+    e = Event("hello")
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert one.get('blah') == "hi"
+    assert one.get("blah") == "hi"
 
 
 def test_module_uppercase():
@@ -119,7 +121,7 @@ def test_module_uppercase():
     e = Event({"upper": "hello"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert one.get('data.upper') == "HELLO"
+    assert one.get("data.upper") == "HELLO"
 
 
 def test_module_template():
@@ -128,7 +130,7 @@ def test_module_template():
     e = Event({"language": "German", "word": "gutten Tag"})
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert one.get('result') == "Good day in German is gutten Tag."
+    assert one.get("result") == "Good day in German is gutten Tag."
 
 
 def test_module_time():
@@ -141,25 +143,25 @@ def test_module_time():
 
 def test_module_replace():
 
-    a = get_actor({"replace": ['\d', "X", "data"]})
+    a = get_actor({"replace": ["\d", "X", "data"]})
     e = Event("hello 123 hello")
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert one.get('data') == "hello XXX hello"
+    assert one.get("data") == "hello XXX hello"
 
 
 def test_module_join():
 
-    a = get_actor({"join": ['data', ",", "tmp.joined"]})
+    a = get_actor({"join": ["data", ",", "tmp.joined"]})
     e = Event(["one", "two", "three"])
     a.pool.queue.inbox.put(e)
     one = getter(a.pool.queue.outbox)
-    assert one.get('tmp.joined') == "one,two,three"
+    assert one.get("tmp.joined") == "one,two,three"
 
 
 def test_module_merge():
 
-    a = get_actor({"merge": ['tmp.one', 'tmp.two', 'data']})
+    a = get_actor({"merge": ["tmp.one", "tmp.two", "data"]})
     e = Event()
     e.set(["one"], "tmp.one")
     e.set(["two"], "tmp.two")

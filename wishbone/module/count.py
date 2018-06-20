@@ -29,7 +29,7 @@ from gevent import sleep
 
 class Count(FlowModule):
 
-    '''**Pass or drop events based on the number of times an event value occurs.**
+    """**Pass or drop events based on the number of times an event value occurs.**
 
     Events pass through or get dropped after a certain key/value has appeared
     for a number of times within an optional time window.
@@ -97,7 +97,7 @@ class Count(FlowModule):
         - dropped
            |  Events not meeting the counter requirements.
 
-    '''
+    """
 
     def __init__(self, actor_config, conditions={}):
         FlowModule.__init__(self, actor_config)
@@ -120,27 +120,38 @@ class Count(FlowModule):
                     else:
                         self.__counter[key] = 1
                         if condition["window"] > 0:
-                            self.__count_down_pool.spawn(self.__countDown, condition["window"], key)
+                            self.__count_down_pool.spawn(
+                                self.__countDown, condition["window"], key
+                            )
 
                     if self.__counter[key] >= condition["occurrence"]:
                         if condition["action"] == "pass":
                             self.submit(event, "outbox")
                         if condition["action"] == "drop":
                             self.submit(event, "dropped")
-                            self.logging.debug("Event with id '%s' and key '%s' dropped" % (event.get('uuid'), key))
+                            self.logging.debug(
+                                "Event with id '%s' and key '%s' dropped"
+                                % (event.get("uuid"), key)
+                            )
                     else:
                         if condition["action"] == "pass":
                             self.submit(event, "dropped")
-                            self.logging.debug("Event with id '%s' and key '%s' dropped" % (event.get('uuid'), key))
+                            self.logging.debug(
+                                "Event with id '%s' and key '%s' dropped"
+                                % (event.get("uuid"), key)
+                            )
                         if condition["action"] == "drop":
                             self.submit(event, "outbox")
                     break
         else:
             self.submit(event, "outbox")
-            self.logging.debug("Event with id '%s' has not a single key defined in the conditions therefor it is passed to outbox." % (event.get('uuid')))
+            self.logging.debug(
+                "Event with id '%s' has not a single key defined in the conditions therefor it is passed to outbox."
+                % (event.get("uuid"))
+            )
 
     def __countDown(self, seconds, key):
 
         sleep(seconds)
-        del(self.__counter[key])
+        del (self.__counter[key])
         self.logging.debug("Time window of '%s' expired for key '%s'." % (seconds, key))

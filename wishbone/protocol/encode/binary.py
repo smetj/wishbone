@@ -27,15 +27,15 @@ from wishbone.protocol import Encode
 
 class Binary(Encode):
 
-    '''
+    """
     Encodes a Python object into a binary representation.
 
     Parameters:
 
         n/a
-    '''
+    """
 
-    def __init__(self, charset='utf-8'):
+    def __init__(self, charset="utf-8"):
         self.charset = charset
 
     def handleString(self, data):

@@ -28,7 +28,7 @@ import re
 
 class Regex(TemplateFunction):
 
-    '''
+    """
     Regex matching on a string.
 
 
@@ -37,10 +37,10 @@ class Regex(TemplateFunction):
 
     Args:
         None
-    '''
+    """
 
     def get(self, pattern, string):
-        '''
+        """
         The function mapped to the template function.
 
         Args:
@@ -49,7 +49,7 @@ class Regex(TemplateFunction):
 
         Returns:
             Bool: True if regex matches if not False
-        '''
+        """
 
         if re.match(pattern, string):
             return True

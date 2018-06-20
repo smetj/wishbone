@@ -27,7 +27,7 @@ from pkg_resources import get_distribution
 
 
 class Version(TemplateFunction):
-    '''
+    """
     Returns the version of the desired Python module.
 
     A Wishbone template function wich returns the version a the defined Python
@@ -35,10 +35,10 @@ class Version(TemplateFunction):
 
     Args:
         None
-    '''
+    """
 
     def get(self, module="wishbone"):
-        '''
+        """
         The function mapped to the template function.
 
         Args:
@@ -46,6 +46,6 @@ class Version(TemplateFunction):
 
         Returns:
             str: The version string
-        '''
+        """
 
         return get_distribution(module).version

@@ -26,7 +26,7 @@ from wishbone.config.configfile import ConfigFile
 from os import remove
 from easydict import EasyDict
 
-HELLO_WORLD = '''
+HELLO_WORLD = """
 modules:
   input:
     module: wishbone.module.input.generator
@@ -38,59 +38,71 @@ modules:
 
 routingtable:
   - input.outbox -> output.inbox
-'''
+"""
 
 
 def setup_module(module):
 
     try:
-        remove('/tmp/.test_bootstrap.yaml')
+        remove("/tmp/.test_bootstrap.yaml")
     except Exception:
         pass
 
-    with open('/tmp/.test_bootstrap.yaml', 'w') as f:
+    with open("/tmp/.test_bootstrap.yaml", "w") as f:
         f.write(HELLO_WORLD)
         f.close()
 
 
 def teardown_module(module):
 
-    remove('/tmp/.test_bootstrap.yaml')
+    remove("/tmp/.test_bootstrap.yaml")
 
 
-class Test_ConfigFile():
-
+class Test_ConfigFile:
     def test_dump_type(self):
 
-        c = ConfigFile('/tmp/.test_bootstrap.yaml', 'SYSLOG')
+        c = ConfigFile("/tmp/.test_bootstrap.yaml", "SYSLOG")
         assert isinstance(c.dump(), EasyDict)
 
     def test_default_template_functions(self):
 
-        c = ConfigFile('/tmp/.test_bootstrap.yaml', 'SYSLOG')
-        assert sorted(c.dump()["template_functions"]) == sorted(["strftime", "epoch", "version", "env"])
+        c = ConfigFile("/tmp/.test_bootstrap.yaml", "SYSLOG")
+        assert sorted(c.dump()["template_functions"]) == sorted(
+            ["strftime", "epoch", "version", "env"]
+        )
 
     def test_syslog_setup(self):
 
-        c = ConfigFile('/tmp/.test_bootstrap.yaml', 'SYSLOG')
+        c = ConfigFile("/tmp/.test_bootstrap.yaml", "SYSLOG")
         assert "_logs_syslog" in c.dump()["modules"]
-        assert c.dump()["modules"]["_logs_syslog"]["module"] == "wishbone.module.output.syslog"
+        assert (
+            c.dump()["modules"]["_logs_syslog"]["module"]
+            == "wishbone.module.output.syslog"
+        )
         assert c.dump()["modules"]["_logs"]["module"] == "wishbone.module.flow.funnel"
 
     def test_stdout_setup(self):
 
-        c = ConfigFile('/tmp/.test_bootstrap.yaml', 'STDOUT')
+        c = ConfigFile("/tmp/.test_bootstrap.yaml", "STDOUT")
         assert "_logs_stdout" in c.dump()["modules"]
-        assert c.dump()["modules"]["_logs_stdout"]["module"] == "wishbone.module.output.stdout"
+        assert (
+            c.dump()["modules"]["_logs_stdout"]["module"]
+            == "wishbone.module.output.stdout"
+        )
 
     def test_logfilter_setup(self):
 
-        c = ConfigFile('/tmp/.test_bootstrap.yaml', 'STDOUT')
+        c = ConfigFile("/tmp/.test_bootstrap.yaml", "STDOUT")
         assert "_logs_filter" in c.dump()["modules"]
-        assert c.dump()["modules"]["_logs_filter"]["module"] == "wishbone.module.flow.queueselect"
+        assert (
+            c.dump()["modules"]["_logs_filter"]["module"]
+            == "wishbone.module.flow.queueselect"
+        )
 
     def test_metrics_setup(self):
 
-        c = ConfigFile('/tmp/.test_bootstrap.yaml', 'STDOUT')
+        c = ConfigFile("/tmp/.test_bootstrap.yaml", "STDOUT")
         assert "_metrics" in c.dump()["modules"]
-        assert c.dump()["modules"]["_metrics"]["module"] == "wishbone.module.flow.funnel"
+        assert (
+            c.dump()["modules"]["_metrics"]["module"] == "wishbone.module.flow.funnel"
+        )

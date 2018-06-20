@@ -4,7 +4,7 @@ from wishbone.module import FlowModule
 
 
 class HigherLower(FlowModule):
-    '''
+    """
     **Checks whether an integer is higher or lower than the defined value.**
 
     Checks whether an event value is higher, lower or equal to the defined baseline.
@@ -34,7 +34,7 @@ class HigherLower(FlowModule):
         - equal
            |  Events with an equal value to ``value`` are submitted to this
            |  queue.
-    '''
+    """
 
     def __init__(self, actor_config, base=100, value=100):
         FlowModule.__init__(self, actor_config)

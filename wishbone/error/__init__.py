@@ -123,5 +123,6 @@ class ProtocolInitFailure(Exception):
 class TTLExpired(Exception):
     pass
 
+
 class QueuePoolError(Exception):
     pass

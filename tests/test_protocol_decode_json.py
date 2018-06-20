@@ -28,12 +28,9 @@ from wishbone.error import ProtocolError
 import itertools
 
 
-class ReadlinesMock():
+class ReadlinesMock:
 
-    data = [
-        b'{"one":',
-        b'1}'
-    ]
+    data = [b'{"one":', b"1}"]
 
     def readlines(self):
 
@@ -57,7 +54,7 @@ def test_protocol_decode_json_basic():
 
 def test_protocol_decode_json_basic_delimiter():
 
-    a = itertools.cycle([{'one': 1}, {'two': 2}])
+    a = itertools.cycle([{"one": 1}, {"two": 2}])
     m = JSON(delimiter="\n")
     for chunk in ['{"one": 1}\n{"two": 2}', None]:
         for item in m.handler(chunk):

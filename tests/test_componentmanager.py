@@ -29,19 +29,23 @@ c = ComponentManager()
 
 def test_exists():
 
-    assert c.exists('wishbone.module.input.inotify') is True
+    assert c.exists("wishbone.module.input.inotify") is True
 
 
 def test_getComponent():
 
     from wishbone.module import wb_inotify
-    assert c.getComponent('wishbone', 'module', 'input', 'inotify') == wb_inotify.WBInotify
+
+    assert (
+        c.getComponent("wishbone", "module", "input", "inotify") == wb_inotify.WBInotify
+    )
 
 
 def test_getComponentByName():
 
     from wishbone.module import wb_inotify
-    assert c.getComponentByName('wishbone.module.input.inotify') == wb_inotify.WBInotify
+
+    assert c.getComponentByName("wishbone.module.input.inotify") == wb_inotify.WBInotify
 
 
 def test_getComponentList():
@@ -55,25 +59,28 @@ def test_getComponentList():
 
 def test_getComponentDoc():
 
-    assert "Parameters" in c.getComponentDoc('wishbone', 'module', 'input', 'inotify')
+    assert "Parameters" in c.getComponentDoc("wishbone", "module", "input", "inotify")
 
 
 def test_getComponentTitle():
 
-    assert "inotify" in c.getComponentTitle('wishbone', 'module', 'input', 'inotify')
+    assert "inotify" in c.getComponentTitle("wishbone", "module", "input", "inotify")
 
 
 def test_getComponentVersion():
 
     import pkg_resources
-    assert pkg_resources.get_distribution("wishbone").version == c.getComponentVersion('wishbone', 'module', 'input', 'inotify')
+
+    assert pkg_resources.get_distribution("wishbone").version == c.getComponentVersion(
+        "wishbone", "module", "input", "inotify"
+    )
 
 
 def test_validateComponentName():
 
-    assert c.validateComponentName('wishbone.module.flow.tippingbucket') is True
+    assert c.validateComponentName("wishbone.module.flow.tippingbucket") is True
     try:
-        c.validateComponentName('wishbone.flow.tippingbucket')
+        c.validateComponentName("wishbone.flow.tippingbucket")
     except Exception:
         assert True
     else:

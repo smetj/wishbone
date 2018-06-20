@@ -30,7 +30,9 @@ from wishbone.module import InputModule
 # patch or merge request
 # todo(smetj): Fix dirty monkey patch of inotify select
 import sys
-from gevent import monkey; monkey.patch_all()
+from gevent import monkey
+
+monkey.patch_all()
 sys.modules["select"] = sys.modules["gevent.select"]
 sys.modules["select"].epoll = sys.modules["select"].poll
 
@@ -44,7 +46,7 @@ import fnmatch
 
 class WBInotify(InputModule):
 
-    '''**Monitors one or more paths for inotify events.**
+    """**Monitors one or more paths for inotify events.**
 
     Monitors one or more paths for the defined inotify events.
 
@@ -112,10 +114,17 @@ class WBInotify(InputModule):
         - outbox
            |  Outgoing notify events.
 
-    '''
+    """
 
-    def __init__(self, actor_config, native_events=False, destination="data",
-                 initial_listing=True, glob_pattern="*", paths={"/tmp": ["IN_CREATE", "IN_CLOSE_WRITE"]}):
+    def __init__(
+        self,
+        actor_config,
+        native_events=False,
+        destination="data",
+        initial_listing=True,
+        glob_pattern="*",
+        paths={"/tmp": ["IN_CREATE", "IN_CLOSE_WRITE"]},
+    ):
         InputModule.__init__(self, actor_config)
 
         self.pool.createQueue("outbox")
@@ -125,43 +134,68 @@ class WBInotify(InputModule):
         for path, event_types in self.kwargs.paths.items():
             for event_type in event_types:
                 if event_type not in constants.__dict__:
-                    raise Exception("Inotify event type '%s' defined for path '%s' is not valid." % (event_type, path))
+                    raise Exception(
+                        "Inotify event type '%s' defined for path '%s' is not valid."
+                        % (event_type, path)
+                    )
 
         for path, inotify_types in self.kwargs.paths.items():
-            self.sendToBackground(self.monitor, path, inotify_types, self.kwargs.glob_pattern)
+            self.sendToBackground(
+                self.monitor, path, inotify_types, self.kwargs.glob_pattern
+            )
 
     def monitor(self, path, inotify_types, glob_pattern):
-        '''Monitors ``path`` for ``inotify_types`` on files and dirs matching ``glob_pattern``
+        """Monitors ``path`` for ``inotify_types`` on files and dirs matching ``glob_pattern``
 
         :param str path: The path to monitor
         :param list inotify_types: A list of inotify types to monitor
         :param str glob_pattern: Paths need to match in order to be returned.
         :return: None
-        '''
+        """
 
-        all_types = ', '.join(inotify_types)
-        if all_types == '':
+        all_types = ", ".join(inotify_types)
+        if all_types == "":
             all_types = "ALL"
 
         while self.loop():
             if os.path.exists(path) and os.access(path, os.R_OK):
-                self.logging.info("Started to monitor path '%s' for '%s' inotify events on paths matching '%s'." % (os.path.abspath(path), all_types, glob_pattern))
+                self.logging.info(
+                    "Started to monitor path '%s' for '%s' inotify events on paths matching '%s'."
+                    % (os.path.abspath(path), all_types, glob_pattern)
+                )
 
                 if self.kwargs.initial_listing:
                     for p in self.__getAllFiles(path, glob_pattern):
                         for payload in self.decode(p):
-                            event = self.generateEvent({"path": os.path.abspath(payload), "inotify_type": "WISHBONE_INIT"}, self.kwargs.destination)
+                            event = self.generateEvent(
+                                {
+                                    "path": os.path.abspath(payload),
+                                    "inotify_type": "WISHBONE_INIT",
+                                },
+                                self.kwargs.destination,
+                            )
                             self.submit(event, "outbox")
                 try:
-                    for abs_path, i_type in self.__setupInotifyMonitor(path, inotify_types, glob_pattern):
+                    for abs_path, i_type in self.__setupInotifyMonitor(
+                        path, inotify_types, glob_pattern
+                    ):
                         for payload in self.decode(abs_path):
-                            event = self.generateEvent({"path": payload, "inotify_type": i_type}, self.kwargs.destination)
+                            event = self.generateEvent(
+                                {"path": payload, "inotify_type": i_type},
+                                self.kwargs.destination,
+                            )
                             self.submit(event, "outbox")
                 except Exception as err:
-                    self.logging.critical('Failed to initialize inotify monitor. This needs immediate attention. Reason: %s' % err)
+                    self.logging.critical(
+                        "Failed to initialize inotify monitor. This needs immediate attention. Reason: %s"
+                        % err
+                    )
                     sleep(1)
             else:
-                self.logging.warning("The defined path '%s' does not exist or is not readable. Will sleep for 5 seconds and try again." % (path))
+                self.logging.warning(
+                    "The defined path '%s' does not exist or is not readable. Will sleep for 5 seconds and try again."
+                    % (path)
+                )
                 sleep(5)
 
     def __getAllFiles(self, path, glob_pattern):
@@ -176,7 +210,11 @@ class WBInotify(InputModule):
         """
 
         if os.path.isdir(path):
-            all_files = [os.path.abspath("%s/%s" % (path, name)) for name in os.listdir(path) if os.path.isfile("%s/%s" % (path, name))]
+            all_files = [
+                os.path.abspath("%s/%s" % (path, name))
+                for name in os.listdir(path)
+                if os.path.isfile("%s/%s" % (path, name))
+            ]
         else:
             all_files = [os.path.abspath(path)]
 
@@ -186,7 +224,7 @@ class WBInotify(InputModule):
 
     def __setupInotifyMonitor(self, path, inotify_types, glob_pattern):
 
-        '''
+        """
 
         Initializes an inotify monitor process on ``path`` and yields the
         defined ``inotify_types`` generated on the paths matching the
@@ -197,7 +235,7 @@ class WBInotify(InputModule):
         :param str glob_pattern: Paths need to match in order to be returned.
         :return: generator
 
-        '''
+        """
 
         file_exists = True
         i = Inotify()
@@ -210,7 +248,7 @@ class WBInotify(InputModule):
                         if inotify_type in inotify_types or inotify_types == []:
                             abs_path = os.path.abspath("%s/%s" % (event[2], event[3]))
                             if fnmatch.fnmatch(abs_path, glob_pattern):
-                                yield abs_path.rstrip('/'), inotify_type
+                                yield abs_path.rstrip("/"), inotify_type
                         if inotify_type == "IN_DELETE_SELF":
                             file_exists = False
                             break

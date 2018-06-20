@@ -27,7 +27,7 @@ from gevent import sleep
 
 
 class Generator(InputModule):
-    '''
+    """
     Generates an event at the chosen interval.
 
     The payload can be just about anything including template functions.
@@ -52,10 +52,16 @@ class Generator(InputModule):
 
         - outbox
            |  Contains the generated events.
-    '''
+    """
 
-    def __init__(self, actor_config, native_events=False,
-                 interval=1, payload="test", destination="data"):
+    def __init__(
+        self,
+        actor_config,
+        native_events=False,
+        interval=1,
+        payload="test",
+        destination="data",
+    ):
         InputModule.__init__(self, actor_config)
         self.pool.createQueue("outbox")
 
@@ -68,10 +74,7 @@ class Generator(InputModule):
         while self.loop():
             for chunk in [self.kwargs_raw["payload"], None]:
                 for payload in self.decode(chunk):
-                    event = self.generateEvent(
-                        payload,
-                        self.kwargs.destination
-                    )
+                    event = self.generateEvent(payload, self.kwargs.destination)
                     self.submit(event, "outbox")
             sleep(self.kwargs.interval)
         self.logging.info("Stopped producing events.")

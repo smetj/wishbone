@@ -29,4 +29,4 @@ from wishbone.protocol.encode.binary import Binary
 def test_protocol_encode_binary():
 
     m = Binary()
-    assert m.handler("hello") == b'hello'
+    assert m.handler("hello") == b"hello"

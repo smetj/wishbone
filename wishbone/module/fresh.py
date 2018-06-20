@@ -30,7 +30,7 @@ from wishbone.event import Event
 
 class Fresh(FlowModule):
 
-    '''**Generates a new event unless an event came through in the last x time.**
+    """**Generates a new event unless an event came through in the last x time.**
 
     This module forwards events without modifying them. If an event has been
     forwarded it resets the timeout counter back to <timeout>.  If the timeout
@@ -66,9 +66,16 @@ class Fresh(FlowModule):
 
         - timeout
            |  timeout and recovery events.
-    '''
+    """
 
-    def __init__(self, actor_config, timeout_payload="timeout", recovery_payload="recovery", timeout=60, repeat_interval=60):
+    def __init__(
+        self,
+        actor_config,
+        timeout_payload="timeout",
+        recovery_payload="recovery",
+        timeout=60,
+        repeat_interval=60,
+    ):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
@@ -94,7 +101,10 @@ class Fresh(FlowModule):
                 self._counter -= 1
                 sleep(1)
             else:
-                self.logging.info("Timeout of %s seconds expired.  Generated timeout event." % (self.kwargs.timeout))
+                self.logging.info(
+                    "Timeout of %s seconds expired.  Generated timeout event."
+                    % (self.kwargs.timeout)
+                )
                 self._incoming = False
                 while self.loop() and not self._incoming:
                     e = Event()

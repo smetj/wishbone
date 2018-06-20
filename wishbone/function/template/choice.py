@@ -27,7 +27,7 @@ from random import choice as choice_values
 
 
 class Choice(TemplateFunction):
-    '''
+    """
     Returns a random element from the provided values.
 
     A Wishbone template function which returns a random element from the
@@ -35,14 +35,14 @@ class Choice(TemplateFunction):
 
     Args:
         values (list): An list of elements to choose from
-    '''
+    """
 
     def __init__(self, values):
 
         self.values = values
 
     def get(self):
-        '''
+        """
         The function mapped to the template function.
 
         Args:
@@ -50,6 +50,6 @@ class Choice(TemplateFunction):
 
         Returns:
             obj: An element of the provided values.
-        '''
+        """
 
         return choice_values(self.values)
