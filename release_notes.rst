@@ -16,3 +16,5 @@ Changes:
       the other but we are actually shoveling messages from one queue to the
       other using a greenthread.
 
+    - Black (https://github.com/ambv/black) formatting has been applied to all
+      .py files.  From this moment onwards, Black formatting is the standard.
