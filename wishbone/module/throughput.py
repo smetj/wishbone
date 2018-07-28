@@ -25,6 +25,8 @@
 from wishbone.actor import Actor
 from wishbone.module import OutputModule
 from gevent import sleep
+from wishbone.queue import MemoryChannel
+from random import randint
 
 
 class Throughput(OutputModule):
@@ -33,6 +35,9 @@ class Throughput(OutputModule):
 
 
     Parameters::
+
+        - failure_rate_pct(int)(0)
+           |  The percent of request which should fail.
 
         - selection(str)("data")
            |  The event key to submit.
@@ -56,6 +61,7 @@ class Throughput(OutputModule):
     def __init__(
         self,
         actor_config,
+        failure_rate_pct=0,
         selection=None,
         payload=None,
         native_events=False,
@@ -65,7 +71,7 @@ class Throughput(OutputModule):
     ):
 
         Actor.__init__(self, actor_config)
-        self.pool.createQueue("inbox")
+        self.pool.createQueue("inbox", MemoryChannel())
         self.registerConsumer(self.consume, "inbox")
         self.sendToBackground(self.calculateSpeed)
         self.counter = 0
@@ -73,6 +79,10 @@ class Throughput(OutputModule):
     def consume(self, event):
 
         self.counter += 1
+        if event.kwargs.failure_rate_pct > 0:
+            dice = randint(1, 100)
+            if dice <= event.kwargs.failure_rate_pct:
+                raise Exception("Failed to process event.  Reason: failure_rate_pct is higher than 0. (%s)" % (dice))
 
     def calculateSpeed(self):
 

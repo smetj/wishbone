@@ -31,6 +31,7 @@ from colorama import init, Fore, Back, Style
 import sys
 import re
 from gevent.fileobject import FileObjectThread
+from wishbone.queue import MemoryChannel
 
 
 class Format:
@@ -142,7 +143,7 @@ class STDOUT(OutputModule):
         OutputModule.__init__(self, actor_config)
 
         self.__validateInput(foreground_color, background_color, color_style)
-        self.pool.createQueue("inbox")
+        self.pool.createQueue("inbox", MemoryChannel())
         self.registerConsumer(self.consume, "inbox")
 
         self.ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")

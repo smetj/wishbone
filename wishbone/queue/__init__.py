@@ -26,3 +26,4 @@ from .queuepool import QueuePool
 from .wishbonequeue import WishboneQueue
 from .memoryqueue import MemoryQueue
 from .queuepool import QueuePoolWrapper
+from .memorychannel import MemoryChannel

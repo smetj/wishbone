@@ -38,7 +38,7 @@ from wishbone.error import (
 from wishbone.actorconfig import ActorConfig
 from wishbone.function.template import TemplateFunction
 from wishbone.function.module import ModuleFunction
-from wishbone.queue import MemoryQueue
+from wishbone.queue import MemoryQueue, MemoryChannel
 
 from collections import namedtuple
 from gevent import spawn, kill
@@ -72,8 +72,8 @@ class Actor(object):
         config (wishbone.actorconfig.ActorConfig): The ActorConfig object instance.
         name (str): The name of the instance, derived from `config`.
         description (str): The description of the actor based instance, derived from `config`.
+        pool (wishbone.pool.QueuePool): The Actor's queue pool.
 
-                pool (wishbone.pool.QueuePool): The Actor's queue pool.
     Methods:
         logging (wishbone.logging.Logging)
 
@@ -99,7 +99,7 @@ class Actor(object):
         self.pool = QueuePoolWrapper(self.name, config.queue_pool)
         for queue in ["_logs", "_metrics", "_success", "_failed"]:
             try:
-                self.pool.createSystemQueue(queue, MemoryQueue())
+                self.pool.createSystemQueue(queue, MemoryChannel())
             except QueuePoolError:
                 # The queue already exists, that's fine.
                 pass
@@ -659,3 +659,4 @@ class Actor(object):
                 "Module instance '%s' seems to be of an incompatible old type."
                 % (self.name)
             )
+

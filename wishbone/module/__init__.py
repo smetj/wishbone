@@ -189,7 +189,6 @@ class OutputModule(Actor):
 
     def _consumer(self, function, queue):
         """
-
         Greenthread which applies <function> to each element from <queue>.
         However, this version overrides ``Actor._consumer`` as it executes
         parallel coroutine versions of ``functions`` spawned on a

@@ -26,6 +26,7 @@ from wishbone.error import QueuePoolError, QueueEmpty, QueueFull
 from gevent import spawn, sleep
 from gevent.event import Event
 from .memoryqueue import MemoryQueue
+from .memorychannel import MemoryChannel
 
 
 class Shovel(object):
@@ -45,6 +46,7 @@ class Shovel(object):
         """
 
         self.__pause.clear()
+        self.__state = "Paused"
 
     def start(self, *args, **kwargs):
         """
@@ -72,12 +74,16 @@ class Shovel(object):
         Unpauses shoveling
         """
 
+        self.__state = "Started"
         self.__pause.set()
 
     def __shovel(self):
         # TODO(smetj): I assume more guarantees need to be foreseen here
+
+        self.__state = "Running"
         while self.lock:
             try:
+                self.__pause.wait()
                 event = self.source.get(timeout=1)
             except QueueEmpty:
                 continue
@@ -89,6 +95,7 @@ class Shovel(object):
                 except QueueFull:
                     continue
 
+        self.__state = "Stopped"
         self.source.enableFallThrough()
         self.destination.enableFallThrough()
 
@@ -139,10 +146,10 @@ class QueuePool(object):
         """
 
         if not self.hasQueue(source):
-            self.registerQueue(source, MemoryQueue())
+            self.registerQueue(source, MemoryChannel())
 
         if not self.hasQueue(destination):
-            self.registerQueue(destination, MemoryQueue())
+            self.registerQueue(destination, MemoryChannel())
 
         if self.isConnected(source):
             raise QueuePoolError(
@@ -417,7 +424,7 @@ class QueuePoolWrapper(object):
             )
 
         if instance is None:
-            instance = MemoryQueue()
+            instance = MemoryChannel()
 
         self._queue_pool.registerQueue("%s.%s" % (self._module_name, name), instance)
         setattr(
@@ -431,7 +438,7 @@ class QueuePoolWrapper(object):
         self._queue_pool.registerQueue("%s.%s" % (self._module_name, name), instance)
 
         if instance is None:
-            instance = MemoryQueue()
+            instance = MemoryChannel()
 
         setattr(
             self.queue,
@@ -460,6 +467,44 @@ class QueuePoolWrapper(object):
                         yield queue_name
                     else:
                         yield instance
+
+    def pauseShovel(self, queue):
+        """
+        Pauses the shovel responsible for consuming or producing events in
+        `queue`.
+
+        Args:
+            queue (str): The name of the queue.
+
+        Returns:
+            None
+
+        Raises:
+            QueuePoolError: Something went wrong pausing ``queue``.
+        """
+
+        full_name = "%s.%s" % (self.module_name, queue)
+        connected_queue = self.queue_pool.getConnectedQueue(full_name)
+        self.queue_pool.getConnection((full_name, connected_queue)).pause()
+
+    def unpauseShovel(self, queue):
+        """
+        Un-pauses the shovel responsible for consuming or producing events in
+        `queue`.
+
+        Args:
+            queue (str): The name of the queue.
+
+        Returns:
+            None
+
+        Raises:
+            QueuePoolError: Something went wrong pausing ``queue``.
+        """
+
+        full_name = "%s.%s" % (self.module_name, queue)
+        connected_queue = self.queue_pool.getConnectedQueue(full_name)
+        self.queue_pool.getConnection((full_name, connected_queue)).unpause()
 
     def __registerExistingQueues(self):
 
