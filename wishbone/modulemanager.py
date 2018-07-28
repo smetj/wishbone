@@ -30,9 +30,9 @@ from wishbone import Actor
 from wishbone.lookup import Lookup
 
 
-class ModuleManager():
+class ModuleManager:
 
-    '''
+    """
     Manages the Wishbone modules it can find under the defined entrypoints
     prefixes.
 
@@ -60,17 +60,19 @@ class ModuleManager():
         groups (list): The list of groups to search for Wishbone actor
             modules.
 
-    '''
+    """
 
-    def __init__(self,
-                 categories=["wishbone", "wishbone_contrib"],
-                 groups=["flow", "encode", "decode", "function", "input", "output", "lookup"]):
+    def __init__(
+        self,
+        categories=["wishbone", "wishbone_contrib"],
+        groups=["flow", "encode", "decode", "function", "input", "output", "lookup"],
+    ):
         self.categories = categories
         self.groups = groups
 
     def exists(self, name):
 
-        '''
+        """
         Validates whether the module with <name> exists.
 
         Args:
@@ -78,7 +80,7 @@ class ModuleManager():
 
         Returns:
             bool: True if module exists. False otherwise.
-        '''
+        """
 
         if self.getModuleByName(name) is None:
             return True
@@ -86,7 +88,7 @@ class ModuleManager():
             return False
 
     def getModule(self, category, group, name):
-        '''
+        """
         Returns the module with name <category>.<group>.<name>
 
         Args:
@@ -100,7 +102,7 @@ class ModuleManager():
         Raises:
             NoSuchModule: The module does not exist.
             InvalidModule: There was module found but it was not deemed valid.
-        '''
+        """
 
         m = None
         for module in pkg_resources.iter_entry_points("%s.%s" % (category, group)):
@@ -108,15 +110,20 @@ class ModuleManager():
                 m = module.load()
 
         if m is None:
-            raise NoSuchModule("Module %s.%s.%s cannot be found." % (category, group, name))
+            raise NoSuchModule(
+                "Module %s.%s.%s cannot be found." % (category, group, name)
+            )
         else:
             if issubclass(m, Actor) or issubclass(m, Lookup):
                 return m
             else:
-                raise InvalidModule("'%s.%s.%s' is not a valid wishbone actor or lookup module." % (category, group, name))
+                raise InvalidModule(
+                    "'%s.%s.%s' is not a valid wishbone actor or lookup module."
+                    % (category, group, name)
+                )
 
     def getModuleByName(self, name):
-        '''
+        """
         Returns the module with name <name>
 
         Args:
@@ -128,18 +135,21 @@ class ModuleManager():
         Raises:
             NoSuchModule: The module does not exist.
             InvalidModule: There was module found but it was not deemed valid.
-        '''
+        """
 
-        (category, group, name) = name.split('.')
+        (category, group, name) = name.split(".")
         m = self.getModule(category, group, name)
 
         if issubclass(m, Actor) or issubclass(m, Lookup):
             return m
         else:
-            raise InvalidModule("'%s.%s.%s' is not a valid wishbone actor or lookup module." % (category, group, name))
+            raise InvalidModule(
+                "'%s.%s.%s' is not a valid wishbone actor or lookup module."
+                % (category, group, name)
+            )
 
     def getModuleList(self):
-        '''
+        """
         Finds and lists all the modules it can find under the defined
         <category>.<groups> combinations.
 
@@ -150,16 +160,18 @@ class ModuleManager():
 
         Yields:
             tuple: A 3 element tuple: (`category`, `group`, `module`)
-        '''
+        """
         for category in self.categories:
             for group in self.groups:
                 group_name = "%s.%s" % (category, group)
-                groups = [m.name for m in pkg_resources.iter_entry_points(group=group_name)]
+                groups = [
+                    m.name for m in pkg_resources.iter_entry_points(group=group_name)
+                ]
                 for m in sorted(groups):
                     yield (category, group, m)
 
     def getModuleDoc(self, category, group, name):
-        '''
+        """
         Returns the docstring of module `category`.`group`.`name`
 
         Args:
@@ -172,17 +184,19 @@ class ModuleManager():
 
         Raises:
             InvalidModule: The docstring does not have the correct format.
-        '''
+        """
 
         doc = self.getModule(category, group, name).__doc__
-        doc = re.search('(\*\*.*?\*\*)(.*)', doc, re.DOTALL).group(2)
+        doc = re.search("(\*\*.*?\*\*)(.*)", doc, re.DOTALL).group(2)
         if doc is None:
-            raise InvalidModule("The module does not seem to have the expected docstring format.")
+            raise InvalidModule(
+                "The module does not seem to have the expected docstring format."
+            )
         else:
             return doc
 
     def getModuleTitle(self, category, group, name):
-        '''
+        """
         Returns the title of the module `category`.`group`.`name` docstring.
 
         Args:
@@ -195,22 +209,24 @@ class ModuleManager():
 
         Raises:
             InvalidModule: The docstring does not have the correct format.
-        '''
+        """
 
         doc = self.getModule(category, group, name).__doc__
-        title = re.search('\*\*(.*?)\*\*(.*)', doc).group(1)
+        title = re.search("\*\*(.*?)\*\*(.*)", doc).group(1)
         if title is None:
-            raise InvalidModule("The module does not seem to have the expected docstring format.")
+            raise InvalidModule(
+                "The module does not seem to have the expected docstring format."
+            )
         else:
             return title
 
     def getModuleTable(self):
-        '''
+        """
         Returns an ascii table of all Wishbone modules with valid entry points.
 
         Returns:
             str: The ascii table containing all modules.
-        '''
+        """
 
         table = self.__getModuleTable()
 
@@ -237,7 +253,7 @@ class ModuleManager():
         return table.get_string()
 
     def getModuleVersion(self, category, group, name):
-        '''
+        """
         Returns the version of the module.
 
         Args:
@@ -247,7 +263,7 @@ class ModuleManager():
 
         Returns:
             str: The version of the module.
-        '''
+        """
 
         try:
             for module in pkg_resources.iter_entry_points("%s.%s" % (category, group)):
@@ -257,7 +273,7 @@ class ModuleManager():
             return "?"
 
     def validateModuleName(self, name):
-        '''
+        """
         Validates a module reference name for the proper format.
 
         Args:
@@ -265,17 +281,17 @@ class ModuleManager():
 
         Returns:
             bool: True when valid.  False when invalid.
-        '''
+        """
 
-        if len(name.split('.')) != 3:
+        if len(name.split(".")) != 3:
             return False
         else:
             return True
 
     def __getModuleTable(self):
-        '''
+        """
         Returns a skeleton ascii module table object
-        '''
+        """
 
         t = PrettyTable(["Category", "Group", "Module", "Version", "Description"])
         t.align["Category"] = "l"

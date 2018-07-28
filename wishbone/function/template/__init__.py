@@ -26,6 +26,7 @@ from wishbone.error import ModuleInitFailure
 
 
 class TemplateFunction(object):
-
     def get(self):
-        raise ModuleInitFailure("A template function is supposed to have a get() method.")
+        raise ModuleInitFailure(
+            "A template function is supposed to have a get() method."
+        )

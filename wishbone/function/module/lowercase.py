@@ -26,7 +26,7 @@ from wishbone.function.module import ModuleFunction
 
 
 class Lowercase(ModuleFunction):
-    '''
+    """
     Puts the desired field in lowercase.
 
     A Wishbone module function which converts the desired field to lowercase.
@@ -34,15 +34,15 @@ class Lowercase(ModuleFunction):
     Args:
         source (str): The source field
         destination (str): The destination field
-    '''
+    """
 
-    def __init__(self, source='data', destination='data'):
+    def __init__(self, source="data", destination="data"):
 
         self.source = source
         self.destination = destination
 
     def do(self, event):
-        '''
+        """
         The function mapped to the module function.
 
         Args:
@@ -50,7 +50,7 @@ class Lowercase(ModuleFunction):
 
         Returns:
             wishbone.event.Event: The modified event.
-        '''
+        """
 
         event.set(event.get(self.source).lower(), self.destination)
         return event

@@ -27,17 +27,17 @@ from time import time
 
 
 class Epoch(TemplateFunction):
-    '''
+    """
     Returns epoch with sub second accuracy as a float.
 
     A Wishbone template function which returns the PID of the current process.
 
     Args:
         None
-    '''
+    """
 
     def get(self):
-        '''
+        """
         The function mapped to the template function.
 
         Args:
@@ -45,6 +45,6 @@ class Epoch(TemplateFunction):
 
         Returns:
             float: The epoch time.
-        '''
+        """
 
         return time()

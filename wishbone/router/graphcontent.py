@@ -83,8 +83,7 @@ var options = {
 """
 
 
-class VisJSData():
-
+class VisJSData:
     def __init__(self, ignore_logging=False, ingore_metrics=False):
 
         self.id = 0
@@ -94,75 +93,74 @@ class VisJSData():
     def addModule(self, instance_name, module_name, description):
 
         if ".input." in module_name:
-            icon = {
-                "face": "FontAwesome",
-                "code": '\uf090',
-                "size": 75,
-                "color": "red"
-            }
+            icon = {"face": "FontAwesome", "code": "\uf090", "size": 75, "color": "red"}
 
         elif ".output." in module_name:
             icon = {
                 "face": "FontAwesome",
-                "code": '\uf08b',
+                "code": "\uf08b",
                 "size": 75,
-                "color": "green"
+                "color": "green",
             }
 
         elif ".flow." in module_name:
             icon = {
                 "face": "FontAwesome",
-                "code": '\uf074',
+                "code": "\uf074",
                 "size": 75,
-                "color": "black"
+                "color": "black",
             }
         else:
             icon = {
                 "face": "FontAwesome",
-                "code": '\uf085',
+                "code": "\uf085",
                 "size": 75,
-                "color": "black"
+                "color": "black",
             }
 
         if instance_name not in list(self.nodes.keys()):
-            self.nodes[instance_name] = {"id": self.id,
-                                         "label": instance_name,
-                                         "shape": "icon",
-                                         "icon": icon,
-                                         "size": 20,
-                                         "title": "Module: %s</br>Description: %s" % (module_name, description),
-                                         "font.size": 20
-                                         }
+            self.nodes[instance_name] = {
+                "id": self.id,
+                "label": instance_name,
+                "shape": "icon",
+                "icon": icon,
+                "size": 20,
+                "title": "Module: %s</br>Description: %s" % (module_name, description),
+                "font.size": 20,
+            }
             self.id += 1
 
     def addQueue(self, module, name):
 
         if "%s.%s" % (module, name) not in list(self.nodes.keys()):
-            self.nodes["%s.%s" % (module, name)] = {"id": self.id,
-                                                    "label": name,
-                                                    "shape": "icon",
-                                                    "icon": {
-                                                        "face": "FontAwesome",
-                                                        "code": '\uf0c9',
-                                                        "size": 20,
-                                                        "color": "orange"
-                                                    },
-                                                    "size": 5,
-                                                    "title": "Queue: %s.%s" % (module, name),
-                                                    "font.size": 20
-                                                    }
-            self.edges.append({"from": self.nodes[module]["id"],
-                               "to": self.nodes["%s.%s" % (module, name)]["id"],
-                               "dashes": True})
+            self.nodes["%s.%s" % (module, name)] = {
+                "id": self.id,
+                "label": name,
+                "shape": "icon",
+                "icon": {
+                    "face": "FontAwesome",
+                    "code": "\uf0c9",
+                    "size": 20,
+                    "color": "orange",
+                },
+                "size": 5,
+                "title": "Queue: %s.%s" % (module, name),
+                "font.size": 20,
+            }
+            self.edges.append(
+                {
+                    "from": self.nodes[module]["id"],
+                    "to": self.nodes["%s.%s" % (module, name)]["id"],
+                    "dashes": True,
+                }
+            )
             self.id += 1
 
     def addEdge(self, f, t):
 
-        self.edges.append({"from": self.nodes[f]["id"],
-                           "to": self.nodes[t]["id"],
-                           "arrows": "to"
-                           }
-                          )
+        self.edges.append(
+            {"from": self.nodes[f]["id"], "to": self.nodes[t]["id"], "arrows": "to"}
+        )
 
     def dumpString(self):
 

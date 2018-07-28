@@ -30,7 +30,7 @@ from os.path import isabs
 
 class Template(ProcessModule):
 
-    '''**Renders Jinja2 templates.**
+    """**Renders Jinja2 templates.**
 
     Renders Jinja2 templates using the event content as context. Templates can
     be read from a file or directly from the bootstrap file.
@@ -60,7 +60,7 @@ class Template(ProcessModule):
         - outbox
            |  Outgoing events
 
-    '''
+    """
 
     def __init__(self, actor_config, filename=None, destination="data", templates={}):
         ProcessModule.__init__(self, actor_config)
@@ -72,7 +72,9 @@ class Template(ProcessModule):
         self.__template_loaders = {}
 
         if self.kwargs.filename is not None:
-            self.file_template = Environment(loader=FileSystemLoader(self.kwargs.filename))
+            self.file_template = Environment(
+                loader=FileSystemLoader(self.kwargs.filename)
+            )
 
     def consume(self, event):
 
@@ -85,11 +87,15 @@ class Template(ProcessModule):
                 data = self.renderFile(event.kwargs.filename, event.dump())
                 event.set(data, event.kwargs.destination)
             else:
-                self.logging.error("%s is not an absolute path. Skipped" % (event.kwargs.filename))
+                self.logging.error(
+                    "%s is not an absolute path. Skipped" % (event.kwargs.filename)
+                )
 
         self.submit(event, "outbox")
 
     def renderFile(self, filename, data):
 
         # TODO(smetj): calling thie private function is ugly, rewrite this part.
-        return self._Actor__renderKwargs.env_template.get_template(filename).render(data)
+        return self._Actor__renderKwargs.env_template.get_template(filename).render(
+            data
+        )

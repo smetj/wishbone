@@ -43,17 +43,17 @@ class InputModule(Actor):
     actorconfig_defined_decoder = False
 
     def getDecoder(self):
-        '''
+        """
         Returns a new instance of the ``handler()`` method of the decoder set
         by ``self.setDecoder()``. Each concurrent incoming data stream should
         use its own instance of the decoder otherwise they end up overwriting
         each other's content.
-        '''
+        """
 
         raise Exception("This function should be overwritten by setDecoder().")
 
     def setDecoder(self, name, *args, **kwargs):
-        '''
+        """
         Sets the decoder with name <name> unless there's already a decoder
         defined via ``actorconfig.ActorConfig``.
 
@@ -61,7 +61,7 @@ class InputModule(Actor):
             name (str): The entrypoint name of the decoder to initialize
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
-        '''
+        """
 
         if not self.actorconfig_defined_decoder:
             class_ = ComponentManager().getComponentByName(name)
@@ -69,7 +69,7 @@ class InputModule(Actor):
             self.decode = self.getDecoder()
 
     def _generateNativeEvent(self, data={}, destination=None):
-        '''
+        """
         Gets mapps to self.generateEvent for `input` type modules and if
         ``Actor.config.protocol_event`` is ``True``.
 
@@ -80,22 +80,25 @@ class InputModule(Actor):
 
         Returns:
             wishbone.event.Event: ``Event`` instance of ``data``
-        '''
+        """
 
         e = Wishbone_Event()
         e.slurp(data)
         return e
 
     def _moduleInitSetup(self):
-        '''
+        """
         Does module type specific setup.
-        '''
+        """
 
         self.setDecoder("wishbone.protocol.decode.dummy")
 
         if self.config.protocol is not None:
             self.actorconfig_defined_decoder = True
-            self.logging.debug("This 'Input' module has '%s' decoder configured." % (self.config.protocol))
+            self.logging.debug(
+                "This 'Input' module has '%s' decoder configured."
+                % (self.config.protocol)
+            )
             self.getDecoder = self.config.protocol
             self.decode = self.config.protocol()
 
@@ -103,7 +106,7 @@ class InputModule(Actor):
             self.generateEvent = self._generateNativeEvent
 
     def _moduleInitValidation(self):
-        '''
+        """
         Validates whether we have all the parameters this module type expects
 
         Args:
@@ -114,18 +117,21 @@ class InputModule(Actor):
 
         Raises:
             ModuleInitFailure: Raised when one of the components isn't correct.
-        '''
+        """
 
         for param in ["native_events", "destination"]:
             if param not in self.kwargs.keys():
-                raise ModuleInitFailure("An 'Input' module should always have a '%s' parameter. This is a programming error." % (param))
+                raise ModuleInitFailure(
+                    "An 'Input' module should always have a '%s' parameter. This is a programming error."
+                    % (param)
+                )
 
 
 class OutputModule(Actor):
     MODULE_TYPE = ModuleType.OUTPUT
 
     def setEncoder(self, name, *args, **kwargs):
-        '''
+        """
         Sets the encoder with name <name> unless there's already an encoder
         defined via ``actorconfig.ActorConfig``.
 
@@ -137,20 +143,24 @@ class OutputModule(Actor):
         Returns:
             Bool: True if the encoder is set, False when an encoder was already
                   set via ``actorconfig.ActorConfig``
-        '''
+        """
 
         if self.encode is None:
-            self.encode = ComponentManager().getComponentByName(name)(*args, **kwargs).handler
+            self.encode = (
+                ComponentManager().getComponentByName(name)(*args, **kwargs).handler
+            )
             self.logging.debug("Encoder '%s' has been set.")
             return True
         else:
-            self.logging.debug("Encoder '%s' has not been set. The user already defined one." % (name))
+            self.logging.debug(
+                "Encoder '%s' has not been set. The user already defined one." % (name)
+            )
             return False
 
     encode = DummyEncoder().handler
 
     def getDataToSubmit(self, event):
-        '''
+        """
         Derives the data to submit from ``event`` taking into account
         ``native_events``, ``payload`` and ``selection`` module parameters.
 
@@ -160,22 +170,25 @@ class OutputModule(Actor):
         Returns:
 
             dict/str/...: The data to submit.
-        '''
+        """
 
         if self.kwargs.native_events:
             return event.getNative()
         elif event.kwargs.payload is None:
             if event.isBulk():
-                return "\n".join([str(item) for item in extractBulkItemValues(event, self.kwargs.selection)])
-            else:
-                return event.get(
-                    event.kwargs.selection
+                return "\n".join(
+                    [
+                        str(item)
+                        for item in extractBulkItemValues(event, self.kwargs.selection)
+                    ]
                 )
+            else:
+                return event.get(event.kwargs.selection)
         else:
             return event.kwargs.payload
 
     def _consumer(self, function, queue):
-        '''
+        """
 
         Greenthread which applies <function> to each element from <queue>.
         However, this version overrides ``Actor._consumer`` as it executes
@@ -191,11 +204,14 @@ class OutputModule(Actor):
 
         Returns:
             None
-        '''
+        """
 
         self.parallel_pool = Pool(self.kwargs.parallel_streams)
         self._run.wait()
-        self.logging.debug("Function '%s' has been registered to consume queue '%s'" % (function.__name__, queue))
+        self.logging.debug(
+            "Function '%s' has been registered to consume queue '%s'"
+            % (function.__name__, queue)
+        )
 
         def execFunction(function, event):
             try:
@@ -204,7 +220,11 @@ class OutputModule(Actor):
                 if self.config.disable_exception_handling:
                     raise
                 exc_type, exc_value, exc_traceback = exc_info()
-                info = (traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value))
+                info = (
+                    traceback.extract_tb(exc_traceback)[-1][1],
+                    str(exc_type),
+                    str(exc_value),
+                )
 
                 event.set(info, "errors.%s" % (self.name))
 
@@ -229,7 +249,9 @@ class OutputModule(Actor):
             try:
                 event.decrementTTL()
             except TTLExpired as err:
-                self.logging.warning("Event with UUID %s dropped. Reason: %s" % (event.get("uuid"), err))
+                self.logging.warning(
+                    "Event with UUID %s dropped. Reason: %s" % (event.get("uuid"), err)
+                )
                 continue
 
             # Set the current event uuid to the logger object
@@ -242,19 +264,24 @@ class OutputModule(Actor):
             self.parallel_pool.spawn(execFunction, function, event)
 
     def _moduleInitSetup(self):
-        '''
+        """
         Does module type specific setup.
-        '''
+        """
 
         if not hasattr(self, "encode") and self.config.protocol is None:
-            self.logging.debug("This 'Output' module has no encoder method set. Setting dummy decoder.")
+            self.logging.debug(
+                "This 'Output' module has no encoder method set. Setting dummy decoder."
+            )
             self.setEncoder("wishbone.protocol.encode.dummy")
         if self.config.protocol is not None:
-            self.logging.debug("This 'Output' module has '%s' encoder configured." % (self.config.protocol))
+            self.logging.debug(
+                "This 'Output' module has '%s' encoder configured."
+                % (self.config.protocol)
+            )
             self.encode = self.config.protocol()
 
     def _moduleInitValidation(self):
-        '''
+        """
         Validates whether we have all the parameters this module type expects
 
         Args:
@@ -265,25 +292,28 @@ class OutputModule(Actor):
 
         Raises:
             ModuleInitFailure: Raised when one of the components isn't correct.
-        '''
+        """
 
         for param in ["payload", "selection", "native_events", "parallel_streams"]:
             if param not in self.kwargs.keys():
-                raise ModuleInitFailure("An 'output' module should always have a '%s' parameter. This is a programming error." % (param))
+                raise ModuleInitFailure(
+                    "An 'output' module should always have a '%s' parameter. This is a programming error."
+                    % (param)
+                )
 
 
 class FlowModule(Actor):
     MODULE_TYPE = ModuleType.FLOW
 
     def _moduleInitSetup(self):
-        '''
+        """
         Does module type specific setup.
-        '''
+        """
 
         pass
 
     def _moduleInitValidation(self):
-        '''
+        """
         Validates whether we have all the parameters this module type expects
 
         Args:
@@ -294,7 +324,7 @@ class FlowModule(Actor):
 
         Raises:
             ModuleInitFailure: Raised when one of the components isn't correct.
-        '''
+        """
 
         pass
 
@@ -303,14 +333,14 @@ class ProcessModule(Actor):
     MODULE_TYPE = ModuleType.PROCESS
 
     def _moduleInitSetup(self):
-        '''
+        """
         Does module type specific setup.
-        '''
+        """
 
         pass
 
     def _moduleInitValidation(self):
-        '''
+        """
         Validates whether we have all the parameters this module type expects
 
         Args:
@@ -321,6 +351,6 @@ class ProcessModule(Actor):
 
         Raises:
             ModuleInitFailure: Raised when one of the components isn't correct.
-        '''
+        """
 
         pass

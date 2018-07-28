@@ -35,7 +35,7 @@ if version_info[0] == 2:
 
 class DictGenerator(Actor):
 
-    '''**Generates random dictionaries.**
+    """**Generates random dictionaries.**
 
     This module allows you to generate an stream of dictionaries.
 
@@ -68,9 +68,20 @@ class DictGenerator(Actor):
 
         - outbox
            |  Outgoing messges
-    '''
+    """
 
-    def __init__(self, actor_config, keys=[], randomize_keys=True, num_values=False, num_values_min=0, num_values_max=1, min_elements=1, max_elements=1, interval=1):
+    def __init__(
+        self,
+        actor_config,
+        keys=[],
+        randomize_keys=True,
+        num_values=False,
+        num_values_min=0,
+        num_values_max=1,
+        min_elements=1,
+        max_elements=1,
+        interval=1,
+    ):
         Actor.__init__(self, actor_config)
 
         self.wordlist = self.readWordlist()
@@ -91,7 +102,9 @@ class DictGenerator(Actor):
         self.pool.createQueue("outbox")
 
     def readWordlist(self):
-        with open("%s/../data/wordlist.txt" % (os.path.dirname(__file__)), encoding="latin-1") as f:
+        with open(
+            "%s/../data/wordlist.txt" % (os.path.dirname(__file__)), encoding="latin-1"
+        ) as f:
             return f.readlines()
 
     def preHook(self):
@@ -128,7 +141,7 @@ class DictGenerator(Actor):
         return d
 
     def pickWord(self):
-        '''Returns a word as string from the wordlist.'''
+        """Returns a word as string from the wordlist."""
 
         while self.loop():
             word = choice(self.wordlist).rstrip()
@@ -138,10 +151,10 @@ class DictGenerator(Actor):
                 pass
 
     def generateValueInteger(self):
-        '''Returns a random number.'''
+        """Returns a random number."""
         return randint(self.kwargs.num_values_min, self.kwargs.num_values_max)
 
     def generateKeyNumber(self):
-        '''Generates a key by incrementing integer.'''
+        """Generates a key by incrementing integer."""
         self.key_number += 1
         return str(self.key_number)

@@ -31,14 +31,9 @@ from gevent import sleep
 from types import SimpleNamespace
 
 
-class QueuePool():
+class QueuePool:
 
-    RESERVED_QUEUES = [
-        '_failed',
-        '_success',
-        '_logs',
-        '_metrics'
-    ]
+    RESERVED_QUEUES = ["_failed", "_success", "_logs", "_metrics"]
 
     def __init__(self, size):
         self.__size = size
@@ -49,8 +44,8 @@ class QueuePool():
         self.queue._failed = Queue(size)
 
     def listQueues(self, names=False, default=True):
-        '''returns the list of queue names from the queuepool.
-        '''
+        """returns the list of queue names from the queuepool.
+        """
 
         if default:
             blacklist = []
@@ -65,7 +60,7 @@ class QueuePool():
                     yield m
 
     def createQueue(self, name):
-        '''Creates a Queue.'''
+        """Creates a Queue."""
 
         if name in self.RESERVED_QUEUES or name.startswith("_"):
             raise ReservedName("%s is an invalid queue name." % (name))
@@ -73,7 +68,7 @@ class QueuePool():
         setattr(self.queue, name, Queue(self.__size))
 
     def createSystemQueue(self, name):
-        '''
+        """
         Creates a queue starting with _ which is forbidden by users as special
         system queues are prefixed with '_'.
 
@@ -83,12 +78,12 @@ class QueuePool():
 
         Args:
             name (str): The name of the queue (should start with _)
-        '''
+        """
 
         setattr(self.queue, name, Queue(self.__size))
 
     def hasQueue(self, name):
-        '''Returns <True> when queue with <name> exists.'''
+        """Returns <True> when queue with <name> exists."""
 
         try:
             getattr(self.queue, name)
@@ -97,7 +92,7 @@ class QueuePool():
             return False
 
     def getQueue(self, name):
-        '''Convenience funtion which returns the queue instance.'''
+        """Convenience funtion which returns the queue instance."""
 
         try:
             return getattr(self.queue, name)
@@ -105,7 +100,7 @@ class QueuePool():
             raise QueueMissing("Module has no queue %s." % (name))
 
     def join(self):
-        '''Blocks until all queues in the pool are empty.'''
+        """Blocks until all queues in the pool are empty."""
         counter = 0
         for queue in self.listQueues():
             while queue.qsize() != 0:
@@ -115,9 +110,9 @@ class QueuePool():
                     break
 
 
-class Queue():
+class Queue:
 
-    '''A queue used to organize communication messaging between Wishbone Actors.
+    """A queue used to organize communication messaging between Wishbone Actors.
 
     Parameters:
 
@@ -133,7 +128,7 @@ class Queue():
     The <stats()> function will reveal whether any events have disappeared via
     this queue.
 
-    '''
+    """
 
     def __init__(self, max_size=1):
         self.max_size = max_size
@@ -147,16 +142,16 @@ class Queue():
         self.put = self.__fallThrough
 
     def clean(self):
-        '''Deletes the content of the queue.
-        '''
+        """Deletes the content of the queue.
+        """
         self.__q = Gevent_Queue(self.max_size)
 
     def disableFallThrough(self):
         self.put = self.__put
 
     def dump(self):
-        '''Dumps the queue as a generator and cleans it when done.
-        '''
+        """Dumps the queue as a generator and cleans it when done.
+        """
 
         while True:
             try:
@@ -165,7 +160,7 @@ class Queue():
                 break
 
     def empty(self):
-        '''Returns True when queue and unacknowledged is empty otherwise False.'''
+        """Returns True when queue and unacknowledged is empty otherwise False."""
 
         return self.__q.empty()
 
@@ -173,7 +168,7 @@ class Queue():
         self.put = self.__fallThrough
 
     def get(self, block=True):
-        '''Gets an element from the queue.'''
+        """Gets an element from the queue."""
 
         try:
             e = self.__q.get(block=block)
@@ -187,30 +182,31 @@ class Queue():
         self.__q.put(element)
 
     def size(self):
-        '''Returns the length of the queue.'''
+        """Returns the length of the queue."""
 
         return self.__q.qsize()
 
     def stats(self):
-        '''Returns statistics of the queue.'''
+        """Returns statistics of the queue."""
 
-        return {"size": self.__q.qsize(),
-                "in_total": self.__in,
-                "out_total": self.__out,
-                "in_rate": self.__rate("in_rate", self.__in),
-                "out_rate": self.__rate("out_rate", self.__out),
-                "dropped_total": self.__dropped,
-                "dropped_rate": self.__rate("dropped_rate", self.__dropped)
-                }
+        return {
+            "size": self.__q.qsize(),
+            "in_total": self.__in,
+            "out_total": self.__out,
+            "in_rate": self.__rate("in_rate", self.__in),
+            "out_rate": self.__rate("out_rate", self.__out),
+            "dropped_total": self.__dropped,
+            "dropped_rate": self.__rate("dropped_rate", self.__dropped),
+        }
 
     def __fallThrough(self, element):
-        '''Accepts an element but discards it'''
+        """Accepts an element but discards it"""
 
         self.__dropped += 1
-        del(element)
+        del (element)
 
     def __put(self, element):
-        '''Puts element in queue.'''
+        """Puts element in queue."""
 
         try:
             self.__q.put(element)
@@ -229,6 +225,8 @@ class Queue():
 
         if time_now - time_then >= 1:
             self.__cache[name]["value"] = (time_now, amount_now)
-            self.__cache[name]["rate"] = (amount_now - amount_then) / (time_now - time_then)
+            self.__cache[name]["rate"] = (amount_now - amount_then) / (
+                time_now - time_then
+            )
 
         return self.__cache[name]["rate"]

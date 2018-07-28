@@ -26,6 +26,5 @@ from wishbone.error import ModuleInitFailure
 
 
 class ModuleFunction(object):
-
     def do(self):
         raise ModuleInitFailure("A module function is supposed to have a do() method.")

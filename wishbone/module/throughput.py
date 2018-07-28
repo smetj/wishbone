@@ -28,7 +28,7 @@ from gevent import sleep
 
 
 class Throughput(OutputModule):
-    '''
+    """
     Prints the number of messages passing through on STDOUT.
 
 
@@ -51,11 +51,18 @@ class Throughput(OutputModule):
 
         - inbox
            |  incoming events
-    '''
+    """
 
-    def __init__(self, actor_config,
-                 selection=None, payload=None, native_events=False, parallel_streams=1,
-                 *args, **kwargs):
+    def __init__(
+        self,
+        actor_config,
+        selection=None,
+        payload=None,
+        native_events=False,
+        parallel_streams=1,
+        *args,
+        **kwargs
+    ):
 
         Actor.__init__(self, actor_config)
         self.pool.createQueue("inbox")

@@ -32,16 +32,12 @@ SCHEMA = {
                 ".*": {
                     "type": "object",
                     "properties": {
-                        "protocol": {
-                            "type": "string"
-                        },
-                        "arguments": {
-                            "type": "object"
-                        }
+                        "protocol": {"type": "string"},
+                        "arguments": {"type": "object"},
                     },
                     "required": ["protocol"],
                     "additionalProperties": False,
-                },
+                }
             },
         },
         "module_functions": {
@@ -50,17 +46,13 @@ SCHEMA = {
                 ".*": {
                     "type": "object",
                     "properties": {
-                        "function": {
-                            "type": "string"
-                        },
-                        "arguments": {
-                            "type": "object"
-                        }
+                        "function": {"type": "string"},
+                        "arguments": {"type": "object"},
                     },
                     "required": ["function"],
-                    "additionalProperties": False
+                    "additionalProperties": False,
                 }
-            }
+            },
         },
         "template_functions": {
             "type": "object",
@@ -68,17 +60,13 @@ SCHEMA = {
                 ".*": {
                     "type": "object",
                     "properties": {
-                        "function": {
-                            "type": "string"
-                        },
-                        "arguments": {
-                            "type": "object"
-                        }
+                        "function": {"type": "string"},
+                        "arguments": {"type": "object"},
                     },
                     "required": ["function"],
-                    "additionalProperties": False
+                    "additionalProperties": False,
                 }
-            }
+            },
         },
         "modules": {
             "type": "object",
@@ -86,34 +74,20 @@ SCHEMA = {
                 ".*": {
                     "type": "object",
                     "properties": {
-                        "module": {
-                            "type": "string"
-                        },
-                        "protocol": {
-                            "type": "string"
-                        },
-                        "description": {
-                            "type": "string"
-                        },
-                        "arguments": {
-                            "type": "object"
-                        },
-                        "functions": {
-                            "type": "object"
-                        },
-                        "event": {
-                            "type": "boolean"
-                        }
+                        "module": {"type": "string"},
+                        "protocol": {"type": "string"},
+                        "description": {"type": "string"},
+                        "arguments": {"type": "object"},
+                        "functions": {"type": "object"},
+                        "event": {"type": "boolean"},
                     },
                     "required": ["module"],
-                    "additionalProperties": False
+                    "additionalProperties": False,
                 }
-            }
+            },
         },
-        "routingtable": {
-            "type": "array"
-        }
+        "routingtable": {"type": "array"},
     },
     "required": ["modules", "routingtable"],
-    "additionalProperties": False
+    "additionalProperties": False,
 }

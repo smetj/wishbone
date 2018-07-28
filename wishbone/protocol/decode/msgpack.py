@@ -31,7 +31,7 @@ from wishbone.error import ProtocolError
 
 class MSGPack(Decode):
 
-    '''**Decode MSGpack data into a Python data structure.**
+    """**Decode MSGpack data into a Python data structure.**
 
     Convert a MSGPack bytestring into a Python data structure using the
     defined charset.
@@ -44,7 +44,7 @@ class MSGPack(Decode):
         - buffer_size(int)(4096)
            |  The max amount of bytes allowed to read for 1 event
 
-    '''
+    """
 
     def __init__(self, charset="utf-8", buffer_size=4096):
 
@@ -64,7 +64,9 @@ class MSGPack(Decode):
                     return
                     yield
         except BufferFull:
-            self.unpacker = Unpacker(encoding=self.charset, max_buffer_size=self.buffer_size)
+            self.unpacker = Unpacker(
+                encoding=self.charset, max_buffer_size=self.buffer_size
+            )
             raise ProtocolError("Buffer of %s bytes full." % (self.buffer_size))
 
     def handleReadLinesMethod(self, data):
@@ -81,4 +83,6 @@ class MSGPack(Decode):
         else:
             yield result
 
-        self.unpacker = Unpacker(encoding=self.charset, max_buffer_size=self.buffer_size)
+        self.unpacker = Unpacker(
+            encoding=self.charset, max_buffer_size=self.buffer_size
+        )

@@ -48,16 +48,16 @@ class Node(object):
 
     def serialize(self):
         res = {
-            'functionName': self.name,
-            'hitCount': self.hitCount,
-            'children': [c.serialize() for c in list(self.children.values())],
-            'scriptId': '1',
-            'url': '',
-            'lineNumber': 1,
-            'columnNumber': 1,
-            'deoptReason': '',
-            'id': self.id_,
-            'callUID': self.id_
+            "functionName": self.name,
+            "hitCount": self.hitCount,
+            "children": [c.serialize() for c in list(self.children.values())],
+            "scriptId": "1",
+            "url": "",
+            "lineNumber": 1,
+            "columnNumber": 1,
+            "deoptReason": "",
+            "id": self.id_,
+            "callUID": self.id_,
         }
         return res
 
@@ -82,7 +82,7 @@ class Profiler(object):
         self.interval = interval
         self.started = None
         self.last_profile = None
-        self.root = Node('head', 1)
+        self.root = Node("head", 1)
         self.nextId = 1
         self.samples = []
         self.timestamps = []
@@ -92,12 +92,14 @@ class Profiler(object):
         return self.nextId
 
     def _profile(self, frame, event, arg):
-        if event == 'call':
+        if event == "call":
             self._record_frame(frame.f_back)
 
     def _record_frame(self, frame):
-        if (self.target_greenlet_id is None or
-                id(gevent.getcurrent()) == self.target_greenlet_id):
+        if (
+            self.target_greenlet_id is None
+            or id(gevent.getcurrent()) == self.target_greenlet_id
+        ):
             now = timeit.default_timer()
             if self.last_profile is not None:
                 if now - self.last_profile < self.interval:
@@ -113,19 +115,20 @@ class Profiler(object):
             self.samples.append(self.nextId)
 
     def _format_frame(self, frame):
-        return '{}({})'.format(frame.f_code.co_name,
-                               frame.f_globals.get('__name__'))
+        return "{}({})".format(frame.f_code.co_name, frame.f_globals.get("__name__"))
 
     def output(self):
         if not self.samples:
             return {}
-        return json.dumps({
-            'startTime': self.started,
-            'endTime': 0.000001 * self.timestamps[-1],
-            'timestamps': self.timestamps,
-            'samples': self.samples,
-            'head': self.root.serialize()
-        })
+        return json.dumps(
+            {
+                "startTime": self.started,
+                "endTime": 0.000001 * self.timestamps[-1],
+                "timestamps": self.timestamps,
+                "samples": self.samples,
+                "head": self.root.serialize(),
+            }
+        )
 
     def __enter__(self):
         sys.setprofile(self._profile)
@@ -141,7 +144,7 @@ class Profiler(object):
 
     def __exit__(self, type, value, traceback):
         sys.setprofile(None)
-        filename = './wishbone_%s_.cpuprofile' % getpid()
-        with open(filename, 'w') as f:
+        filename = "./wishbone_%s_.cpuprofile" % getpid()
+        with open(filename, "w") as f:
             f.write(self.output())
             print(("Written profile file '%s'." % (filename)))

@@ -27,7 +27,7 @@ from wishbone import Actor
 
 class TTL(Actor):
 
-    '''**Allows messages to pass a maximum number of times.**
+    """**Allows messages to pass a maximum number of times.**
 
     When a message has traveled through this module more than <ttl> times it
     will be submitted to the <ttl_exceeded> queue.
@@ -49,7 +49,7 @@ class TTL(Actor):
 
         - ttl_exceeded
            |  Events which passed the module more than <ttl> times.
-    '''
+    """
 
     def __init__(self, actor_config, ttl=1):
         Actor.__init__(self, actor_config)
@@ -66,7 +66,10 @@ class TTL(Actor):
         if self.validateTTL(event):
             self.submit(event, self.pool.queue.outbox)
         else:
-            self.logging.warning("Event TTL of %s exceeded in transit (%s) moving event to ttl_exceeded queue." % (event.getHeaderValue(self.name, "ttl_counter"), self.kwargs.ttl))
+            self.logging.warning(
+                "Event TTL of %s exceeded in transit (%s) moving event to ttl_exceeded queue."
+                % (event.getHeaderValue(self.name, "ttl_counter"), self.kwargs.ttl)
+            )
             self.submit(event, self.pool.queue.ttl_exceeded)
 
     def validateTTL(self, event):

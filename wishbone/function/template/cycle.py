@@ -27,7 +27,7 @@ from itertools import cycle as cycle_array
 
 
 class Cycle(TemplateFunction):
-    '''
+    """
     Cycles through the provided array returning the next element.
 
     A Wishbone template function which returns the next value of an array.
@@ -39,14 +39,14 @@ class Cycle(TemplateFunction):
     Args:
 
         values(list): A list of elements to cycle through.
-    '''
+    """
 
     def __init__(self, values):
 
         self.c = cycle_array(values)
 
     def get(self):
-        '''
+        """
         The function mapped to the template function.
 
         Args:
@@ -54,6 +54,6 @@ class Cycle(TemplateFunction):
 
         Returns:
             obj: An element of the provided array.
-        '''
+        """
 
         return next(self.c)

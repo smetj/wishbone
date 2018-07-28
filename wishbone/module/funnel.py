@@ -27,7 +27,7 @@ from wishbone.module import FlowModule
 
 class Funnel(FlowModule):
 
-    '''**Funnel multiple incoming queues to one outgoing queue.**
+    """**Funnel multiple incoming queues to one outgoing queue.**
 
     Funnel multiple incoming queues to one outgoing queue.
 
@@ -40,7 +40,7 @@ class Funnel(FlowModule):
         - outbox:
            |  Outgoing messages
 
-    '''
+    """
 
     def __init__(self, actor_config):
 

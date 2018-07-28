@@ -32,7 +32,7 @@ import os
 
 class JSON(Decode):
 
-    '''
+    """
     Decode a JSON string into a Python object.
 
     Parameters:
@@ -47,13 +47,13 @@ class JSON(Decode):
         - buffer_size(int)(4096)
             |  The maximum number of bytes allowed to buffer.
 
-    '''
+    """
 
-    def __init__(self, charset='utf-8', delimiter=None, buffer_size=4096):
+    def __init__(self, charset="utf-8", delimiter=None, buffer_size=4096):
 
         self.charset = charset
         if isinstance(delimiter, bytes):
-            self.delimiter = delimiter.decode(charset, 'strict')
+            self.delimiter = delimiter.decode(charset, "strict")
         else:
             self.delimiter = delimiter
         self.buffer_size = buffer_size
@@ -113,9 +113,7 @@ class JSON(Decode):
             yield
         else:
             try:
-                yield loads(
-                    self.buffer.getvalue()
-                )
+                yield loads(self.buffer.getvalue())
             except Exception as err:
                 raise ProtocolError(err)
             else:
@@ -124,4 +122,3 @@ class JSON(Decode):
     def resetBuffer(self):
 
         self.buffer = StringIO()
-

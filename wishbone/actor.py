@@ -22,7 +22,9 @@
 #
 #
 
-from gevent.monkey import patch_all; patch_all()
+from gevent.monkey import patch_all
+
+patch_all()
 from wishbone.queue import QueuePool
 from wishbone.logging import Logging
 from wishbone.event import Event as Wishbone_Event
@@ -47,7 +49,7 @@ from easydict import EasyDict
 from pkg_resources import get_distribution
 
 
-Greenlets = namedtuple('Greenlets', "consumer generic log metric")
+Greenlets = namedtuple("Greenlets", "consumer generic log metric")
 
 
 class Actor(object):
@@ -81,7 +83,7 @@ class Actor(object):
         self.logging = Logging(
             name=config.name,
             q=self.pool.queue._logs,
-            identification=self.config.identification
+            identification=self.config.identification,
         )
 
         self.__loop = True
@@ -98,7 +100,7 @@ class Actor(object):
         self.env_template = jinja2.Environment(
             undefined=jinja2.StrictUndefined,
             trim_blocks=True,
-            loader=jinja2.FileSystemLoader('/')
+            loader=jinja2.FileSystemLoader("/"),
         )
 
         # Add the template functions to the template globals
@@ -112,7 +114,9 @@ class Actor(object):
 
         # Store a copy of kwargs with all templates replaced by a template instance
         ############################################################################
-        self.kwargs_template = self.__getTemplateKwargs(self.env_template, self.kwargs_raw)
+        self.kwargs_template = self.__getTemplateKwargs(
+            self.env_template, self.kwargs_raw
+        )
 
         # Store a copy of the rendered kwargs as an EasyDict instance
         #############################################################
@@ -131,7 +135,7 @@ class Actor(object):
         self.version = self.__getVersion()
 
     def generateEvent(self, data={}, destination=None):
-        '''
+        """
         Generates a new event.
 
         This function can get overridden by
@@ -147,7 +151,7 @@ class Actor(object):
         Returns:
             wishbone.event.Event: An event containing ``data`` as a payload.
 
-        '''
+        """
         if destination in [None, "data"]:
             event = Wishbone_Event(data)
             event.renderField(destination, self.env_template)
@@ -158,30 +162,30 @@ class Actor(object):
         return event
 
     def loop(self):
-        '''The global lock for this module.
+        """The global lock for this module.
 
         Returns:
             bool: True when module is in running mode. False if not.
-        '''
+        """
 
         return self.__loop
 
     def postHook(self):
-        '''
+        """
         Is executed when module exits.
-        '''
+        """
 
         self.logging.debug("Module has no postHook() method set.")
 
     def preHook(self):
-        '''
+        """
         Is executed when module starts. Can be overriden by the user.
-        '''
+        """
 
         self.logging.debug("Module has no preHook() method set.")
 
     def registerConsumer(self, function, queue):
-        '''
+        """
         Registers <function> to process all events in <queue>
 
         Don't not trap errors here.  When <function> fails then the event will be
@@ -198,12 +202,12 @@ class Actor(object):
 
         Returns:
             None
-        '''
+        """
 
         self.greenlets.consumer.append(spawn(self._consumer, function, queue))
 
     def renderEventKwargs(self, event, queue=None):
-        '''
+        """
         Renders kwargs using the content of ``event`` and stores the result under
         ``event.kwargs``.
 
@@ -214,33 +218,32 @@ class Actor(object):
 
         Returns:
             ``wishbone.event.Event``: The provided event instance.
-        '''
+        """
 
         event.kwargs = self.__renderKwargs.render(
-            queue_context=queue,
-            event_content=event.dump()
+            queue_context=queue, event_content=event.dump()
         )
         return event
 
     def renderKwargs(self):
-        '''
+        """
         Renders kwargs without making use of event content. This is typically
         used when initiliazing a module and render the defined kwargs which do
         not need a event data for rendering.
 
         Returns:
             None
-        '''
+        """
 
         self.kwargs = self.__renderKwargs.render()
 
     def start(self):
-        '''
+        """
         Starts the module.
 
         Returns:
             None
-        '''
+        """
 
         self.__postHook()
         if hasattr(self, "preHook"):
@@ -249,10 +252,8 @@ class Actor(object):
         self.__validateAppliedFunctions()
         self._run.set()
         self.logging.debug(
-            "Started with max queue size of %s events and metrics interval of %s seconds." % (
-                self.config.size,
-                self.config.frequency
-            )
+            "Started with max queue size of %s events and metrics interval of %s seconds."
+            % (self.config.size, self.config.frequency)
         )
         self.stopped = False
 
@@ -260,7 +261,7 @@ class Actor(object):
             self.logging.debug("Started version %s" % (self.version))
 
     def sendToBackground(self, function, *args, **kwargs):
-        '''
+        """
 
         Executes a function and sends it to the background. Such a function
         should never exit until ``self.loop`` returns ``False``.
@@ -272,7 +273,7 @@ class Actor(object):
             function (``function``): The function which has to be executed.
             *args: Variable length argument list.
             **kwargs: Arbitrary keyword arguments.
-        '''
+        """
 
         def wrapIntoLoop():
             while self.loop():
@@ -287,20 +288,19 @@ class Actor(object):
                 except Exception as err:
                     if self.config.disable_exception_handling:
                         raise
-                    self.logging.error("Backgrounded function '%s' of module instance '%s' caused an error. This needs attention. Restarting it in 2 seconds. Reason: %s" % (
-                        function.__name__,
-                        self.name,
-                        err)
+                    self.logging.error(
+                        "Backgrounded function '%s' of module instance '%s' caused an error. This needs attention. Restarting it in 2 seconds. Reason: %s"
+                        % (function.__name__, self.name, err)
                     )
                     sleep(2)
 
         self.greenlets.generic.append(spawn(wrapIntoLoop))
 
     def stop(self):
-        '''
+        """
         Makes ``self.loop`` return ``False`` and handles shutdown of of the
         registered background jobs.
-        '''
+        """
 
         self.logging.info("Received stop. Initiating shutdown.")
 
@@ -324,7 +324,7 @@ class Actor(object):
         self.stopped = True
 
     def submit(self, event, queue):
-        '''
+        """
         Submits <event> to the queue with name <queue>.
 
 
@@ -334,21 +334,27 @@ class Actor(object):
 
         Returns:
             None
-        '''
+        """
 
         while self.loop():
             try:
                 getattr(self.pool.queue, queue).put(event)
                 break
             except AttributeError:
-                self.logging.error("No such queue %s. Event with uuid %s dropped." % (queue, event.get('uuid')))
+                self.logging.error(
+                    "No such queue %s. Event with uuid %s dropped."
+                    % (queue, event.get("uuid"))
+                )
                 break
             except QueueFull:
-                self.logging.warning("Queue '%s' is full and stalls the event pipeline. You should probably look into this." % (queue))
+                self.logging.warning(
+                    "Queue '%s' is full and stalls the event pipeline. You should probably look into this."
+                    % (queue)
+                )
                 sleep(0.1)
 
     def _applyFunctions(self, queue, event):
-        '''
+        """
         Executes and applies all registered module functions against the event.
 
         Args:
@@ -357,7 +363,7 @@ class Actor(object):
 
         Returns:
             wisbone.event.Event: The modified version of ``event``
-        '''
+        """
 
         if queue in self.config.module_functions:
             for f in self.config.module_functions[queue]:
@@ -366,11 +372,14 @@ class Actor(object):
                 except Exception as err:
                     if self.config.disable_exception_handling:
                         raise
-                    self.logging.error("Function '%s' is skipped as it is causing an error. Reason: '%s'" % (f, err))
+                    self.logging.error(
+                        "Function '%s' is skipped as it is causing an error. Reason: '%s'"
+                        % (f, err)
+                    )
         return event
 
     def _consumer(self, function, queue):
-        '''
+        """
         Greenthread which applies <function> to each element from <queue>
 
         Args:
@@ -381,10 +390,13 @@ class Actor(object):
 
         Returns:
             None
-        '''
+        """
 
         self._run.wait()
-        self.logging.debug("Function '%s' has been registered to consume queue '%s'" % (function.__name__, queue))
+        self.logging.debug(
+            "Function '%s' has been registered to consume queue '%s'"
+            % (function.__name__, queue)
+        )
 
         while self.loop():
 
@@ -399,7 +411,9 @@ class Actor(object):
             try:
                 event.decrementTTL()
             except TTLExpired as err:
-                self.logging.warning("Event with UUID %s dropped. Reason: %s" % (event.get("uuid"), err))
+                self.logging.warning(
+                    "Event with UUID %s dropped. Reason: %s" % (event.get("uuid"), err)
+                )
                 continue
 
             # Set the current event uuid to the logger object
@@ -415,7 +429,11 @@ class Actor(object):
                 if self.config.disable_exception_handling:
                     raise
                 exc_type, exc_value, exc_traceback = exc_info()
-                info = (traceback.extract_tb(exc_traceback)[-1][1], str(exc_type), str(exc_value))
+                info = (
+                    traceback.extract_tb(exc_traceback)[-1][1],
+                    str(exc_type),
+                    str(exc_value),
+                )
 
                 event.set(info, "errors.%s" % (self.name))
 
@@ -428,7 +446,7 @@ class Actor(object):
                 self.logging.setCurrentEventID(None)
 
     def __getDescription(self, config):
-        '''
+        """
         Gets the module description.
 
         Args:
@@ -436,21 +454,23 @@ class Actor(object):
 
         Returns:
             str: The description of this actor instance.
-        '''
+        """
 
         if config.description is None:
-            return self.__doc__.strip().split('\n')[0].strip('*')
+            return self.__doc__.strip().split("\n")[0].strip("*")
         else:
             return config.description
 
     def __getRawKwargs(self):
-        '''
+        """
         Get the class paramaters of the class basing this class.
 
         Returns (dict): A dict of the the raw kwargs
-        '''
+        """
         kwargs = {}
-        for key, value in list(inspect.getouterframes(inspect.currentframe())[2][0].f_locals.items()):
+        for key, value in list(
+            inspect.getouterframes(inspect.currentframe())[2][0].f_locals.items()
+        ):
             if key == "self" or isinstance(value, ActorConfig):
                 next
             else:
@@ -458,7 +478,7 @@ class Actor(object):
         return kwargs
 
     def __getTemplateKwargs(self, template_env, kwargs):
-        '''
+        """
         Recurses through ``kwargs`` and returns a version of it in which all
         strings are replaced by jinja2 template instances.
 
@@ -467,13 +487,16 @@ class Actor(object):
                                                         derive templates from.
             kwargs (dict): The dict of keyword/arguments.
 
-        '''
+        """
 
         def recurse(data):
 
             if isinstance(data, str):
                 try:
-                    if len(list(template_env.parse(data).find_all(jinja2.nodes.Name))) > 0:
+                    if (
+                        len(list(template_env.parse(data).find_all(jinja2.nodes.Name)))
+                        > 0
+                    ):
                         t = template_env.from_string(data)
                         return t
                     else:
@@ -497,44 +520,46 @@ class Actor(object):
     def __getVersion(self):
 
         try:
-            return get_distribution(self.__module__.split('.')[0]).version
+            return get_distribution(self.__module__.split(".")[0]).version
         except Exception as err:
             return "unknown"
 
     def __metricProducer(self):
-        '''
+        """
         A greenthread collecting the queue metrics at the defined interval.
-        '''
+        """
 
         self._run.wait()
         hostname = socket.gethostname()
         while self.loop():
             for queue in self.pool.listQueues(names=True):
                 for metric, value in list(self.pool.getQueue(queue).stats().items()):
-                    event = Wishbone_Event({
-                        "time": time(),
-                        "type": "wishbone",
-                        "source": hostname,
-                        "name": "module.%s.queue.%s.%s" % (self.name, queue, metric),
-                        "value": value,
-                        "unit": "",
-                        "tags": ()
-                    })
+                    event = Wishbone_Event(
+                        {
+                            "time": time(),
+                            "type": "wishbone",
+                            "source": hostname,
+                            "name": "module.%s.queue.%s.%s"
+                            % (self.name, queue, metric),
+                            "value": value,
+                            "unit": "",
+                            "tags": (),
+                        }
+                    )
                     self.submit(event, "_metrics")
             sleep(self.config.frequency)
 
     def __postHook(self):
-        '''
+        """
         Is always executed when the module starts.
-        '''
+        """
 
-        self.logging.debug("Following template functions are available: %s" % ", ".join(
-            self.config.template_functions.keys()
-        )
+        self.logging.debug(
+            "Following template functions are available: %s"
+            % ", ".join(self.config.template_functions.keys())
         )
 
     def __renderTemplateKwargs(self, kwargs):
-
         def recurse(data):
 
             if isinstance(data, jinja2.environment.Template):
@@ -556,30 +581,29 @@ class Actor(object):
             else:
                 return data
 
-        rendered_kwargs = EasyDict(
-            recurse(
-                kwargs
-            )
-        )
+        rendered_kwargs = EasyDict(recurse(kwargs))
 
         return rendered_kwargs
 
     def __validateAppliedFunctions(self):
-        '''
+        """
         A validation routine which checks whether functions have been applied
         to queues without a registered consumer.  The effect of that would be
         that the functions are never applied which is not what the user
         wanted.
-        '''
+        """
 
         queues_w_registered_consumers = [t.args[1] for t in self.greenlets.consumer]
 
         for queue in self.config.module_functions.keys():
             if queue not in queues_w_registered_consumers:
-                raise ModuleInitFailure("Failed to initialize module '%s'. You have functions defined on queue '%s' which doesn't have a registered consumer." % (self.name, queue))
+                raise ModuleInitFailure(
+                    "Failed to initialize module '%s'. You have functions defined on queue '%s' which doesn't have a registered consumer."
+                    % (self.name, queue)
+                )
 
     def __sanityChecks(self):
-        '''
+        """
         Does following validations:
 
             - Validate if all template functions base ``TemplateFunction``
@@ -595,19 +619,26 @@ class Actor(object):
         Raises:
             ModuleInitFailure: Raised when one of the components isn't correct.
 
-        '''
+        """
 
         # Validate template functions
         for n, f in self.config.template_functions.items():
             if not isinstance(f, TemplateFunction):
-                raise ModuleInitFailure("Template function '%s' does not base TemplateFunction." % (n))
+                raise ModuleInitFailure(
+                    "Template function '%s' does not base TemplateFunction." % (n)
+                )
 
         # Validate module functions
         for name, functions in self.config.module_functions.items():
 
             for function in functions:
                 if not isinstance(function, ModuleFunction):
-                    raise ModuleInitFailure("Module function '%s' does not base ModuleFunction." % (name))
+                    raise ModuleInitFailure(
+                        "Module function '%s' does not base ModuleFunction." % (name)
+                    )
 
         if not hasattr(self, "MODULE_TYPE"):
-            raise InvalidModule("Module instance '%s' seems to be of an incompatible old type." % (self.name))
+            raise InvalidModule(
+                "Module instance '%s' seems to be of an incompatible old type."
+                % (self.name)
+            )

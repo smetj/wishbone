@@ -28,7 +28,7 @@ from wishbone.module import FlowModule
 
 class Fanout(FlowModule):
 
-    '''**Forward each incoming message to all connected queues.**
+    """**Forward each incoming message to all connected queues.**
 
     Forward each incoming message to all connected queues.
 
@@ -41,7 +41,7 @@ class Fanout(FlowModule):
         - inbox:
            |  Incoming messages
 
-    '''
+    """
 
     def __init__(self, actor_config):
         Actor.__init__(self, actor_config)

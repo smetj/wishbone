@@ -31,7 +31,7 @@ import arrow
 
 class FileOut(OutputModule):
 
-    '''**Writes events to a file**
+    """**Writes events to a file**
 
     Writes incoming events to a file.  Each line represents an event. Keep in
     mind no rotation of the file is done so data is always appended to the end
@@ -55,9 +55,11 @@ class FileOut(OutputModule):
         - inbox
            |  Incoming messages
 
-    '''
+    """
 
-    def __init__(self, actor_config, selection='data', location="./wishbone.out", timestamp=False):
+    def __init__(
+        self, actor_config, selection="data", location="./wishbone.out", timestamp=False
+    ):
         Actor.__init__(self, actor_config)
 
         self.pool.createQueue("inbox")
