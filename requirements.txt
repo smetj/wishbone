@@ -9,7 +9,7 @@ gipc==0.6.0
 greenlet==0.4.13
 idna==2.6
 inotify==0.2.9
-Jinja2==2.10
+Jinja2==2.11.3
 jsonschema==2.6.0
 lockfile==0.12.2
 MarkupSafe==1.0
