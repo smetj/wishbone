@@ -19,7 +19,7 @@ prettytable==0.7.2
 Pygments==2.2.0
 python-daemon-3K==1.5.8
 python-dateutil==2.7.0
-PyYAML==3.12
+PyYAML==5.4
 requests==2.18.4
 scalpl==0.2.5
 six==1.11.0
