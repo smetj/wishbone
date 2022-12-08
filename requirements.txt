@@ -1,5 +1,5 @@
 arrow==0.12.1
-certifi==2018.1.18
+certifi==2022.12.7
 chardet==3.0.4
 colorama==0.3.9
 cronex==0.1.2
